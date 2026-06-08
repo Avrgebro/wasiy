@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wasiy Palette Preview</title>
+    <style>
+      :root {
+        --background: #fbfcf8;
+        --foreground: #0f172a;
+        --card: #ffffff;
+        --card-foreground: #0f172a;
+        --popover: #ffffff;
+        --popover-foreground: #0f172a;
+        --primary: #aff33e;
+        --primary-foreground: #000000;
+        --secondary: #334155;
+        --secondary-foreground: #f8fafc;
+        --muted: #f1f5f9;
+        --muted-foreground: #64748b;
+        --accent: #f0fdf4;
+        --accent-foreground: #166534;
+        --destructive: #ef4444;
+        --destructive-foreground: #ffffff;
+        --border: #e2e8f0;
+        --input: #e2e8f0;
+        --ring: #aff33e;
+        --chart-1: #aff33e;
+        --chart-2: #334155;
+        --chart-3: #22c55e;
+        --chart-4: #64748b;
+        --chart-5: #94a3b8;
+        --success: #16a34a;
+        --success-foreground: #ffffff;
+        --warning: #f59e0b;
+        --warning-foreground: #0f172a;
+        --info: #3b82f6;
+        --info-foreground: #ffffff;
+        --sidebar: #ffffff;
+        --sidebar-foreground: #0f172a;
+        --sidebar-primary: #aff33e;
+        --sidebar-primary-foreground: #000000;
+        --sidebar-hover: #f1f5f9;
+        --sidebar-hover-foreground: #0f172a;
+        --sidebar-accent: #f8fafc;
+        --sidebar-accent-foreground: #0f172a;
+        --sidebar-border: #f1f5f9;
+        --sidebar-ring: #aff33e;
+        --radius: 0.5rem;
+        --shadow: 0 10px 30px 0 rgb(15 23 42 / 0.08), 0 1px 2px 0 rgb(15 23 42 / 0.06);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0;
+      }
+
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 28px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        line-height: 1.1;
+      }
+
+      header p {
+        max-width: 620px;
+        color: var(--muted-foreground);
+        line-height: 1.55;
+        margin-top: 10px;
+      }
+
+      .button {
+        border: 0;
+        border-radius: var(--radius);
+        background: var(--primary);
+        color: var(--primary-foreground);
+        font-weight: 700;
+        padding: 12px 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .button:hover {
+        background: #9fe62f;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 14px;
+        margin-bottom: 28px;
+      }
+
+      .swatch,
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--card);
+      }
+
+      .swatch {
+        overflow: hidden;
+      }
+
+      .color {
+        height: 96px;
+      }
+
+      .meta {
+        padding: 12px;
+      }
+
+      .name {
+        font-size: 14px;
+        font-weight: 750;
+      }
+
+      .hex {
+        color: var(--muted-foreground);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      .preview {
+        display: grid;
+        grid-template-columns: minmax(220px, 280px) 1fr;
+        gap: 18px;
+      }
+
+      .sidebar {
+        background: var(--sidebar);
+        color: var(--sidebar-foreground);
+        padding: 16px;
+      }
+
+      .brand {
+        color: var(--foreground);
+        font-size: 20px;
+        font-weight: 850;
+        margin-bottom: 20px;
+      }
+
+      .nav-item {
+        border-radius: var(--radius);
+        color: var(--sidebar-foreground);
+        font-weight: 650;
+        position: relative;
+        padding: 10px 12px;
+      }
+
+      .nav-item:hover,
+      .nav-item.hover-preview {
+        background: var(--sidebar-hover);
+        color: var(--sidebar-hover-foreground);
+      }
+
+      .nav-item.active {
+        background: var(--sidebar-accent);
+        color: var(--sidebar-accent-foreground);
+      }
+
+      .nav-item.active::before {
+        background: var(--sidebar-primary);
+        border-radius: 999px;
+        content: "";
+        height: 20px;
+        left: 0;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+      }
+
+      .content {
+        padding: 18px;
+      }
+
+      .content-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .content h2 {
+        font-size: 20px;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .metric {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+        padding: 14px;
+      }
+
+      .metric span {
+        color: var(--muted-foreground);
+        display: block;
+        font-size: 13px;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 24px;
+        margin-top: 6px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+        text-align: left;
+        font-size: 14px;
+      }
+
+      th {
+        color: var(--muted-foreground);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .badge {
+        display: inline-flex;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 750;
+        padding: 4px 8px;
+      }
+
+      @media (max-width: 760px) {
+        header,
+        .content-head {
+          align-items: start;
+          flex-direction: column;
+        }
+
+        .preview,
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Vista previa de paleta</h1>
+          <p>
+            Paleta clara con fondo calido, acento lima y navegacion blanca.
+            El menu muestra estados activo, hover y normal para
+            evaluar contraste y jerarquia.
+          </p>
+        </div>
+        <button class="button">Accion principal</button>
+      </header>
+
+      <section class="grid" aria-label="Muestras de color">
+        <article class="swatch">
+          <div class="color" style="background: var(--primary)"></div>
+          <div class="meta"><div class="name">Primary</div><div class="hex">#AFF33E</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--secondary)"></div>
+          <div class="meta"><div class="name">Secondary</div><div class="hex">#334155</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--accent)"></div>
+          <div class="meta"><div class="name">Accent</div><div class="hex">#F0FDF4</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--background)"></div>
+          <div class="meta"><div class="name">Background</div><div class="hex">#FBFCF8</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--muted)"></div>
+          <div class="meta"><div class="name">Muted</div><div class="hex">#F1F5F9</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--border)"></div>
+          <div class="meta"><div class="name">Border</div><div class="hex">#E2E8F0</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--success)"></div>
+          <div class="meta"><div class="name">Success</div><div class="hex">status token</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--warning)"></div>
+          <div class="meta"><div class="name">Warning</div><div class="hex">status token</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--destructive)"></div>
+          <div class="meta"><div class="name">Destructive</div><div class="hex">#EF4444</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--info)"></div>
+          <div class="meta"><div class="name">Info</div><div class="hex">status token</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--sidebar-accent)"></div>
+          <div class="meta"><div class="name">Sidebar active</div><div class="hex">#F8FAFC</div></div>
+        </article>
+        <article class="swatch">
+          <div class="color" style="background: var(--sidebar-hover)"></div>
+          <div class="meta"><div class="name">Sidebar hover</div><div class="hex">#F1F5F9</div></div>
+        </article>
+      </section>
+
+      <section class="preview" aria-label="Vista de interfaz">
+        <aside class="panel sidebar">
+          <div class="brand">Wasiy</div>
+          <div class="nav-item active">Visitantes</div>
+          <div class="nav-item hover-preview">Residentes hover</div>
+          <div class="nav-item">Reservas</div>
+          <div class="nav-item">Amenidades</div>
+        </aside>
+        <section class="panel content">
+          <div class="content-head">
+            <h2>Panel operativo</h2>
+            <button class="button">Registrar visitante</button>
+          </div>
+          <div class="cards">
+            <div class="metric"><span>Visitantes hoy</span><strong>18</strong></div>
+            <div class="metric"><span>Reservas pendientes</span><strong>4</strong></div>
+            <div class="metric"><span>Invitaciones sin reclamar</span><strong>23</strong></div>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Visitante</th><th>Unidad</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Daniel Ruiz</td>
+                <td>1201</td>
+                <td><span class="badge" style="background: var(--success); color: var(--success-foreground)">Registrado</span></td>
+              </tr>
+              <tr>
+                <td>Maria Torres</td>
+                <td>302</td>
+                <td><span class="badge" style="background: var(--warning); color: var(--warning-foreground)">Esperado</span></td>
+              </tr>
+              <tr>
+                <td>Proveedor limpieza</td>
+                <td>Salon eventos</td>
+                <td><span class="badge" style="background: var(--info); color: var(--info-foreground)">Servicio</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup - Panel administrador</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="mark">W</span><span>Wasiy</span></div>
+        <nav class="nav">
+          <div class="nav-item active">Panel</div>
+          <div class="nav-item">Visitantes</div>
+          <div class="nav-item">Residentes</div>
+          <div class="nav-item">Unidades</div>
+          <div class="nav-item">Reservas</div>
+          <div class="nav-item">Amenidades</div>
+          <div class="nav-item">Vehiculos</div>
+          <div class="nav-item">Anuncios</div>
+          <div class="nav-item">Actividad</div>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <select class="location-select" aria-label="Ubicacion">
+            <option>Torres del Parque</option>
+          </select>
+          <div class="user-chip"><span>Laura Mendoza</span><span class="avatar">LM</span></div>
+        </header>
+
+        <section class="page">
+          <div class="page-header">
+            <div>
+              <div class="eyebrow">Administrador de ubicacion</div>
+              <h1>Panel operativo</h1>
+            </div>
+            <div class="actions">
+              <button class="button secondary">Exportar</button>
+              <button class="button">Crear anuncio</button>
+            </div>
+          </div>
+
+          <section class="metrics" aria-label="Metricas principales">
+            <article class="metric">
+              <div class="metric-label">Visitantes hoy</div>
+              <div class="metric-value">18</div>
+              <div class="metric-note">6 pre-registrados</div>
+            </article>
+            <article class="metric">
+              <div class="metric-label">Reservas pendientes</div>
+              <div class="metric-value">4</div>
+              <div class="metric-note">Requieren revision</div>
+            </article>
+            <article class="metric">
+              <div class="metric-label">Invitaciones sin reclamar</div>
+              <div class="metric-value">23</div>
+              <div class="metric-note">Residentes pendientes</div>
+            </article>
+            <article class="metric">
+              <div class="metric-label">Unidades activas</div>
+              <div class="metric-value">126</div>
+              <div class="metric-note">94% con residente</div>
+            </article>
+          </section>
+
+          <section class="grid-2">
+            <article class="panel">
+              <div class="panel-header">
+                <h2>Reservas pendientes</h2>
+                <button class="button ghost">Ver todas</button>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Amenidad</th>
+                    <th>Unidad</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Salon de eventos</td>
+                    <td>1201</td>
+                    <td>Sab 15, 7:00 p.m.</td>
+                    <td><span class="badge warning">Pendiente</span></td>
+                  </tr>
+                  <tr>
+                    <td>Parrilla terraza</td>
+                    <td>804</td>
+                    <td>Dom 16, 1:00 p.m.</td>
+                    <td><span class="badge warning">Pendiente</span></td>
+                  </tr>
+                  <tr>
+                    <td>Sala cowork</td>
+                    <td>302</td>
+                    <td>Lun 17, 10:00 a.m.</td>
+                    <td><span class="badge info">En revision</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <h2>Actividad reciente</h2>
+              </div>
+              <div class="panel-body">
+                <div class="list">
+                  <div class="list-item">
+                    <div>
+                      <div class="item-title">Reserva aprobada</div>
+                      <div class="item-meta">Salon de eventos para unidad 901</div>
+                    </div>
+                    <span class="badge success">Listo</span>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <div class="item-title">Visitante registrado</div>
+                      <div class="item-meta">Daniel Ruiz ingreso a unidad 1201</div>
+                    </div>
+                    <span class="badge info">Hoy</span>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <div class="item-title">Anuncio publicado</div>
+                      <div class="item-meta">Mantenimiento de ascensores</div>
+                    </div>
+                    <span class="badge neutral">Hace 2 h</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

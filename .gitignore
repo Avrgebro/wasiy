@@ -1,0 +1,74 @@
+# Dependencies
+node_modules/
+apps/*/node_modules/
+apps/api/vendor/
+
+# Build output
+dist/
+dist-ssr/
+apps/*/dist/
+apps/api/public/build/
+apps/api/public/hot
+apps/api/public/storage
+
+# Framework caches and generated local state
+apps/marketing/.astro/
+apps/api/bootstrap/cache/*.php
+!apps/api/bootstrap/cache/.gitignore
+apps/api/storage/*.key
+apps/api/storage/pail/
+apps/api/storage/framework/cache/data/
+apps/api/storage/framework/sessions/
+apps/api/storage/framework/testing/
+apps/api/storage/framework/views/*.php
+apps/api/storage/logs/*.log
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+apps/*/.env
+apps/*/.env.*
+!apps/*/.env.example
+auth.json
+apps/api/auth.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test and tool caches
+coverage/
+.nyc_output/
+.phpunit.cache/
+.phpunit.result.cache
+.eslintcache
+*.tsbuildinfo
+apps/*/tsconfig.tsbuildinfo
+apps/*/node_modules/.tmp/
+
+# Local editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.zed/
+.nova/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local agent/tool state
+.codex/
+.cursor/
+apps/api/.codex/
+apps/api/.cursor/
+

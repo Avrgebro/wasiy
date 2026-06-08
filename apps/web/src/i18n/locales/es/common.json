@@ -1,0 +1,65 @@
+{
+  "actions": {
+    "export": "Exportar",
+    "newVisitor": "Registrar visitante",
+    "search": "Buscar"
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "login": "Entrar",
+    "loginTitle": "Entrar a Wasiy",
+    "logout": "Cerrar sesión",
+    "password": "Contraseña"
+  },
+  "dashboard": {
+    "heading": "Operación de hoy",
+    "registryTitle": "Registro reciente",
+    "stats": {
+      "expectedVisitors": "Visitantes esperados",
+      "expectedVisitorsDetail": "Para la fecha actual",
+      "occupiedUnits": "Unidades ocupadas",
+      "occupiedUnitsDetail": "En esta ubicación",
+      "pendingReservations": "Reservas pendientes",
+      "pendingReservationsDetail": "Requieren revisión"
+    },
+    "summary": "Resumen operativo para recepción, residentes y reservas.",
+    "table": {
+      "resident": "Residente",
+      "status": "Estado",
+      "unit": "Unidad"
+    },
+    "title": "Panel de ubicación"
+  },
+  "frontDesk": {
+    "title": "Registro de visitantes"
+  },
+  "nav": {
+    "activity": "Actividad",
+    "announcements": "Anuncios",
+    "checkIn": "Registro",
+    "dashboard": "Panel",
+    "home": "Inicio",
+    "residents": "Residentes",
+    "reservations": "Reservas",
+    "todaysVisitors": "Visitantes de hoy",
+    "unitLookup": "Buscar unidad",
+    "units": "Unidades",
+    "vehicles": "Vehículos",
+    "visitors": "Visitantes"
+  },
+  "notifications": {
+    "label": "Ver notificaciones"
+  },
+  "roles": {
+    "frontDesk": "Portería",
+    "locationManager": "Administrador"
+  },
+  "shell": {
+    "account": "Condominio Los Olivos",
+    "frontDeskArea": "Operaciones de portería",
+    "location": "Torre Norte",
+    "locations": "Ubicaciones",
+    "mainNav": "Navegación principal",
+    "productArea": "Operaciones residenciales"
+  }
+}

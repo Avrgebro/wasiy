@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #f5f5ff;
+  --foreground: #2a2a4a;
+  --card: #ffffff;
+  --card-foreground: #2a2a4a;
+  --popover: #ffffff;
+  --popover-foreground: #2a2a4a;
+  --primary: #6e56cf;
+  --primary-foreground: #ffffff;
+  --secondary: #e4dfff;
+  --secondary-foreground: #4a4080;
+  --muted: #f0f0fa;
+  --muted-foreground: #6c6c8a;
+  --accent: #d8e6ff;
+  --accent-foreground: #2a2a4a;
+  --destructive: #ff5470;
+  --destructive-foreground: #ffffff;
+  --border: #e0e0f0;
+  --input: #e0e0f0;
+  --ring: #6e56cf;
+  --sidebar: #f0f0fa;
+  --sidebar-foreground: #2a2a4a;
+  --sidebar-accent: #d8e6ff;
+  --sidebar-accent-foreground: #2a2a4a;
+  --sidebar-border: #e0e0f0;
+  --sidebar-ring: #6e56cf;
+
+  color: var(--foreground);
+  background: var(--background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  font-family: Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 0;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--background);
+}
+
+[data-active='true'] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+#root {
+  min-height: 100svh;
+}

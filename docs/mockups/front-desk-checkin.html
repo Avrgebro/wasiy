@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup - Porteria</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="mark">W</span><span>Wasiy</span></div>
+        <nav class="nav">
+          <div class="nav-item active">Registro</div>
+          <div class="nav-item">Visitantes de hoy</div>
+          <div class="nav-item">Unidades</div>
+          <div class="nav-item">Reservas</div>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <select class="location-select" aria-label="Ubicacion">
+            <option>Torres del Parque</option>
+          </select>
+          <div class="user-chip"><span>Porteria principal</span><span class="avatar">P1</span></div>
+        </header>
+
+        <section class="page">
+          <div class="page-header">
+            <div>
+              <div class="eyebrow">Front Desk / Seguridad</div>
+              <h1>Registro de visitantes</h1>
+            </div>
+            <button class="button">Registrar visitante</button>
+          </div>
+
+          <section class="search-hero">
+            <label class="eyebrow" for="search">Buscar por visitante, residente o unidad</label>
+            <input id="search" class="search-input" value="" placeholder="Ej. Daniel Ruiz, Maria Torres, 1201" />
+          </section>
+
+          <section class="grid-2">
+            <article class="panel">
+              <div class="panel-header">
+                <h2>Visitantes esperados hoy</h2>
+                <button class="button secondary">Ver agenda</button>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Visitante</th>
+                    <th>Unidad</th>
+                    <th>Hora esperada</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Maria Torres</td>
+                    <td>302</td>
+                    <td>10:30 a.m.</td>
+                    <td><span class="badge warning">Esperado</span></td>
+                  </tr>
+                  <tr>
+                    <td>Proveedor limpieza</td>
+                    <td>Salon eventos</td>
+                    <td>12:00 p.m.</td>
+                    <td><span class="badge info">Servicio</span></td>
+                  </tr>
+                  <tr>
+                    <td>Carlos Vera</td>
+                    <td>901</td>
+                    <td>4:00 p.m.</td>
+                    <td><span class="badge warning">Esperado</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <h2>Ingresos recientes</h2>
+              </div>
+              <div class="panel-body">
+                <div class="list">
+                  <div class="list-item">
+                    <div>
+                      <div class="item-title">Daniel Ruiz</div>
+                      <div class="item-meta">Unidad 1201, confirmado por intercom</div>
+                    </div>
+                    <span class="badge success">Registrado</span>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <div class="item-title">Ana Salas</div>
+                      <div class="item-meta">Unidad 408, pre-registrado</div>
+                    </div>
+                    <span class="badge success">Registrado</span>
+                  </div>
+                  <div class="list-item">
+                    <div>
+                      <div class="item-title">Tecnico ascensor</div>
+                      <div class="item-meta">Area comun, autorizado por administracion</div>
+                    </div>
+                    <span class="badge info">Servicio</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,65 @@
+{
+  "actions": {
+    "export": "Export",
+    "newVisitor": "Register visitor",
+    "search": "Search"
+  },
+  "auth": {
+    "email": "Email",
+    "login": "Sign in",
+    "loginTitle": "Sign in to Wasiy",
+    "logout": "Sign out",
+    "password": "Password"
+  },
+  "dashboard": {
+    "heading": "Today's operation",
+    "registryTitle": "Recent registry",
+    "stats": {
+      "expectedVisitors": "Expected visitors",
+      "expectedVisitorsDetail": "For the current date",
+      "occupiedUnits": "Occupied units",
+      "occupiedUnitsDetail": "In this location",
+      "pendingReservations": "Pending reservations",
+      "pendingReservationsDetail": "Require review"
+    },
+    "summary": "Operational summary for front desk, residents, and reservations.",
+    "table": {
+      "resident": "Resident",
+      "status": "Status",
+      "unit": "Unit"
+    },
+    "title": "Location dashboard"
+  },
+  "frontDesk": {
+    "title": "Visitor check-in"
+  },
+  "nav": {
+    "activity": "Activity",
+    "announcements": "Announcements",
+    "checkIn": "Check-in",
+    "dashboard": "Dashboard",
+    "home": "Home",
+    "residents": "Residents",
+    "reservations": "Reservations",
+    "todaysVisitors": "Today's visitors",
+    "unitLookup": "Unit lookup",
+    "units": "Units",
+    "vehicles": "Vehicles",
+    "visitors": "Visitors"
+  },
+  "notifications": {
+    "label": "View notifications"
+  },
+  "roles": {
+    "frontDesk": "Front desk",
+    "locationManager": "Manager"
+  },
+  "shell": {
+    "account": "Los Olivos Condominium",
+    "frontDeskArea": "Front desk operations",
+    "location": "North Tower",
+    "locations": "Locations",
+    "mainNav": "Main navigation",
+    "productArea": "Residential operations"
+  }
+}
