@@ -21,6 +21,10 @@ Implementation should start with a tracer bullet, then grow through vertical sli
 
 ## M0: Monorepo and Local Development Scaffold
 
+Status: Completed.
+
+Verification note: scaffold, dependencies, root scripts, frontend build, API tests, Laravel health route, and Sail service configuration are present. Sail runtime startup still requires Docker or Podman to be running locally.
+
 Goal: create the project foundation and make local development reproducible.
 
 Scope:

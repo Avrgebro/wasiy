@@ -1,0 +1,17 @@
+{
+  "name": "wasiy",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "build:marketing": "pnpm --filter @wasiy/marketing build",
+    "build:web": "pnpm --filter @wasiy/web build",
+    "dev:marketing": "pnpm --filter @wasiy/marketing dev",
+    "dev:web": "pnpm --filter @wasiy/web dev",
+    "lint": "pnpm -r --if-present lint",
+    "lint:web": "pnpm --filter @wasiy/web lint",
+    "sail:down": "cd apps/api && ./vendor/bin/sail down",
+    "sail:test": "cd apps/api && ./vendor/bin/sail artisan test",
+    "sail:up": "cd apps/api && ./vendor/bin/sail up -d",
+    "test:api": "cd apps/api && php artisan test"
+  }
+}
