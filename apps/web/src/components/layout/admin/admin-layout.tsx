@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react'
 import { AppShell } from '../shared/app-shell'
-import { adminNavItems } from './admin-nav'
+import type { LayoutNavEntry } from '../shared/types'
 
 type AdminLayoutProps = {
   children: ReactNode
+  navItems: LayoutNavEntry[]
 }
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children, navItems }: AdminLayoutProps) {
   return (
     <AppShell
-      navItems={adminNavItems}
+      navItems={navItems}
       productAreaKey="shell.productArea"
       roleLabelKey="roles.locationManager"
       titleKey="dashboard.title"
@@ -18,4 +19,3 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     </AppShell>
   )
 }
-

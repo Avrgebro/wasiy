@@ -44,7 +44,7 @@ Scope:
   - React Hook Form
   - Zod
   - i18next / react-i18next
-  - lucide-react
+  - solar-react
   - @mantine/modals
   - @mantine/dropzone
 - Add base design tokens and Mantine theme adapter.

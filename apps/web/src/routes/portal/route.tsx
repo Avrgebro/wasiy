@@ -1,5 +1,6 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { PortalLayout } from '../../components/layout/portal/portal-layout'
+import { portalNavItems } from './-nav'
 
 export const Route = createFileRoute('/portal')({
   component: PortalRouteLayout,
@@ -7,9 +8,8 @@ export const Route = createFileRoute('/portal')({
 
 function PortalRouteLayout() {
   return (
-    <PortalLayout>
+    <PortalLayout navItems={portalNavItems}>
       <Outlet />
     </PortalLayout>
   )
 }
-

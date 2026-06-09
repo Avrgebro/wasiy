@@ -352,7 +352,7 @@ Aprovisionar Usuario
 
 ## Icons
 
-Use `lucide-react` for product icons.
+Use `solar-react` for product icons.
 
 Rules:
 

@@ -1,5 +1,5 @@
 import { Button, Menu } from '@mantine/core'
-import { ChevronDown } from 'lucide-react'
+import { AltArrowDown } from '@solar-icons/react'
 import { useTranslation } from 'react-i18next'
 
 export function LocationSwitcher() {
@@ -8,7 +8,7 @@ export function LocationSwitcher() {
   return (
     <Menu position="bottom-end" width={220}>
       <Menu.Target>
-        <Button rightSection={<ChevronDown size={16} />} variant="default">
+        <Button rightSection={<AltArrowDown size={16} />} variant="default">
           {t('shell.location')}
         </Button>
       </Menu.Target>
@@ -19,4 +19,3 @@ export function LocationSwitcher() {
     </Menu>
   )
 }
-

@@ -11,11 +11,15 @@ import './i18n'
 import './index.css'
 import { queryClient } from './app/query-client'
 import { router } from './app/router'
-import { theme } from './app/theme'
+import { cssVariablesResolver, theme } from './app/theme'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider theme={theme}>
+    <MantineProvider
+      theme={theme}
+      cssVariablesResolver={cssVariablesResolver}
+      defaultColorScheme="auto"
+    >
       <ModalsProvider>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />

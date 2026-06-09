@@ -56,7 +56,7 @@ The backend remains one deployable Laravel application with one PostgreSQL datab
 - @mantine/modals
 - @mantine/dropzone
 - Tailwind CSS for layout
-- lucide-react icons
+- solar-react icons
 - Vitest
 - React Testing Library
 - Playwright
@@ -212,7 +212,7 @@ Mantine should be used for interactive components such as:
 
 Layout should use semantic HTML and Tailwind CSS classes. Avoid Mantine layout primitives such as `Grid`, `Box`, and `Stack` so the styling boundary stays clear.
 
-Use `lucide-react` for icons.
+Use `solar-react` for icons.
 
 Use `@mantine/modals` for global confirmations and simple context modal flows. Complex forms should use explicit Wasiy `ModalForm` or `DrawerForm` wrappers.
 

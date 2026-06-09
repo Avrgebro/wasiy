@@ -39,6 +39,7 @@
     "checkIn": "Registro",
     "dashboard": "Panel",
     "home": "Inicio",
+    "people": "Personas",
     "residents": "Residentes",
     "reservations": "Reservas",
     "todaysVisitors": "Visitantes de hoy",
@@ -50,16 +51,28 @@
   "notifications": {
     "label": "Ver notificaciones"
   },
+  "navGroups": {
+    "communication": "Comunicación",
+    "frontDesk": "Portería",
+    "operations": "Operación",
+    "overview": "Resumen"
+  },
   "roles": {
     "frontDesk": "Portería",
     "locationManager": "Administrador"
   },
   "shell": {
     "account": "Condominio Los Olivos",
+    "closeNav": "Cerrar navegación",
     "frontDeskArea": "Operaciones de portería",
     "location": "Torre Norte",
     "locations": "Ubicaciones",
     "mainNav": "Navegación principal",
+    "openNav": "Abrir navegación",
     "productArea": "Operaciones residenciales"
+  },
+  "theme": {
+    "dark": "Usar modo oscuro",
+    "light": "Usar modo claro"
   }
 }

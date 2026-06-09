@@ -6,7 +6,7 @@ export function LoginPage() {
 
   return (
     <main className="grid min-h-screen place-items-center bg-[var(--background)] px-4">
-      <form className="w-full max-w-sm rounded-md border border-[var(--border)] bg-white p-5">
+      <form className="w-full max-w-sm rounded-md border border-[var(--border)] bg-[var(--card)] p-5">
         <h1 className="text-2xl font-bold text-[var(--foreground)]">
           {t('auth.loginTitle')}
         </h1>

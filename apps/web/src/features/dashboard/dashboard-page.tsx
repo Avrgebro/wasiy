@@ -1,5 +1,5 @@
 import { Button, Table } from '@mantine/core'
-import { Download, Plus, Search } from 'lucide-react'
+import { AddCircle, Download, Magnifier } from '@solar-icons/react'
 import { useTranslation } from 'react-i18next'
 import { StatCard } from '../../components/ui/stat-card'
 
@@ -24,13 +24,15 @@ export function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button leftSection={<Search size={16} />} variant="default">
+          <Button leftSection={<Magnifier size={16} />} variant="default">
             {t('actions.search')}
           </Button>
           <Button leftSection={<Download size={16} />} variant="default">
             {t('actions.export')}
           </Button>
-          <Button leftSection={<Plus size={16} />}>{t('actions.newVisitor')}</Button>
+          <Button leftSection={<AddCircle size={16} />}>
+            {t('actions.newVisitor')}
+          </Button>
         </div>
       </section>
 
@@ -52,7 +54,7 @@ export function DashboardPage() {
         />
       </section>
 
-      <section className="rounded-md border border-[var(--border)] bg-white">
+      <section className="rounded-md border border-[var(--border)] bg-[var(--card)]">
         <div className="border-b border-[var(--border)] px-4 py-3">
           <h2 className="text-base font-bold text-[var(--foreground)]">
             {t('dashboard.registryTitle')}

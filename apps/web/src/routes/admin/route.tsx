@@ -1,5 +1,6 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { AdminLayout } from '../../components/layout/admin/admin-layout'
+import { adminNavItems } from './-nav'
 
 export const Route = createFileRoute('/admin')({
   component: AdminRouteLayout,
@@ -7,9 +8,8 @@ export const Route = createFileRoute('/admin')({
 
 function AdminRouteLayout() {
   return (
-    <AdminLayout>
+    <AdminLayout navItems={adminNavItems}>
       <Outlet />
     </AdminLayout>
   )
 }
-

@@ -39,6 +39,7 @@
     "checkIn": "Check-in",
     "dashboard": "Dashboard",
     "home": "Home",
+    "people": "People",
     "residents": "Residents",
     "reservations": "Reservations",
     "todaysVisitors": "Today's visitors",
@@ -50,16 +51,28 @@
   "notifications": {
     "label": "View notifications"
   },
+  "navGroups": {
+    "communication": "Communication",
+    "frontDesk": "Front desk",
+    "operations": "Operations",
+    "overview": "Overview"
+  },
   "roles": {
     "frontDesk": "Front desk",
     "locationManager": "Manager"
   },
   "shell": {
     "account": "Los Olivos Condominium",
+    "closeNav": "Close navigation",
     "frontDeskArea": "Front desk operations",
     "location": "North Tower",
     "locations": "Locations",
     "mainNav": "Main navigation",
+    "openNav": "Open navigation",
     "productArea": "Residential operations"
+  },
+  "theme": {
+    "dark": "Use dark mode",
+    "light": "Use light mode"
   }
 }

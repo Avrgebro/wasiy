@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react'
 import { AppShell } from '../shared/app-shell'
-import { frontDeskNavItems } from './front-desk-nav'
+import type { LayoutNavEntry } from '../shared/types'
 
 type FrontDeskLayoutProps = {
   children: ReactNode
+  navItems: LayoutNavEntry[]
 }
 
-export function FrontDeskLayout({ children }: FrontDeskLayoutProps) {
+export function FrontDeskLayout({ children, navItems }: FrontDeskLayoutProps) {
   return (
     <AppShell
-      navItems={frontDeskNavItems}
+      navItems={navItems}
       productAreaKey="shell.frontDeskArea"
       roleLabelKey="roles.frontDesk"
       titleKey="frontDesk.title"
@@ -18,4 +19,3 @@ export function FrontDeskLayout({ children }: FrontDeskLayoutProps) {
     </AppShell>
   )
 }
-
