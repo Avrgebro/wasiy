@@ -61,6 +61,8 @@ If using Sail, adjust `apps/api/.env` for container networking:
 ```env
 APP_NAME=Wasiy
 APP_URL=http://localhost
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:5174,127.0.0.1,127.0.0.1:5174
+CORS_ALLOWED_ORIGINS=http://localhost:5174,http://127.0.0.1:5174
 
 DB_CONNECTION=pgsql
 DB_HOST=pgsql
@@ -125,7 +127,7 @@ pnpm --filter @wasiy/marketing dev
 
 Common local URLs:
 
-- Web app: `http://localhost:5173`
+- Web app: `http://localhost:5174`
 - Marketing site: `http://localhost:4321`
 - API: `http://localhost` or the configured `APP_PORT`
 
@@ -210,4 +212,3 @@ Planned production shape:
 - Public domains:
   - `app.wasiyapp.com`
   - `api.wasiyapp.com`
-

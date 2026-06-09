@@ -1,23 +1,50 @@
-import { Button, Table } from '@mantine/core'
+import { Alert, Button, Loader, Table } from '@mantine/core'
 import { AddCircle, Download, Magnifier } from '@solar-icons/react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { StatCard } from '../../components/ui/stat-card'
-
-const rows = [
-  { unit: 'A-1203', resident: 'María Torres', status: 'Activo' },
-  { unit: 'B-0704', resident: 'Carlos Méndez', status: 'Pendiente' },
-  { unit: 'C-0302', resident: 'Lucía Rivas', status: 'Activo' },
-]
+import { getDefaultLocation } from '../auth/access'
+import { useMe } from '../auth/hooks'
+import { getLocationDashboard } from './api'
 
 export function DashboardPage() {
   const { t } = useTranslation('common')
+  const meQuery = useMe()
+  const location = meQuery.data ? getDefaultLocation(meQuery.data) : null
+  const dashboardQuery = useQuery({
+    queryKey: ['locations', location?.id, 'dashboard'],
+    queryFn: () => {
+      if (!location) {
+        throw new Error(t('auth.noAssignedLocation'))
+      }
+
+      return getLocationDashboard(location.id)
+    },
+    enabled: Boolean(location),
+  })
+
+  if (meQuery.isLoading) {
+    return (
+      <div className="grid min-h-64 place-items-center">
+        <Loader aria-label={t('common.loading')} />
+      </div>
+    )
+  }
+
+  if (!location) {
+    return (
+      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+        {t('auth.noAssignedLocation')}
+      </Alert>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
           <h2 className="text-2xl font-bold leading-8 text-[var(--foreground)]">
-            {t('dashboard.heading')}
+            {t('dashboard.heading', { location: location.name })}
           </h2>
           <p className="text-sm text-[var(--muted-foreground)]">
             {t('dashboard.summary')}
@@ -38,19 +65,15 @@ export function DashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard
-          detail={t('dashboard.stats.occupiedUnitsDetail')}
-          label={t('dashboard.stats.occupiedUnits')}
-          value="128"
-        />
-        <StatCard
-          detail={t('dashboard.stats.expectedVisitorsDetail')}
-          label={t('dashboard.stats.expectedVisitors')}
-          value="14"
-        />
-        <StatCard
-          detail={t('dashboard.stats.pendingReservationsDetail')}
-          label={t('dashboard.stats.pendingReservations')}
-          value="6"
+          detail={t('dashboard.stats.assignedStaffDetail')}
+          label={t('dashboard.stats.assignedStaff')}
+          value={
+            dashboardQuery.isLoading
+              ? t('common.loadingShort')
+              : String(
+                  dashboardQuery.data?.metrics.assigned_staff_count ?? 0,
+                )
+          }
         />
       </section>
 
@@ -69,13 +92,9 @@ export function DashboardPage() {
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {rows.map((row) => (
-              <Table.Tr key={row.unit}>
-                <Table.Td>{row.unit}</Table.Td>
-                <Table.Td>{row.resident}</Table.Td>
-                <Table.Td>{row.status}</Table.Td>
-              </Table.Tr>
-            ))}
+            <Table.Tr>
+              <Table.Td colSpan={3}>{t('dashboard.emptyRegistry')}</Table.Td>
+            </Table.Tr>
           </Table.Tbody>
         </Table>
       </section>

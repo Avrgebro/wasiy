@@ -31,3 +31,19 @@ test('invalid login credentials are rejected', function () {
         ])
         ->assertRedirect('/login');
 });
+
+test('invalid json login credentials return validation errors', function () {
+    User::factory()->create([
+        'email' => 'manager@wasiy.test',
+        'password' => 'password',
+    ]);
+
+    $response = $this->postJson('/login', [
+        'email' => 'manager@wasiy.test',
+        'password' => 'wrong-password',
+    ]);
+
+    expect($response->status())->toBe(422)
+        ->and($response->json('message'))->toBe(trans('auth.failed'))
+        ->and($response->json('errors.email.0'))->toBe(trans('auth.failed'));
+});

@@ -4,17 +4,28 @@
     "newVisitor": "Registrar visitante",
     "search": "Buscar"
   },
+  "common": {
+    "loading": "Cargando",
+    "loadingShort": "..."
+  },
   "auth": {
     "email": "Correo electrónico",
+    "invalidCredentials": "Las credenciales no coinciden con nuestros registros.",
     "login": "Entrar",
+    "loginFailed": "No se pudo iniciar sesión",
     "loginTitle": "Entrar a Wasiy",
     "logout": "Cerrar sesión",
+    "noAccessTitle": "Acceso no disponible",
+    "noAssignedLocation": "Tu usuario no tiene una ubicación asignada para este panel.",
     "password": "Contraseña"
   },
   "dashboard": {
-    "heading": "Operación de hoy",
+    "emptyRegistry": "Aún no hay actividad reciente para esta ubicación.",
+    "heading": "Operación de {{location}}",
     "registryTitle": "Registro reciente",
     "stats": {
+      "assignedStaff": "Personal asignado",
+      "assignedStaffDetail": "Con acceso a esta ubicación",
       "expectedVisitors": "Visitantes esperados",
       "expectedVisitorsDetail": "Para la fecha actual",
       "occupiedUnits": "Unidades ocupadas",
@@ -74,5 +85,10 @@
   "theme": {
     "dark": "Usar modo oscuro",
     "light": "Usar modo claro"
+  },
+  "validation": {
+    "emailInvalid": "Ingresa un correo válido.",
+    "emailRequired": "Ingresa tu correo.",
+    "passwordRequired": "Ingresa tu contraseña."
   }
 }

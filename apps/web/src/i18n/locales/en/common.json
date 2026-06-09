@@ -4,17 +4,28 @@
     "newVisitor": "Register visitor",
     "search": "Search"
   },
+  "common": {
+    "loading": "Loading",
+    "loadingShort": "..."
+  },
   "auth": {
     "email": "Email",
+    "invalidCredentials": "These credentials do not match our records.",
     "login": "Sign in",
+    "loginFailed": "Sign-in failed",
     "loginTitle": "Sign in to Wasiy",
     "logout": "Sign out",
+    "noAccessTitle": "Access unavailable",
+    "noAssignedLocation": "Your user does not have an assigned location for this dashboard.",
     "password": "Password"
   },
   "dashboard": {
-    "heading": "Today's operation",
+    "emptyRegistry": "There is no recent activity for this location yet.",
+    "heading": "{{location}} operation",
     "registryTitle": "Recent registry",
     "stats": {
+      "assignedStaff": "Assigned staff",
+      "assignedStaffDetail": "With access to this location",
       "expectedVisitors": "Expected visitors",
       "expectedVisitorsDetail": "For the current date",
       "occupiedUnits": "Occupied units",
@@ -74,5 +85,10 @@
   "theme": {
     "dark": "Use dark mode",
     "light": "Use light mode"
+  },
+  "validation": {
+    "emailInvalid": "Enter a valid email.",
+    "emailRequired": "Enter your email.",
+    "passwordRequired": "Enter your password."
   }
 }
