@@ -122,7 +122,7 @@ Scope:
   - accessible accounts
   - active account context when selected
   - roles
-  - assigned locations
+  - accessible locations
   - resident memberships placeholder
 - Account selection page for Users with access to multiple Accounts.
 - Location switcher for Users with access to multiple Locations inside the active Account.

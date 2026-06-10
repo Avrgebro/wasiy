@@ -6,6 +6,10 @@
 
 The top-level customer workspace. An Account is managed by one primary Admin and can manage multiple Locations.
 
+### Active Account
+
+The Account currently selected as the User's workspace. Users with access to multiple Accounts must select an Active Account before entering account-scoped dashboard routes.
+
 ### Admin
 
 The primary manager of an Account. The Admin can add Users and assign them to Locations.
@@ -109,6 +113,14 @@ A logged security, safety, rule, or operational event that staff need to record 
 ### Location
 
 A whole residential property managed under an Account, such as a condo, multifamily building, or residential community. A Location contains Units, Residents, Amenities, Staff assignments, visitor activity, payments, and expenses.
+
+### Active Location
+
+The Location currently selected as the User's default operational scope inside the Active Account. Location-scoped workflows still validate access to the specific Location they operate on.
+
+### Accessible Location
+
+A Location that a User is allowed to operate in or view within an Account. Access may come from an explicit Location role assignment or from an Account-level role that grants implicit Location access.
 
 ### Unit
 

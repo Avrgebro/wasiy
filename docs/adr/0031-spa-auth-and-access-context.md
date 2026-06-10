@@ -35,3 +35,5 @@ The Location Manager tracer bullet should render `/admin` for the seeded user an
 ## M2 Context Direction
 
 When users can access multiple Accounts or Locations, the frontend should not rely on `localStorage` as the source of active context. The backend should expose explicit endpoints to set active Account and active Location context, and `/api/me` should return the selected context alongside all accessible Accounts, assigned Locations, roles, and resident membership placeholders.
+
+Active Account is a session-owned required workspace context. Active Location is a session-owned default operational scope inside the Active Account, but location-scoped routes and mutations should still identify and authorize the concrete Location they operate on. `/api/me` auto-selects the only accessible Account, requires explicit selection when multiple Accounts are accessible, scopes roles and accessible Locations to the Active Account, and clears stale session context before applying those selection rules.

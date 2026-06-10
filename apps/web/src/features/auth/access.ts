@@ -28,7 +28,7 @@ export function canAccessAdmin(me: MeResponse) {
 }
 
 export function getDefaultLocation(me: MeResponse) {
-  return me.assigned_locations[0] ?? null
+  return me.active_location ?? me.accessible_locations[0] ?? null
 }
 
 export function getDefaultAuthenticatedRoute(me: MeResponse) {

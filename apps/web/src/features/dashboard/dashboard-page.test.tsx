@@ -63,6 +63,15 @@ describe('DashboardPage', () => {
               },
             ],
             active_account: null,
+            active_location: {
+              id: 'loc_1',
+              account_id: 'acc_1',
+              name: 'Edificio Central',
+              slug: 'edificio-central',
+              timezone: 'America/Lima',
+              roles: ['location_manager'],
+              access_source: 'location_role',
+            },
             roles: {
               account: [],
               location: [
@@ -73,14 +82,15 @@ describe('DashboardPage', () => {
                 },
               ],
             },
-            assigned_locations: [
+            accessible_locations: [
               {
                 id: 'loc_1',
                 account_id: 'acc_1',
                 name: 'Edificio Central',
                 slug: 'edificio-central',
                 timezone: 'America/Lima',
-                role: 'location_manager',
+                roles: ['location_manager'],
+                access_source: 'location_role',
               },
             ],
             resident_memberships: [],

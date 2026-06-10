@@ -23,7 +23,8 @@ export type LocationSummary = {
   name: string
   slug: string
   timezone: string
-  role: LocationRole
+  roles: Array<AccountRole | LocationRole>
+  access_source: 'account_role' | 'location_role'
 }
 
 export type AccountRoleAssignment = {
@@ -41,11 +42,12 @@ export type MeResponse = {
   user: AuthUser
   accounts: AccountSummary[]
   active_account: AccountSummary | null
+  active_location: LocationSummary | null
   roles: {
     account: AccountRoleAssignment[]
     location: LocationRoleAssignment[]
   }
-  assigned_locations: LocationSummary[]
+  accessible_locations: LocationSummary[]
   resident_memberships: unknown[]
 }
 
