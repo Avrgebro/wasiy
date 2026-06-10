@@ -47,3 +47,20 @@ test('invalid json login credentials return validation errors', function () {
         ->and($response->json('message'))->toBe(trans('auth.failed'))
         ->and($response->json('errors.email.0'))->toBe(trans('auth.failed'));
 });
+
+test('deactivated users cannot log in', function () {
+    $user = User::factory()->create([
+        'email' => 'manager@wasiy.test',
+        'password' => 'password',
+    ]);
+
+    $user->deactivate();
+
+    $response = $this->postJson('/login', [
+        'email' => 'manager@wasiy.test',
+        'password' => 'password',
+    ]);
+
+    expect($response->status())->toBe(422)
+        ->and($response->json('message'))->toBe(trans('auth.failed'));
+});

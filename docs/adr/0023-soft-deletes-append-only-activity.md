@@ -1,3 +1,3 @@
-# Soft Deletes and Append-Only Activity
+# Archive, Permanent Delete, and Append-Only Activity
 
-Wasiy will soft delete most core operational records so accidental removal does not destroy business history. Activity log entries should be append-only and not casually deleted, preserving an operational audit trail for role changes, resident/unit changes, visitor records, reservation decisions, and other sensitive events.
+Wasiy will support both reversible archive and explicit permanent delete for Locations. Archiving a Location should remove it from normal operational use without deleting its child records, while permanent deletion is a deliberate destructive action that may hard-delete Location-owned operational records; Activity Log entries must remain append-only and must store enough snapshot data to stay meaningful after related records are deleted. This keeps day-to-day deletion safe while still allowing Account Admins to intentionally purge a Location and its operational data when that is the desired product behavior.

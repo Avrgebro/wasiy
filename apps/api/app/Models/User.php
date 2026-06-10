@@ -29,6 +29,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'deactivated_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -38,12 +39,32 @@ class User extends Authenticatable
         return trim("{$this->first_name} {$this->last_name}");
     }
 
+    public function isDeactivated(): bool
+    {
+        return $this->deactivated_at !== null;
+    }
+
+    public function deactivate(): bool
+    {
+        return $this->forceFill([
+            'deactivated_at' => $this->freshTimestamp(),
+        ])->save();
+    }
+
+    public function activate(): bool
+    {
+        return $this->forceFill([
+            'deactivated_at' => null,
+        ])->save();
+    }
+
     /**
      * @return HasMany<AccountUserRole, $this>
      */
     public function accountUserRoles(): HasMany
     {
-        return $this->hasMany(AccountUserRole::class);
+        return $this->hasMany(AccountUserRole::class)
+            ->whereHas('account');
     }
 
     /**
@@ -51,7 +72,9 @@ class User extends Authenticatable
      */
     public function locationUserRoles(): HasMany
     {
-        return $this->hasMany(LocationUserRole::class);
+        return $this->hasMany(LocationUserRole::class)
+            ->whereHas('account')
+            ->whereHas('location');
     }
 
     /**

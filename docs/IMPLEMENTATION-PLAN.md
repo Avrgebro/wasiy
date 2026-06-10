@@ -66,6 +66,8 @@ Acceptance criteria:
 
 ## M1: Tracer Bullet
 
+Status: Completed.
+
 Goal: prove the architecture end to end with production-shaped code.
 
 Tracer bullet:

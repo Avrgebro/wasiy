@@ -41,6 +41,24 @@ test('users without an assignment cannot view a location dashboard', function ()
         ->assertForbidden();
 });
 
+test('users with deleted location assignments cannot view a location dashboard', function () {
+    $location = Location::factory()->create();
+    $user = User::factory()->create();
+
+    $assignment = LocationUserRole::query()->create([
+        'account_id' => $location->account_id,
+        'location_id' => $location->id,
+        'user_id' => $user->id,
+        'role' => LocationRole::LocationManager,
+    ]);
+
+    $assignment->delete();
+
+    $this->actingAs($user)
+        ->getJson("/api/locations/{$location->id}/dashboard")
+        ->assertForbidden();
+});
+
 test('account admins can view dashboards for locations in their account', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
@@ -57,6 +75,24 @@ test('account admins can view dashboards for locations in their account', functi
         ->assertOk()
         ->assertJsonPath('location.id', $location->id)
         ->assertJsonPath('metrics.assigned_staff_count', 0);
+});
+
+test('users with deleted account admin assignments cannot view account location dashboards', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = User::factory()->create();
+
+    $assignment = AccountUserRole::query()->create([
+        'account_id' => $account->id,
+        'user_id' => $admin->id,
+        'role' => AccountRole::AccountAdmin,
+    ]);
+
+    $assignment->delete();
+
+    $this->actingAs($admin)
+        ->getJson("/api/locations/{$location->id}/dashboard")
+        ->assertForbidden();
 });
 
 test('the assigned staff count counts unique users assigned to the location', function () {
@@ -82,4 +118,31 @@ test('the assigned staff count counts unique users assigned to the location', fu
         ->getJson("/api/locations/{$location->id}/dashboard")
         ->assertOk()
         ->assertJsonPath('metrics.assigned_staff_count', 2);
+});
+
+test('the assigned staff count ignores deleted assignments', function () {
+    $location = Location::factory()->create();
+    $manager = User::factory()->create();
+    $deletedStaff = User::factory()->create();
+
+    LocationUserRole::query()->create([
+        'account_id' => $location->account_id,
+        'location_id' => $location->id,
+        'user_id' => $manager->id,
+        'role' => LocationRole::LocationManager,
+    ]);
+
+    $assignment = LocationUserRole::query()->create([
+        'account_id' => $location->account_id,
+        'location_id' => $location->id,
+        'user_id' => $deletedStaff->id,
+        'role' => LocationRole::FrontDesk,
+    ]);
+
+    $assignment->delete();
+
+    $this->actingAs($manager)
+        ->getJson("/api/locations/{$location->id}/dashboard")
+        ->assertOk()
+        ->assertJsonPath('metrics.assigned_staff_count', 1);
 });

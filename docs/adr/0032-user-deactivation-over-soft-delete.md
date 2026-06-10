@@ -1,0 +1,3 @@
+# User Deactivation Over Soft Delete
+
+Wasiy will treat `User` as a global identity that may belong to multiple Accounts, so normal product workflows should deactivate a User or remove account/location assignments rather than soft-delete the `users` record. A global `deactivated_at` state blocks login and actions while preserving identity, ownership, and activity history; account-specific access changes should be represented on role assignments instead of deleting the shared User identity. Soft deletes remain appropriate for core operational records, but `users.deleted_at` is deferred unless a later privacy or account-cleanup workflow requires it.

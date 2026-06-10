@@ -17,43 +17,46 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('timezone')->default('America/Lima');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('locations', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('account_id')->constrained()->restrictOnDelete();
             $table->string('name');
             $table->string('slug');
             $table->string('timezone')->default('America/Lima');
             $table->string('address')->nullable();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->unique(['account_id', 'slug']);
             $table->unique(['id', 'account_id']);
             $table->index(['account_id', 'name']);
+            $table->index(['account_id', 'deleted_at']);
         });
 
         Schema::create('account_user_roles', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
-            $table->foreignUlid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('account_id')->constrained()->restrictOnDelete();
+            $table->foreignUlid('user_id')->constrained()->restrictOnDelete();
             $table->string('role');
             $table->timestamps();
 
-            $table->unique(['account_id', 'user_id', 'role']);
+            $table->unique(['account_id', 'user_id']);
             $table->index(['user_id', 'account_id']);
         });
 
         Schema::create('location_user_roles', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('account_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('account_id')->constrained()->restrictOnDelete();
             $table->foreignUlid('location_id');
-            $table->foreignUlid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('user_id')->constrained()->restrictOnDelete();
             $table->string('role');
             $table->timestamps();
 
             $table->foreign(['location_id', 'account_id'])->references(['id', 'account_id'])->on('locations')->cascadeOnDelete();
-            $table->unique(['location_id', 'user_id', 'role']);
+            $table->unique(['location_id', 'user_id']);
             $table->index(['account_id', 'user_id']);
             $table->index(['user_id', 'location_id']);
         });

@@ -445,9 +445,12 @@ Visitor check-in timestamps should be recorded server-side in UTC and displayed 
 
 ### Deletion
 
-Use soft deletes for core operational records.
+Locations support two lifecycle actions:
 
-Activity logs should be append-only and should not be casually deleted.
+- Archive: reversible removal from normal operational use without deleting child records.
+- Delete permanently: explicit destructive removal that may hard-delete Location-owned operational records.
+
+Activity logs should be append-only and should not cascade delete with operational records. Activity log entries must store enough snapshot data, such as actor label, location label, subject label, event type, summary, metadata, and timestamp, to remain understandable after related records are deleted.
 
 ### Visitor Retention
 

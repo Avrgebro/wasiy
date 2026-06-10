@@ -15,6 +15,15 @@ test('guests cannot view their access context', function () {
     $this->getJson('/api/me')->assertUnauthorized();
 });
 
+test('deactivated authenticated users cannot view their access context', function () {
+    $user = User::factory()->create();
+    $user->deactivate();
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertForbidden();
+});
+
 test('it returns the authenticated user location scoped access context', function () {
     $this->seed();
 
@@ -84,4 +93,34 @@ test('it deduplicates accounts when a user has account and location roles in the
         ->assertJsonCount(1, 'roles.account')
         ->assertJsonCount(1, 'roles.location')
         ->assertJsonCount(1, 'assigned_locations');
+});
+
+test('it excludes deleted role assignments from the access context', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+
+    $accountRole = AccountUserRole::query()->create([
+        'account_id' => $account->id,
+        'user_id' => $user->id,
+        'role' => AccountRole::AccountAdmin,
+    ]);
+
+    $locationRole = LocationUserRole::query()->create([
+        'account_id' => $account->id,
+        'location_id' => $location->id,
+        'user_id' => $user->id,
+        'role' => LocationRole::LocationManager,
+    ]);
+
+    $accountRole->delete();
+    $locationRole->delete();
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonCount(0, 'accounts')
+        ->assertJsonCount(0, 'roles.account')
+        ->assertJsonCount(0, 'roles.location')
+        ->assertJsonCount(0, 'assigned_locations');
 });
