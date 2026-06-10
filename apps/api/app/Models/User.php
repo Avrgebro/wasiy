@@ -78,6 +78,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<UserInvitation, $this>
+     */
+    public function userInvitations(): HasMany
+    {
+        return $this->hasMany(UserInvitation::class);
+    }
+
+    /**
      * @return BelongsToMany<Account, $this>
      */
     public function accounts(): BelongsToMany

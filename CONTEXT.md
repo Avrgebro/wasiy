@@ -22,6 +22,10 @@ A person who can access the system under an Account. Users may have operational 
 
 The highest-privilege role in an Account. The Account Admin manages account settings, Locations, Users, role assignments, records, and cross-location reporting. In the initial product, only the Account Admin can create staff Users or change staff roles.
 
+### Staff Invitation
+
+An invitation for a User to join an Account in an operational staff role. A Staff Invitation may include Account-level authority or Location assignments, but the staff relationship belongs to the Account even when the invitation is started from a Location screen.
+
 ### Location Manager
 
 A User assigned to manage one or more Locations. A Location Manager can manage operational records for assigned Locations, including Units, Residents, visitors, amenities, reservations, reservation-related payment status, vehicles, and announcements.

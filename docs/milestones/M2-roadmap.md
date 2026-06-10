@@ -188,6 +188,32 @@ Keep Laravel policies authoritative. Frontend guards should only improve UX.
 - `AccountPolicy::manageStaff` denies Location Manager and Front Desk.
 - `LocationPolicy::view` delegates to the shared helper semantics and existing dashboard tests still pass.
 
+### Slice 2 Handoff
+
+Slice 3 should treat `AccessAuthorizationService` as the canonical backend access boundary for staff-management endpoints. Do not re-implement account or location role queries in staff controllers.
+
+Use `AccountPolicy::manageStaff` for all staff invitation, staff role assignment, and staff location assignment mutations. `AccountPolicy::view` is intentionally broader and should not authorize staff mutation.
+
+Staff-management APIs should keep these permission rules:
+
+- Only explicit Account Admin can invite staff, assign account roles, assign location roles, or change staff location assignments.
+- Location Manager and Front Desk can have broad Account visibility through their Location roles, but cannot create staff or change staff roles.
+- Account Admin implicit Location access is access authority, not an explicit Location role assignment.
+- `hasLocationRole` only answers whether a `location_user_roles` row exists for the requested role.
+- `canAccessLocation` is broad and suitable for "can view or operate in this Location" checks, not for manager-only abilities.
+- `accessibleLocationsForAccount` returns a query builder and excludes soft-deleted Locations through normal Eloquent scopes.
+- Staff assignment APIs should keep one explicit Location role per User per Location and replace that role when it changes.
+- Location-scoped role assignments must validate that every Location belongs to the target Account before writing rows.
+- Active Account and Active Location are session context only. Staff endpoints must authorize against explicit route models such as `/api/accounts/{account}` and any submitted Location IDs.
+- User deactivation remains middleware/auth lifecycle behavior, not a repeated check inside the authorization service.
+
+Slice 3 staff list visibility decision:
+
+- `GET /api/accounts/{account}/staff` is Account Admin-only in M2 and should use `AccountPolicy::manageStaff`, not broader `AccountPolicy::view`.
+- If Location Managers later need operational staff visibility, add a narrower Location-scoped endpoint such as `GET /api/locations/{location}/staff` that returns staff assigned to that Location without account-level role management fields.
+- Staff assignment updates may remove all Account and Location role grants for a User in the Account. That means the User is no longer staff for that Account and should disappear from `GET /api/accounts/{account}/staff`.
+- Staff assignment updates must prevent removing the actor's own final Account Admin access when no other Account Admin remains for the Account.
+
 ## Slice 3: Staff Invitation and Assignment API
 
 ### Minimal Data Model
@@ -207,9 +233,21 @@ Add a staff invitation foundation that can later be reused by resident invitatio
   - `expires_at`
   - `accepted_at`
   - `invited_by_user_id`
+  - nullable `user_id`
   - timestamps
 
 For M2, the invitation can create or prepare a user without requiring full email delivery. The important part is the workflow boundary and token-ready model.
+
+Staff invitations create or reuse a global User immediately, so `user_id` should be set for staff invitations. It remains nullable so resident invitation flows can still decide later whether they create the User before or during acceptance.
+
+Invitation uniqueness:
+
+- A User can be invited to multiple Accounts, and historical accepted, expired, or cancelled invitations may coexist.
+- M2 should enforce one pending invitation per `(account_id, email, purpose)`.
+- Because the API targets PostgreSQL, prefer a partial unique index for pending invitations rather than relying only on application validation.
+- Staff invitation expiry should use nested config, backed by an environment variable with a 14-day default:
+  - `config('wasiy.invitations.staff_expires_days')`
+  - `WASIY_STAFF_INVITATION_EXPIRES_DAYS=14`
 
 ### API
 
@@ -234,6 +272,53 @@ Rules:
 - Account Admin can assign Front Desk to one location.
 - Account Admin can assign Location Manager to multiple locations.
 - Role assignment cannot cross account boundaries.
+
+### Slice 4 Handoff
+
+Slice 3 centralizes staff workflow mutations in action classes. Slice 4 activity logging should hook into these actions rather than controllers:
+
+- `InviteStaffUser` is the canonical point for `staff.invited`.
+- `UpdateStaffAccountRole` is the canonical point for Account Admin role grants and removals.
+- `UpdateStaffLocationAssignments` is the canonical point for Location Manager / Front Desk assignment grants, removals, and role changes.
+
+The actions already have the data Slice 4 needs:
+
+- actor User
+- target Account
+- target staff User
+- submitted account role or Location assignment payload
+- final staff resource state after mutation
+
+Before logging, Slice 4 should add change-set calculation around the action writes:
+
+- Account role changed from none to `account_admin` should log `staff.role_assigned`.
+- Account role changed from `account_admin` to none should log `staff.role_removed`.
+- Location assignment added should log `staff.role_assigned` with the Location and role in metadata.
+- Location assignment removed should log `staff.role_removed` with the Location and previous role in metadata.
+- Location assignment role changed should log either a remove + assign pair or one `staff.locations_changed` event; prefer one `staff.locations_changed` event if the product copy should read as a reassignment instead of two separate changes.
+- Removing all grants from a User should still be logged as role/location removals, because it represents account-specific staff removal.
+
+Activity log scoping for staff events:
+
+- `account_id` should always be the staff-management Account.
+- `location_id` should be `null` for Account Admin role changes and staff invitations.
+- `location_id` should be set for single-Location assignment changes.
+- For multi-Location assignment changes in one request, either create one row per changed Location or create one account-scoped summary row with changed Location IDs in metadata. Prefer one row per changed Location when the UI will filter activity by Location.
+
+Suggested metadata fields for staff events:
+
+- `staff_user_id`
+- `staff_user_email`
+- `staff_user_name`
+- `account_role_before`
+- `account_role_after`
+- `location_id`
+- `location_name`
+- `location_role_before`
+- `location_role_after`
+- `invitation_id` for `staff.invited`
+
+Do not expose invitation `token_hash` or raw tokens in activity metadata.
 
 ## Slice 4: Activity Logging Foundation
 
