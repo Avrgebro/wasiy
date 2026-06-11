@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\StaffInvitationController;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['web', 'auth:sanctum', EnsureUserIsActive::class])->group(function () {
+Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function () {
     Route::get('/me', MeController::class);
     Route::post('/context/account', [AccessContextController::class, 'selectAccount']);
     Route::post('/context/location', [AccessContextController::class, 'selectLocation']);
