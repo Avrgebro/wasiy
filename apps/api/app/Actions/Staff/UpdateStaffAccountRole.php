@@ -3,15 +3,21 @@
 namespace App\Actions\Staff;
 
 use App\Enums\AccountRole;
+use App\Enums\ActivityEventType;
 use App\Models\Account;
 use App\Models\AccountUserRole;
 use App\Models\LocationUserRole;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class UpdateStaffAccountRole
 {
+    public function __construct(
+        private readonly ActivityLogger $activityLogger,
+    ) {}
+
     public function handle(Account $account, User $actor, User $staff, ?string $accountRole): User
     {
         abort_unless($this->isStaffForAccount($account, $staff), 404);
@@ -28,8 +34,11 @@ class UpdateStaffAccountRole
                 ]);
             }
 
+            $accountRoleBefore = $currentAccountRole?->role->value;
+
             if ($accountRole === null) {
                 $currentAccountRole?->delete();
+                $this->logAccountRoleChange($account, $actor, $staff, $accountRoleBefore, null);
 
                 return $this->loadStaffRelations($staff, $account);
             }
@@ -41,6 +50,8 @@ class UpdateStaffAccountRole
                 ],
                 ['role' => AccountRole::from($accountRole)],
             );
+
+            $this->logAccountRoleChange($account, $actor, $staff, $accountRoleBefore, $accountRole);
 
             return $this->loadStaffRelations($staff, $account);
         });
@@ -88,5 +99,46 @@ class UpdateStaffAccountRole
                 ->where('account_id', $account->id)
                 ->with('location'),
         ]);
+    }
+
+    private function logAccountRoleChange(
+        Account $account,
+        User $actor,
+        User $staff,
+        ?string $accountRoleBefore,
+        ?string $accountRoleAfter,
+    ): void {
+        if ($accountRoleBefore === $accountRoleAfter) {
+            return;
+        }
+
+        $eventType = $accountRoleAfter === null
+            ? ActivityEventType::StaffRoleRemoved
+            : ActivityEventType::StaffRoleAssigned;
+
+        $summary = $accountRoleAfter === null
+            ? "Se quitó el rol de administrador de cuenta a {$staff->name} en {$account->name}."
+            : "{$staff->name} recibió el rol de administrador de cuenta en {$account->name}.";
+
+        $this->activityLogger->log(
+            account: $account,
+            eventType: $eventType,
+            summary: $summary,
+            metadata: [
+                'actor_user_id' => $actor->id,
+                'actor_user_name' => $actor->name,
+                'actor_user_email' => $actor->email,
+                'account_id' => $account->id,
+                'account_name' => $account->name,
+                'staff_user_id' => $staff->id,
+                'staff_user_name' => $staff->name,
+                'staff_user_email' => $staff->email,
+                'account_role_before' => $accountRoleBefore,
+                'account_role_after' => $accountRoleAfter,
+            ],
+            actor: $actor,
+            subjectType: 'user',
+            subjectId: $staff->id,
+        );
     }
 }

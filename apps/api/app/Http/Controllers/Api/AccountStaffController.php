@@ -119,8 +119,12 @@ class AccountStaffController extends Controller
         User $user,
         UpdateStaffLocationAssignments $updateStaffLocationAssignments,
     ): JsonResource {
+        /** @var User $actor */
+        $actor = $request->user();
+
         return new StaffResource($updateStaffLocationAssignments->handle(
             $account,
+            $actor,
             $user,
             $request->validated('location_assignments'),
         ));

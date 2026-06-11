@@ -3,19 +3,26 @@
 namespace App\Actions\Staff;
 
 use App\Enums\AccountRole;
+use App\Enums\ActivityEventType;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Models\Account;
 use App\Models\AccountUserRole;
+use App\Models\Location;
 use App\Models\LocationUserRole;
 use App\Models\User;
 use App\Models\UserInvitation;
+use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class InviteStaffUser
 {
+    public function __construct(
+        private readonly ActivityLogger $activityLogger,
+    ) {}
+
     /**
      * @param  array{
      *     email: string,
@@ -108,6 +115,23 @@ class InviteStaffUser
                 $data['location_assignments'] ?? [],
             );
 
+            $this->activityLogger->log(
+                account: $account,
+                eventType: ActivityEventType::StaffInvited,
+                summary: "Se invitó a {$user->name} al equipo de {$account->name}.",
+                metadata: $this->invitationMetadata(
+                    account: $account,
+                    actor: $actor,
+                    staff: $user,
+                    invitation: $invitation,
+                    accountRole: $data['account_role'] ?? null,
+                    locationAssignments: $data['location_assignments'] ?? [],
+                ),
+                actor: $actor,
+                subjectType: 'user',
+                subjectId: $user->id,
+            );
+
             return [
                 'staff' => $this->loadStaffRelations($user, $account),
                 'invitation' => $invitation,
@@ -177,5 +201,45 @@ class InviteStaffUser
                 ->where('account_id', $account->id)
                 ->with('location'),
         ]);
+    }
+
+    /**
+     * @param  array<int, array{location_id: string, role: string}>  $locationAssignments
+     * @return array<string, mixed>
+     */
+    private function invitationMetadata(
+        Account $account,
+        User $actor,
+        User $staff,
+        UserInvitation $invitation,
+        ?string $accountRole,
+        array $locationAssignments,
+    ): array {
+        $locations = Location::query()
+            ->where('account_id', $account->id)
+            ->whereIn('id', collect($locationAssignments)->pluck('location_id'))
+            ->get()
+            ->keyBy('id');
+
+        return [
+            'actor_user_id' => $actor->id,
+            'actor_user_name' => $actor->name,
+            'actor_user_email' => $actor->email,
+            'account_id' => $account->id,
+            'account_name' => $account->name,
+            'staff_user_id' => $staff->id,
+            'staff_user_name' => $staff->name,
+            'staff_user_email' => $staff->email,
+            'invitation_id' => $invitation->id,
+            'account_role_after' => $accountRole,
+            'location_assignments_after' => collect($locationAssignments)
+                ->map(fn (array $assignment): array => [
+                    'location_id' => $assignment['location_id'],
+                    'location_name' => $locations->get($assignment['location_id'])?->name,
+                    'role' => $assignment['role'],
+                ])
+                ->values()
+                ->all(),
+        ];
     }
 }

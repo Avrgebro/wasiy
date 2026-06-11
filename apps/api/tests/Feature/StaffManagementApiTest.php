@@ -1,11 +1,13 @@
 <?php
 
 use App\Enums\AccountRole;
+use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Models\Account;
 use App\Models\AccountUserRole;
+use App\Models\ActivityLog;
 use App\Models\Location;
 use App\Models\LocationUserRole;
 use App\Models\User;
@@ -73,6 +75,37 @@ test('account admins can invite staff users with location assignments', function
         ->and($invitation->token_hash)->not->toBeEmpty()
         ->and($invitation->expires_at->isSameDay(now()->addDays(21)))->toBeTrue()
         ->and($staff->email_verified_at)->toBeNull();
+
+    $activityLog = ActivityLog::query()->sole();
+
+    expect($activityLog->account_id)->toBe($account->id)
+        ->and($activityLog->location_id)->toBeNull()
+        ->and($activityLog->actor_user_id)->toBe($admin->id)
+        ->and($activityLog->subject_type)->toBe('user')
+        ->and($activityLog->subject_id)->toBe($staff->id)
+        ->and($activityLog->event_type)->toBe(ActivityEventType::StaffInvited)
+        ->and($activityLog->summary)->toBe("Se invitó a {$staff->name} al equipo de {$account->name}.")
+        ->and($activityLog->metadata)->toMatchArray([
+            'actor_user_id' => $admin->id,
+            'actor_user_name' => $admin->name,
+            'actor_user_email' => $admin->email,
+            'account_id' => $account->id,
+            'account_name' => $account->name,
+            'staff_user_id' => $staff->id,
+            'staff_user_name' => $staff->name,
+            'staff_user_email' => $staff->email,
+            'invitation_id' => $invitation->id,
+            'account_role_after' => null,
+            'location_assignments_after' => [
+                [
+                    'location_id' => $location->id,
+                    'location_name' => $location->name,
+                    'role' => LocationRole::FrontDesk->value,
+                ],
+            ],
+        ])
+        ->and($activityLog->metadata)->not->toHaveKey('token_hash')
+        ->and($activityLog->metadata)->not->toHaveKey('token');
 });
 
 test('location managers cannot invite staff users', function () {
@@ -296,6 +329,182 @@ test('account admins can assign account roles and location roles independently',
         'user_id' => $staff->id,
         'role' => LocationRole::LocationManager->value,
     ]);
+});
+
+test('account role changes create scoped activity rows and skip no op updates', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+    $staff = User::factory()->create(['first_name' => 'Ana', 'last_name' => 'Salas']);
+
+    LocationUserRole::query()->create([
+        'account_id' => $account->id,
+        'location_id' => $location->id,
+        'user_id' => $staff->id,
+        'role' => LocationRole::FrontDesk,
+    ]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+            'account_role' => AccountRole::AccountAdmin->value,
+        ])
+        ->assertOk();
+
+    expect(ActivityLog::query()->count())->toBe(1);
+
+    $assignedLog = ActivityLog::query()->sole();
+
+    expect($assignedLog->event_type)->toBe(ActivityEventType::StaffRoleAssigned)
+        ->and($assignedLog->account_id)->toBe($account->id)
+        ->and($assignedLog->location_id)->toBeNull()
+        ->and($assignedLog->actor_user_id)->toBe($admin->id)
+        ->and($assignedLog->subject_type)->toBe('user')
+        ->and($assignedLog->subject_id)->toBe($staff->id)
+        ->and($assignedLog->metadata)->toMatchArray([
+            'account_role_before' => null,
+            'account_role_after' => AccountRole::AccountAdmin->value,
+            'staff_user_id' => $staff->id,
+            'staff_user_name' => 'Ana Salas',
+            'staff_user_email' => $staff->email,
+            'account_id' => $account->id,
+            'account_name' => $account->name,
+            'actor_user_id' => $admin->id,
+            'actor_user_name' => $admin->name,
+            'actor_user_email' => $admin->email,
+        ]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+            'account_role' => AccountRole::AccountAdmin->value,
+        ])
+        ->assertOk();
+
+    expect(ActivityLog::query()->count())->toBe(1);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+            'account_role' => null,
+        ])
+        ->assertOk();
+
+    expect(ActivityLog::query()->count())->toBe(2);
+
+    $removedLog = ActivityLog::query()
+        ->where('event_type', ActivityEventType::StaffRoleRemoved->value)
+        ->sole();
+
+    expect($removedLog->location_id)->toBeNull()
+        ->and($removedLog->metadata)->toMatchArray([
+            'account_role_before' => AccountRole::AccountAdmin->value,
+            'account_role_after' => null,
+        ]);
+});
+
+test('location assignment updates create one activity row per changed location and skip no ops', function () {
+    $account = Account::factory()->create();
+    $firstLocation = Location::factory()->for($account)->create(['name' => 'Torre Norte']);
+    $secondLocation = Location::factory()->for($account)->create(['name' => 'Torre Sur']);
+    $admin = createAccountAdmin($account);
+    $staff = User::factory()->create(['first_name' => 'Ana', 'last_name' => 'Salas']);
+
+    LocationUserRole::query()->create([
+        'account_id' => $account->id,
+        'location_id' => $firstLocation->id,
+        'user_id' => $staff->id,
+        'role' => LocationRole::FrontDesk,
+    ]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+            'location_assignments' => [
+                [
+                    'location_id' => $firstLocation->id,
+                    'role' => LocationRole::FrontDesk->value,
+                ],
+                [
+                    'location_id' => $secondLocation->id,
+                    'role' => LocationRole::LocationManager->value,
+                ],
+            ],
+        ])
+        ->assertOk();
+
+    expect(ActivityLog::query()->count())->toBe(1);
+
+    $assignedLog = ActivityLog::query()->sole();
+
+    expect($assignedLog->event_type)->toBe(ActivityEventType::StaffRoleAssigned)
+        ->and($assignedLog->account_id)->toBe($account->id)
+        ->and($assignedLog->location_id)->toBe($secondLocation->id)
+        ->and($assignedLog->actor_user_id)->toBe($admin->id)
+        ->and($assignedLog->subject_type)->toBe('user')
+        ->and($assignedLog->subject_id)->toBe($staff->id)
+        ->and($assignedLog->metadata)->toMatchArray([
+            'location_id' => $secondLocation->id,
+            'location_name' => 'Torre Sur',
+            'location_role_before' => null,
+            'location_role_after' => LocationRole::LocationManager->value,
+            'staff_user_id' => $staff->id,
+            'staff_user_name' => 'Ana Salas',
+            'staff_user_email' => $staff->email,
+            'account_id' => $account->id,
+            'account_name' => $account->name,
+            'actor_user_id' => $admin->id,
+            'actor_user_name' => $admin->name,
+            'actor_user_email' => $admin->email,
+        ]);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+            'location_assignments' => [
+                [
+                    'location_id' => $firstLocation->id,
+                    'role' => LocationRole::FrontDesk->value,
+                ],
+                [
+                    'location_id' => $secondLocation->id,
+                    'role' => LocationRole::LocationManager->value,
+                ],
+            ],
+        ])
+        ->assertOk();
+
+    expect(ActivityLog::query()->count())->toBe(1);
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+            'location_assignments' => [
+                [
+                    'location_id' => $firstLocation->id,
+                    'role' => LocationRole::LocationManager->value,
+                ],
+            ],
+        ])
+        ->assertOk();
+
+    expect(ActivityLog::query()->count())->toBe(3);
+
+    $changedLog = ActivityLog::query()
+        ->where('event_type', ActivityEventType::StaffLocationsChanged->value)
+        ->sole();
+    $removedLog = ActivityLog::query()
+        ->where('event_type', ActivityEventType::StaffRoleRemoved->value)
+        ->sole();
+
+    expect($changedLog->location_id)->toBe($firstLocation->id)
+        ->and($changedLog->metadata)->toMatchArray([
+            'location_id' => $firstLocation->id,
+            'location_name' => 'Torre Norte',
+            'location_role_before' => LocationRole::FrontDesk->value,
+            'location_role_after' => LocationRole::LocationManager->value,
+        ])
+        ->and($removedLog->location_id)->toBe($secondLocation->id)
+        ->and($removedLog->metadata)->toMatchArray([
+            'location_id' => $secondLocation->id,
+            'location_name' => 'Torre Sur',
+            'location_role_before' => LocationRole::LocationManager->value,
+            'location_role_after' => null,
+        ]);
 });
 
 test('location assignment updates reject duplicate and cross account locations', function () {

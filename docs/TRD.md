@@ -526,9 +526,19 @@ subject_id nullable
 event_type
 summary
 metadata jsonb
-occurred_at
 created_at
 ```
+
+Activity logs use `created_at` as the product timestamp in v1 and do not use `updated_at`; entries are append-only. The schema should support polymorphic subjects without constraining `subject_id` to a single table. Activity log rows must never be cascade-deleted by related records.
+
+Foreign key behavior:
+
+- `account_id` restricts deletion until tenant deletion semantics are explicitly designed.
+- `location_id` is nullable and may be set to null if the Location is deleted.
+- `actor_user_id` is nullable and may be set to null if the User is deleted.
+- `subject_type` and `subject_id` are unconstrained polymorphic subject references.
+
+The stored `summary` should be a Spanish human-readable snapshot for the event, while `event_type` and `metadata` should store canonical values and labels so future UIs can filter, inspect, or re-render localized copy. Metadata should duplicate important labels such as actor, account, subject, and location names where relevant so entries remain understandable if related records are deleted or renamed.
 
 Workflow actions should call an activity logging service for meaningful product events, such as:
 

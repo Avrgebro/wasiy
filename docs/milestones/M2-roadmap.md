@@ -338,9 +338,31 @@ Suggested table:
   - `metadata`
   - `created_at`
 
+Use `created_at` as the only activity timestamp in M2. Do not add a separate `occurred_at` column.
+
+The table should not include `updated_at`; Activity Log entries are append-only product events. Create an `ActivityLog` model and factory in Slice 4 so tests and future activity-list work can use first-class Laravel conventions.
+
+Foreign key behavior:
+
+- `account_id` should reference Accounts with restricted deletion until tenant deletion semantics are designed.
+- `location_id` should be nullable and use `nullOnDelete`.
+- `actor_user_id` should be nullable and use `nullOnDelete`.
+- `subject_type` and `subject_id` are polymorphic and should not use a foreign key constraint.
+- No Activity Log foreign key should cascade-delete Activity Log rows.
+
+Suggested indexes:
+
+- `(account_id, created_at)`
+- `(account_id, location_id, created_at)`
+- `(account_id, event_type, created_at)`
+- `(actor_user_id, created_at)`
+- `(subject_type, subject_id)`
+
 Suggested service:
 
 - `ActivityLogger::log(...)`
+
+Use a pragmatic named-argument logger method in Slice 4 and an `ActivityEventType` enum for stable event types. Do not add a value object until more workflow families need it.
 
 First event types:
 
@@ -349,11 +371,29 @@ First event types:
 - `staff.role_removed`
 - `staff.locations_changed`
 
+Staff activity semantics:
+
+- Staff activity logging should happen inside the same database transaction as the staff mutation. A staff access mutation that cannot be logged should fail.
+- `actor_user_id` is nullable at the schema/service level for future system events, but Slice 4 staff events must always pass the authenticated Account Admin actor.
+- Use the affected staff `User` as `subject_type = "user"` and `subject_id = staff_user_id` for all staff events. Store invitation, role, and Location details in metadata.
+- `staff.invited` should be the only event logged during staff invitation. Initial account role and Location grants should be stored in metadata instead of emitting separate assignment events.
+- Account role changes should be account-scoped with `location_id = null`.
+- Location assignment additions should log `staff.role_assigned` with `location_id` set.
+- Location assignment removals should log `staff.role_removed` with `location_id` set.
+- Location assignment role changes should log `staff.locations_changed` with `location_id` set.
+- Multi-Location assignment updates should create one row per changed Location so future Location-filtered activity views remain simple and permission-safe.
+- No-op updates should not create Activity Log rows.
+- `summary` should store a Spanish human-readable snapshot, while `event_type` and `metadata` should remain canonical enough for future localized rendering.
+- Metadata should snapshot actor, account, staff, and Location labels where relevant, even when foreign key columns also exist.
+- Do not expose invitation `token_hash` or raw tokens in activity metadata.
+
 Tests:
 
 - Staff invite creates an activity log row.
 - Role change creates an activity log row.
 - Activity log account and location scope are correct.
+- No-op role or Location assignment updates do not create activity log rows.
+- Staff invitation metadata includes initial grants but excludes invitation tokens and token hashes.
 
 ## Slice 5: Frontend Account and Location Context
 
