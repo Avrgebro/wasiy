@@ -2,12 +2,11 @@ import { Badge, Button } from '@mantine/core'
 import { Bell, HamburgerMenu, Logout } from '@solar-icons/react'
 import { useRouter } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useLogout } from '../../../features/auth/hooks'
+import { useLogout, useMe } from '../../../features/auth/hooks'
 import { ColorSchemeToggle } from './color-scheme-toggle'
 import { LocationSwitcher } from './location-switcher'
 
 type TopbarProps = {
-  accountKey: string
   onMobileNavOpen: () => void
   roleLabelKey?: string
   showLocationSwitcher?: boolean
@@ -16,7 +15,6 @@ type TopbarProps = {
 }
 
 export function Topbar({
-  accountKey,
   onMobileNavOpen,
   roleLabelKey,
   showLocationSwitcher = true,
@@ -25,7 +23,9 @@ export function Topbar({
 }: TopbarProps) {
   const { t } = useTranslation('common')
   const router = useRouter()
+  const meQuery = useMe()
   const logoutMutation = useLogout()
+  const accountName = meQuery.data?.active_account?.name ?? t('shell.account')
 
   async function handleLogout() {
     await logoutMutation.mutateAsync()
@@ -46,7 +46,7 @@ export function Topbar({
         </Button>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-[var(--muted-foreground)]">
-            {t(accountKey)}
+            {accountName}
           </p>
           <h1 className="truncate text-xl font-bold leading-7 text-[var(--foreground)]">
             {t(titleKey)}

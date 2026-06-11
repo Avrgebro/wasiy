@@ -5,6 +5,24 @@ export function getMe() {
   return apiRequest<MeResponse>('/api/me')
 }
 
+export function selectAccount(accountId: string) {
+  return apiRequest<MeResponse>('/api/context/account', {
+    data: {
+      account_id: accountId,
+    },
+    method: 'POST',
+  })
+}
+
+export function selectLocation(locationId: string) {
+  return apiRequest<MeResponse>('/api/context/location', {
+    data: {
+      location_id: locationId,
+    },
+    method: 'POST',
+  })
+}
+
 export async function login(credentials: LoginCredentials) {
   await csrfCookie()
 

@@ -408,6 +408,20 @@ Routing rules:
 - Authenticated user with multiple accounts and no active account goes to `/select-account`.
 - Selecting an account calls `POST /api/context/account`, invalidates `/api/me`, then routes to the default surface.
 
+Slice 5 should pull in the minimal `requiresAccountSelection(me)` helper even though broader role-aware navigation remains Slice 6:
+
+```ts
+me.accounts.length > 1 && me.active_account === null
+```
+
+Use `/select-account` as a full-screen blocking page outside the dashboard shell. Without an Active Account, the app shell cannot truthfully render account name, navigation, role badges, or a Location switcher.
+
+The selection page should show the Wasiy brand, a Spanish heading, the accessible Account choices, loading/error states, and a logout action. It should not include a clear-context action because the page represents a state where Active Account context is already absent.
+
+After selecting an Account from `/select-account`, route to `getDefaultAuthenticatedRoute(returnedMe)`. Future account switching from inside the shell can preserve the current surface only when that surface remains valid for the new Account.
+
+Active Location should not fall back to the first accessible Location on the frontend. If selecting an Account returns multiple `accessible_locations` and `active_location = null`, account-scoped admin surfaces may still render, but Location-scoped widgets should show a select-location state instead of querying the first Location.
+
 ### Location Switcher
 
 Replace the placeholder location switcher with a real context mutation:
@@ -416,6 +430,15 @@ Replace the placeholder location switcher with a real context mutation:
 - Switching location calls `POST /api/context/location`.
 - Invalidate `/api/me` and location-scoped queries.
 - Keep the visible selected location from server-returned context.
+
+Location switcher display rules:
+
+- Hide the switcher when there are zero accessible Locations.
+- Render a disabled single-Location control when there is exactly one accessible Location.
+- Render a menu when there are multiple accessible Locations.
+- When there are multiple accessible Locations but no Active Location, label the control `Seleccionar ubicación`.
+
+When a Location is selected, update the `/api/me` query cache immediately from the mutation response, then invalidate non-auth queries so stale Location-scoped dashboard data is refreshed.
 
 ## Slice 6: Role-Aware Routes and Navigation
 
@@ -446,10 +469,19 @@ Navigation behavior:
 
 Add seed data for:
 
-- Account Admin with one account.
-- Location Manager assigned to one location.
-- Front Desk assigned to one location.
-- User with access to two accounts.
+- Account Admin with one account: `admin@wasiy.test` / `password`.
+- Location Manager assigned to one location: `manager@wasiy.test` / `password`.
+- Front Desk assigned to one location: `frontdesk@wasiy.test` / `password`.
+- User with access to two accounts: `multi@wasiy.test` / `password`.
+
+Seeded demo context:
+
+- `wasiy-demo` has `edificio-central` and `torre-norte`.
+- `wasiy-playa` has `edificio-playa`.
+- `admin@wasiy.test` is Account Admin for `wasiy-demo`.
+- `manager@wasiy.test` is Location Manager for `edificio-central`.
+- `frontdesk@wasiy.test` is Front Desk for `torre-norte`.
+- `multi@wasiy.test` is Location Manager for `edificio-central` and Front Desk for `edificio-playa`, forcing explicit Active Account selection before dashboard entry.
 
 Final M2 acceptance checks:
 

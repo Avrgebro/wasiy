@@ -15,9 +15,17 @@
     "loginFailed": "Sign-in failed",
     "loginTitle": "Sign in to Wasiy",
     "logout": "Sign out",
+    "noAvailableSurface": "Your user does not have access to an available surface yet.",
     "noAccessTitle": "Access unavailable",
     "noAssignedLocation": "Your user does not have an assigned location for this dashboard.",
+    "selectLocationRequired": "Select a location to view this dashboard.",
     "password": "Password"
+  },
+  "accountSelection": {
+    "productArea": "Account access",
+    "selectFailed": "Account selection failed",
+    "summary": "Choose the account you want to work in for this session.",
+    "title": "Select an account"
   },
   "dashboard": {
     "emptyRegistry": "There is no recent activity for this location yet.",
@@ -50,9 +58,11 @@
     "checkIn": "Check-in",
     "dashboard": "Dashboard",
     "home": "Home",
+    "locations": "Locations",
     "people": "People",
     "residents": "Residents",
     "reservations": "Reservations",
+    "staff": "Staff",
     "todaysVisitors": "Today's visitors",
     "unitLookup": "Unit lookup",
     "units": "Units",
@@ -63,12 +73,15 @@
     "label": "View notifications"
   },
   "navGroups": {
+    "account": "Account",
     "communication": "Communication",
     "frontDesk": "Front desk",
     "operations": "Operations",
-    "overview": "Overview"
+    "overview": "Overview",
+    "portal": "Portal"
   },
   "roles": {
+    "accountAdmin": "Account admin",
     "frontDesk": "Front desk",
     "locationManager": "Manager"
   },
@@ -80,7 +93,8 @@
     "locations": "Locations",
     "mainNav": "Main navigation",
     "openNav": "Open navigation",
-    "productArea": "Residential operations"
+    "productArea": "Residential operations",
+    "selectLocation": "Select location"
   },
   "theme": {
     "dark": "Use dark mode",

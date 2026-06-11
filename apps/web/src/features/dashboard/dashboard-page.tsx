@@ -11,6 +11,8 @@ export function DashboardPage() {
   const { t } = useTranslation('common')
   const meQuery = useMe()
   const location = meQuery.data ? getDefaultLocation(meQuery.data) : null
+  const hasAccessibleLocations =
+    (meQuery.data?.accessible_locations.length ?? 0) > 0
   const dashboardQuery = useQuery({
     queryKey: ['locations', location?.id, 'dashboard'],
     queryFn: () => {
@@ -34,7 +36,9 @@ export function DashboardPage() {
   if (!location) {
     return (
       <Alert color="yellow" title={t('auth.noAccessTitle')}>
-        {t('auth.noAssignedLocation')}
+        {hasAccessibleLocations
+          ? t('auth.selectLocationRequired')
+          : t('auth.noAssignedLocation')}
       </Alert>
     )
   }

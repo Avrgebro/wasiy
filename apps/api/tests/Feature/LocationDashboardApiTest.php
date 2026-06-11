@@ -29,7 +29,7 @@ test('assigned location managers can view their location dashboard', function ()
         ->assertOk()
         ->assertJsonPath('location.id', $location->id)
         ->assertJsonPath('location.name', 'Edificio Central')
-        ->assertJsonPath('metrics.assigned_staff_count', 1);
+        ->assertJsonPath('metrics.assigned_staff_count', 2);
 });
 
 test('users without an assignment cannot view a location dashboard', function () {

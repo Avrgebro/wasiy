@@ -5,14 +5,19 @@ import type { LayoutNavEntry } from '../shared/types'
 type AdminLayoutProps = {
   children: ReactNode
   navItems: LayoutNavEntry[]
+  roleLabelKey: string
 }
 
-export function AdminLayout({ children, navItems }: AdminLayoutProps) {
+export function AdminLayout({
+  children,
+  navItems,
+  roleLabelKey,
+}: AdminLayoutProps) {
   return (
     <AppShell
       navItems={navItems}
       productAreaKey="shell.productArea"
-      roleLabelKey="roles.locationManager"
+      roleLabelKey={roleLabelKey}
       titleKey="dashboard.title"
     >
       {children}

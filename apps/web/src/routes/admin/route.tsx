@@ -3,15 +3,23 @@ import { AdminLayout } from '../../components/layout/admin/admin-layout'
 import { isAuthBootstrapError } from '../../app/api-client'
 import {
   canAccessAdmin,
+  getAvailableNavigationItems,
   getDefaultAuthenticatedRoute,
+  hasAccountRole,
+  accountRoles,
+  requiresAccountSelection,
 } from '../../features/auth/access'
+import { useMe } from '../../features/auth/hooks'
 import { meQueryOptions } from '../../features/auth/query-options'
-import { adminNavItems } from './-nav'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async ({ context, location }) => {
     try {
       const me = await context.queryClient.ensureQueryData(meQueryOptions())
+
+      if (requiresAccountSelection(me)) {
+        throw redirect({ to: '/select-account' })
+      }
 
       if (!canAccessAdmin(me)) {
         throw redirect({ to: getDefaultAuthenticatedRoute(me) })
@@ -31,8 +39,17 @@ export const Route = createFileRoute('/admin')({
 })
 
 function AdminRouteLayout() {
+  const meQuery = useMe()
+  const navItems = meQuery.data
+    ? getAvailableNavigationItems(meQuery.data, 'admin')
+    : []
+  const roleLabelKey =
+    meQuery.data && hasAccountRole(meQuery.data, accountRoles.accountAdmin)
+      ? 'roles.accountAdmin'
+      : 'roles.locationManager'
+
   return (
-    <AdminLayout navItems={adminNavItems}>
+    <AdminLayout navItems={navItems} roleLabelKey={roleLabelKey}>
       <Outlet />
     </AdminLayout>
   )

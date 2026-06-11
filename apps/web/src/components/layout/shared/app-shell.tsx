@@ -5,7 +5,6 @@ import { Topbar } from './topbar'
 import type { LayoutNavEntry } from './types'
 
 type AppShellProps = {
-  accountKey?: string
   children: ReactNode
   navItems: LayoutNavEntry[]
   productAreaKey: string
@@ -16,7 +15,6 @@ type AppShellProps = {
 }
 
 export function AppShell({
-  accountKey = 'shell.account',
   children,
   navItems,
   productAreaKey,
@@ -38,7 +36,6 @@ export function AppShell({
 
       <div className="min-w-0">
         <Topbar
-          accountKey={accountKey}
           onMobileNavOpen={() => setMobileNavOpened(true)}
           roleLabelKey={roleLabelKey}
           showLocationSwitcher={showLocationSwitcher}

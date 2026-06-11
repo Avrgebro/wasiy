@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SelectAccountRouteImport } from './routes/select-account'
+import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PortalRouteRouteImport } from './routes/portal/route'
 import { Route as FrontDeskRouteRouteImport } from './routes/front-desk/route'
@@ -16,6 +18,16 @@ import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 
+const SelectAccountRoute = SelectAccountRouteImport.update({
+  id: '/select-account',
+  path: '/select-account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoAccessRoute = NoAccessRouteImport.update({
+  id: '/no-access',
+  path: '/no-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -53,6 +65,8 @@ export interface FileRoutesByFullPath {
   '/front-desk': typeof FrontDeskRouteRoute
   '/portal': typeof PortalRouteRoute
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
+  '/select-account': typeof SelectAccountRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -60,6 +74,8 @@ export interface FileRoutesByTo {
   '/front-desk': typeof FrontDeskRouteRoute
   '/portal': typeof PortalRouteRoute
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
+  '/select-account': typeof SelectAccountRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -69,13 +85,30 @@ export interface FileRoutesById {
   '/front-desk': typeof FrontDeskRouteRoute
   '/portal': typeof PortalRouteRoute
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
+  '/select-account': typeof SelectAccountRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/front-desk' | '/portal' | '/login' | '/admin/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/front-desk'
+    | '/portal'
+    | '/login'
+    | '/no-access'
+    | '/select-account'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/front-desk' | '/portal' | '/login' | '/admin'
+  to:
+    | '/'
+    | '/front-desk'
+    | '/portal'
+    | '/login'
+    | '/no-access'
+    | '/select-account'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -83,6 +116,8 @@ export interface FileRouteTypes {
     | '/front-desk'
     | '/portal'
     | '/login'
+    | '/no-access'
+    | '/select-account'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -92,10 +127,26 @@ export interface RootRouteChildren {
   FrontDeskRouteRoute: typeof FrontDeskRouteRoute
   PortalRouteRoute: typeof PortalRouteRoute
   LoginRoute: typeof LoginRoute
+  NoAccessRoute: typeof NoAccessRoute
+  SelectAccountRoute: typeof SelectAccountRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/select-account': {
+      id: '/select-account'
+      path: '/select-account'
+      fullPath: '/select-account'
+      preLoaderRoute: typeof SelectAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/no-access': {
+      id: '/no-access'
+      path: '/no-access'
+      fullPath: '/no-access'
+      preLoaderRoute: typeof NoAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -159,6 +210,8 @@ const rootRouteChildren: RootRouteChildren = {
   FrontDeskRouteRoute: FrontDeskRouteRoute,
   PortalRouteRoute: PortalRouteRoute,
   LoginRoute: LoginRoute,
+  NoAccessRoute: NoAccessRoute,
+  SelectAccountRoute: SelectAccountRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -15,9 +15,17 @@
     "loginFailed": "No se pudo iniciar sesión",
     "loginTitle": "Entrar a Wasiy",
     "logout": "Cerrar sesión",
+    "noAvailableSurface": "Tu usuario no tiene acceso a ningún panel disponible todavía.",
     "noAccessTitle": "Acceso no disponible",
     "noAssignedLocation": "Tu usuario no tiene una ubicación asignada para este panel.",
+    "selectLocationRequired": "Selecciona una ubicación para ver este panel.",
     "password": "Contraseña"
+  },
+  "accountSelection": {
+    "productArea": "Acceso de cuenta",
+    "selectFailed": "No se pudo seleccionar la cuenta",
+    "summary": "Elige la cuenta con la que quieres trabajar en esta sesión.",
+    "title": "Selecciona una cuenta"
   },
   "dashboard": {
     "emptyRegistry": "Aún no hay actividad reciente para esta ubicación.",
@@ -50,9 +58,11 @@
     "checkIn": "Registro",
     "dashboard": "Panel",
     "home": "Inicio",
+    "locations": "Ubicaciones",
     "people": "Personas",
     "residents": "Residentes",
     "reservations": "Reservas",
+    "staff": "Personal",
     "todaysVisitors": "Visitantes de hoy",
     "unitLookup": "Buscar unidad",
     "units": "Unidades",
@@ -63,12 +73,15 @@
     "label": "Ver notificaciones"
   },
   "navGroups": {
+    "account": "Cuenta",
     "communication": "Comunicación",
     "frontDesk": "Portería",
     "operations": "Operación",
-    "overview": "Resumen"
+    "overview": "Resumen",
+    "portal": "Portal"
   },
   "roles": {
+    "accountAdmin": "Administrador de cuenta",
     "frontDesk": "Portería",
     "locationManager": "Administrador"
   },
@@ -80,7 +93,8 @@
     "locations": "Ubicaciones",
     "mainNav": "Navegación principal",
     "openNav": "Abrir navegación",
-    "productArea": "Operaciones residenciales"
+    "productArea": "Operaciones residenciales",
+    "selectLocation": "Seleccionar ubicación"
   },
   "theme": {
     "dark": "Usar modo oscuro",
