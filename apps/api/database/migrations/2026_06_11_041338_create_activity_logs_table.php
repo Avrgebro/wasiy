@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('subject_type')->nullable();
             $table->ulid('subject_id')->nullable();
             $table->string('event_type');
-            $table->string('summary');
+            $table->text('summary');
             $table->jsonb('metadata')->default('{}');
             $table->timestamp('created_at');
 

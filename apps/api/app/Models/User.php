@@ -78,6 +78,27 @@ class User extends Authenticatable
     }
 
     /**
+     * Eager loads shared by staff endpoints and StaffResource. Constrains
+     * role relations to the Account so the resource can render them as-is.
+     *
+     * @return array<string, callable>
+     */
+    public static function staffRelationsForAccount(Account $account): array
+    {
+        return [
+            'accountUserRoles' => fn ($query) => $query->where('account_id', $account->id),
+            'locationUserRoles' => fn ($query) => $query
+                ->where('account_id', $account->id)
+                ->with('location'),
+        ];
+    }
+
+    public function loadStaffRelationsForAccount(Account $account): self
+    {
+        return $this->load(self::staffRelationsForAccount($account));
+    }
+
+    /**
      * @return HasMany<UserInvitation, $this>
      */
     public function userInvitations(): HasMany

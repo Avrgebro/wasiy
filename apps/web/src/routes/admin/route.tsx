@@ -1,6 +1,9 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { AdminLayout } from '../../components/layout/admin/admin-layout'
-import { isAuthBootstrapError } from '../../app/api-client'
+import {
+  isAuthBootstrapError,
+  isDeactivatedAccountError,
+} from '../../app/api-client'
 import {
   canAccessAdmin,
   getAvailableNavigationItems,
@@ -30,6 +33,10 @@ export const Route = createFileRoute('/admin')({
           to: '/login',
           search: { redirect: location.href },
         })
+      }
+
+      if (isDeactivatedAccountError(error)) {
+        throw redirect({ to: '/no-access' })
       }
 
       throw error

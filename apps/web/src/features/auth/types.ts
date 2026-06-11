@@ -24,7 +24,7 @@ export type LocationSummary = {
   slug: string
   timezone: string
   roles: Array<AccountRole | LocationRole>
-  access_source: 'account_role' | 'location_role'
+  access_source: 'account_role' | 'location_role' | 'both'
 }
 
 export type AccountRoleAssignment = {

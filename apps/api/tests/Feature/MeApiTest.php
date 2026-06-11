@@ -101,7 +101,7 @@ test('it gives account admins implicit access to active account locations', func
         ->assertJsonPath('accessible_locations.0.id', $location->id)
         ->assertJsonPath('accessible_locations.0.roles.0', AccountRole::AccountAdmin->value)
         ->assertJsonPath('accessible_locations.0.roles.1', LocationRole::LocationManager->value)
-        ->assertJsonPath('accessible_locations.0.access_source', 'account_role');
+        ->assertJsonPath('accessible_locations.0.access_source', 'both');
 });
 
 test('it excludes deleted role assignments from the access context', function () {

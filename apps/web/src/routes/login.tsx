@@ -1,5 +1,8 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { isAuthBootstrapError } from '../app/api-client'
+import {
+  isAuthBootstrapError,
+  isDeactivatedAccountError,
+} from '../app/api-client'
 import { getDefaultAuthenticatedRoute } from '../features/auth/access'
 import { LoginPage } from '../features/auth/login-page'
 import { meQueryOptions } from '../features/auth/query-options'
@@ -13,6 +16,10 @@ export const Route = createFileRoute('/login')({
     } catch (error) {
       if (isAuthBootstrapError(error)) {
         return
+      }
+
+      if (isDeactivatedAccountError(error)) {
+        throw redirect({ to: '/no-access' })
       }
 
       throw error

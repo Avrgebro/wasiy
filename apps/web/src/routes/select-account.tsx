@@ -1,5 +1,8 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { isAuthBootstrapError } from '../app/api-client'
+import {
+  isAuthBootstrapError,
+  isDeactivatedAccountError,
+} from '../app/api-client'
 import {
   getDefaultAuthenticatedRoute,
   requiresAccountSelection,
@@ -21,6 +24,10 @@ export const Route = createFileRoute('/select-account')({
           to: '/login',
           search: { redirect: location.href },
         })
+      }
+
+      if (isDeactivatedAccountError(error)) {
+        throw redirect({ to: '/no-access' })
       }
 
       throw error

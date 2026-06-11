@@ -1,6 +1,9 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { PortalLayout } from '../../components/layout/portal/portal-layout'
-import { isAuthBootstrapError } from '../../app/api-client'
+import {
+  isAuthBootstrapError,
+  isDeactivatedAccountError,
+} from '../../app/api-client'
 import {
   canAccessPortal,
   getAvailableNavigationItems,
@@ -28,6 +31,10 @@ export const Route = createFileRoute('/portal')({
           to: '/login',
           search: { redirect: location.href },
         })
+      }
+
+      if (isDeactivatedAccountError(error)) {
+        throw redirect({ to: '/no-access' })
       }
 
       throw error

@@ -118,6 +118,40 @@ test('account admin implicit access is not reported as an explicit location role
         ->and($service->hasLocationRole($admin, $location, LocationRole::FrontDesk))->toBeFalse();
 });
 
+test('staff membership uses the same soft delete semantics as account access', function () {
+    $service = app(AccessAuthorizationService::class);
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = User::factory()->create();
+    $orphanedStaff = User::factory()->create();
+    $outsider = User::factory()->create();
+
+    AccountUserRole::query()->create([
+        'account_id' => $account->id,
+        'user_id' => $admin->id,
+        'role' => AccountRole::AccountAdmin,
+    ]);
+
+    LocationUserRole::query()->create([
+        'account_id' => $account->id,
+        'location_id' => $location->id,
+        'user_id' => $orphanedStaff->id,
+        'role' => LocationRole::FrontDesk,
+    ]);
+
+    expect($service->isStaffForAccount($admin, $account))->toBeTrue()
+        ->and($service->isStaffForAccount($orphanedStaff, $account))->toBeTrue()
+        ->and($service->isStaffForAccount($outsider, $account))->toBeFalse()
+        ->and($service->staffForAccount($account)->pluck('id')->all())
+        ->toEqualCanonicalizing([$admin->id, $orphanedStaff->id]);
+
+    $location->delete();
+
+    expect($service->isStaffForAccount($orphanedStaff, $account))->toBeFalse()
+        ->and($service->staffForAccount($account)->pluck('id')->all())
+        ->toEqual([$admin->id]);
+});
+
 test('staff management requires explicit account admin role', function () {
     $service = app(AccessAuthorizationService::class);
     $account = Account::factory()->create();

@@ -7,6 +7,7 @@ import {
   csrfCookie,
   installAuthInterceptors,
   isAuthBootstrapError,
+  isDeactivatedAccountError,
 } from './api-client'
 
 const originalAdapter = apiClient.defaults.adapter
@@ -38,7 +39,7 @@ describe('apiClient', () => {
     expect(apiClient.defaults.xsrfHeaderName).toBe('X-XSRF-TOKEN')
   })
 
-  it('normalizes network failures into recoverable auth bootstrap errors', async () => {
+  it('does not treat network failures as auth bootstrap errors', async () => {
     apiClient.defaults.adapter = vi.fn(() =>
       Promise.reject(new AxiosError('Network Error', 'ERR_NETWORK')),
     ) satisfies AxiosAdapter
@@ -52,8 +53,26 @@ describe('apiClient', () => {
       await apiRequest('/api/me')
     } catch (error) {
       expect(error).toBeInstanceOf(ApiError)
-      expect(isAuthBootstrapError(error)).toBe(true)
+      expect(isAuthBootstrapError(error)).toBe(false)
+      expect(isDeactivatedAccountError(error)).toBe(false)
     }
+  })
+
+  it('classifies unauthenticated and deactivated responses', () => {
+    expect(isAuthBootstrapError(new ApiError('Unauthenticated.', 401))).toBe(
+      true,
+    )
+    expect(
+      isDeactivatedAccountError(
+        new ApiError('User account is deactivated.', 403),
+      ),
+    ).toBe(true)
+    expect(
+      isAuthBootstrapError(new ApiError('User account is deactivated.', 403)),
+    ).toBe(false)
+    expect(isDeactivatedAccountError(new ApiError('Unauthenticated.', 401))).toBe(
+      false,
+    )
   })
 
   it('calls the installed unauthorized callback for unauthorized responses', async () => {

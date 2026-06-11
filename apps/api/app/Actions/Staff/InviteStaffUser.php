@@ -9,10 +9,11 @@ use App\Enums\UserInvitationStatus;
 use App\Models\Account;
 use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\User;
 use App\Models\UserInvitation;
+use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -20,7 +21,9 @@ use Illuminate\Validation\ValidationException;
 class InviteStaffUser
 {
     public function __construct(
+        private readonly AccessAuthorizationService $access,
         private readonly ActivityLogger $activityLogger,
+        private readonly SyncStaffLocationAssignments $syncLocationAssignments,
     ) {}
 
     /**
@@ -45,7 +48,7 @@ class InviteStaffUser
                 ]);
             }
 
-            if ($user instanceof User && $this->isStaffForAccount($account, $user)) {
+            if ($user instanceof User && $this->access->isStaffForAccount($user, $account)) {
                 throw ValidationException::withMessages([
                     'email' => __('This user is already staff for this account.'),
                 ]);
@@ -73,31 +76,44 @@ class InviteStaffUser
             }
 
             if (! $user instanceof User) {
-                $user = User::query()->create([
-                    'first_name' => $data['first_name'],
-                    'last_name' => $data['last_name'],
-                    'email' => $email,
-                    'password' => Str::random(64),
-                ]);
+                try {
+                    $user = User::query()->create([
+                        'first_name' => $data['first_name'],
+                        'last_name' => $data['last_name'],
+                        'email' => $email,
+                        'password' => Str::random(64),
+                    ]);
+                } catch (UniqueConstraintViolationException) {
+                    throw ValidationException::withMessages([
+                        'email' => __('This email was registered by a concurrent request. Try again.'),
+                    ]);
+                }
             }
 
             $token = Str::random(64);
             $expiresDays = max(1, (int) config('wasiy.invitations.staff_expires_days', 14));
 
-            $invitation = UserInvitation::query()->create([
-                'account_id' => $account->id,
-                'location_id' => null,
-                'user_id' => $user->id,
-                'email' => $email,
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'token_hash' => hash('sha256', $token),
-                'purpose' => UserInvitationPurpose::Staff,
-                'status' => UserInvitationStatus::Pending,
-                'expires_at' => now()->addDays($expiresDays),
-                'accepted_at' => null,
-                'invited_by_user_id' => $actor->id,
-            ]);
+            try {
+                $invitation = UserInvitation::query()->create([
+                    'account_id' => $account->id,
+                    'location_id' => null,
+                    'user_id' => $user->id,
+                    'email' => $email,
+                    // Snapshot the real identity when the User already exists.
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                    'token_hash' => hash('sha256', $token),
+                    'purpose' => UserInvitationPurpose::Staff,
+                    'status' => UserInvitationStatus::Pending,
+                    'expires_at' => now()->addDays($expiresDays),
+                    'accepted_at' => null,
+                    'invited_by_user_id' => $actor->id,
+                ]);
+            } catch (UniqueConstraintViolationException) {
+                throw ValidationException::withMessages([
+                    'email' => __('This email already has a pending staff invitation for this account.'),
+                ]);
+            }
 
             if (($data['account_role'] ?? null) !== null) {
                 AccountUserRole::query()->updateOrCreate(
@@ -109,7 +125,7 @@ class InviteStaffUser
                 );
             }
 
-            $this->replaceLocationAssignments(
+            $this->syncLocationAssignments->sync(
                 $account,
                 $user,
                 $data['location_assignments'] ?? [],
@@ -133,74 +149,10 @@ class InviteStaffUser
             );
 
             return [
-                'staff' => $this->loadStaffRelations($user, $account),
+                'staff' => $user->loadStaffRelationsForAccount($account),
                 'invitation' => $invitation,
             ];
         });
-    }
-
-    private function isStaffForAccount(Account $account, User $user): bool
-    {
-        return AccountUserRole::query()
-            ->where('account_id', $account->id)
-            ->where('user_id', $user->id)
-            ->exists()
-            || LocationUserRole::query()
-                ->where('account_id', $account->id)
-                ->where('user_id', $user->id)
-                ->exists();
-    }
-
-    /**
-     * @param  array<int, array{location_id: string, role: string}>  $locationAssignments
-     */
-    private function replaceLocationAssignments(Account $account, User $user, array $locationAssignments): void
-    {
-        $desiredAssignments = collect($locationAssignments)
-            ->keyBy('location_id');
-
-        $existingAssignments = LocationUserRole::query()
-            ->where('account_id', $account->id)
-            ->where('user_id', $user->id)
-            ->get()
-            ->keyBy('location_id');
-
-        foreach ($existingAssignments as $locationId => $assignment) {
-            if (! $desiredAssignments->has($locationId)) {
-                $assignment->delete();
-            }
-        }
-
-        foreach ($desiredAssignments as $locationId => $assignmentData) {
-            $existingAssignment = $existingAssignments->get($locationId);
-
-            if (! $existingAssignment instanceof LocationUserRole) {
-                LocationUserRole::query()->create([
-                    'account_id' => $account->id,
-                    'location_id' => $locationId,
-                    'user_id' => $user->id,
-                    'role' => $assignmentData['role'],
-                ]);
-
-                continue;
-            }
-
-            if ($existingAssignment->role->value !== $assignmentData['role']) {
-                $existingAssignment->forceFill([
-                    'role' => $assignmentData['role'],
-                ])->save();
-            }
-        }
-    }
-
-    private function loadStaffRelations(User $user, Account $account): User
-    {
-        return $user->load([
-            'accountUserRoles' => fn ($query) => $query->where('account_id', $account->id),
-            'locationUserRoles' => fn ($query) => $query
-                ->where('account_id', $account->id)
-                ->with('location'),
-        ]);
     }
 
     /**

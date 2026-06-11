@@ -6,9 +6,9 @@ use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Models\Account;
 use App\Models\AccountUserRole;
-use App\Models\LocationUserRole;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -20,27 +20,40 @@ class UpdateStaffAccountRole
 
     public function handle(Account $account, User $actor, User $staff, ?string $accountRole): User
     {
-        abort_unless($this->isStaffForAccount($account, $staff), 404);
-
         return DB::transaction(function () use ($account, $actor, $staff, $accountRole): User {
+            // Lock the Account's admin rows so concurrent demotions cannot
+            // each pass the last-admin check and leave zero admins behind.
+            $adminAssignments = AccountUserRole::query()
+                ->where('account_id', $account->id)
+                ->where('role', AccountRole::AccountAdmin->value)
+                ->lockForUpdate()
+                ->get();
+
             $currentAccountRole = AccountUserRole::query()
                 ->where('account_id', $account->id)
                 ->where('user_id', $staff->id)
+                ->lockForUpdate()
                 ->first();
 
-            if ($this->wouldRemoveOnlyActorAdmin($account, $actor, $staff, $accountRole, $currentAccountRole)) {
+            $accountRoleBefore = $currentAccountRole?->role->value;
+
+            if ($staff->isDeactivated() && $accountRole !== null && $accountRole !== $accountRoleBefore) {
+                throw ValidationException::withMessages([
+                    'account_role' => __('This user is deactivated and cannot be granted new access.'),
+                ]);
+            }
+
+            if ($this->wouldRemoveOnlyActorAdmin($actor, $staff, $accountRole, $currentAccountRole, $adminAssignments)) {
                 throw ValidationException::withMessages([
                     'account_role' => __('Add another Account Admin before removing your own admin access.'),
                 ]);
             }
 
-            $accountRoleBefore = $currentAccountRole?->role->value;
-
             if ($accountRole === null) {
                 $currentAccountRole?->delete();
                 $this->logAccountRoleChange($account, $actor, $staff, $accountRoleBefore, null);
 
-                return $this->loadStaffRelations($staff, $account);
+                return $staff->loadStaffRelationsForAccount($account);
             }
 
             AccountUserRole::query()->updateOrCreate(
@@ -53,28 +66,19 @@ class UpdateStaffAccountRole
 
             $this->logAccountRoleChange($account, $actor, $staff, $accountRoleBefore, $accountRole);
 
-            return $this->loadStaffRelations($staff, $account);
+            return $staff->loadStaffRelationsForAccount($account);
         });
     }
 
-    private function isStaffForAccount(Account $account, User $user): bool
-    {
-        return AccountUserRole::query()
-            ->where('account_id', $account->id)
-            ->where('user_id', $user->id)
-            ->exists()
-            || LocationUserRole::query()
-                ->where('account_id', $account->id)
-                ->where('user_id', $user->id)
-                ->exists();
-    }
-
+    /**
+     * @param  Collection<int, AccountUserRole>  $adminAssignments
+     */
     private function wouldRemoveOnlyActorAdmin(
-        Account $account,
         User $actor,
         User $staff,
         ?string $accountRole,
         ?AccountUserRole $currentAccountRole,
+        Collection $adminAssignments,
     ): bool {
         if ($accountRole !== null || $actor->id !== $staff->id) {
             return false;
@@ -84,21 +88,9 @@ class UpdateStaffAccountRole
             return false;
         }
 
-        return ! AccountUserRole::query()
-            ->where('account_id', $account->id)
-            ->where('role', AccountRole::AccountAdmin->value)
+        return $adminAssignments
             ->where('user_id', '!=', $actor->id)
-            ->exists();
-    }
-
-    private function loadStaffRelations(User $user, Account $account): User
-    {
-        return $user->load([
-            'accountUserRoles' => fn ($query) => $query->where('account_id', $account->id),
-            'locationUserRoles' => fn ($query) => $query
-                ->where('account_id', $account->id)
-                ->with('location'),
-        ]);
+            ->isEmpty();
     }
 
     private function logAccountRoleChange(

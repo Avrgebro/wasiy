@@ -34,10 +34,16 @@ export class ApiError extends Error {
 }
 
 export function isAuthBootstrapError(error: unknown) {
-  return (
-    error instanceof ApiError &&
-    (error.status === 0 || error.status === 401)
-  )
+  return error instanceof ApiError && error.status === 401
+}
+
+// /api/me only returns 403 when EnsureUserIsActive rejects a deactivated
+// user; route guards use this to send them to /no-access instead of
+// surfacing a raw error. Network failures (status 0) are deliberately not
+// auth errors: redirecting to /login on a transient outage would read as a
+// logout, so guards let them propagate to the router's error boundary.
+export function isDeactivatedAccountError(error: unknown) {
+  return error instanceof ApiError && error.status === 403
 }
 
 export function installAuthInterceptors(onUnauthorized: () => void) {

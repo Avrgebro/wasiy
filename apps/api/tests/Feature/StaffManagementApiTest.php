@@ -200,8 +200,8 @@ test('staff invitations reuse existing active users without overwriting identity
         ->assertCreated()
         ->assertJsonPath('data.staff.id', $existingUser->id)
         ->assertJsonPath('data.staff.name', 'Existing Person')
-        ->assertJsonPath('data.invitation.first_name', 'Invited')
-        ->assertJsonPath('data.invitation.last_name', 'Name');
+        ->assertJsonPath('data.invitation.first_name', 'Existing')
+        ->assertJsonPath('data.invitation.last_name', 'Person');
 
     expect($existingUser->fresh()->name)->toBe('Existing Person');
 });
@@ -613,6 +613,53 @@ test('staff assignment updates prevent removing the only remaining account admin
         'user_id' => $otherAdmin->id,
         'role' => AccountRole::AccountAdmin->value,
     ]);
+});
+
+test('deactivated staff users cannot be granted new roles but can have roles removed', function () {
+    $account = Account::factory()->create();
+    $firstLocation = Location::factory()->for($account)->create();
+    $secondLocation = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+    $staff = User::factory()->create();
+
+    LocationUserRole::query()->create([
+        'account_id' => $account->id,
+        'location_id' => $firstLocation->id,
+        'user_id' => $staff->id,
+        'role' => LocationRole::FrontDesk,
+    ]);
+
+    $staff->deactivate();
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+            'account_role' => AccountRole::AccountAdmin->value,
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('account_role');
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+            'location_assignments' => [
+                [
+                    'location_id' => $firstLocation->id,
+                    'role' => LocationRole::FrontDesk->value,
+                ],
+                [
+                    'location_id' => $secondLocation->id,
+                    'role' => LocationRole::FrontDesk->value,
+                ],
+            ],
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('location_assignments');
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+            'location_assignments' => [],
+        ])
+        ->assertOk()
+        ->assertJsonCount(0, 'data.location_assignments');
 });
 
 test('staff list is admin only paginated and filters by explicit role and location assignments', function () {

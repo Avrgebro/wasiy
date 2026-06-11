@@ -12,6 +12,7 @@ use App\Http\Requests\UpdateStaffLocationAssignmentsRequest;
 use App\Http\Resources\StaffResource;
 use App\Models\Account;
 use App\Models\User;
+use App\Services\AccessAuthorizationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -21,6 +22,10 @@ use Illuminate\Validation\Rule;
 
 class AccountStaffController extends Controller
 {
+    public function __construct(
+        private readonly AccessAuthorizationService $access,
+    ) {}
+
     public function index(Request $request, Account $account): AnonymousResourceCollection
     {
         $validated = $request->validate([
@@ -47,14 +52,9 @@ class AccountStaffController extends Controller
             ],
         ]);
 
-        $staff = User::query()
-            ->where(function (Builder $query) use ($account): void {
-                $query
-                    ->whereHas('accountUserRoles', fn (Builder $query) => $query->where('account_id', $account->id))
-                    ->orWhereHas('locationUserRoles', fn (Builder $query) => $query->where('account_id', $account->id));
-            })
+        $staff = $this->access->staffForAccount($account)
             ->when($validated['search'] ?? null, function (Builder $query, string $search): void {
-                $likeSearch = '%'.Str::lower(trim($search)).'%';
+                $likeSearch = '%'.addcslashes(Str::lower(trim($search)), '\\%_').'%';
 
                 $query->where(function (Builder $query) use ($likeSearch): void {
                     $query
@@ -81,12 +81,7 @@ class AccountStaffController extends Controller
                 ->whereHas('locationUserRoles', fn (Builder $query) => $query
                     ->where('account_id', $account->id)
                     ->where('location_id', $locationId)))
-            ->with([
-                'accountUserRoles' => fn ($query) => $query->where('account_id', $account->id),
-                'locationUserRoles' => fn ($query) => $query
-                    ->where('account_id', $account->id)
-                    ->with('location'),
-            ])
+            ->with(User::staffRelationsForAccount($account))
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->orderBy('email')
@@ -102,6 +97,8 @@ class AccountStaffController extends Controller
         User $user,
         UpdateStaffAccountRole $updateStaffAccountRole,
     ): JsonResource {
+        abort_unless($this->access->isStaffForAccount($user, $account), 404);
+
         /** @var User $actor */
         $actor = $request->user();
 
@@ -119,6 +116,8 @@ class AccountStaffController extends Controller
         User $user,
         UpdateStaffLocationAssignments $updateStaffLocationAssignments,
     ): JsonResource {
+        abort_unless($this->access->isStaffForAccount($user, $account), 404);
+
         /** @var User $actor */
         $actor = $request->user();
 

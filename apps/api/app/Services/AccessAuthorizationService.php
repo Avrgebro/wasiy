@@ -99,6 +99,35 @@ class AccessAuthorizationService
     }
 
     /**
+     * Users that hold any Account or Location role in the Account.
+     *
+     * Uses the User role relations, so soft-deleted Accounts, Locations,
+     * and role assignments are excluded with the same semantics as
+     * canAccessAccount.
+     *
+     * @return Builder<User>
+     */
+    public function staffForAccount(Account $account): Builder
+    {
+        if ($account->trashed()) {
+            return User::query()->whereKey([]);
+        }
+
+        return User::query()->where(function (Builder $query) use ($account): void {
+            $query
+                ->whereHas('accountUserRoles', fn (Builder $query) => $query->where('account_id', $account->id))
+                ->orWhereHas('locationUserRoles', fn (Builder $query) => $query->where('account_id', $account->id));
+        });
+    }
+
+    public function isStaffForAccount(User $user, Account $account): bool
+    {
+        return $this->staffForAccount($account)
+            ->whereKey($user->id)
+            ->exists();
+    }
+
+    /**
      * @return Builder<Location>
      */
     public function accessibleLocationsForAccount(User $user, Account $account): Builder

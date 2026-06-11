@@ -215,11 +215,9 @@ class AccessContextService
     private function locationSummary(Location $location, User $user, bool $isAccountAdmin): array
     {
         $roles = [];
-        $accessSource = 'location_role';
 
         if ($isAccountAdmin) {
             $roles[] = AccountRole::AccountAdmin->value;
-            $accessSource = 'account_role';
         }
 
         $locationRole = $user->locationUserRoles
@@ -228,6 +226,12 @@ class AccessContextService
         if ($locationRole) {
             $roles[] = $locationRole->role->value;
         }
+
+        $accessSource = match (true) {
+            $isAccountAdmin && $locationRole !== null => 'both',
+            $isAccountAdmin => 'account_role',
+            default => 'location_role',
+        };
 
         return [
             'id' => $location->id,

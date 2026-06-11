@@ -64,7 +64,7 @@ Decision summary:
   - `POST /api/context/location`
   - `DELETE /api/context`
 - `AccessContextService` is the backend module that resolves the access-context payload and should be the starting point for Slice 2 authorization helper extraction.
-- Protected API routes now include `web` middleware because Active Account and Active Location are session-backed.
+- Protected API routes rely on Sanctum stateful SPA authentication (`statefulApi()` in `bootstrap/app.php`) instead of the `web` middleware group. Active Account and Active Location are session-backed for browser clients; the session only exists for requests from configured stateful domains, so token-based clients are not yet supported by the context endpoints.
 - Context session keys:
   - `wasiy.active_account_id`
   - `wasiy.active_location_id`
@@ -117,7 +117,7 @@ Important response fields for Slice 2:
 }
 ```
 
-For Account Admin implicit Location access, `access_source` is `account_role` and `roles` includes `account_admin`.
+`access_source` is `account_role` for Account Admin implicit access, `location_role` for an explicit Location role, and `both` when an Account Admin also holds an explicit Location role. For Account Admin access, `roles` includes `account_admin`.
 
 ### Slice 2 Handoff
 
@@ -319,6 +319,8 @@ Suggested metadata fields for staff events:
 - `invitation_id` for `staff.invited`
 
 Do not expose invitation `token_hash` or raw tokens in activity metadata.
+
+The `staff.invited` metadata shape is canonical for activity rendering: initial grants are stored as `account_role_after` plus `location_assignments_after` (a list of `location_id`, `location_name`, `role`), instead of the per-change `*_before`/`*_after` pairs used by role-change events.
 
 ## Slice 4: Activity Logging Foundation
 

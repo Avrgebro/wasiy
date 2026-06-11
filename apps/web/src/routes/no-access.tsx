@@ -1,5 +1,8 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { isAuthBootstrapError } from '../app/api-client'
+import {
+  isAuthBootstrapError,
+  isDeactivatedAccountError,
+} from '../app/api-client'
 import {
   canAccessAnySurface,
   getDefaultAuthenticatedRoute,
@@ -23,6 +26,12 @@ export const Route = createFileRoute('/no-access')({
     } catch (error) {
       if (isAuthBootstrapError(error)) {
         throw redirect({ to: '/login' })
+      }
+
+      // Deactivated users land here; the page renders without /api/me data
+      // and only offers logout.
+      if (isDeactivatedAccountError(error)) {
+        return
       }
 
       throw error
