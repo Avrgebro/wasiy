@@ -9,20 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SelectAccountRouteImport } from './routes/select-account'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as PortalRouteRouteImport } from './routes/portal/route'
-import { Route as FrontDeskRouteRouteImport } from './routes/front-desk/route'
-import { Route as AdminRouteRouteImport } from './routes/admin/route'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AuthenticatedSelectAccountRouteImport } from './routes/_authenticated/select-account'
+import { Route as AuthenticatedPortalRouteRouteImport } from './routes/_authenticated/portal/route'
+import { Route as AuthenticatedFrontDeskRouteRouteImport } from './routes/_authenticated/front-desk/route'
+import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 
-const SelectAccountRoute = SelectAccountRouteImport.update({
-  id: '/select-account',
-  path: '/select-account',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
   path: '/no-access',
@@ -33,19 +29,8 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PortalRouteRoute = PortalRouteRouteImport.update({
-  id: '/portal',
-  path: '/portal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FrontDeskRouteRoute = FrontDeskRouteRouteImport.update({
-  id: '/front-desk',
-  path: '/front-desk',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRouteRoute = AdminRouteRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -53,93 +38,108 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
+const AuthenticatedSelectAccountRoute =
+  AuthenticatedSelectAccountRouteImport.update({
+    id: '/select-account',
+    path: '/select-account',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPortalRouteRoute =
+  AuthenticatedPortalRouteRouteImport.update({
+    id: '/portal',
+    path: '/portal',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedFrontDeskRouteRoute =
+  AuthenticatedFrontDeskRouteRouteImport.update({
+    id: '/front-desk',
+    path: '/front-desk',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRouteWithChildren
-  '/front-desk': typeof FrontDeskRouteRoute
-  '/portal': typeof PortalRouteRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
-  '/select-account': typeof SelectAccountRoute
-  '/admin/': typeof AdminIndexRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
+  '/portal': typeof AuthenticatedPortalRouteRoute
+  '/select-account': typeof AuthenticatedSelectAccountRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/front-desk': typeof FrontDeskRouteRoute
-  '/portal': typeof PortalRouteRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
-  '/select-account': typeof SelectAccountRoute
-  '/admin': typeof AdminIndexRoute
+  '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
+  '/portal': typeof AuthenticatedPortalRouteRoute
+  '/select-account': typeof AuthenticatedSelectAccountRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRouteWithChildren
-  '/front-desk': typeof FrontDeskRouteRoute
-  '/portal': typeof PortalRouteRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
-  '/select-account': typeof SelectAccountRoute
-  '/admin/': typeof AdminIndexRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/_authenticated/front-desk': typeof AuthenticatedFrontDeskRouteRoute
+  '/_authenticated/portal': typeof AuthenticatedPortalRouteRoute
+  '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
+    | '/no-access'
     | '/admin'
     | '/front-desk'
     | '/portal'
-    | '/login'
-    | '/no-access'
     | '/select-account'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/front-desk'
-    | '/portal'
     | '/login'
     | '/no-access'
+    | '/front-desk'
+    | '/portal'
     | '/select-account'
     | '/admin'
   id:
     | '__root__'
     | '/'
-    | '/admin'
-    | '/front-desk'
-    | '/portal'
+    | '/_authenticated'
     | '/login'
     | '/no-access'
-    | '/select-account'
-    | '/admin/'
+    | '/_authenticated/admin'
+    | '/_authenticated/front-desk'
+    | '/_authenticated/portal'
+    | '/_authenticated/select-account'
+    | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRouteRoute: typeof AdminRouteRouteWithChildren
-  FrontDeskRouteRoute: typeof FrontDeskRouteRoute
-  PortalRouteRoute: typeof PortalRouteRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
-  SelectAccountRoute: typeof SelectAccountRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/select-account': {
-      id: '/select-account'
-      path: '/select-account'
-      fullPath: '/select-account'
-      preLoaderRoute: typeof SelectAccountRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/no-access': {
       id: '/no-access'
       path: '/no-access'
@@ -154,25 +154,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/portal': {
-      id: '/portal'
-      path: '/portal'
-      fullPath: '/portal'
-      preLoaderRoute: typeof PortalRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/front-desk': {
-      id: '/front-desk'
-      path: '/front-desk'
-      fullPath: '/front-desk'
-      preLoaderRoute: typeof FrontDeskRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -182,36 +168,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
+    '/_authenticated/select-account': {
+      id: '/_authenticated/select-account'
+      path: '/select-account'
+      fullPath: '/select-account'
+      preLoaderRoute: typeof AuthenticatedSelectAccountRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/portal': {
+      id: '/_authenticated/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof AuthenticatedPortalRouteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/front-desk': {
+      id: '/_authenticated/front-desk'
+      path: '/front-desk'
+      fullPath: '/front-desk'
+      preLoaderRoute: typeof AuthenticatedFrontDeskRouteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
       path: '/'
       fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
     }
   }
 }
 
-interface AdminRouteRouteChildren {
-  AdminIndexRoute: typeof AdminIndexRoute
+interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
-const AdminRouteRouteChildren: AdminRouteRouteChildren = {
-  AdminIndexRoute: AdminIndexRoute,
+const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
+  {
+    AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  }
+
+const AuthenticatedAdminRouteRouteWithChildren =
+  AuthenticatedAdminRouteRoute._addFileChildren(
+    AuthenticatedAdminRouteRouteChildren,
+  )
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
+  AuthenticatedFrontDeskRouteRoute: typeof AuthenticatedFrontDeskRouteRoute
+  AuthenticatedPortalRouteRoute: typeof AuthenticatedPortalRouteRoute
+  AuthenticatedSelectAccountRoute: typeof AuthenticatedSelectAccountRoute
 }
 
-const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
-  AdminRouteRouteChildren,
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
+  AuthenticatedFrontDeskRouteRoute: AuthenticatedFrontDeskRouteRoute,
+  AuthenticatedPortalRouteRoute: AuthenticatedPortalRouteRoute,
+  AuthenticatedSelectAccountRoute: AuthenticatedSelectAccountRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRouteRoute: AdminRouteRouteWithChildren,
-  FrontDeskRouteRoute: FrontDeskRouteRoute,
-  PortalRouteRoute: PortalRouteRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
-  SelectAccountRoute: SelectAccountRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

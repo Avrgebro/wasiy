@@ -1,5 +1,6 @@
 import { Button } from '@mantine/core'
 import { Logout } from '@solar-icons/react'
+import { useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Brand } from './brand'
 import { SidebarItemGroup } from './sidebar-item-group'
@@ -25,14 +26,6 @@ function isActivePath(pathname: string, item: LayoutNavLeaf) {
   }
 
   return pathname === to
-}
-
-function getPathname() {
-  if (typeof window === 'undefined') {
-    return '/'
-  }
-
-  return window.location.pathname
 }
 
 function isGroup(entry: LayoutNavEntry) {
@@ -70,7 +63,11 @@ function SidebarNav({
   onNavigate?: () => void
 }) {
   const { t } = useTranslation('common')
-  const pathname = getPathname()
+  // Reactive router state, not window.location: with client-side navigation
+  // the document URL updates without a re-render.
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
 
   return (
     <nav className="flex flex-1 flex-col gap-4" aria-label={t('shell.mainNav')}>

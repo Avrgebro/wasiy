@@ -1,13 +1,11 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
-import {
-  isAuthBootstrapError,
-  isDeactivatedAccountError,
-} from '../app/api-client'
 import { getDefaultAuthenticatedRoute } from '../features/auth/access'
-import { getSafeRedirectPath } from '../features/auth/guards'
+import {
+  getSafeRedirectPath,
+  resolveSession,
+} from '../features/auth/guards'
 import { LoginPage } from '../features/auth/login-page'
-import { meQueryOptions } from '../features/auth/query-options'
 
 const loginSearchSchema = z.object({
   redirect: z.string().optional().catch(undefined),
@@ -16,25 +14,20 @@ const loginSearchSchema = z.object({
 export const Route = createFileRoute('/login')({
   validateSearch: loginSearchSchema,
   beforeLoad: async ({ context, search }) => {
-    try {
-      const me = await context.queryClient.ensureQueryData(meQueryOptions())
+    const session = await resolveSession(context)
 
+    if (session.status === 'deactivated') {
+      throw redirect({ to: '/no-access' })
+    }
+
+    if (session.status === 'authenticated') {
       throw redirect({
         to:
           getSafeRedirectPath(search.redirect) ??
-          getDefaultAuthenticatedRoute(me),
+          getDefaultAuthenticatedRoute(session.me),
       })
-    } catch (error) {
-      if (isAuthBootstrapError(error)) {
-        return
-      }
-
-      if (isDeactivatedAccountError(error)) {
-        throw redirect({ to: '/no-access' })
-      }
-
-      throw error
     }
+    // Anonymous visitors see the login form.
   },
   component: LoginPage,
 })

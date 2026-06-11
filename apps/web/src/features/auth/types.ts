@@ -55,3 +55,11 @@ export type LoginCredentials = {
   email: string
   password: string
 }
+
+// The three expected auth states, modeled as data so the session query only
+// rejects on genuinely exceptional failures (network, 5xx). 'anonymous' maps
+// from /api/me 401, 'deactivated' from the EnsureUserIsActive 403.
+export type Session =
+  | { status: 'authenticated'; me: MeResponse }
+  | { status: 'anonymous' }
+  | { status: 'deactivated' }

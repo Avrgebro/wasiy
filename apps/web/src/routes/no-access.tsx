@@ -1,40 +1,31 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import {
-  isAuthBootstrapError,
-  isDeactivatedAccountError,
-} from '../app/api-client'
-import {
   canAccessAnySurface,
   getDefaultAuthenticatedRoute,
   requiresAccountSelection,
 } from '../features/auth/access'
+import { resolveSession } from '../features/auth/guards'
 import { NoAccessPage } from '../features/auth/no-access-page'
-import { meQueryOptions } from '../features/auth/query-options'
 
+// Deliberately outside the _authenticated layout: deactivated users (whose
+// guard would otherwise bounce them here in a loop) and users without any
+// surface both land on this page, which only offers logout.
 export const Route = createFileRoute('/no-access')({
   beforeLoad: async ({ context }) => {
-    try {
-      const me = await context.queryClient.ensureQueryData(meQueryOptions())
+    const session = await resolveSession(context)
 
-      if (requiresAccountSelection(me)) {
+    if (session.status === 'anonymous') {
+      throw redirect({ to: '/login' })
+    }
+
+    if (session.status === 'authenticated') {
+      if (requiresAccountSelection(session.me)) {
         throw redirect({ to: '/select-account' })
       }
 
-      if (canAccessAnySurface(me)) {
-        throw redirect({ to: getDefaultAuthenticatedRoute(me) })
+      if (canAccessAnySurface(session.me)) {
+        throw redirect({ to: getDefaultAuthenticatedRoute(session.me) })
       }
-    } catch (error) {
-      if (isAuthBootstrapError(error)) {
-        throw redirect({ to: '/login' })
-      }
-
-      // Deactivated users land here; the page renders without /api/me data
-      // and only offers logout.
-      if (isDeactivatedAccountError(error)) {
-        return
-      }
-
-      throw error
     }
   },
   component: NoAccessPage,

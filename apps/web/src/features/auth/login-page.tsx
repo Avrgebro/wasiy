@@ -31,12 +31,16 @@ export function LoginPage() {
 
   async function handleSubmit(values: LoginFormValues) {
     try {
-      const me = await loginMutation.mutateAsync(values)
+      const session = await loginMutation.mutateAsync(values)
 
+      // A non-authenticated session right after login (e.g. a deactivated
+      // user) is routed by the index guard.
       await router.navigate({
         to:
           getSafeRedirectPath(search.redirect) ??
-          getDefaultAuthenticatedRoute(me),
+          (session.status === 'authenticated'
+            ? getDefaultAuthenticatedRoute(session.me)
+            : '/'),
       })
     } catch (error) {
       if (!applyLaravelValidationErrors<LoginFormValues>(error, form.setError)) {

@@ -1,5 +1,6 @@
 import { Collapse } from '@mantine/core'
 import { AltArrowDown } from '@solar-icons/react'
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { LayoutNavCollapsible, LayoutNavItem, LayoutNavLeaf } from './types'
@@ -31,12 +32,12 @@ function SidebarLink({
   const Icon = item.icon
 
   return (
-    <a
+    <Link
       aria-current={active ? 'page' : undefined}
       className={`${sidebarItemClassName} data-[nested=true]:min-h-9 data-[nested=true]:bg-transparent data-[nested=true]:pl-10 data-[nested=true]:text-[13px] data-[nested=true]:data-[active=true]:text-[var(--sidebar-active-foreground)] data-[nested=true]:data-[active=true]:hover:bg-[var(--sidebar-hover)]`}
       data-active={active}
       data-nested={nested}
-      href={item.to}
+      to={item.to}
       onClick={onNavigate}
     >
       {nested ? null : <Icon aria-hidden="true" size={20} />}
@@ -46,7 +47,7 @@ function SidebarLink({
       >
         {t(item.labelKey)}
       </span>
-    </a>
+    </Link>
   )
 }
 

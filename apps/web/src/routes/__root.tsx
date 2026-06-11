@@ -1,42 +1,10 @@
 import type { QueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import {
-  Outlet,
-  createRootRouteWithContext,
-  useRouter,
-} from '@tanstack/react-router'
-import { apiClient, installAuthInterceptors } from '../app/api-client'
-import { meQueryKey } from '../features/auth/query-options'
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 
 type RouterContext = {
   queryClient: QueryClient
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
-  component: RootRoute,
+  component: Outlet,
 })
-
-function RootRoute() {
-  const queryClient = useQueryClient()
-  const router = useRouter()
-
-  useEffect(() => {
-    const interceptorId = installAuthInterceptors(() => {
-      queryClient.removeQueries({ queryKey: meQueryKey })
-
-      if (router.state.location.pathname !== '/login') {
-        void router.navigate({
-          to: '/login',
-          search: { redirect: router.state.location.href },
-        })
-      }
-    })
-
-    return () => {
-      apiClient.interceptors.response.eject(interceptorId)
-    }
-  }, [queryClient, router])
-
-  return <Outlet />
-}

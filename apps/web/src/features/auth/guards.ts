@@ -1,15 +1,11 @@
 import { redirect, type ParsedLocation } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
 import {
-  isAuthBootstrapError,
-  isDeactivatedAccountError,
-} from '../../app/api-client'
-import {
   getDefaultAuthenticatedRoute,
   requiresAccountSelection,
 } from './access'
-import { meQueryOptions } from './query-options'
-import type { MeResponse } from './types'
+import { sessionQueryOptions } from './query-options'
+import type { MeResponse, Session } from './types'
 
 type GuardContext = {
   queryClient: QueryClient
@@ -25,40 +21,52 @@ export function getSafeRedirectPath(redirectPath: string | undefined) {
   return null
 }
 
-// Resolves /api/me for a route guard. Unauthenticated users are sent to
-// /login (carrying the attempted location so login can return them there)
-// and deactivated users to /no-access. Other errors — notably network
-// failures — propagate to the router's error boundary so a transient outage
-// does not read as a logout.
-export async function requireMe(
-  context: GuardContext,
-  location?: ParsedLocation,
-) {
-  try {
-    return await context.queryClient.ensureQueryData(meQueryOptions())
-  } catch (error) {
-    if (isAuthBootstrapError(error)) {
-      throw redirect({
-        to: '/login',
-        search: location ? { redirect: location.href } : {},
-      })
-    }
-
-    if (isDeactivatedAccountError(error)) {
-      throw redirect({ to: '/no-access' })
-    }
-
-    throw error
-  }
+// Resolves the cached session for a route guard. Auth states come back as
+// data; only exceptional failures (network, 5xx) throw, propagating to the
+// router's error boundary so a transient outage does not read as a logout.
+//
+// revalidateIfStale makes this stale-while-revalidate: with any session in
+// the cache, guards resolve synchronously (navigation never blocks on
+// /api/me) while a stale session refreshes in the background. Only the cold
+// first load awaits the network. A session revoked server-side is still
+// caught by the next background refresh or, immediately, by the 401
+// interceptor when any API call fails.
+export function resolveSession(context: GuardContext): Promise<Session> {
+  return context.queryClient.ensureQueryData({
+    ...sessionQueryOptions(),
+    revalidateIfStale: true,
+  })
 }
 
-export async function requireSurfaceAccess(
+// Guard for routes that require a signed-in, active user. Anonymous visitors
+// are sent to /login (carrying the attempted location so login can return
+// them there) and deactivated users to /no-access.
+export async function requireAuthenticated(
   context: GuardContext,
-  location: ParsedLocation,
+  location?: ParsedLocation,
+): Promise<MeResponse> {
+  const session = await resolveSession(context)
+
+  if (session.status === 'anonymous') {
+    throw redirect({
+      to: '/login',
+      search: location ? { redirect: location.href } : {},
+    })
+  }
+
+  if (session.status === 'deactivated') {
+    throw redirect({ to: '/no-access' })
+  }
+
+  return session.me
+}
+
+// Surface-level check for routes under the _authenticated layout, which has
+// already resolved `me` into route context.
+export function checkSurfaceAccess(
+  me: MeResponse,
   canAccess: (me: MeResponse) => boolean,
 ) {
-  const me = await requireMe(context, location)
-
   if (requiresAccountSelection(me)) {
     throw redirect({ to: '/select-account' })
   }
@@ -66,6 +74,4 @@ export async function requireSurfaceAccess(
   if (!canAccess(me)) {
     throw redirect({ to: getDefaultAuthenticatedRoute(me) })
   }
-
-  return me
 }

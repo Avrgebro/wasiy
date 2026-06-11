@@ -1,4 +1,5 @@
 import { Button } from '@mantine/core'
+import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Brand } from '../shared/brand'
@@ -53,7 +54,7 @@ export function PortalLayout({ children, navItems }: PortalLayoutProps) {
               aria-label={t('shell.mainNav')}
             >
               {portalNavItems.map((item) => (
-                <Button component="a" href={item.to} key={item.to} variant="subtle">
+                <Button component={Link} key={item.to} to={item.to} variant="subtle">
                   {t(item.labelKey)}
                 </Button>
               ))}
