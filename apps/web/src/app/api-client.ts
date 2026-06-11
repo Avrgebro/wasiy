@@ -48,7 +48,14 @@ export function isDeactivatedAccountError(error: unknown) {
 
 export function installAuthInterceptors(onUnauthorized: () => void) {
   return apiClient.interceptors.response.use(undefined, (error: AxiosError) => {
-    if (error.response?.status === 401) {
+    // A 401 from /api/me itself is the route guards' responsibility
+    // (requireMe redirects to /login). Reacting to it here would
+    // removeQueries the guard's own in-flight ensureQueryData, cancelling it
+    // and surfacing a CancelledError instead of the redirect.
+    if (
+      error.response?.status === 401 &&
+      error.config?.url !== '/api/me'
+    ) {
       onUnauthorized()
     }
 
@@ -56,9 +63,12 @@ export function installAuthInterceptors(onUnauthorized: () => void) {
   })
 }
 
+// ApiError.message carries the server-provided message when there is one and
+// stays empty otherwise; getErrorMessage() in lib/errors.ts supplies the
+// localized fallback so this module stays free of i18n concerns.
 function toApiError(error: unknown) {
   if (!axios.isAxiosError(error) || !error.response) {
-    return new ApiError('No se pudo conectar con el servidor.', 0)
+    return new ApiError('', 0)
   }
 
   const body = error.response.data as {
@@ -67,7 +77,7 @@ function toApiError(error: unknown) {
   }
 
   return new ApiError(
-    body?.message ?? 'No se pudo completar la solicitud.',
+    body?.message ?? '',
     error.response.status,
     body?.errors,
     error.response.data,

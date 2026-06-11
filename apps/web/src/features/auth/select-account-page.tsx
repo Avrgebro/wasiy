@@ -14,15 +14,17 @@ export function SelectAccountPage() {
   const logoutMutation = useLogout()
   const selectAccountMutation = useSelectAccount()
 
-  async function handleSelectAccount(accountId: string) {
-    const me = await selectAccountMutation.mutateAsync(accountId)
-
-    await router.navigate({ to: getDefaultAuthenticatedRoute(me) })
+  function handleSelectAccount(accountId: string) {
+    selectAccountMutation.mutate(accountId, {
+      onSuccess: (me) =>
+        void router.navigate({ to: getDefaultAuthenticatedRoute(me) }),
+    })
   }
 
-  async function handleLogout() {
-    await logoutMutation.mutateAsync()
-    await router.navigate({ to: '/login' })
+  function handleLogout() {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => void router.navigate({ to: '/login' }),
+    })
   }
 
   const error = selectAccountMutation.error
@@ -63,7 +65,7 @@ export function SelectAccountPage() {
                 selectAccountMutation.isPending &&
                 selectAccountMutation.variables === account.id
               }
-              onClick={() => void handleSelectAccount(account.id)}
+              onClick={() => handleSelectAccount(account.id)}
               variant="default"
             >
               {account.name}
@@ -76,7 +78,7 @@ export function SelectAccountPage() {
             fullWidth
             leftSection={<Logout size={16} />}
             loading={logoutMutation.isPending}
-            onClick={() => void handleLogout()}
+            onClick={handleLogout}
             variant="subtle"
           >
             {t('auth.logout')}

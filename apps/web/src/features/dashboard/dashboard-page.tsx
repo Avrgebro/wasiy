@@ -1,11 +1,13 @@
 import { Alert, Button, Loader, Table } from '@mantine/core'
 import { AddCircle, Download, Magnifier } from '@solar-icons/react'
-import { useQuery } from '@tanstack/react-query'
+import { skipToken, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { StatCard } from '../../components/ui/stat-card'
+import { getErrorMessage } from '../../lib/errors'
 import { getDefaultLocation } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { getLocationDashboard } from './api'
+import { locationDashboardQueryKey } from './query-options'
 
 export function DashboardPage() {
   const { t } = useTranslation('common')
@@ -14,15 +16,8 @@ export function DashboardPage() {
   const hasAccessibleLocations =
     (meQuery.data?.accessible_locations.length ?? 0) > 0
   const dashboardQuery = useQuery({
-    queryKey: ['locations', location?.id, 'dashboard'],
-    queryFn: () => {
-      if (!location) {
-        throw new Error(t('auth.noAssignedLocation'))
-      }
-
-      return getLocationDashboard(location.id)
-    },
-    enabled: Boolean(location),
+    queryKey: locationDashboardQueryKey(location?.id ?? ''),
+    queryFn: location ? () => getLocationDashboard(location.id) : skipToken,
   })
 
   if (meQuery.isLoading) {
@@ -66,6 +61,19 @@ export function DashboardPage() {
           </Button>
         </div>
       </section>
+
+      {dashboardQuery.isError ? (
+        <Alert color="red" title={t('errors.loadFailed')}>
+          <p>{getErrorMessage(dashboardQuery.error)}</p>
+          <Button
+            className="mt-3"
+            onClick={() => void dashboardQuery.refetch()}
+            variant="default"
+          >
+            {t('router.retry')}
+          </Button>
+        </Alert>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-3">
         <StatCard

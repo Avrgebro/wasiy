@@ -1,16 +1,23 @@
 import { ApiError } from '../app/api-client'
+import { i18next } from '../i18n'
 import type { FieldValues, Path, UseFormSetError } from 'react-hook-form'
 
 export function getErrorMessage(error: unknown) {
   if (error instanceof ApiError) {
+    if (error.message) {
+      return error.message
+    }
+
+    return i18next.t(
+      error.status === 0 ? 'errors.network' : 'errors.requestFailed',
+    )
+  }
+
+  if (error instanceof Error && error.message) {
     return error.message
   }
 
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'Ocurrió un error inesperado.'
+  return i18next.t('errors.unexpected')
 }
 
 export function applyLaravelValidationErrors<T extends FieldValues>(

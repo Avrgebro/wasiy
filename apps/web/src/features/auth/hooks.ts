@@ -21,6 +21,8 @@ export function useLogin() {
 
       return queryClient.fetchQuery(meQueryOptions())
     },
+    // The login form maps failures onto field/root errors itself.
+    meta: { suppressErrorNotification: true },
   })
 }
 
@@ -35,6 +37,9 @@ export function useLogout() {
   })
 }
 
+// Convention: every query key outside the 'auth' prefix is assumed to depend
+// on the active account/location context and is invalidated when that
+// context changes. Keep context-independent data under the 'auth' prefix.
 function invalidateContextDependentQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({
     predicate: (query) => query.queryKey[0] !== meQueryKey[0],
@@ -50,6 +55,8 @@ export function useSelectAccount() {
       queryClient.setQueryData(meQueryKey, me)
       invalidateContextDependentQueries(queryClient)
     },
+    // SelectAccountPage renders the failure as an inline alert.
+    meta: { suppressErrorNotification: true },
   })
 }
 

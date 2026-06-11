@@ -25,8 +25,8 @@ export function LocationSwitcher() {
 
   const locationName = location?.name ?? t('shell.selectLocation')
 
-  async function handleSelectLocation(locationId: string) {
-    await selectLocationMutation.mutateAsync(locationId)
+  function handleSelectLocation(locationId: string) {
+    selectLocationMutation.mutate(locationId)
   }
 
   return (
@@ -49,7 +49,7 @@ export function LocationSwitcher() {
               availableLocation.id === location?.id
             }
             key={availableLocation.id}
-            onClick={() => void handleSelectLocation(availableLocation.id)}
+            onClick={() => handleSelectLocation(availableLocation.id)}
           >
             {availableLocation.name}
           </Menu.Item>

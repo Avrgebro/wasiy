@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, PasswordInput, TextInput } from '@mantine/core'
-import { useRouter } from '@tanstack/react-router'
+import { getRouteApi, useRouter } from '@tanstack/react-router'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { getDefaultAuthenticatedRoute } from './access'
+import { getSafeRedirectPath } from './guards'
 import { useLogin } from './hooks'
 import { loginSchema, type LoginFormValues } from './schemas'
 import {
@@ -11,9 +12,12 @@ import {
   getErrorMessage,
 } from '../../lib/errors'
 
+const loginRouteApi = getRouteApi('/login')
+
 export function LoginPage() {
   const { t } = useTranslation('common')
   const router = useRouter()
+  const search = loginRouteApi.useSearch()
   const loginMutation = useLogin()
   const form = useForm<LoginFormValues>({
     defaultValues: {
@@ -29,7 +33,11 @@ export function LoginPage() {
     try {
       const me = await loginMutation.mutateAsync(values)
 
-      await router.navigate({ to: getDefaultAuthenticatedRoute(me) })
+      await router.navigate({
+        to:
+          getSafeRedirectPath(search.redirect) ??
+          getDefaultAuthenticatedRoute(me),
+      })
     } catch (error) {
       if (!applyLaravelValidationErrors<LoginFormValues>(error, form.setError)) {
         form.setError('root', {

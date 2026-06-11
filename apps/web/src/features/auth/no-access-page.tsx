@@ -10,9 +10,10 @@ export function NoAccessPage() {
   const router = useRouter()
   const logoutMutation = useLogout()
 
-  async function handleLogout() {
-    await logoutMutation.mutateAsync()
-    await router.navigate({ to: '/login' })
+  function handleLogout() {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => void router.navigate({ to: '/login' }),
+    })
   }
 
   return (
@@ -32,7 +33,7 @@ export function NoAccessPage() {
             fullWidth
             leftSection={<Logout size={16} />}
             loading={logoutMutation.isPending}
-            onClick={() => void handleLogout()}
+            onClick={handleLogout}
             variant="subtle"
           >
             {t('auth.logout')}

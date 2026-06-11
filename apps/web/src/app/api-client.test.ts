@@ -45,7 +45,7 @@ describe('apiClient', () => {
     ) satisfies AxiosAdapter
 
     await expect(apiRequest('/api/me')).rejects.toMatchObject({
-      message: 'No se pudo conectar con el servidor.',
+      message: '',
       status: 0,
     })
 
@@ -91,9 +91,33 @@ describe('apiClient', () => {
       ),
     ) satisfies AxiosAdapter
 
-    await expect(apiRequest('/api/me')).rejects.toMatchObject({ status: 401 })
+    await expect(
+      apiRequest('/api/locations/loc_1/dashboard'),
+    ).rejects.toMatchObject({ status: 401 })
 
     expect(onUnauthorized).toHaveBeenCalledOnce()
+    apiClient.interceptors.response.eject(interceptorId)
+  })
+
+  it('leaves /api/me unauthorized responses to the route guards', async () => {
+    const onUnauthorized = vi.fn()
+    const interceptorId = installAuthInterceptors(onUnauthorized)
+
+    apiClient.defaults.adapter = vi.fn((config) =>
+      Promise.reject(
+        new AxiosError(
+          'Unauthenticated.',
+          'ERR_BAD_REQUEST',
+          config,
+          undefined,
+          axiosResponse(config, 401, { message: 'Unauthenticated.' }),
+        ),
+      ),
+    ) satisfies AxiosAdapter
+
+    await expect(apiRequest('/api/me')).rejects.toMatchObject({ status: 401 })
+
+    expect(onUnauthorized).not.toHaveBeenCalled()
     apiClient.interceptors.response.eject(interceptorId)
   })
 

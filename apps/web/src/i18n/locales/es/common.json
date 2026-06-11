@@ -27,6 +27,20 @@
     "summary": "Elige la cuenta con la que quieres trabajar en esta sesión.",
     "title": "Selecciona una cuenta"
   },
+  "errors": {
+    "actionFailed": "No se pudo completar la acción",
+    "loadFailed": "No se pudo cargar la información",
+    "network": "No se pudo conectar con el servidor.",
+    "requestFailed": "No se pudo completar la solicitud.",
+    "unexpected": "Ocurrió un error inesperado."
+  },
+  "router": {
+    "errorTitle": "Algo salió mal",
+    "goHome": "Ir al inicio",
+    "notFoundBody": "La página que buscas no existe o se movió.",
+    "notFoundTitle": "Página no encontrada",
+    "retry": "Reintentar"
+  },
   "dashboard": {
     "emptyRegistry": "Aún no hay actividad reciente para esta ubicación.",
     "heading": "Operación de {{location}}",

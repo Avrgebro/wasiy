@@ -27,9 +27,10 @@ export function Topbar({
   const logoutMutation = useLogout()
   const accountName = meQuery.data?.active_account?.name ?? t('shell.account')
 
-  async function handleLogout() {
-    await logoutMutation.mutateAsync()
-    await router.navigate({ to: '/login' })
+  function handleLogout() {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => void router.navigate({ to: '/login' }),
+    })
   }
 
   return (

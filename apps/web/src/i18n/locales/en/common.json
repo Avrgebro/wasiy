@@ -27,6 +27,20 @@
     "summary": "Choose the account you want to work in for this session.",
     "title": "Select an account"
   },
+  "errors": {
+    "actionFailed": "Action failed",
+    "loadFailed": "Could not load data",
+    "network": "Could not connect to the server.",
+    "requestFailed": "The request could not be completed.",
+    "unexpected": "An unexpected error occurred."
+  },
+  "router": {
+    "errorTitle": "Something went wrong",
+    "goHome": "Go to home",
+    "notFoundBody": "The page you are looking for does not exist or has moved.",
+    "notFoundTitle": "Page not found",
+    "retry": "Try again"
+  },
   "dashboard": {
     "emptyRegistry": "There is no recent activity for this location yet.",
     "heading": "{{location}} operation",

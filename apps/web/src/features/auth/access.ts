@@ -102,66 +102,71 @@ export function getAvailableNavigationItems(
   return canAccessPortal(me) ? portalNavigationItems : []
 }
 
+const overviewNavigationGroup: LayoutNavEntry = {
+  type: 'group',
+  titleKey: 'navGroups.overview',
+  items: [{ icon: Widget, labelKey: 'nav.dashboard', to: '/admin' }],
+}
+
+const operationsNavigationGroup: LayoutNavEntry = {
+  type: 'group',
+  titleKey: 'navGroups.operations',
+  items: [
+    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/units' },
+    {
+      type: 'collapsible',
+      icon: UsersGroupRounded,
+      labelKey: 'nav.people',
+      children: [
+        {
+          icon: UsersGroupRounded,
+          labelKey: 'nav.residents',
+          to: '/admin/residents',
+        },
+        { icon: KeySquare, labelKey: 'nav.visitors', to: '/admin/visitors' },
+      ],
+    },
+    {
+      icon: Calendar,
+      labelKey: 'nav.reservations',
+      to: '/admin/reservations',
+    },
+  ],
+}
+
+const communicationNavigationGroup: LayoutNavEntry = {
+  type: 'group',
+  titleKey: 'navGroups.communication',
+  items: [
+    {
+      icon: Speaker,
+      labelKey: 'nav.announcements',
+      to: '/admin/announcements',
+    },
+    { icon: ClipboardList, labelKey: 'nav.activity', to: '/admin/activity' },
+  ],
+}
+
+const accountNavigationGroup: LayoutNavEntry = {
+  type: 'group',
+  titleKey: 'navGroups.account',
+  items: [
+    { icon: Buildings2, labelKey: 'nav.locations', to: '/admin/locations' },
+    { icon: UsersGroupRounded, labelKey: 'nav.staff', to: '/admin/staff' },
+  ],
+}
+
 const locationManagerNavigationItems: LayoutNavEntry[] = [
-  {
-    type: 'group',
-    titleKey: 'navGroups.overview',
-    items: [{ icon: Widget, labelKey: 'nav.dashboard', to: '/admin' }],
-  },
-  {
-    type: 'group',
-    titleKey: 'navGroups.operations',
-    items: [
-      { icon: Buildings2, labelKey: 'nav.units', to: '/admin/units' },
-      {
-        type: 'collapsible',
-        icon: UsersGroupRounded,
-        labelKey: 'nav.people',
-        children: [
-          {
-            icon: UsersGroupRounded,
-            labelKey: 'nav.residents',
-            to: '/admin/residents',
-          },
-          { icon: KeySquare, labelKey: 'nav.visitors', to: '/admin/visitors' },
-        ],
-      },
-      {
-        icon: Calendar,
-        labelKey: 'nav.reservations',
-        to: '/admin/reservations',
-      },
-    ],
-  },
-  {
-    type: 'group',
-    titleKey: 'navGroups.communication',
-    items: [
-      {
-        icon: Speaker,
-        labelKey: 'nav.announcements',
-        to: '/admin/announcements',
-      },
-      { icon: ClipboardList, labelKey: 'nav.activity', to: '/admin/activity' },
-    ],
-  },
+  overviewNavigationGroup,
+  operationsNavigationGroup,
+  communicationNavigationGroup,
 ]
 
 const accountAdminNavigationItems: LayoutNavEntry[] = [
-  {
-    type: 'group',
-    titleKey: 'navGroups.overview',
-    items: [{ icon: Widget, labelKey: 'nav.dashboard', to: '/admin' }],
-  },
-  {
-    type: 'group',
-    titleKey: 'navGroups.account',
-    items: [
-      { icon: Buildings2, labelKey: 'nav.locations', to: '/admin/locations' },
-      { icon: UsersGroupRounded, labelKey: 'nav.staff', to: '/admin/staff' },
-    ],
-  },
-  ...locationManagerNavigationItems.slice(1),
+  overviewNavigationGroup,
+  accountNavigationGroup,
+  operationsNavigationGroup,
+  communicationNavigationGroup,
 ]
 
 const frontDeskNavigationItems: LayoutNavEntry[] = [

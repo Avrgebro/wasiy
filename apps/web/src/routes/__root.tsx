@@ -26,7 +26,10 @@ function RootRoute() {
       queryClient.removeQueries({ queryKey: meQueryKey })
 
       if (router.state.location.pathname !== '/login') {
-        void router.navigate({ to: '/login' })
+        void router.navigate({
+          to: '/login',
+          search: { redirect: router.state.location.href },
+        })
       }
     })
 
