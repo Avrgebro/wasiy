@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'account_id',
     'location_id',
     'user_id',
+    'resident_id',
     'email',
     'first_name',
     'last_name',
@@ -65,6 +66,14 @@ class UserInvitation extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Resident, $this>
+     */
+    public function resident(): BelongsTo
+    {
+        return $this->belongsTo(Resident::class);
     }
 
     /**

@@ -26,6 +26,7 @@ class UserInvitationFactory extends Factory
             'account_id' => Account::factory(),
             'location_id' => null,
             'user_id' => null,
+            'resident_id' => null,
             'email' => fake()->unique()->safeEmail(),
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),

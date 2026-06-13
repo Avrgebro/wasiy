@@ -17,7 +17,11 @@ import { Route as AuthenticatedSelectAccountRouteImport } from './routes/_authen
 import { Route as AuthenticatedPortalRouteRouteImport } from './routes/_authenticated/portal/route'
 import { Route as AuthenticatedFrontDeskRouteRouteImport } from './routes/_authenticated/front-desk/route'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminRegistryVehiclesRouteImport } from './routes/_authenticated/admin/registry/vehicles'
+import { Route as AuthenticatedAdminRegistryUnitsRouteImport } from './routes/_authenticated/admin/registry/units'
+import { Route as AuthenticatedAdminRegistryResidentsRouteImport } from './routes/_authenticated/admin/registry/residents'
 
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
@@ -61,11 +65,35 @@ const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPortalIndexRoute =
+  AuthenticatedPortalIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminRegistryVehiclesRoute =
+  AuthenticatedAdminRegistryVehiclesRouteImport.update({
+    id: '/registry/vehicles',
+    path: '/registry/vehicles',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminRegistryUnitsRoute =
+  AuthenticatedAdminRegistryUnitsRouteImport.update({
+    id: '/registry/units',
+    path: '/registry/units',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminRegistryResidentsRoute =
+  AuthenticatedAdminRegistryResidentsRouteImport.update({
+    id: '/registry/residents',
+    path: '/registry/residents',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,18 +101,25 @@ export interface FileRoutesByFullPath {
   '/no-access': typeof NoAccessRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
-  '/portal': typeof AuthenticatedPortalRouteRoute
+  '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
+  '/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
+  '/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
-  '/portal': typeof AuthenticatedPortalRouteRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/portal': typeof AuthenticatedPortalIndexRoute
+  '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
+  '/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
+  '/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,9 +129,13 @@ export interface FileRoutesById {
   '/no-access': typeof NoAccessRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/front-desk': typeof AuthenticatedFrontDeskRouteRoute
-  '/_authenticated/portal': typeof AuthenticatedPortalRouteRoute
+  '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/_authenticated/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
+  '/_authenticated/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
+  '/_authenticated/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,15 +148,22 @@ export interface FileRouteTypes {
     | '/portal'
     | '/select-account'
     | '/admin/'
+    | '/portal/'
+    | '/admin/registry/residents'
+    | '/admin/registry/units'
+    | '/admin/registry/vehicles'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/no-access'
     | '/front-desk'
-    | '/portal'
     | '/select-account'
     | '/admin'
+    | '/portal'
+    | '/admin/registry/residents'
+    | '/admin/registry/units'
+    | '/admin/registry/vehicles'
   id:
     | '__root__'
     | '/'
@@ -129,6 +175,10 @@ export interface FileRouteTypes {
     | '/_authenticated/portal'
     | '/_authenticated/select-account'
     | '/_authenticated/admin/'
+    | '/_authenticated/portal/'
+    | '/_authenticated/admin/registry/residents'
+    | '/_authenticated/admin/registry/units'
+    | '/_authenticated/admin/registry/vehicles'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -196,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/portal/': {
+      id: '/_authenticated/portal/'
+      path: '/'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
@@ -203,16 +260,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/registry/vehicles': {
+      id: '/_authenticated/admin/registry/vehicles'
+      path: '/registry/vehicles'
+      fullPath: '/admin/registry/vehicles'
+      preLoaderRoute: typeof AuthenticatedAdminRegistryVehiclesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/registry/units': {
+      id: '/_authenticated/admin/registry/units'
+      path: '/registry/units'
+      fullPath: '/admin/registry/units'
+      preLoaderRoute: typeof AuthenticatedAdminRegistryUnitsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/registry/residents': {
+      id: '/_authenticated/admin/registry/residents'
+      path: '/registry/residents'
+      fullPath: '/admin/registry/residents'
+      preLoaderRoute: typeof AuthenticatedAdminRegistryResidentsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminRegistryResidentsRoute: typeof AuthenticatedAdminRegistryResidentsRoute
+  AuthenticatedAdminRegistryUnitsRoute: typeof AuthenticatedAdminRegistryUnitsRoute
+  AuthenticatedAdminRegistryVehiclesRoute: typeof AuthenticatedAdminRegistryVehiclesRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminRegistryResidentsRoute:
+      AuthenticatedAdminRegistryResidentsRoute,
+    AuthenticatedAdminRegistryUnitsRoute: AuthenticatedAdminRegistryUnitsRoute,
+    AuthenticatedAdminRegistryVehiclesRoute:
+      AuthenticatedAdminRegistryVehiclesRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =
@@ -220,17 +306,31 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
+interface AuthenticatedPortalRouteRouteChildren {
+  AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
+}
+
+const AuthenticatedPortalRouteRouteChildren: AuthenticatedPortalRouteRouteChildren =
+  {
+    AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
+  }
+
+const AuthenticatedPortalRouteRouteWithChildren =
+  AuthenticatedPortalRouteRoute._addFileChildren(
+    AuthenticatedPortalRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedFrontDeskRouteRoute: typeof AuthenticatedFrontDeskRouteRoute
-  AuthenticatedPortalRouteRoute: typeof AuthenticatedPortalRouteRoute
+  AuthenticatedPortalRouteRoute: typeof AuthenticatedPortalRouteRouteWithChildren
   AuthenticatedSelectAccountRoute: typeof AuthenticatedSelectAccountRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedFrontDeskRouteRoute: AuthenticatedFrontDeskRouteRoute,
-  AuthenticatedPortalRouteRoute: AuthenticatedPortalRouteRoute,
+  AuthenticatedPortalRouteRoute: AuthenticatedPortalRouteRouteWithChildren,
   AuthenticatedSelectAccountRoute: AuthenticatedSelectAccountRoute,
 }
 

@@ -110,7 +110,18 @@ describe('access helpers', () => {
     expect(getDefaultAuthenticatedRoute(me)).toBe('/no-access')
 
     const residentMe = makeMe({
-      resident_memberships: [{ id: 'membership_1' }],
+      resident_memberships: [
+        {
+          account_id: 'acc_1',
+          is_primary_contact: true,
+          location_id: 'loc_1',
+          resident_id: 'res_1',
+          resident_type: 'owner',
+          unit_id: 'unit_1',
+          unit_label: 'Torre A / 301',
+          unit_membership_id: 'membership_1',
+        },
+      ],
     })
 
     expect(canAccessPortal(residentMe)).toBe(true)
@@ -134,6 +145,30 @@ describe('access helpers', () => {
 
     expect(JSON.stringify(navItems)).toContain('nav.staff')
     expect(JSON.stringify(navItems)).toContain('nav.locations')
+    expect(JSON.stringify(navItems)).toContain('navGroups.registry')
+    expect(JSON.stringify(navItems)).toContain('/admin/registry/units')
+    expect(JSON.stringify(navItems)).toContain('/admin/registry/residents')
+    expect(JSON.stringify(navItems)).toContain('/admin/registry/vehicles')
+  })
+
+  it('shows registry navigation to location managers', () => {
+    const me = makeMe({
+      roles: {
+        account: [],
+        location: [
+          {
+            account_id: 'acc_1',
+            location_id: 'loc_1',
+            role: 'location_manager',
+          },
+        ],
+      },
+    })
+
+    const navItems = getAvailableNavigationItems(me, 'admin')
+
+    expect(JSON.stringify(navItems)).toContain('navGroups.registry')
+    expect(JSON.stringify(navItems)).toContain('/admin/registry/vehicles')
   })
 
   it('does not expose admin navigation to front desk users', () => {

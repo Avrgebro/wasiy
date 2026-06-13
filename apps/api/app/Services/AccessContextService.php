@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\AccountRole;
 use App\Models\Account;
 use App\Models\Location;
+use App\Models\UnitMembership;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -86,7 +87,7 @@ class AccessContextService
             'accessible_locations' => $locations
                 ->map(fn (Location $location) => $this->locationSummary($location, $user, $isAccountAdmin))
                 ->all(),
-            'resident_memberships' => [],
+            'resident_memberships' => $this->residentMemberships($user),
         ];
     }
 
@@ -242,5 +243,38 @@ class AccessContextService
             'roles' => array_values(array_unique($roles)),
             'access_source' => $accessSource,
         ];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function residentMemberships(User $user): array
+    {
+        return $this->access->activeResidentMembershipsForUser($user)
+            ->with(['unit', 'location'])
+            ->orderBy('location_id')
+            ->orderBy('unit_id')
+            ->get()
+            ->map(fn (UnitMembership $membership): array => [
+                'resident_id' => $membership->resident_id,
+                'unit_membership_id' => $membership->id,
+                'account_id' => $membership->account_id,
+                'location_id' => $membership->location_id,
+                'unit_id' => $membership->unit_id,
+                'unit_label' => $this->unitLabel($membership),
+                'resident_type' => $membership->resident_type->value,
+                'is_primary_contact' => $membership->is_primary_contact,
+            ])
+            ->values()
+            ->all();
+    }
+
+    private function unitLabel(UnitMembership $membership): string
+    {
+        $unit = $membership->unit;
+
+        return collect([$unit->building_name, $unit->unit_number])
+            ->filter(fn (?string $part): bool => is_string($part) && trim($part) !== '')
+            ->implode(' / ');
     }
 }

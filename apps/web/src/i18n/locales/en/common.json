@@ -1,7 +1,9 @@
 {
   "actions": {
+    "edit": "Edit",
     "export": "Export",
     "newVisitor": "Register visitor",
+    "save": "Save",
     "search": "Search"
   },
   "common": {
@@ -66,6 +68,26 @@
   "frontDesk": {
     "title": "Visitor check-in"
   },
+  "portal": {
+    "accessEnabled": "Access active",
+    "householdTitle": "Your units",
+    "phone": "Phone",
+    "phoneSaved": "Your phone number was updated.",
+    "phoneSavedTitle": "Phone saved",
+    "phoneSummary": "This number is used for operational condominium messages.",
+    "phoneTitle": "Contact phone",
+    "primaryContact": "Primary contact",
+    "primaryUnit": "Active access for {{unit}}",
+    "residentTypes": {
+      "guestResident": "Guest resident",
+      "occupant": "Occupant",
+      "owner": "Owner",
+      "tenant": "Tenant"
+    },
+    "savePhone": "Save phone",
+    "summary": "Summary of your units and contact details.",
+    "title": "Resident portal"
+  },
   "nav": {
     "activity": "Activity",
     "announcements": "Announcements",
@@ -92,7 +114,64 @@
     "frontDesk": "Front desk",
     "operations": "Operations",
     "overview": "Overview",
-    "portal": "Portal"
+    "portal": "Portal",
+    "registry": "Registry"
+  },
+  "registry": {
+    "notes": "Notes",
+    "portal": {
+      "disabled": "No access",
+      "enabled": "Active"
+    },
+    "residents": {
+      "edit": "Edit resident",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "memberships": "Memberships",
+      "name": "Resident",
+      "new": "New resident",
+      "phone": "Phone",
+      "portal": "Portal",
+      "title": "Residents",
+      "type": "Type",
+      "unit": "Unit"
+    },
+    "saved": "Changes were saved.",
+    "savedTitle": "Registry updated",
+    "status": "Status",
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "units": {
+      "building": "Building",
+      "edit": "Edit unit",
+      "floor": "Floor",
+      "new": "New unit",
+      "primaryContact": "Primary contact",
+      "residents": "Residents",
+      "title": "Units",
+      "unit": "Unit",
+      "vehicles": "Vehicles"
+    },
+    "vehicles": {
+      "color": "Color",
+      "edit": "Edit vehicle",
+      "make": "Make",
+      "model": "Model",
+      "new": "New vehicle",
+      "notes": "Notes",
+      "plate": "Plate",
+      "title": "Vehicles",
+      "type": "Type",
+      "unit": "Unit"
+    },
+    "vehicleTypes": {
+      "bicycle": "Bicycle",
+      "car": "Car",
+      "motorcycle": "Motorcycle",
+      "other": "Other"
+    }
   },
   "roles": {
     "accountAdmin": "Account admin",
@@ -117,6 +196,10 @@
   "validation": {
     "emailInvalid": "Enter a valid email.",
     "emailRequired": "Enter your email.",
-    "passwordRequired": "Enter your password."
+    "firstNameRequired": "Enter the first name.",
+    "lastNameRequired": "Enter the last name.",
+    "passwordRequired": "Enter your password.",
+    "phoneTooLong": "Phone cannot exceed 255 characters.",
+    "unitRequired": "Select a unit."
   }
 }

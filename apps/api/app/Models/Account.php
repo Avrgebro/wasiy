@@ -40,6 +40,38 @@ class Account extends Model
     }
 
     /**
+     * @return HasMany<Unit, $this>
+     */
+    public function units(): HasMany
+    {
+        return $this->hasMany(Unit::class);
+    }
+
+    /**
+     * @return HasMany<Resident, $this>
+     */
+    public function residents(): HasMany
+    {
+        return $this->hasMany(Resident::class);
+    }
+
+    /**
+     * @return HasMany<UnitMembership, $this>
+     */
+    public function unitMemberships(): HasMany
+    {
+        return $this->hasMany(UnitMembership::class);
+    }
+
+    /**
+     * @return HasMany<Vehicle, $this>
+     */
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    /**
      * @return BelongsToMany<User, $this>
      */
     public function users(): BelongsToMany

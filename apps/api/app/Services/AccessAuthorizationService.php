@@ -4,11 +4,16 @@ namespace App\Services;
 
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
+use App\Enums\RegistryStatus;
 use App\Models\Account;
 use App\Models\AccountUserRole;
 use App\Models\Location;
 use App\Models\LocationUserRole;
+use App\Models\Resident;
+use App\Models\Unit;
+use App\Models\UnitMembership;
 use App\Models\User;
+use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Builder;
 
 class AccessAuthorizationService
@@ -98,6 +103,104 @@ class AccessAuthorizationService
         return $this->hasAccountRole($user, $account, AccountRole::AccountAdmin);
     }
 
+    public function canManageRegistry(User $user, Location $location): bool
+    {
+        if ($location->trashed() || ! $this->locationAccountExists($location)) {
+            return false;
+        }
+
+        return $this->hasAccountRole($user, $location->account, AccountRole::AccountAdmin)
+            || $this->hasLocationRole($user, $location, LocationRole::LocationManager);
+    }
+
+    public function canViewRegistry(User $user, Location $location): bool
+    {
+        return $this->canManageRegistry($user, $location)
+            || $this->hasLocationRole($user, $location, LocationRole::FrontDesk);
+    }
+
+    public function canManageUnit(User $user, Unit $unit): bool
+    {
+        if (! $this->registryRecordLocationMatches($unit->location, $unit->account_id)) {
+            return false;
+        }
+
+        return $this->canManageRegistry($user, $unit->location);
+    }
+
+    public function canManageResidentInLocation(User $user, Resident $resident, Location $location): bool
+    {
+        if ($resident->account_id !== $location->account_id || ! $this->canManageRegistry($user, $location)) {
+            return false;
+        }
+
+        if ($this->hasAccountRole($user, $location->account, AccountRole::AccountAdmin)) {
+            return true;
+        }
+
+        return $resident->unitMemberships()
+            ->where('location_id', $location->id)
+            ->where('account_id', $location->account_id)
+            ->exists();
+    }
+
+    public function canManageVehicle(User $user, Vehicle $vehicle): bool
+    {
+        if (! $this->registryRecordLocationMatches($vehicle->location, $vehicle->account_id)) {
+            return false;
+        }
+
+        return $this->canManageRegistry($user, $vehicle->location);
+    }
+
+    public function residentForUser(User $user): ?Resident
+    {
+        return Resident::query()
+            ->where('user_id', $user->id)
+            ->where('status', RegistryStatus::Active)
+            ->whereHas('account')
+            ->first();
+    }
+
+    /**
+     * @return Builder<UnitMembership>
+     */
+    public function activeResidentMembershipsForUser(User $user): Builder
+    {
+        $resident = $this->residentForUser($user);
+
+        if (! $resident) {
+            return UnitMembership::query()->whereKey([]);
+        }
+
+        return UnitMembership::query()
+            ->where('resident_id', $resident->id)
+            ->where('account_id', $resident->account_id)
+            ->where('status', RegistryStatus::Active)
+            ->whereHas('location')
+            ->whereHas('unit', fn (Builder $query) => $query->where('status', RegistryStatus::Active));
+    }
+
+    public function canResidentAccessUnit(User $user, Unit $unit): bool
+    {
+        if ($unit->status !== RegistryStatus::Active || ! $this->registryRecordLocationMatches($unit->location, $unit->account_id)) {
+            return false;
+        }
+
+        return $this->activeResidentMembershipsForUser($user)
+            ->where('unit_id', $unit->id)
+            ->exists();
+    }
+
+    public function canResidentManageVehicle(User $user, Vehicle $vehicle): bool
+    {
+        if (! $this->registryRecordLocationMatches($vehicle->location, $vehicle->account_id)) {
+            return false;
+        }
+
+        return $this->canResidentAccessUnit($user, $vehicle->unit);
+    }
+
     /**
      * Users that hold any Account or Location role in the Account.
      *
@@ -153,5 +256,13 @@ class AccessAuthorizationService
         return Account::query()
             ->whereKey($location->account_id)
             ->exists();
+    }
+
+    private function registryRecordLocationMatches(?Location $location, string $accountId): bool
+    {
+        return $location !== null
+            && $location->account_id === $accountId
+            && ! $location->trashed()
+            && $this->locationAccountExists($location);
     }
 }

@@ -1,7 +1,9 @@
 {
   "actions": {
+    "edit": "Editar",
     "export": "Exportar",
     "newVisitor": "Registrar visitante",
+    "save": "Guardar",
     "search": "Buscar"
   },
   "common": {
@@ -66,6 +68,26 @@
   "frontDesk": {
     "title": "Registro de visitantes"
   },
+  "portal": {
+    "accessEnabled": "Acceso activo",
+    "householdTitle": "Tus unidades",
+    "phone": "Teléfono",
+    "phoneSaved": "Tu teléfono fue actualizado.",
+    "phoneSavedTitle": "Teléfono guardado",
+    "phoneSummary": "Este número se usará para comunicaciones operativas del condominio.",
+    "phoneTitle": "Teléfono de contacto",
+    "primaryContact": "Contacto principal",
+    "primaryUnit": "Acceso activo para {{unit}}",
+    "residentTypes": {
+      "guestResident": "Residente invitado",
+      "occupant": "Ocupante",
+      "owner": "Propietario",
+      "tenant": "Inquilino"
+    },
+    "savePhone": "Guardar teléfono",
+    "summary": "Resumen de tus unidades y datos de contacto.",
+    "title": "Portal de residentes"
+  },
   "nav": {
     "activity": "Actividad",
     "announcements": "Anuncios",
@@ -92,7 +114,64 @@
     "frontDesk": "Portería",
     "operations": "Operación",
     "overview": "Resumen",
-    "portal": "Portal"
+    "portal": "Portal",
+    "registry": "Registro"
+  },
+  "registry": {
+    "notes": "Notas",
+    "portal": {
+      "disabled": "Sin acceso",
+      "enabled": "Activo"
+    },
+    "residents": {
+      "edit": "Editar residente",
+      "firstName": "Nombres",
+      "lastName": "Apellidos",
+      "memberships": "Membresías",
+      "name": "Residente",
+      "new": "Nuevo residente",
+      "phone": "Teléfono",
+      "portal": "Portal",
+      "title": "Residentes",
+      "type": "Tipo",
+      "unit": "Unidad"
+    },
+    "saved": "Los cambios fueron guardados.",
+    "savedTitle": "Registro actualizado",
+    "status": "Estado",
+    "statuses": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "units": {
+      "building": "Edificio",
+      "edit": "Editar unidad",
+      "floor": "Piso",
+      "new": "Nueva unidad",
+      "primaryContact": "Contacto principal",
+      "residents": "Residentes",
+      "title": "Unidades",
+      "unit": "Unidad",
+      "vehicles": "Vehículos"
+    },
+    "vehicles": {
+      "color": "Color",
+      "edit": "Editar vehículo",
+      "make": "Marca",
+      "model": "Modelo",
+      "new": "Nuevo vehículo",
+      "notes": "Notas",
+      "plate": "Placa",
+      "title": "Vehículos",
+      "type": "Tipo",
+      "unit": "Unidad"
+    },
+    "vehicleTypes": {
+      "bicycle": "Bicicleta",
+      "car": "Auto",
+      "motorcycle": "Motocicleta",
+      "other": "Otro"
+    }
   },
   "roles": {
     "accountAdmin": "Administrador de cuenta",
@@ -117,6 +196,10 @@
   "validation": {
     "emailInvalid": "Ingresa un correo válido.",
     "emailRequired": "Ingresa tu correo.",
-    "passwordRequired": "Ingresa tu contraseña."
+    "firstNameRequired": "Ingresa los nombres.",
+    "lastNameRequired": "Ingresa los apellidos.",
+    "passwordRequired": "Ingresa tu contraseña.",
+    "phoneTooLong": "El teléfono no puede superar 255 caracteres.",
+    "unitRequired": "Selecciona una unidad."
   }
 }

@@ -38,6 +38,17 @@ export type LocationRoleAssignment = {
   role: LocationRole
 }
 
+export type ResidentMembership = {
+  resident_id: string
+  unit_membership_id: string
+  account_id: string
+  location_id: string
+  unit_id: string
+  unit_label: string
+  resident_type: 'owner' | 'tenant' | 'occupant' | 'guest_resident'
+  is_primary_contact: boolean
+}
+
 export type MeResponse = {
   user: AuthUser
   accounts: AccountSummary[]
@@ -48,7 +59,7 @@ export type MeResponse = {
     location: LocationRoleAssignment[]
   }
   accessible_locations: LocationSummary[]
-  resident_memberships: unknown[]
+  resident_memberships: ResidentMembership[]
 }
 
 export type LoginCredentials = {

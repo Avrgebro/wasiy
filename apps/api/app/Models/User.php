@@ -107,6 +107,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<Resident, $this>
+     */
+    public function residents(): HasMany
+    {
+        return $this->hasMany(Resident::class);
+    }
+
+    /**
      * @return BelongsToMany<Account, $this>
      */
     public function accounts(): BelongsToMany

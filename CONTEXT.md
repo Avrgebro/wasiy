@@ -84,7 +84,7 @@ The responsive web interface used by Residents to manage their own resident-faci
 
 ### Resident Self-Service
 
-Resident-facing capabilities that allow Residents to maintain limited personal and Unit-related data. In the initial product, Residents can update simple contact information and manage vehicles, but cannot change resident type, Unit membership, or primary contact status.
+Resident-facing capabilities that allow Residents to maintain limited personal and Unit-related data. In M3, Residents can update their own phone number and manage Vehicles for their active Units, but cannot change name, email, resident type, Unit Membership, or Primary Contact status.
 
 ### Activity Log
 
@@ -104,7 +104,7 @@ A file or record shared inside the system, such as rules, bylaws, policies, form
 
 ### Vehicle
 
-A car, motorcycle, bicycle, or other transport asset associated with a Resident or Unit in the initial product, and potentially with Visitors or parking permissions in later phases.
+A car, motorcycle, bicycle, or other transport asset associated with a Unit in the initial product, and potentially with Visitors, Residents, or parking permissions in later phases.
 
 ### Package
 
@@ -128,19 +128,31 @@ A Location that a User is allowed to operate in or view within an Account. Acces
 
 ### Unit
 
-A residential space inside a Location, such as an apartment, condo unit, or house number.
+A residential space inside a Location, such as an apartment, condo unit, suite, or house number. In the initial product, Units are not parking spots, storage lockers, or other non-residential assets.
+
+### Inactive Registry Record
+
+A Unit, Resident, Unit Membership, or Vehicle that remains in the system for historical context but is no longer available for normal future operations. Records with meaningful operational history should become inactive instead of being hard-deleted.
 
 ### Unit Membership
 
 The association between a Resident and a Unit. A Resident may have memberships in multiple Units, and each membership can have its own resident type and status. A Unit may designate one membership as the primary contact.
 
+### Primary Contact
+
+The active Unit Membership designated as the main contact for a Unit. A Unit may have zero or one Primary Contact. Setting a Unit Membership as Primary Contact replaces the previous Primary Contact for that Unit, and inactive memberships cannot remain Primary Contact.
+
+### Resident Type
+
+The Resident's relationship to a specific Unit Membership. Initial fixed Resident Types are Owner, Tenant, Occupant, and Guest Resident. Resident Type belongs to the Unit Membership, not to the Resident globally.
+
 ### Resident
 
-A person authorized to live in or be associated with a Unit. A Resident may be classified by type, such as Owner, Tenant, Occupant, or Guest Resident. Residents may have login access to resident-facing features such as visitor pre-registration, amenity reservations, profile management, payment visibility, and announcements.
+A person authorized to live in or be associated with a Unit. Residents belong to an Account, and their Location relationship comes through Unit Memberships. Resident Type is defined per Unit Membership, not on the Resident globally. Residents may have login access to resident-facing features such as visitor pre-registration, amenity reservations, profile management, payment visibility, and announcements.
 
 ### Resident Invitation
 
-An invitation that allows a Resident to claim login access to the resident-facing portal for their Unit.
+An invitation that allows a Resident to claim login access to the resident-facing portal for their Unit. In M3, a Resident Invitation is a token-based claim flow that links a Resident to a User and enables portal access for that Resident.
 
 ### CSV Import
 

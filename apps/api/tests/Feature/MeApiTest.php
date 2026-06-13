@@ -1,11 +1,18 @@
 <?php
 
 use App\Enums\AccountRole;
+use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
+use App\Enums\RegistryStatus;
+use App\Enums\ResidentType;
 use App\Models\Account;
 use App\Models\AccountUserRole;
+use App\Models\ActivityLog;
 use App\Models\Location;
 use App\Models\LocationUserRole;
+use App\Models\Resident;
+use App\Models\Unit;
+use App\Models\UnitMembership;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -250,4 +257,147 @@ test('stale active location context is cleared and a single accessible location 
         ->assertOk()
         ->assertJsonPath('active_account.id', $account->id)
         ->assertJsonPath('active_location.id', $location->id);
+});
+
+test('/api/me returns empty resident memberships for unclaimed residents', function () {
+    $user = User::factory()->create();
+    $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create([
+        'unit_number' => '301',
+        'building_name' => 'Torre A',
+    ]);
+    $resident = Resident::factory()->for($location->account)->create();
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->create();
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('resident_memberships', []);
+});
+
+test('/api/me returns active memberships for claimed active residents', function () {
+    $user = User::factory()->create();
+    $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create([
+        'unit_number' => '301',
+        'building_name' => 'Torre A',
+    ]);
+    $resident = Resident::factory()->for($location->account)->for($user)->create();
+    $membership = UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->primaryContact()
+        ->create(['resident_type' => ResidentType::Owner]);
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('resident_memberships.0.resident_id', $resident->id)
+        ->assertJsonPath('resident_memberships.0.unit_membership_id', $membership->id)
+        ->assertJsonPath('resident_memberships.0.account_id', $location->account_id)
+        ->assertJsonPath('resident_memberships.0.location_id', $location->id)
+        ->assertJsonPath('resident_memberships.0.unit_id', $unit->id)
+        ->assertJsonPath('resident_memberships.0.unit_label', 'Torre A / 301')
+        ->assertJsonPath('resident_memberships.0.resident_type', ResidentType::Owner->value)
+        ->assertJsonPath('resident_memberships.0.is_primary_contact', true);
+});
+
+test('inactive resident membership or unit removes portal access from /api/me', function () {
+    $user = User::factory()->create();
+    $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
+    $resident = Resident::factory()->for($location->account)->for($user)->create();
+    $membership = UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->create();
+
+    $membership->forceFill(['status' => RegistryStatus::Inactive])->save();
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('resident_memberships', []);
+
+    $membership->forceFill(['status' => RegistryStatus::Active])->save();
+    $unit->forceFill(['status' => RegistryStatus::Inactive])->save();
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('resident_memberships', []);
+
+    $unit->forceFill(['status' => RegistryStatus::Active])->save();
+    $resident->forceFill(['status' => RegistryStatus::Inactive])->save();
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('resident_memberships', []);
+});
+
+test('resident can update own phone through portal endpoint', function () {
+    $user = User::factory()->create();
+    $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
+    $resident = Resident::factory()->for($location->account)->for($user)->create([
+        'phone' => '999111222',
+    ]);
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->create();
+
+    $this->actingAs($user)
+        ->patchJson('/api/portal/resident/phone', [
+            'phone' => '999333444',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.phone', '999333444');
+
+    expect($resident->fresh()->phone)->toBe('999333444')
+        ->and(ActivityLog::query()->sole()->event_type)->toBe(ActivityEventType::ResidentPhoneUpdated);
+});
+
+test('resident cannot update restricted fields through portal phone endpoint', function () {
+    $user = User::factory()->create();
+    $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
+    $resident = Resident::factory()->for($location->account)->for($user)->create([
+        'first_name' => 'Rosa',
+        'last_name' => 'Diaz',
+        'email' => 'rosa@wasiy.test',
+        'phone' => '999111222',
+    ]);
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->create();
+
+    $this->actingAs($user)
+        ->patchJson('/api/portal/resident/phone', [
+            'phone' => '999333444',
+            'first_name' => 'Changed',
+            'email' => 'changed@wasiy.test',
+            'status' => RegistryStatus::Inactive->value,
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['first_name', 'email', 'status']);
+
+    expect($resident->fresh()->first_name)->toBe('Rosa')
+        ->and($resident->fresh()->email)->toBe('rosa@wasiy.test')
+        ->and($resident->fresh()->phone)->toBe('999111222');
 });

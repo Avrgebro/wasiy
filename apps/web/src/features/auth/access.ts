@@ -112,17 +112,11 @@ const operationsNavigationGroup: LayoutNavEntry = {
   type: 'group',
   titleKey: 'navGroups.operations',
   items: [
-    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/units' },
     {
       type: 'collapsible',
       icon: UsersGroupRounded,
       labelKey: 'nav.people',
       children: [
-        {
-          icon: UsersGroupRounded,
-          labelKey: 'nav.residents',
-          to: '/admin/residents',
-        },
         { icon: KeySquare, labelKey: 'nav.visitors', to: '/admin/visitors' },
       ],
     },
@@ -130,6 +124,28 @@ const operationsNavigationGroup: LayoutNavEntry = {
       icon: Calendar,
       labelKey: 'nav.reservations',
       to: '/admin/reservations',
+    },
+  ],
+}
+
+const registryNavigationGroup: LayoutNavEntry = {
+  type: 'group',
+  titleKey: 'navGroups.registry',
+  items: [
+    {
+      icon: Buildings2,
+      labelKey: 'nav.units',
+      to: '/admin/registry/units',
+    },
+    {
+      icon: UsersGroupRounded,
+      labelKey: 'nav.residents',
+      to: '/admin/registry/residents',
+    },
+    {
+      icon: KeySquare,
+      labelKey: 'nav.vehicles',
+      to: '/admin/registry/vehicles',
     },
   ],
 }
@@ -158,6 +174,7 @@ const accountNavigationGroup: LayoutNavEntry = {
 
 const locationManagerNavigationItems: LayoutNavEntry[] = [
   overviewNavigationGroup,
+  registryNavigationGroup,
   operationsNavigationGroup,
   communicationNavigationGroup,
 ]
@@ -165,6 +182,7 @@ const locationManagerNavigationItems: LayoutNavEntry[] = [
 const accountAdminNavigationItems: LayoutNavEntry[] = [
   overviewNavigationGroup,
   accountNavigationGroup,
+  registryNavigationGroup,
   operationsNavigationGroup,
   communicationNavigationGroup,
 ]
