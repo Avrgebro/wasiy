@@ -10,4 +10,9 @@ return [
         'disk' => env('WASIY_EXPORT_DISK', 'local'),
         'expires_days' => (int) env('WASIY_EXPORT_EXPIRES_DAYS', 7),
     ],
+    'imports' => [
+        'disk' => env('WASIY_IMPORT_DISK', 'local'),
+        'max_file_kb' => (int) env('WASIY_IMPORT_MAX_FILE_KB', 2048),
+        'max_rows' => (int) env('WASIY_IMPORT_MAX_ROWS', 5000),
+    ],
 ];
