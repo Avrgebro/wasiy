@@ -215,7 +215,7 @@ Policy semantics should mirror M3 registry management:
 
 ## Slice 2: CSV Parser and Validation Service
 
-Status: Not started.
+Status: Done.
 
 Create a parser/normalizer service before adding controllers. Keep it framework-friendly but testable without HTTP.
 
@@ -271,6 +271,16 @@ Avoid using the manager HTTP controllers from the parser. Shared domain behavior
 - Invalid enum, email, and too-long fields produce Spanish row errors.
 - Duplicate detector distinguishes reusable existing Units from duplicate rows that must be skipped.
 - Multiple Resident rows for one Unit are not treated as duplicate Units.
+
+### Implementation Handoff
+
+- Status: Done
+- Completed: 2026-06-21
+- Summary: Added the registry CSV parsing, normalization, row validation, and duplicate detection services that turn CSV contents into row preview data without creating registry records.
+- Changed areas: `apps/api/app/Services/RegistryImports`, `apps/api/app/Data/RegistryImports`, `apps/api/tests/Feature/RegistryImportCsvParserTest.php`.
+- Verification: Red step confirmed `RegistryCsvParser` was missing; `./vendor/bin/sail artisan test tests/Feature/RegistryImportCsvParserTest.php` passed with 9 tests and 79 assertions; related import/registry/resident tests passed with 30 tests and 203 assertions; full `./vendor/bin/sail artisan test` passed with 143 tests and 917 assertions; `./vendor/bin/sail pint --dirty --format agent` passed.
+- Decisions: Parser accepts CSV contents directly, detects comma/semicolon delimiters, strips UTF-8 BOM, normalizes Spanish headers to the canonical preview keys, and enforces `config('wasiy.imports.max_rows')`. Validation normalizes Spanish aliases into persisted enum values, defaults omitted Membership status to `active`, treats Unit-only rows as valid, and returns Spanish row errors. Duplicate detection marks reusable existing Units/Residents with warnings, skips repeated Unit-only rows, and treats existing active Memberships as duplicates while allowing multiple Resident rows for the same Unit.
+- Follow-up: Slice 3 can read uploaded files from storage, call `RegistryCsvParser`, `RegistryImportValidator`, and `RegistryImportDuplicateDetector`, then persist the returned preview rows into `registry_import_rows` without creating Units, Residents, or Memberships.
 
 ## Slice 3: Upload API and Validation Job
 
