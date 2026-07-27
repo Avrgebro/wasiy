@@ -28,4 +28,8 @@ enum ActivityEventType: string
     case ExportRequested = 'export.requested';
     case ExportCompleted = 'export.completed';
     case ExportFailed = 'export.failed';
+    case ImportUploaded = 'import.uploaded';
+    case ImportValidationFailed = 'import.validation_failed';
+    case ImportCompleted = 'import.completed';
+    case ImportFailed = 'import.failed';
 }

@@ -284,7 +284,7 @@ Avoid using the manager HTTP controllers from the parser. Shared domain behavior
 
 ## Slice 3: Upload API and Validation Job
 
-Status: Not started.
+Status: Done.
 
 Add the upload endpoint and queue the validation work. No registry records should be created in this slice.
 
@@ -335,9 +335,19 @@ Use the existing export job pattern for status transitions and direct job testin
 - Validation job stores row-level errors without creating Units, Residents, or Memberships.
 - Validation job marks import failed when storage read fails or parser throws.
 
+### Implementation Handoff
+
+- Status: Done
+- Completed: 2026-06-21
+- Summary: Added the Location-scoped registry import upload endpoint and `ValidateRegistryImport` queued job. Uploads now create pending import records, store CSV files on the configured disk, dispatch validation, and the job persists row preview data/counters without creating registry records.
+- Changed areas: `apps/api/routes/api.php`, `apps/api/app/Http/Controllers/Api/RegistryImportController.php`, `apps/api/app/Jobs/ValidateRegistryImport.php`, `apps/api/tests/Feature/RegistryImportUploadApiTest.php`.
+- Verification: Red step confirmed the upload route returned 404 and `ValidateRegistryImport` was missing; `./vendor/bin/sail artisan test tests/Feature/RegistryImportUploadApiTest.php` passed with 8 tests and 53 assertions; related import/parser/registry/export tests passed with 36 tests and 256 assertions; full `./vendor/bin/sail artisan test` passed with 151 tests and 970 assertions; `./vendor/bin/sail pint --dirty --format agent` passed.
+- Decisions: Uploads are authorized with `RegistryImportPolicy::create` against the concrete Location and accept only `registry_units_residents`. Stored paths remain internal and are omitted from resources. `ValidateRegistryImport` only processes pending imports, replaces stale preview rows before inserting new rows, counts valid/error/duplicate/warning rows separately, and marks parser or storage failures visible on the Import record.
+- Follow-up: Slice 4 can add import history, detail, and row-preview read APIs on top of the stored `registry_imports` and `registry_import_rows` data.
+
 ## Slice 4: Preview and Import Read APIs
 
-Status: Not started.
+Status: Done.
 
 Add APIs that let the frontend show import history and inspect preview rows.
 
@@ -382,9 +392,19 @@ Authorization:
 - Row list supports status filtering and pagination.
 - Preview resources expose errors and warnings without exposing storage paths.
 
+### Implementation Handoff
+
+- Status: Done
+- Completed: 2026-06-21
+- Summary: Added import history, import detail, and row-preview read APIs with Account Admin and Location Manager scoping. Row previews can now be filtered by status, searched, and paginated for review UI consumption.
+- Changed areas: `apps/api/routes/api.php`, `apps/api/app/Http/Controllers/Api/RegistryImportController.php`, `apps/api/app/Policies/RegistryImportPolicy.php`, `apps/api/tests/Feature/RegistryImportReadApiTest.php`.
+- Verification: Red step confirmed read routes returned 404; `./vendor/bin/sail artisan test tests/Feature/RegistryImportReadApiTest.php` passed with 6 tests and 23 assertions; related import/authorization tests passed with 45 tests and 311 assertions; full `./vendor/bin/sail artisan test` passed with 157 tests and 993 assertions; `./vendor/bin/sail pint --dirty --format agent` passed.
+- Decisions: `GET /api/registry-imports` requires `account_id`; Account Admins may list Account-wide or Location-filtered imports, while Location Managers can omit `location_id` and still receive only imports for manageable Locations. Front Desk users remain denied. Row search uses PostgreSQL JSON text matching over raw data, normalized data, errors, warnings, and duplicate key.
+- Follow-up: Slice 5 can add confirm and commit endpoints on top of the existing detail/row preview APIs.
+
 ## Slice 5: Confirm API and Commit Job
 
-Status: Not started.
+Status: Done.
 
 Add the confirm flow and queued commit. This is the first slice that writes registry records.
 
@@ -435,9 +455,19 @@ The commit job should use the same Account and Location IDs from the Import reco
 - Primary Contact changes use the same invariant as manager CRUD.
 - Failed commit is visible on the Import record.
 
+### Implementation Handoff
+
+- Status: Done
+- Completed: 2026-06-21
+- Summary: Added the confirm endpoint and queued commit job for ready registry imports. Confirmed imports now process valid and warning rows, create or reuse scoped Units and Residents, create missing Unit Memberships, skip duplicate rows, and expose unexpected commit failures on the Import record.
+- Changed areas: `apps/api/routes/api.php`, `apps/api/app/Http/Controllers/Api/RegistryImportController.php`, `apps/api/app/Jobs/CommitRegistryImport.php`, `apps/api/tests/Feature/RegistryImportCommitApiTest.php`.
+- Verification: Red step confirmed `POST /api/registry-imports/{import}/confirm` returned 404 and `CommitRegistryImport` was missing; `./vendor/bin/sail artisan test tests/Feature/RegistryImportCommitApiTest.php` passed with 8 tests and 40 assertions; related import/registry tests passed with 51 tests and 335 assertions; full `./vendor/bin/sail artisan test` passed with 165 tests and 1033 assertions.
+- Decisions: The commit job treats the Import Account and Location as authoritative, only trusting preview `existing_*_id` values when they still belong to that scope. Duplicate rows are marked `skipped`; stale existing active Memberships also skip safely. Primary Contact promotion goes through `UnitMembership::markAsPrimaryContact()`.
+- Follow-up: Slice 6 can add import completion/failure activity logging and decide whether retry should cover failed validation, failed commit, or reupload-only recovery.
+
 ## Slice 6: Activity Logging and Failure Recovery
 
-Status: Not started.
+Status: Done.
 
 Extend the activity log with import completion and failure visibility.
 
@@ -487,9 +517,19 @@ If retry complexity becomes too large, defer retry endpoint and satisfy recovera
 - Retry of failed commit does not duplicate already committed rows if implemented.
 - No activity log is created for a no-op retry that does not run.
 
+### Implementation Handoff
+
+- Status: Done
+- Completed: 2026-06-21
+- Summary: Added compact activity logging for import upload, validation failure, commit failure, and completion. Failed validation imports can now be retried from the stored CSV when the original file is still available, while failed commit imports stay visible and require reupload recovery for M4.
+- Changed areas: `apps/api/app/Enums/ActivityEventType.php`, `apps/api/app/Http/Controllers/Api/RegistryImportController.php`, `apps/api/app/Jobs/ValidateRegistryImport.php`, `apps/api/app/Jobs/CommitRegistryImport.php`, `apps/api/routes/api.php`, `apps/api/tests/Feature/RegistryImportActivityRecoveryTest.php`.
+- Verification: Red step confirmed import activity event types and `POST /api/registry-imports/{import}/retry` were missing; `./vendor/bin/sail artisan test tests/Feature/RegistryImportActivityRecoveryTest.php` passed with 6 tests and 75 assertions; related import/export/activity tests passed with 38 tests and 255 assertions; full `./vendor/bin/sail artisan test` passed with 171 tests and 1108 assertions.
+- Decisions: Import activity follows the queued export pattern and uses the original requester as actor. Completion metadata includes counters plus created Unit, Resident, and Unit Membership IDs. Retry is intentionally limited to failed validation imports where `confirmed_at` is null and the stored file still exists; failed commit retry is deferred because partial row commits need a safer idempotent recovery contract.
+- Follow-up: Slice 7 can build the frontend import workflow using the visible import statuses, failure reasons, activity-backed lifecycle, and validation retry endpoint.
+
 ## Slice 7: Frontend Import Workflow
 
-Status: Not started.
+Status: Done.
 
 Add an admin Registry import workflow that fits the existing frontend structure.
 
@@ -546,9 +586,19 @@ Testing:
 - Confirm mutation invalidates import detail, import rows, Units, and Residents queries.
 - Spanish copy comes from i18n files.
 
+### Implementation Handoff
+
+- Status: Done
+- Completed: 2026-06-21
+- Summary: Added the frontend Registry import workflow at `/admin/registry/imports`, including CSV upload, import history, review preview filters, disabled/enabled confirm behavior, retry support, and Spanish i18n copy.
+- Changed areas: `apps/web/src/features/imports`, Registry API helper tests, authenticated Registry navigation, TanStack route tree, and `apps/web/src/i18n/locales/{es,en}/common.json`.
+- Verification: `pnpm --filter @wasiy/web test`, `pnpm --filter @wasiy/web lint`, and `pnpm --filter @wasiy/web build` passed. Build still reports the existing large chunk warning.
+- Decisions: The import route owns CSV review instead of adding upload controls into Units or Residents CRUD pages; list responses are normalized before render so partial row/detail responses cannot crash the preview.
+- Follow-up: Slice 8 can add seeded CSV scenarios and final acceptance fixtures for manual end-to-end import verification.
+
 ## Slice 8: Seed Scenarios and Final Acceptance
 
-Status: Not started.
+Status: Done.
 
 Add enough seeded or test fixture coverage to manually verify imports without crafting data from scratch every time.
 
@@ -585,6 +635,16 @@ Final M4 acceptance checks:
 - Frontend import tests pass.
 - `pnpm --filter @wasiy/web lint` passes.
 - `pnpm --filter @wasiy/web build` passes.
+
+### Implementation Handoff
+
+- Status: Done
+- Completed: 2026-06-21
+- Summary: Added the M4 acceptance CSV fixture and seeded lifecycle coverage for the full Registry import workflow. The test now verifies upload, preview rows before record creation, Spanish row errors, duplicate/warning separation, blocked confirm with errors, corrected confirmation, Unit/Resident/Membership creation, existing Unit reuse, unauthorized Location denial, parser failure visibility, and completion activity logging.
+- Changed areas: `apps/api/database/seeders/fixtures/m4-registry-import-acceptance.csv`, `apps/api/tests/Feature/DatabaseSeederTest.php`, and this roadmap.
+- Verification: `./vendor/bin/sail artisan test tests/Feature/DatabaseSeederTest.php`, focused Registry import suites, related registry/authorization/activity suites, full `./vendor/bin/sail artisan test`, `./vendor/bin/sail pint --dirty --format agent`, `pnpm --filter @wasiy/web test`, `pnpm --filter @wasiy/web lint`, and `pnpm --filter @wasiy/web build` passed. Build still reports the existing large chunk warning.
+- Decisions: The manual acceptance fixture keeps the invalid row in the committed CSV sample so managers can verify blocked preview behavior; the automated confirmation path derives a corrected fixture by removing that invalid row, preserving the backend invariant that imports with row errors cannot be confirmed.
+- Follow-up: M4 is ready for pull-request packaging or manual browser verification against `/admin/registry/imports` using the fixture CSV.
 
 ## Suggested Pull Request Breakdown
 

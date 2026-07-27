@@ -21,9 +21,14 @@ class RegistryImportPolicy
             return $location === null || $location->account_id === $account->id;
         }
 
-        return $location !== null
-            && $location->account_id === $account->id
-            && $this->access->canManageRegistry($user, $location);
+        if ($location !== null) {
+            return $location->account_id === $account->id
+                && $this->access->canManageRegistry($user, $location);
+        }
+
+        return $this->access->accessibleLocationsForAccount($user, $account)
+            ->get()
+            ->contains(fn (Location $location): bool => $this->access->canManageRegistry($user, $location));
     }
 
     public function create(User $user, Location $location): bool

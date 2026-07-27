@@ -96,6 +96,7 @@
     "home": "Inicio",
     "locations": "Ubicaciones",
     "people": "Personas",
+    "imports": "Importaciones",
     "residents": "Residentes",
     "reservations": "Reservas",
     "staff": "Personal",
@@ -118,6 +119,62 @@
     "registry": "Registro"
   },
   "registry": {
+    "imports": {
+      "confirm": "Confirmar importación",
+      "confirmed": "La importación fue confirmada.",
+      "counterLabels": {
+        "duplicate": "Duplicadas",
+        "error": "Errores",
+        "total": "Total",
+        "valid": "Válidas",
+        "warning": "Advertencias"
+      },
+      "completedAt": "Completada",
+      "counters": "V/E/D/A",
+      "dropzoneHint": "CSV con columnas de unidad, residente y membresía.",
+      "dropzoneTitle": "Arrastra el CSV o selecciónalo",
+      "empty": "Aún no hay importaciones para revisar.",
+      "emptyRows": "No hay filas para este filtro.",
+      "failureReason": "Motivo del fallo",
+      "fileLabel": "Archivo CSV",
+      "filename": "Archivo",
+      "history": "Historial",
+      "location": "Ubicación",
+      "messages": "Mensajes",
+      "preview": "Vista previa",
+      "requestedAt": "Solicitada",
+      "retry": "Reintentar validación",
+      "retryQueued": "La validación fue reenviada.",
+      "review": "Revisar",
+      "rowFilters": {
+        "all": "Todos",
+        "duplicate": "Duplicados",
+        "error": "Errores",
+        "valid": "Válidos",
+        "warning": "Advertencias"
+      },
+      "rowNumber": "Fila",
+      "rowStatuses": {
+        "duplicate": "Duplicada",
+        "error": "Error",
+        "imported": "Importada",
+        "skipped": "Omitida",
+        "valid": "Válida",
+        "warning": "Advertencia"
+      },
+      "statuses": {
+        "completed": "Completada",
+        "failed": "Fallida",
+        "pending": "Pendiente",
+        "processing": "Procesando",
+        "ready_for_review": "Lista para revisar"
+      },
+      "title": "Importaciones",
+      "uploadAction": "Importar CSV",
+      "uploaded": "El archivo fue cargado para validación.",
+      "uploadSubmit": "Subir archivo",
+      "uploadTitle": "Importar registro"
+    },
     "notes": "Notas",
     "portal": {
       "disabled": "Sin acceso",

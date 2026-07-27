@@ -2,6 +2,7 @@ import {
   Buildings2,
   Calendar,
   ClipboardList,
+  Import,
   KeySquare,
   Magnifier,
   Speaker,
@@ -146,6 +147,11 @@ const registryNavigationGroup: LayoutNavEntry = {
       icon: KeySquare,
       labelKey: 'nav.vehicles',
       to: '/admin/registry/vehicles',
+    },
+    {
+      icon: Import,
+      labelKey: 'nav.imports',
+      to: '/admin/registry/imports',
     },
   ],
 }

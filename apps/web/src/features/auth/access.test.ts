@@ -149,6 +149,7 @@ describe('access helpers', () => {
     expect(JSON.stringify(navItems)).toContain('/admin/registry/units')
     expect(JSON.stringify(navItems)).toContain('/admin/registry/residents')
     expect(JSON.stringify(navItems)).toContain('/admin/registry/vehicles')
+    expect(JSON.stringify(navItems)).toContain('/admin/registry/imports')
   })
 
   it('shows registry navigation to location managers', () => {
@@ -169,6 +170,7 @@ describe('access helpers', () => {
 
     expect(JSON.stringify(navItems)).toContain('navGroups.registry')
     expect(JSON.stringify(navItems)).toContain('/admin/registry/vehicles')
+    expect(JSON.stringify(navItems)).toContain('/admin/registry/imports')
   })
 
   it('does not expose admin navigation to front desk users', () => {

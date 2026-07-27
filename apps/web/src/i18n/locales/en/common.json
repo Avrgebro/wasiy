@@ -96,6 +96,7 @@
     "home": "Home",
     "locations": "Locations",
     "people": "People",
+    "imports": "Imports",
     "residents": "Residents",
     "reservations": "Reservations",
     "staff": "Staff",
@@ -118,6 +119,62 @@
     "registry": "Registry"
   },
   "registry": {
+    "imports": {
+      "confirm": "Confirm import",
+      "confirmed": "The import was confirmed.",
+      "counterLabels": {
+        "duplicate": "Duplicates",
+        "error": "Errors",
+        "total": "Total",
+        "valid": "Valid",
+        "warning": "Warnings"
+      },
+      "completedAt": "Completed",
+      "counters": "V/E/D/W",
+      "dropzoneHint": "CSV with unit, resident, and membership columns.",
+      "dropzoneTitle": "Drop the CSV or select it",
+      "empty": "There are no imports to review yet.",
+      "emptyRows": "No rows match this filter.",
+      "failureReason": "Failure reason",
+      "fileLabel": "CSV file",
+      "filename": "File",
+      "history": "History",
+      "location": "Location",
+      "messages": "Messages",
+      "preview": "Preview",
+      "requestedAt": "Requested",
+      "retry": "Retry validation",
+      "retryQueued": "Validation was queued again.",
+      "review": "Review",
+      "rowFilters": {
+        "all": "All",
+        "duplicate": "Duplicates",
+        "error": "Errors",
+        "valid": "Valid",
+        "warning": "Warnings"
+      },
+      "rowNumber": "Row",
+      "rowStatuses": {
+        "duplicate": "Duplicate",
+        "error": "Error",
+        "imported": "Imported",
+        "skipped": "Skipped",
+        "valid": "Valid",
+        "warning": "Warning"
+      },
+      "statuses": {
+        "completed": "Completed",
+        "failed": "Failed",
+        "pending": "Pending",
+        "processing": "Processing",
+        "ready_for_review": "Ready for review"
+      },
+      "title": "Imports",
+      "uploadAction": "Import CSV",
+      "uploaded": "The file was uploaded for validation.",
+      "uploadSubmit": "Upload file",
+      "uploadTitle": "Import registry"
+    },
     "notes": "Notes",
     "portal": {
       "disabled": "No access",

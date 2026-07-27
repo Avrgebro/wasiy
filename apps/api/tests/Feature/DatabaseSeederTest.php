@@ -3,17 +3,24 @@
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\ExportType;
+use App\Enums\ImportRowStatus;
+use App\Enums\ImportStatus;
+use App\Enums\ImportType;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Enums\ResidentType;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Enums\VehicleType;
+use App\Jobs\CommitRegistryImport;
+use App\Jobs\ValidateRegistryImport;
 use App\Models\Account;
 use App\Models\AccountUserRole;
 use App\Models\ActivityLog;
 use App\Models\Location;
 use App\Models\LocationUserRole;
+use App\Models\RegistryImport;
+use App\Models\RegistryImportRow;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -21,7 +28,9 @@ use App\Models\User;
 use App\Models\UserInvitation;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -354,3 +363,154 @@ test('seeded manager can complete m3 registry export and activity acceptance flo
         'actor_user_id' => $manager->id,
     ]);
 });
+
+test('seeded manager can complete m4 registry import acceptance flow', function () {
+    Queue::fake();
+    Storage::fake('local');
+    $this->seed();
+
+    $account = Account::query()->where('slug', 'wasiy-demo')->sole();
+    $location = Location::query()->where('slug', 'edificio-central')->sole();
+    $northTower = Location::query()->where('slug', 'torre-norte')->sole();
+    $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
+    $existingUnit = Unit::query()
+        ->where('location_id', $location->id)
+        ->where('building_name', 'Torre A')
+        ->where('unit_number', '101')
+        ->sole();
+    $existingResident = Resident::query()
+        ->where('account_id', $account->id)
+        ->where('email', 'resident@wasiy.test')
+        ->sole();
+    $fixture = m4RegistryImportAcceptanceFixture();
+    $unitCountBeforeValidation = Unit::query()->where('location_id', $location->id)->count();
+    $residentCountBeforeValidation = Resident::query()->where('account_id', $account->id)->count();
+    $membershipCountBeforeValidation = UnitMembership::query()->where('location_id', $location->id)->count();
+
+    $this->actingAs($manager)
+        ->postJson("/api/locations/{$northTower->id}/registry-imports", [
+            'import_type' => ImportType::RegistryUnitsResidents->value,
+            'file' => UploadedFile::fake()->createWithContent('m4-registry-import-acceptance.csv', $fixture),
+        ])
+        ->assertForbidden();
+
+    $uploadResponse = $this->actingAs($manager)
+        ->postJson("/api/locations/{$location->id}/registry-imports", [
+            'import_type' => ImportType::RegistryUnitsResidents->value,
+            'file' => UploadedFile::fake()->createWithContent('m4-registry-import-acceptance.csv', $fixture),
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.status', ImportStatus::Pending->value);
+
+    $previewImport = RegistryImport::query()->findOrFail($uploadResponse->json('data.id'));
+    Queue::assertPushed(ValidateRegistryImport::class, fn (ValidateRegistryImport $job): bool => $job->import->id === $previewImport->id);
+
+    (new ValidateRegistryImport($previewImport))->handle();
+    $previewImport->refresh();
+
+    expect($previewImport->status)->toBe(ImportStatus::ReadyForReview)
+        ->and($previewImport->total_rows)->toBe(6)
+        ->and($previewImport->valid_rows)->toBe(3)
+        ->and($previewImport->error_rows)->toBe(1)
+        ->and($previewImport->duplicate_rows)->toBe(1)
+        ->and($previewImport->warning_rows)->toBe(1)
+        ->and(Unit::query()->where('location_id', $location->id)->count())->toBe($unitCountBeforeValidation)
+        ->and(Resident::query()->where('account_id', $account->id)->count())->toBe($residentCountBeforeValidation)
+        ->and(UnitMembership::query()->where('location_id', $location->id)->count())->toBe($membershipCountBeforeValidation);
+
+    $this->actingAs($manager)
+        ->getJson("/api/registry-imports/{$previewImport->id}/rows?status=".ImportRowStatus::Error->value)
+        ->assertOk()
+        ->assertJsonPath('data.0.errors.0', 'El campo unidad es obligatorio.');
+
+    $this->actingAs($manager)
+        ->getJson("/api/registry-imports/{$previewImport->id}/rows?status=".ImportRowStatus::Duplicate->value)
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.duplicate_key', "membership:{$existingUnit->id}:{$existingResident->id}");
+
+    $this->actingAs($manager)
+        ->getJson("/api/registry-imports/{$previewImport->id}/rows?status=".ImportRowStatus::Warning->value)
+        ->assertOk()
+        ->assertJsonPath('data.0.warnings.0', 'La unidad existente sera reutilizada.');
+
+    $this->actingAs($manager)
+        ->postJson("/api/registry-imports/{$previewImport->id}/confirm")
+        ->assertUnprocessable();
+
+    $confirmableResponse = $this->actingAs($manager)
+        ->postJson("/api/locations/{$location->id}/registry-imports", [
+            'import_type' => ImportType::RegistryUnitsResidents->value,
+            'file' => UploadedFile::fake()->createWithContent(
+                'm4-registry-import-confirmable.csv',
+                m4RegistryImportConfirmableFixture($fixture),
+            ),
+        ])
+        ->assertCreated();
+
+    $confirmableImport = RegistryImport::query()->findOrFail($confirmableResponse->json('data.id'));
+    (new ValidateRegistryImport($confirmableImport))->handle();
+    $confirmableImport->refresh();
+
+    expect($confirmableImport->error_rows)->toBe(0)
+        ->and($confirmableImport->valid_rows)->toBe(3)
+        ->and($confirmableImport->duplicate_rows)->toBe(1)
+        ->and($confirmableImport->warning_rows)->toBe(1);
+
+    $this->actingAs($manager)
+        ->postJson("/api/registry-imports/{$confirmableImport->id}/confirm")
+        ->assertOk()
+        ->assertJsonPath('data.confirmed_at', fn (?string $confirmedAt): bool => $confirmedAt !== null);
+
+    Queue::assertPushed(CommitRegistryImport::class, fn (CommitRegistryImport $job): bool => $job->import->id === $confirmableImport->id);
+
+    (new CommitRegistryImport($confirmableImport))->handle();
+    $confirmableImport->refresh();
+
+    $newResident = Resident::query()->where('email', 'julia.import@wasiy.test')->sole();
+    $primaryResident = Resident::query()->where('email', 'pedro.primary@wasiy.test')->sole();
+    $primaryMembership = UnitMembership::query()
+        ->where('resident_id', $primaryResident->id)
+        ->where('is_primary_contact', true)
+        ->sole();
+
+    expect($confirmableImport->status)->toBe(ImportStatus::Completed)
+        ->and(Unit::query()->where('location_id', $location->id)->where('building_name', 'Torre Import')->where('unit_number', '701')->count())->toBe(1)
+        ->and(Unit::query()->where('location_id', $location->id)->where('building_name', 'Torre A')->where('unit_number', '101')->count())->toBe(1)
+        ->and(UnitMembership::query()->where('resident_id', $newResident->id)->where('location_id', $location->id)->count())->toBe(1)
+        ->and($primaryMembership->unit->unit_number)->toBe('703')
+        ->and(RegistryImportRow::query()->where('registry_import_id', $confirmableImport->id)->where('status', ImportRowStatus::Skipped)->count())->toBe(1)
+        ->and(ActivityLog::query()->where('event_type', ActivityEventType::ImportCompleted)->where('subject_id', $confirmableImport->id)->count())->toBe(1);
+
+    $failedResponse = $this->actingAs($manager)
+        ->postJson("/api/locations/{$location->id}/registry-imports", [
+            'import_type' => ImportType::RegistryUnitsResidents->value,
+            'file' => UploadedFile::fake()->createWithContent('m4-registry-import-failed.csv', "edificio\nTorre A\n"),
+        ])
+        ->assertCreated();
+
+    $failedImport = RegistryImport::query()->findOrFail($failedResponse->json('data.id'));
+    (new ValidateRegistryImport($failedImport))->handle();
+
+    $this->actingAs($manager)
+        ->getJson("/api/registry-imports/{$failedImport->id}")
+        ->assertOk()
+        ->assertJsonPath('data.status', ImportStatus::Failed->value)
+        ->assertJsonPath('data.failure_reason', 'Falta el encabezado requerido: unidad.');
+});
+
+function m4RegistryImportAcceptanceFixture(): string
+{
+    $path = database_path('seeders/fixtures/m4-registry-import-acceptance.csv');
+
+    expect(is_file($path))->toBeTrue("Missing M4 acceptance fixture at {$path}");
+
+    return file_get_contents($path);
+}
+
+function m4RegistryImportConfirmableFixture(string $fixture): string
+{
+    return collect(explode("\n", trim($fixture)))
+        ->reject(fn (string $line): bool => str_starts_with($line, ',Torre Error,'))
+        ->implode("\n")."\n";
+}

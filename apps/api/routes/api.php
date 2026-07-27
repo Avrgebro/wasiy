@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\LocationDashboardController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\PortalResidentController;
 use App\Http\Controllers\Api\RegistryExportController;
+use App\Http\Controllers\Api\RegistryImportController;
 use App\Http\Controllers\Api\ResidentController;
 use App\Http\Controllers\Api\ResidentInvitationController;
 use App\Http\Controllers\Api\StaffInvitationController;
@@ -37,6 +38,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::post('/locations/{location}/units', [UnitController::class, 'store']);
     Route::get('/locations/{location}/vehicles', [VehicleController::class, 'index']);
     Route::post('/locations/{location}/vehicles', [VehicleController::class, 'store']);
+    Route::post('/locations/{location}/registry-imports', [RegistryImportController::class, 'store']);
     Route::get('/units/{unit}', [UnitController::class, 'show']);
     Route::patch('/units/{unit}', [UnitController::class, 'update']);
     Route::delete('/units/{unit}', [UnitController::class, 'destroy']);
@@ -61,4 +63,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::post('/exports', [RegistryExportController::class, 'store']);
     Route::get('/exports/{export}', [RegistryExportController::class, 'show']);
     Route::get('/exports/{export}/download', [RegistryExportController::class, 'download']);
+    Route::get('/registry-imports', [RegistryImportController::class, 'index']);
+    Route::get('/registry-imports/{import}', [RegistryImportController::class, 'show']);
+    Route::get('/registry-imports/{import}/rows', [RegistryImportController::class, 'rows']);
+    Route::post('/registry-imports/{import}/confirm', [RegistryImportController::class, 'confirm']);
+    Route::post('/registry-imports/{import}/retry', [RegistryImportController::class, 'retry']);
 });

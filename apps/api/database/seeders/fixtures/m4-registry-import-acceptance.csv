@@ -1,0 +1,7 @@
+unidad,edificio,piso,nombres,apellidos,email,tipo_residente,contacto_principal,estado_membresia,notas_unidad
+701,Torre Import,7,,,,,,,Unidad nueva sin residente
+702,Torre Import,7,Julia,Nueva,julia.import@wasiy.test,propietaria,no,activo,Nueva residente con membresia
+101,Torre A,1,,,,,,,Reutiliza unidad existente
+101,Torre A,1,Rosa,Portal,resident@wasiy.test,propietaria,no,activo,Membresia existente duplicada
+,Torre Error,8,Error,Sin Unidad,error.import@wasiy.test,inquilino,no,activo,Falta unidad
+703,Torre Import,7,Pedro,Principal,pedro.primary@wasiy.test,inquilino,si,activo,Contacto principal importado

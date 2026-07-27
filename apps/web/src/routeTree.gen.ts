@@ -22,6 +22,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminRegistryVehiclesRouteImport } from './routes/_authenticated/admin/registry/vehicles'
 import { Route as AuthenticatedAdminRegistryUnitsRouteImport } from './routes/_authenticated/admin/registry/units'
 import { Route as AuthenticatedAdminRegistryResidentsRouteImport } from './routes/_authenticated/admin/registry/residents'
+import { Route as AuthenticatedAdminRegistryImportsRouteImport } from './routes/_authenticated/admin/registry/imports'
 
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
@@ -94,6 +95,12 @@ const AuthenticatedAdminRegistryResidentsRoute =
     path: '/registry/residents',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminRegistryImportsRoute =
+  AuthenticatedAdminRegistryImportsRouteImport.update({
+    id: '/registry/imports',
+    path: '/registry/imports',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
   '/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
   '/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
@@ -117,6 +125,7 @@ export interface FileRoutesByTo {
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
+  '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
   '/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
   '/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
@@ -133,6 +142,7 @@ export interface FileRoutesById {
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/_authenticated/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/_authenticated/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
   '/_authenticated/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
   '/_authenticated/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/select-account'
     | '/admin/'
     | '/portal/'
+    | '/admin/registry/imports'
     | '/admin/registry/residents'
     | '/admin/registry/units'
     | '/admin/registry/vehicles'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/select-account'
     | '/admin'
     | '/portal'
+    | '/admin/registry/imports'
     | '/admin/registry/residents'
     | '/admin/registry/units'
     | '/admin/registry/vehicles'
@@ -176,6 +188,7 @@ export interface FileRouteTypes {
     | '/_authenticated/select-account'
     | '/_authenticated/admin/'
     | '/_authenticated/portal/'
+    | '/_authenticated/admin/registry/imports'
     | '/_authenticated/admin/registry/residents'
     | '/_authenticated/admin/registry/units'
     | '/_authenticated/admin/registry/vehicles'
@@ -281,11 +294,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRegistryResidentsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/registry/imports': {
+      id: '/_authenticated/admin/registry/imports'
+      path: '/registry/imports'
+      fullPath: '/admin/registry/imports'
+      preLoaderRoute: typeof AuthenticatedAdminRegistryImportsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminRegistryImportsRoute: typeof AuthenticatedAdminRegistryImportsRoute
   AuthenticatedAdminRegistryResidentsRoute: typeof AuthenticatedAdminRegistryResidentsRoute
   AuthenticatedAdminRegistryUnitsRoute: typeof AuthenticatedAdminRegistryUnitsRoute
   AuthenticatedAdminRegistryVehiclesRoute: typeof AuthenticatedAdminRegistryVehiclesRoute
@@ -294,6 +315,8 @@ interface AuthenticatedAdminRouteRouteChildren {
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminRegistryImportsRoute:
+      AuthenticatedAdminRegistryImportsRoute,
     AuthenticatedAdminRegistryResidentsRoute:
       AuthenticatedAdminRegistryResidentsRoute,
     AuthenticatedAdminRegistryUnitsRoute: AuthenticatedAdminRegistryUnitsRoute,
