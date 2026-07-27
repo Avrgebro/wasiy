@@ -36,6 +36,14 @@ class InviteResidentUser
         return DB::transaction(function () use ($resident, $actor, $data): array {
             $resident->loadMissing(['account', 'unitMemberships.location']);
 
+            // Authorize before any state check, so the validation messages below
+            // cannot be used to probe residents in other accounts.
+            $location = $this->manageableInvitationLocation($resident, $actor);
+
+            if (! $location) {
+                abort(403);
+            }
+
             if ($resident->status !== RegistryStatus::Active) {
                 throw ValidationException::withMessages([
                     'resident' => __('Inactive residents cannot be invited to the portal.'),
@@ -46,12 +54,6 @@ class InviteResidentUser
                 throw ValidationException::withMessages([
                     'resident' => __('This resident already has portal access.'),
                 ]);
-            }
-
-            $location = $this->manageableInvitationLocation($resident, $actor);
-
-            if (! $location) {
-                abort(403);
             }
 
             $email = $data['email'] ?? $resident->email;

@@ -401,9 +401,14 @@ test('resident users cannot mutate memberships or another units vehicles', funct
     $otherVehicle = Vehicle::factory()->for($otherUnit)->for($unit->account)->for($unit->location)->create();
 
     expect($residentUser->can('update', $membership))->toBeFalse()
-        ->and($residentUser->can('update', $vehicle))->toBeTrue()
-        ->and($residentUser->can('delete', $vehicle))->toBeTrue()
-        ->and($residentUser->can('update', $otherVehicle))->toBeFalse()
+        ->and($residentUser->can('updateAsResident', $vehicle))->toBeTrue()
+        ->and($residentUser->can('deleteAsResident', $vehicle))->toBeTrue()
+        ->and($residentUser->can('updateAsResident', $otherVehicle))->toBeFalse()
         ->and($residentUser->can('updatePortalPhone', $resident))->toBeTrue()
         ->and($residentUser->can('updatePortalPhone', $otherResident))->toBeFalse();
+
+    // Residents hold only the portal abilities; the staff endpoints allow
+    // setting status and reassigning units, so they must stay out of reach.
+    expect($residentUser->can('update', $vehicle))->toBeFalse()
+        ->and($residentUser->can('delete', $vehicle))->toBeFalse();
 });

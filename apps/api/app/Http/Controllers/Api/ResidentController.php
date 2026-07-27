@@ -88,6 +88,8 @@ class ResidentController extends Controller
 
     public function store(Request $request, Account $account): JsonResponse
     {
+        Gate::authorize('createInAccount', [Resident::class, $account]);
+
         $validated = $this->validateResidentPayload($request, $account);
 
         /** @var User $user */

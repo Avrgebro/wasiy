@@ -212,7 +212,7 @@ class VehicleController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        Gate::authorize('update', $vehicle);
+        Gate::authorize('updateAsResident', $vehicle);
 
         $validated = $this->validatePortalVehiclePayload($request, $user, partial: true);
 
@@ -251,7 +251,7 @@ class VehicleController extends Controller
 
     public function portalDestroy(Vehicle $vehicle): Response
     {
-        Gate::authorize('delete', $vehicle);
+        Gate::authorize('deleteAsResident', $vehicle);
 
         /** @var User $actor */
         $actor = request()->user();

@@ -162,7 +162,8 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Registration stays disabled: every user is provisioned through a
+        // UserInvitation, so there is no legitimate self-signup path.
         Features::resetPasswords(),
         // Features::emailVerification(),
         Features::updateProfileInformation(),

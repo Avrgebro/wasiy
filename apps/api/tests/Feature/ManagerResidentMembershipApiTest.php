@@ -224,3 +224,62 @@ test('resident delete becomes inactive when memberships exist', function () {
         'status' => RegistryStatus::Inactive->value,
     ]);
 });
+
+test('resident creation is closed to users without registry management rights', function () {
+    $location = Location::factory()->create();
+    $outsider = User::factory()->create();
+
+    $frontDesk = User::factory()->create();
+    LocationUserRole::query()->create([
+        'account_id' => $location->account_id,
+        'location_id' => $location->id,
+        'user_id' => $frontDesk->id,
+        'role' => LocationRole::FrontDesk,
+    ]);
+
+    $payload = [
+        'first_name' => 'Mara',
+        'last_name' => 'Quispe',
+    ];
+
+    $this->actingAs($outsider)
+        ->postJson("/api/accounts/{$location->account_id}/residents", $payload)
+        ->assertForbidden();
+
+    $this->actingAs($frontDesk)
+        ->postJson("/api/accounts/{$location->account_id}/residents", $payload)
+        ->assertForbidden();
+
+    $this->assertDatabaseMissing('residents', ['last_name' => 'Quispe']);
+});
+
+test('resident creation without memberships still requires registry rights in the account', function () {
+    $location = Location::factory()->create();
+    $otherLocation = Location::factory()->create();
+
+    // A manager of a different account must not be able to write into this one.
+    $foreignManager = createRegistryManager($otherLocation);
+
+    $this->actingAs($foreignManager)
+        ->postJson("/api/accounts/{$location->account_id}/residents", [
+            'first_name' => 'Ines',
+            'last_name' => 'Torres',
+        ])
+        ->assertForbidden();
+
+    $this->assertDatabaseMissing('residents', ['last_name' => 'Torres']);
+
+    $admin = createRegistryAdmin($location->account);
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$location->account_id}/residents", [
+            'first_name' => 'Ines',
+            'last_name' => 'Torres',
+        ])
+        ->assertCreated();
+
+    $this->assertDatabaseHas('residents', [
+        'last_name' => 'Torres',
+        'account_id' => $location->account_id,
+    ]);
+});

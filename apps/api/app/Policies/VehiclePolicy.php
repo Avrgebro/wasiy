@@ -31,13 +31,26 @@ class VehiclePolicy
 
     public function update(User $user, Vehicle $vehicle): bool
     {
-        return $this->access->canManageVehicle($user, $vehicle)
-            || $this->access->canResidentManageVehicle($user, $vehicle);
+        return $this->access->canManageVehicle($user, $vehicle);
     }
 
     public function delete(User $user, Vehicle $vehicle): bool
     {
-        return $this->access->canManageVehicle($user, $vehicle)
-            || $this->access->canResidentManageVehicle($user, $vehicle);
+        return $this->access->canManageVehicle($user, $vehicle);
+    }
+
+    /**
+     * Portal-only abilities. Kept separate from update/delete so residents
+     * cannot reach the staff endpoints, which allow setting status and
+     * reassigning a vehicle to any unit in the location.
+     */
+    public function updateAsResident(User $user, Vehicle $vehicle): bool
+    {
+        return $this->access->canResidentManageVehicle($user, $vehicle);
+    }
+
+    public function deleteAsResident(User $user, Vehicle $vehicle): bool
+    {
+        return $this->access->canResidentManageVehicle($user, $vehicle);
     }
 }
