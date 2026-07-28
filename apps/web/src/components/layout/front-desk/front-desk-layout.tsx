@@ -9,12 +9,7 @@ type FrontDeskLayoutProps = {
 
 export function FrontDeskLayout({ children, navItems }: FrontDeskLayoutProps) {
   return (
-    <AppShell
-      navItems={navItems}
-      productAreaKey="shell.frontDeskArea"
-      roleLabelKey="roles.frontDesk"
-      titleKey="frontDesk.title"
-    >
+    <AppShell navItems={navItems}>
       {children}
     </AppShell>
   )

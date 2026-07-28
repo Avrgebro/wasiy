@@ -9,9 +9,9 @@ export function Brand({ productAreaKey }: BrandProps) {
 
   return (
     <div className="px-3 pb-5">
-      <p className="text-lg font-bold text-[var(--foreground)]">Wasiy</p>
+      <p className="text-lg font-bold text-[var(--mantine-color-text)]">Wasiy</p>
       {productAreaKey ? (
-        <p className="text-sm text-[var(--muted-foreground)]">
+        <p className="text-sm text-[var(--mantine-color-dimmed)]">
           {t(productAreaKey)}
         </p>
       ) : null}

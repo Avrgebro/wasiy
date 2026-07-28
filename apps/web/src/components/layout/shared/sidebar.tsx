@@ -1,8 +1,7 @@
-import { Button } from '@mantine/core'
-import { Logout } from '@solar-icons/react'
 import { useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Brand } from './brand'
+import { LocationSwitcher } from './location-switcher'
 import { SidebarItemGroup } from './sidebar-item-group'
 import { SidebarItem } from './sidebar-item'
 import type { LayoutNavEntry, LayoutNavItem, LayoutNavLeaf } from './types'
@@ -11,7 +10,6 @@ type SidebarProps = {
   mobileOpened: boolean
   navItems: LayoutNavEntry[]
   onMobileClose: () => void
-  productAreaKey: string
 }
 
 function isActivePath(pathname: string, item: LayoutNavLeaf) {
@@ -100,24 +98,18 @@ function SidebarNav({
 function SidebarContent({
   navItems,
   onNavigate,
-  productAreaKey,
 }: {
   navItems: LayoutNavEntry[]
   onNavigate?: () => void
-  productAreaKey: string
 }) {
-  const { t } = useTranslation('common')
-
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <Brand productAreaKey={productAreaKey} />
+      <Brand />
+      <div className="pb-4">
+        <LocationSwitcher />
+      </div>
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <SidebarNav navItems={navItems} onNavigate={onNavigate} />
-      </div>
-      <div className="border-t border-[var(--sidebar-border)] pt-3">
-        <Button fullWidth leftSection={<Logout size={16} />} variant="subtle">
-          {t('auth.logout')}
-        </Button>
       </div>
     </div>
   )
@@ -127,7 +119,6 @@ export function Sidebar({
   mobileOpened,
   navItems,
   onMobileClose,
-  productAreaKey,
 }: SidebarProps) {
   const { t } = useTranslation('common')
 
@@ -143,14 +134,10 @@ export function Sidebar({
       ) : null}
 
       <aside
-        className="fixed inset-y-0 left-0 z-40 w-[var(--sidebar-width)] -translate-x-full border-r border-[var(--border)] bg-[var(--sidebar)] px-3 py-4 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0"
+        className="fixed inset-y-0 left-0 z-40 w-[var(--sidebar-width)] -translate-x-full border-r border-[var(--mantine-color-default-border)] bg-[var(--sidebar)] px-3 py-4 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0"
         data-opened={mobileOpened}
       >
-        <SidebarContent
-          navItems={navItems}
-          onNavigate={onMobileClose}
-          productAreaKey={productAreaKey}
-        />
+        <SidebarContent navItems={navItems} onNavigate={onMobileClose} />
       </aside>
     </>
   )

@@ -30,14 +30,14 @@ export function SelectAccountPage() {
   const error = selectAccountMutation.error
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[var(--background)] px-4 py-8">
-      <section className="w-full max-w-md rounded-md border border-[var(--border)] bg-[var(--card)] p-5">
+    <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4 py-8">
+      <section className="w-full max-w-md rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
         <Brand productAreaKey="accountSelection.productArea" />
         <div className="mt-2">
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+          <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
             {t('accountSelection.title')}
           </h1>
-          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          <p className="mt-2 text-sm text-[var(--mantine-color-dimmed)]">
             {t('accountSelection.summary')}
           </p>
         </div>
@@ -73,7 +73,7 @@ export function SelectAccountPage() {
           ))}
         </div>
 
-        <div className="mt-5 border-t border-[var(--border)] pt-4">
+        <div className="mt-5 border-t border-[var(--mantine-color-default-border)] pt-4">
           <Button
             fullWidth
             leftSection={<Logout size={16} />}

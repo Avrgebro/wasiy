@@ -171,7 +171,7 @@ export function ImportsRegistryPage() {
   return (
     <div className="flex flex-col gap-5">
       <Group justify="space-between">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
+        <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
           {t('registry.imports.title')}
         </h1>
         <Button leftSection={<Upload size={16} />} onClick={() => setUploadOpened(true)}>
@@ -186,7 +186,7 @@ export function ImportsRegistryPage() {
       ) : null}
 
       <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="md">
-        <section className="rounded-md border border-[var(--border)] bg-[var(--card)]">
+        <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
           <Group justify="space-between" p="md">
             <Text fw={700}>{t('registry.imports.history')}</Text>
             {importsQuery.isFetching ? <Loader size="sm" /> : null}
@@ -209,7 +209,7 @@ export function ImportsRegistryPage() {
           </div>
         </section>
 
-        <section className="rounded-md border border-[var(--border)] bg-[var(--card)] p-4">
+        <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
           {selectedImport ? (
             <Stack gap="md">
               <Group align="start" justify="space-between">
@@ -270,7 +270,7 @@ export function ImportsRegistryPage() {
         </section>
       </SimpleGrid>
 
-      <section className="rounded-md border border-[var(--border)] bg-[var(--card)]">
+      <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
         <Stack gap="md" p="md">
           <Group justify="space-between">
             <Text fw={700}>{t('registry.imports.preview')}</Text>
@@ -425,7 +425,7 @@ function ImportCounters({ registryImport }: { registryImport: RegistryImportSumm
     <SimpleGrid cols={{ base: 2, sm: 5 }} spacing="xs">
       {counters.map(([key, value]) => (
         <div
-          className="rounded-md border border-[var(--border)] p-3"
+          className="rounded-md border border-[var(--mantine-color-default-border)] p-3"
           key={key}
         >
           <Text c="dimmed" size="xs">

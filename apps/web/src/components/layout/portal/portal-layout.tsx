@@ -42,8 +42,8 @@ export function PortalLayout({ children, navItems }: PortalLayoutProps) {
   const portalNavItems = flattenPortalNavItems(navItems)
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-[var(--card)] px-4 py-3 backdrop-blur">
+    <div className="min-h-screen bg-[var(--mantine-color-body)] text-[var(--mantine-color-text)]">
+      <header className="sticky top-0 z-10 border-b border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
           <div className="[&>div]:p-0">
             <Brand />

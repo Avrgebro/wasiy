@@ -1,76 +1,78 @@
-import { createTheme, rem, type CSSVariablesResolver } from '@mantine/core'
+import { Card, Container, createTheme, Paper, rem, Select } from "@mantine/core";
+import type { MantineThemeOverride } from "@mantine/core";
 
-export const cssVariablesResolver: CSSVariablesResolver = () => ({
-  variables: {},
-  light: {
-    '--mantine-color-body': 'var(--background)',
-    '--mantine-color-text': 'var(--foreground)',
-    '--mantine-color-default': 'var(--card)',
-    '--mantine-color-default-hover': 'var(--muted)',
-    '--mantine-color-default-color': 'var(--foreground)',
-    '--mantine-color-default-border': 'var(--border)',
-    '--mantine-color-dimmed': 'var(--muted-foreground)',
-    '--mantine-color-placeholder': 'var(--muted-foreground)',
-  },
-  dark: {
-    '--mantine-color-body': 'var(--background)',
-    '--mantine-color-text': 'var(--foreground)',
-    '--mantine-color-default': 'var(--card)',
-    '--mantine-color-default-hover': 'var(--muted)',
-    '--mantine-color-default-color': 'var(--foreground)',
-    '--mantine-color-default-border': 'var(--border)',
-    '--mantine-color-dimmed': 'var(--muted-foreground)',
-    '--mantine-color-placeholder': 'var(--muted-foreground)',
-  },
-})
+const CONTAINER_SIZES: Record<string, string> = {
+  xxs: rem("200px"),
+  xs: rem("300px"),
+  sm: rem("400px"),
+  md: rem("500px"),
+  lg: rem("600px"),
+  xl: rem("1400px"),
+  xxl: rem("1600px"),
+};
 
-export const theme = createTheme({
-  primaryColor: 'wasiy',
-  defaultRadius: 'md',
-  fontFamily: 'Inter, system-ui, Segoe UI, Roboto, sans-serif',
-  headings: {
-    fontFamily: 'Inter, system-ui, Segoe UI, Roboto, sans-serif',
-    sizes: {
-      h1: { fontSize: rem(24), lineHeight: '32px', fontWeight: '700' },
-      h2: { fontSize: rem(18), lineHeight: '28px', fontWeight: '700' },
-    },
+export const mantineTheme: MantineThemeOverride = createTheme({
+  /** Put your mantine theme override here */
+  fontSizes: {
+    xs: rem("12px"),
+    sm: rem("14px"),
+    md: rem("16px"),
+    lg: rem("18px"),
+    xl: rem("20px"),
+    "2xl": rem("24px"),
+    "3xl": rem("30px"),
+    "4xl": rem("36px"),
+    "5xl": rem("48px"),
   },
-  colors: {
-    gray: [
-      '#f8fafc',
-      '#f1f5f9',
-      '#e2e8f0',
-      '#cbd5e1',
-      '#94a3b8',
-      '#64748b',
-      '#475569',
-      '#334155',
-      '#1e293b',
-      '#0f172a',
-    ],
-    dark: [
-      '#f4f2ff',
-      '#d8d3ef',
-      '#b7b1d6',
-      '#85809f',
-      '#565b73',
-      '#303a50',
-      '#263247',
-      '#1c2536',
-      '#151c2a',
-      '#0f1420',
-    ],
-    wasiy: [
-      '#f3f0ff',
-      '#e4dfff',
-      '#c9bfff',
-      '#ab99ff',
-      '#9177f5',
-      '#7d63e5',
-      '#6e56cf',
-      '#5f48b8',
-      '#503c9a',
-      '#40317b',
-    ],
+  spacing: {
+    "3xs": rem("4px"),
+    "2xs": rem("8px"),
+    xs: rem("10px"),
+    sm: rem("12px"),
+    md: rem("16px"),
+    lg: rem("20px"),
+    xl: rem("24px"),
+    "2xl": rem("28px"),
+    "3xl": rem("32px"),
   },
-})
+  primaryColor: "teal",
+  components: {
+    /** Put your mantine component override here */
+    Container: Container.extend({
+      vars: (_, { size, fluid }) => ({
+        root: {
+          "--container-size": fluid
+            ? "100%"
+            : size !== undefined && size in CONTAINER_SIZES
+              ? CONTAINER_SIZES[size]
+              : rem(size),
+        },
+      }),
+    }),
+    Paper: Paper.extend({
+      defaultProps: {
+        p: "md",
+        shadow: "xl",
+        radius: "md",
+        withBorder: true,
+      },
+    }),
+
+    Card: Card.extend({
+      defaultProps: {
+        p: "xl",
+        shadow: "xl",
+        radius: "var(--mantine-radius-default)",
+        withBorder: true,
+      },
+    }),
+    Select: Select.extend({
+      defaultProps: {
+        checkIconPosition: "right",
+      },
+    }),
+  },
+  other: {
+    style: "mantine",
+  },
+});

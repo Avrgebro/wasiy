@@ -264,10 +264,10 @@ function InvitationHeading({
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-[var(--foreground)]">
+      <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
         {t('invitations.staffTitle', { account: invitation.account.name })}
       </h1>
-      <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+      <p className="mt-2 text-sm text-[var(--mantine-color-dimmed)]">
         {invitation.invited_by.name
           ? t('invitations.staffIntroByInviter', {
               account: invitation.account.name,
@@ -275,7 +275,7 @@ function InvitationHeading({
             })
           : t('invitations.staffIntro', { account: invitation.account.name })}
       </p>
-      <ul className="mt-3 grid gap-1 text-sm text-[var(--muted-foreground)]">
+      <ul className="mt-3 grid gap-1 text-sm text-[var(--mantine-color-dimmed)]">
         {invitation.roles.account_role ? (
           <li>{t(getRoleLabelKey(invitation.roles.account_role))}</li>
         ) : null}

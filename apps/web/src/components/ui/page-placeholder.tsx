@@ -18,7 +18,7 @@ export function PagePlaceholder({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-2xl font-bold text-[var(--foreground)]">
+      <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
         {t(titleKey)}
       </h1>
       <Alert

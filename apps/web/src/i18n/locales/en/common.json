@@ -249,11 +249,14 @@
     "mainNav": "Main navigation",
     "openNav": "Open navigation",
     "productArea": "Residential operations",
-    "selectLocation": "Select location"
+    "selectLocation": "Select location",
+    "userMenu": "Open user menu"
   },
   "theme": {
     "dark": "Use dark mode",
-    "light": "Use light mode"
+    "light": "Use light mode",
+    "label": "Theme",
+    "auto": "Use system theme"
   },
   "validation": {
     "emailInvalid": "Enter a valid email.",

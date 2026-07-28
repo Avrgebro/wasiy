@@ -53,12 +53,12 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[var(--background)] px-4">
+    <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4">
       <form
-        className="w-full max-w-sm rounded-md border border-[var(--border)] bg-[var(--card)] p-5"
+        className="w-full max-w-sm rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
+        <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
           {t('auth.loginTitle')}
         </h1>
         <div className="mt-5 grid gap-4">

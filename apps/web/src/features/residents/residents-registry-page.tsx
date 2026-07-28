@@ -177,7 +177,7 @@ export function ResidentsRegistryPage() {
   return (
     <div className="flex flex-col gap-5">
       <Group justify="space-between">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
+        <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
           {t('registry.residents.title')}
         </h1>
         <Group gap="sm">
@@ -320,7 +320,7 @@ export function ResidentsRegistryPage() {
 
 function RegistryTable<T>({ table }: { table: ReturnType<typeof useReactTable<T>> }) {
   return (
-    <section className="rounded-md border border-[var(--border)] bg-[var(--card)]">
+    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <Table highlightOnHover verticalSpacing="sm">
         <Table.Thead>
           {table.getHeaderGroups().map((headerGroup) => (

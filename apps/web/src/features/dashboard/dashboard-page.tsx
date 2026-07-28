@@ -42,10 +42,10 @@ export function DashboardPage() {
     <div className="flex flex-col gap-6">
       <section className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div>
-          <h2 className="text-2xl font-bold leading-8 text-[var(--foreground)]">
+          <h2 className="text-2xl font-bold leading-8 text-[var(--mantine-color-text)]">
             {t('dashboard.heading', { location: location.name })}
           </h2>
-          <p className="text-sm text-[var(--muted-foreground)]">
+          <p className="text-sm text-[var(--mantine-color-dimmed)]">
             {t('dashboard.summary')}
           </p>
         </div>
@@ -89,9 +89,9 @@ export function DashboardPage() {
         />
       </section>
 
-      <section className="rounded-md border border-[var(--border)] bg-[var(--card)]">
-        <div className="border-b border-[var(--border)] px-4 py-3">
-          <h2 className="text-base font-bold text-[var(--foreground)]">
+      <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+        <div className="border-b border-[var(--mantine-color-default-border)] px-4 py-3">
+          <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
             {t('dashboard.registryTitle')}
           </h2>
         </div>

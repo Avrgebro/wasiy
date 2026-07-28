@@ -264,7 +264,7 @@ function RegistryHeader({
 }) {
   return (
     <Group justify="space-between">
-      <h1 className="text-2xl font-bold text-[var(--foreground)]">{title}</h1>
+      <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">{title}</h1>
       <Group gap="sm">
         <ImportRegistryButton />
         <Button leftSection={<AddCircle size={16} />} onClick={onAction}>
@@ -311,7 +311,7 @@ function RegistryFilters({
 
 function RegistryTable<T>({ table }: { table: ReturnType<typeof useReactTable<T>> }) {
   return (
-    <section className="rounded-md border border-[var(--border)] bg-[var(--card)]">
+    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <Table highlightOnHover verticalSpacing="sm">
         <Table.Thead>
           {table.getHeaderGroups().map((headerGroup) => (

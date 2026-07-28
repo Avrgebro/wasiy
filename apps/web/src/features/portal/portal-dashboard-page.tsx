@@ -101,10 +101,10 @@ export function PortalDashboardPage() {
     <div className="flex flex-col gap-6">
       <section className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+          <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
             {t('portal.title')}
           </h1>
-          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          <p className="mt-1 text-sm text-[var(--mantine-color-dimmed)]">
             {primaryMembership
               ? t('portal.primaryUnit', {
                   unit: primaryMembership.unit_label,
@@ -118,22 +118,22 @@ export function PortalDashboardPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-md border border-[var(--border)] bg-[var(--card)] p-4">
-          <h2 className="text-base font-bold text-[var(--foreground)]">
+        <div className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
+          <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
             {t('portal.householdTitle')}
           </h2>
           <div className="mt-4 grid gap-3">
             {memberships.map((membership) => (
               <div
-                className="rounded-md border border-[var(--border)] p-3"
+                className="rounded-md border border-[var(--mantine-color-default-border)] p-3"
                 key={membership.unit_membership_id}
               >
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-[var(--foreground)]">
+                    <p className="font-semibold text-[var(--mantine-color-text)]">
                       {membership.unit_label}
                     </p>
-                    <p className="text-sm text-[var(--muted-foreground)]">
+                    <p className="text-sm text-[var(--mantine-color-dimmed)]">
                       {t(residentTypeLabelKey[membership.resident_type])}
                     </p>
                   </div>
@@ -147,13 +147,13 @@ export function PortalDashboardPage() {
         </div>
 
         <form
-          className="rounded-md border border-[var(--border)] bg-[var(--card)] p-4"
+          className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4"
           onSubmit={form.handleSubmit(handleSubmit)}
         >
-          <h2 className="text-base font-bold text-[var(--foreground)]">
+          <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
             {t('portal.phoneTitle')}
           </h2>
-          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          <p className="mt-1 text-sm text-[var(--mantine-color-dimmed)]">
             {t('portal.phoneSummary')}
           </p>
           <div className="mt-4 grid gap-4">

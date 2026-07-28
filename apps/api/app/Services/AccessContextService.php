@@ -245,6 +245,7 @@ class AccessContextService
             'name' => $location->name,
             'slug' => $location->slug,
             'timezone' => $location->timezone,
+            'address' => $location->address,
             'roles' => array_values(array_unique($roles)),
             'access_source' => $accessSource,
         ];

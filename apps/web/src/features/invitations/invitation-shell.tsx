@@ -10,8 +10,8 @@ import { getErrorMessage } from '../../lib/errors'
  */
 export function InvitationShell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="grid min-h-screen place-items-center bg-[var(--background)] px-4">
-      <div className="w-full max-w-sm rounded-md border border-[var(--border)] bg-[var(--card)] p-5">
+    <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4">
+      <div className="w-full max-w-sm rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
         {children}
       </div>
     </main>
@@ -38,10 +38,10 @@ export function InvitationUnavailable({ error }: { error: unknown }) {
 
   return (
     <InvitationShell>
-      <h1 className="text-2xl font-bold text-[var(--foreground)]">
+      <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
         {isGone ? t('invitations.unavailableTitle') : t('errors.loadFailed')}
       </h1>
-      <p className="mt-3 text-sm text-[var(--muted-foreground)]">
+      <p className="mt-3 text-sm text-[var(--mantine-color-dimmed)]">
         {isGone ? t('invitations.unavailableBody') : getErrorMessage(error)}
       </p>
       <Button className="mt-5" component={Link} to="/login" variant="light">

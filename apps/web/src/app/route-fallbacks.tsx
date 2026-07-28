@@ -11,7 +11,7 @@ export function RoutePendingFallback() {
   const { t } = useTranslation('common')
 
   return (
-    <div className="grid min-h-screen place-items-center bg-[var(--background)]">
+    <div className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)]">
       <Loader aria-label={t('common.loading')} />
     </div>
   )
@@ -22,7 +22,7 @@ export function RouteErrorFallback({ error }: ErrorComponentProps) {
   const router = useRouter()
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[var(--background)] px-4">
+    <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4">
       <div className="w-full max-w-md">
         <Alert color="red" title={t('router.errorTitle')}>
           <p>{getErrorMessage(error)}</p>
@@ -43,12 +43,12 @@ export function RouteNotFoundFallback() {
   const { t } = useTranslation('common')
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[var(--background)] px-4">
+    <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4">
       <div className="text-center">
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
+        <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
           {t('router.notFoundTitle')}
         </h1>
-        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+        <p className="mt-2 text-sm text-[var(--mantine-color-dimmed)]">
           {t('router.notFoundBody')}
         </p>
         <Button className="mt-5" component={Link} to="/" variant="default">

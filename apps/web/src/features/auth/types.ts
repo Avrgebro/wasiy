@@ -23,6 +23,7 @@ export type LocationSummary = {
   name: string
   slug: string
   timezone: string
+  address: string | null
   roles: Array<AccountRole | LocationRole>
   access_source: 'account_role' | 'location_role' | 'both'
 }

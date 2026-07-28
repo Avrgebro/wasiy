@@ -77,10 +77,10 @@ export function ResidentInvitationPage({ token }: { token: string }) {
   return (
     <InvitationShell>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <h1 className="text-2xl font-bold text-[var(--foreground)]">
+        <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
           {t('invitations.residentTitle')}
         </h1>
-        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+        <p className="mt-2 text-sm text-[var(--mantine-color-dimmed)]">
           {t('invitations.residentIntro', {
             account: invitation.account.name,
             name: invitation.resident.name,

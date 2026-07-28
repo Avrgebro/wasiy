@@ -1,72 +1,12 @@
 @import 'tailwindcss';
 
-:root {
-  color-scheme: light;
-  --background: #f8fafc;
-  --foreground: #2a2a4a;
-  --card: #fbfcfe;
-  --card-foreground: #2a2a4a;
-  --popover: #fbfcfe;
-  --popover-foreground: #2a2a4a;
-  --primary: #6e56cf;
-  --primary-foreground: #ffffff;
-  --secondary: #e4dfff;
-  --secondary-foreground: #4a4080;
-  --muted: #f1f5f9;
-  --muted-foreground: #6c6c8a;
-  --accent: #eef4ff;
-  --accent-foreground: #2a2a4a;
-  --destructive: #ff5470;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #6e56cf;
-  --sidebar: #f6f8fb;
-  --sidebar-foreground: #2a2a4a;
-  --sidebar-hover: #ddd6fe;
-  --sidebar-accent: var(--primary);
-  --sidebar-accent-foreground: var(--primary-foreground);
-  --sidebar-active-foreground: var(--primary);
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #6e56cf;
+/* Colors live in src/app/theme.ts (Mantine theme + cssVariablesResolver). */
 
-  color: var(--foreground);
-  background: var(--background);
+:root {
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-[data-mantine-color-scheme='dark'] {
-  color-scheme: dark;
-  --background: #1c2536;
-  --foreground: #f4f2ff;
-  --card: #1c2536;
-  --card-foreground: #f4f2ff;
-  --popover: #18192b;
-  --popover-foreground: #f4f2ff;
-  --primary: #ab99ff;
-  --primary-foreground: #151326;
-  --secondary: #2a2847;
-  --secondary-foreground: #e9e5ff;
-  --muted: #202139;
-  --muted-foreground: #b7b1d6;
-  --accent: #29375c;
-  --accent-foreground: #edf3ff;
-  --destructive: #ff6b86;
-  --destructive-foreground: #1f0710;
-  --border: #30314f;
-  --input: #30314f;
-  --ring: #ab99ff;
-  --sidebar: #1c2536;
-  --sidebar-foreground: #c9c4dc;
-  --sidebar-hover: #4a466f;
-  --sidebar-accent: #6e56cf;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-active-foreground: var(--primary);
-  --sidebar-border: #30314f;
-  --sidebar-ring: #ab99ff;
 }
 
 html {
@@ -77,8 +17,6 @@ html {
 body {
   margin: 0;
   min-height: 100svh;
-  background: var(--background);
-  color: var(--foreground);
 }
 
 #root {

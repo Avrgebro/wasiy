@@ -80,6 +80,7 @@ describe('access helpers', () => {
           name: 'Torre Norte',
           slug: 'torre-norte',
           timezone: 'America/Lima',
+          address: null,
           roles: ['location_manager'],
           access_source: 'location_role',
         },
