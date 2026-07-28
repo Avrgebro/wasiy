@@ -11,11 +11,30 @@ type SidebarItemProps = {
   onNavigate?: () => void
 }
 
-const sidebarItemClassName =
-  'flex min-h-10 w-full transform-gpu appearance-none items-center gap-3 rounded-md border-0 bg-transparent px-3 text-left font-sans text-sm font-semibold leading-5 tracking-normal text-[var(--sidebar-foreground)] transition-all duration-150 ease-out hover:translate-x-1 hover:bg-[var(--sidebar-hover)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 data-[active=true]:bg-[var(--sidebar-accent)] data-[active=true]:text-[var(--sidebar-accent-foreground)] data-[active=true]:hover:bg-[var(--sidebar-accent)]'
+const sidebarItemBaseClassName =
+  'flex w-full transform-gpu appearance-none items-center gap-3 rounded-md border-0 px-3 text-left font-sans text-sm font-semibold leading-5 tracking-normal transition-all duration-150 ease-out hover:translate-x-1 motion-reduce:transition-none motion-reduce:hover:translate-x-0'
+
+// Class lists are computed from state instead of stacked data-attribute
+// variants: with data-[nested]/data-[active] overrides the winner depends on
+// generated CSS order, which made the active subitem style silently lose.
+function sidebarItemClassName({
+  active,
+  nested = false,
+}: {
+  active: boolean
+  nested?: boolean
+}) {
+  return [
+    sidebarItemBaseClassName,
+    nested ? 'min-h-9 pl-10' : 'min-h-10',
+    active
+      ? 'bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] hover:bg-[var(--sidebar-accent)]'
+      : 'bg-transparent text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover)]',
+  ].join(' ')
+}
 
 const sidebarItemLabelClassName =
-  'min-w-0 flex-1 font-sans text-sm font-semibold leading-5 tracking-normal'
+  'min-w-0 flex-1 font-sans font-semibold leading-5 tracking-normal'
 
 function SidebarLink({
   active,
@@ -34,19 +53,12 @@ function SidebarLink({
   return (
     <Link
       aria-current={active ? 'page' : undefined}
-      className={`${sidebarItemClassName} data-[nested=true]:min-h-9 data-[nested=true]:bg-transparent data-[nested=true]:pl-10 data-[nested=true]:text-[13px] data-[nested=true]:data-[active=true]:text-[var(--sidebar-active-foreground)] data-[nested=true]:data-[active=true]:hover:bg-[var(--sidebar-hover)]`}
-      data-active={active}
-      data-nested={nested}
+      className={sidebarItemClassName({ active, nested })}
       to={item.to}
       onClick={onNavigate}
     >
       {nested ? null : <Icon aria-hidden="true" size={20} />}
-      <span
-        className={`${sidebarItemLabelClassName} data-[nested=true]:text-[13px]`}
-        data-nested={nested}
-      >
-        {t(item.labelKey)}
-      </span>
+      <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
     </Link>
   )
 }
@@ -89,8 +101,7 @@ function SidebarCollapsibleItem({
     <div>
       <button
         aria-expanded={opened}
-        className={sidebarItemClassName}
-        data-active={childIsActive}
+        className={sidebarItemClassName({ active: childIsActive && !opened })}
         onClick={() => setOpened((current) => !current)}
         type="button"
       >

@@ -1,8 +1,29 @@
+/* Mantine's default stylesheet is unlayered, so its element resets (e.g.
+   button { font-size: 100% }) would beat Tailwind's layered utilities. Import
+   the layered build and order it below Tailwind's components/utilities. */
+@layer theme, base, mantine, components, utilities;
 @import 'tailwindcss';
+@import '@mantine/core/styles.layer.css';
+@import '@mantine/notifications/styles.layer.css';
 
-/* Colors live in src/app/theme.ts (Mantine theme + cssVariablesResolver). */
+/* Mantine colors live in src/app/theme.ts; shell-specific tokens are defined
+   here on top of Mantine's CSS variables. */
 
 :root {
+  /* App shell ("Soft workspace" layout) */
+  --app-canvas: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-8)
+  );
+  --sidebar: var(--mantine-color-body);
+  --sidebar-foreground: var(--mantine-color-text);
+  --sidebar-hover: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-5)
+  );
+  --sidebar-accent: var(--mantine-primary-color-filled);
+  --sidebar-accent-foreground: var(--mantine-primary-color-contrast);
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

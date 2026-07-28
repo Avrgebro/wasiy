@@ -18,7 +18,7 @@ export function AppShell({
   const [mobileNavOpened, setMobileNavOpened] = useState(false)
 
   return (
-    <div className="min-h-screen bg-[var(--mantine-color-body)] text-[var(--mantine-color-text)] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] [--sidebar-width:17rem]">
+    <div className="min-h-screen bg-[var(--app-canvas)] text-[var(--mantine-color-text)] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] [--sidebar-width:18rem]">
       <Sidebar
         mobileOpened={mobileNavOpened}
         navItems={navItems}
@@ -30,7 +30,7 @@ export function AppShell({
           onMobileNavOpen={() => setMobileNavOpened(true)}
           showNotifications={showNotifications}
         />
-        <main className="px-4 py-6 lg:px-6">{children}</main>
+        <main className="px-4 pb-8 pt-2 lg:px-8">{children}</main>
       </div>
     </div>
   )

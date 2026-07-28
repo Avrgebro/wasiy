@@ -1,5 +1,5 @@
 import { ActionIcon, Tooltip } from '@mantine/core'
-import { Bell, HamburgerMenu } from '@solar-icons/react'
+import { Bell, HamburgerMenu, Magnifer } from '@solar-icons/react'
 import { useTranslation } from 'react-i18next'
 import { UserMenu } from './user-menu'
 
@@ -15,8 +15,8 @@ export function Topbar({
   const { t } = useTranslation('common')
 
   return (
-    <header className="sticky top-0 z-10 flex min-h-16 items-center justify-between border-b border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 backdrop-blur lg:px-6">
-      <div className="flex min-w-0 items-center gap-3">
+    <header className="sticky top-0 z-10 flex min-h-16 items-center justify-between bg-[var(--app-canvas)]/85 px-4 backdrop-blur lg:px-8">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
         <ActionIcon
           aria-label={t('shell.openNav')}
           hiddenFrom="lg"
@@ -26,6 +26,16 @@ export function Topbar({
         >
           <HamburgerMenu size={18} />
         </ActionIcon>
+
+        {/* TEMPORARY: visual placeholder only — global search is not built yet.
+            Remove or wire up when the search feature lands. */}
+        <div className="hidden h-9 w-full max-w-md items-center gap-2 rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-3 text-sm text-[var(--mantine-color-dimmed)] md:flex">
+          <Magnifer aria-hidden="true" size={16} />
+          <span>Search…</span>
+          <kbd className="ml-auto rounded border border-[var(--mantine-color-default-border)] px-1.5 py-0.5 font-sans text-[10px] font-semibold">
+            ⌘K
+          </kbd>
+        </div>
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {showNotifications ? (

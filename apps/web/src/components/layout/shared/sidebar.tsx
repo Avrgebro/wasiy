@@ -103,7 +103,7 @@ function SidebarContent({
   onNavigate?: () => void
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-[var(--mantine-color-default-border)] bg-[var(--sidebar)] px-3 pb-4 pt-5 shadow-sm">
       <Brand />
       <div className="pb-4">
         <LocationSwitcher />
@@ -127,14 +127,14 @@ export function Sidebar({
       {mobileOpened ? (
         <button
           aria-label={t('shell.closeNav')}
-          className="fixed inset-0 z-30 bg-black/30 lg:hidden"
+          className="fixed inset-0 z-30 border-0 bg-black/40 lg:hidden"
           onClick={onMobileClose}
           type="button"
         />
       ) : null}
 
       <aside
-        className="fixed inset-y-0 left-0 z-40 w-[var(--sidebar-width)] -translate-x-full border-r border-[var(--mantine-color-default-border)] bg-[var(--sidebar)] px-3 py-4 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0"
+        className="fixed inset-y-0 left-0 z-40 w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0"
         data-opened={mobileOpened}
       >
         <SidebarContent navItems={navItems} onNavigate={onMobileClose} />
