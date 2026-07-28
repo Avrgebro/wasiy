@@ -189,7 +189,12 @@ class AccessContextService
             $request->session()->forget(self::ACTIVE_LOCATION_KEY);
         }
 
-        if (! $activeLocation instanceof Location && $locations->count() === 1) {
+        // Select a Location whenever any is accessible, not only when there is
+        // exactly one. The location-scoped surface is unusable without an
+        // active Location, and locations are ordered by name so the fallback is
+        // deterministic. An Account with no Locations yet resolves to null,
+        // which is the signal for an admin to go create one.
+        if (! $activeLocation instanceof Location && $locations->isNotEmpty()) {
             $activeLocation = $locations->first();
             $request->session()->put(self::ACTIVE_LOCATION_KEY, $activeLocation->id);
         }

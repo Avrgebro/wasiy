@@ -12,9 +12,15 @@ use App\Models\Location;
 use App\Models\LocationUserRole;
 use App\Models\User;
 use App\Models\UserInvitation;
+use App\Notifications\StaffInvitationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    Notification::fake();
+});
 
 function createAccountAdmin(Account $account): User
 {
@@ -50,53 +56,55 @@ test('account admins can invite staff users with location assignments', function
             ],
         ])
         ->assertCreated()
-        ->assertJsonPath('data.staff.email', 'ana.salas@wasiy.test')
-        ->assertJsonPath('data.staff.location_assignments.0.location_id', $location->id)
-        ->assertJsonPath('data.staff.location_assignments.0.role', LocationRole::FrontDesk->value)
         ->assertJsonPath('data.invitation.email', 'ana.salas@wasiy.test')
         ->assertJsonPath('data.invitation.purpose', UserInvitationPurpose::Staff->value)
         ->assertJsonPath('data.invitation.status', UserInvitationStatus::Pending->value)
+        ->assertJsonPath('data.invitation.invited_location_assignments.0.location_id', $location->id)
+        ->assertJsonPath('data.invitation.invited_location_assignments.0.role', LocationRole::FrontDesk->value)
         ->assertJsonMissing(['token_hash']);
 
-    $staff = User::query()->where('email', 'ana.salas@wasiy.test')->sole();
-
-    $this->assertDatabaseHas('location_user_roles', [
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::FrontDesk->value,
-    ]);
+    // Nothing is granted at invite time: no User, no role rows. Access appears
+    // only when the invitee accepts.
+    expect(User::query()->where('email', 'ana.salas@wasiy.test')->exists())->toBeFalse();
+    $this->assertDatabaseCount('location_user_roles', 0);
+    $this->assertDatabaseCount('account_user_roles', 1); // the inviting admin
 
     $invitation = UserInvitation::query()->where('email', 'ana.salas@wasiy.test')->sole();
 
-    expect($invitation->user_id)->toBe($staff->id)
+    expect($invitation->user_id)->toBeNull()
         ->and($invitation->invited_by_user_id)->toBe($admin->id)
         ->and($invitation->location_id)->toBeNull()
         ->and($invitation->token_hash)->not->toBeEmpty()
         ->and($invitation->expires_at->isSameDay(now()->addDays(21)))->toBeTrue()
-        ->and($staff->email_verified_at)->toBeNull();
+        ->and($invitation->invitedAccountRole())->toBeNull()
+        ->and($invitation->invitedLocationAssignments())->toBe([
+            [
+                'location_id' => $location->id,
+                'role' => LocationRole::FrontDesk->value,
+            ],
+        ]);
+
+    Notification::assertSentOnDemand(StaffInvitationNotification::class);
 
     $activityLog = ActivityLog::query()->sole();
 
     expect($activityLog->account_id)->toBe($account->id)
         ->and($activityLog->location_id)->toBeNull()
         ->and($activityLog->actor_user_id)->toBe($admin->id)
-        ->and($activityLog->subject_type)->toBe('user')
-        ->and($activityLog->subject_id)->toBe($staff->id)
+        ->and($activityLog->subject_type)->toBe('user_invitation')
+        ->and($activityLog->subject_id)->toBe($invitation->id)
         ->and($activityLog->event_type)->toBe(ActivityEventType::StaffInvited)
-        ->and($activityLog->summary)->toBe("Se invitó a {$staff->name} al equipo de {$account->name}.")
+        ->and($activityLog->summary)->toBe("Se invitó a Ana Salas al equipo de {$account->name}.")
         ->and($activityLog->metadata)->toMatchArray([
             'actor_user_id' => $admin->id,
             'actor_user_name' => $admin->name,
             'actor_user_email' => $admin->email,
             'account_id' => $account->id,
             'account_name' => $account->name,
-            'staff_user_id' => $staff->id,
-            'staff_user_name' => $staff->name,
-            'staff_user_email' => $staff->email,
             'invitation_id' => $invitation->id,
-            'account_role_after' => null,
-            'location_assignments_after' => [
+            'invitation_email' => 'ana.salas@wasiy.test',
+            'invited_account_role' => null,
+            'invited_location_assignments' => [
                 [
                     'location_id' => $location->id,
                     'location_name' => $location->name,
@@ -198,12 +206,13 @@ test('staff invitations reuse existing active users without overwriting identity
             ],
         ])
         ->assertCreated()
-        ->assertJsonPath('data.staff.id', $existingUser->id)
-        ->assertJsonPath('data.staff.name', 'Existing Person')
         ->assertJsonPath('data.invitation.first_name', 'Existing')
         ->assertJsonPath('data.invitation.last_name', 'Person');
 
+    // The existing identity is snapshotted and left untouched, and the invite
+    // still grants nothing until it is accepted.
     expect($existingUser->fresh()->name)->toBe('Existing Person');
+    $this->assertDatabaseCount('location_user_roles', 0);
 });
 
 test('staff invitations reject existing deactivated users', function () {
@@ -711,4 +720,396 @@ test('staff list is admin only paginated and filters by explicit role and locati
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.id', $manager->id);
+});
+
+function inviteStaffAndCaptureToken(Account $account, User $admin, array $payload): string
+{
+    test()->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/invitations", $payload)
+        ->assertCreated();
+
+    $token = null;
+
+    Notification::assertSentOnDemand(
+        StaffInvitationNotification::class,
+        function (StaffInvitationNotification $notification) use (&$token): bool {
+            $token = $notification->token;
+
+            return true;
+        },
+    );
+
+    app('auth')->forgetGuards();
+
+    return $token;
+}
+
+test('accepting a staff invitation creates the user and applies every role', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'nueva@wasiy.test',
+        'first_name' => 'Nueva',
+        'last_name' => 'Persona',
+        'account_role' => AccountRole::AccountAdmin->value,
+        'location_assignments' => [
+            ['location_id' => $location->id, 'role' => LocationRole::LocationManager->value],
+        ],
+    ]);
+
+    $this->getJson("/api/staff-invitations/{$token}")
+        ->assertOk()
+        ->assertJsonPath('data.email', 'nueva@wasiy.test')
+        ->assertJsonPath('data.requires_account_creation', true)
+        ->assertJsonPath('data.account.name', $account->name)
+        ->assertJsonPath('data.roles.account_role', AccountRole::AccountAdmin->value)
+        ->assertJsonPath('data.roles.locations.0.name', $location->name)
+        ->assertJsonMissingPath('data.token_hash');
+
+    $this->withHeader('Origin', 'http://localhost:5174')
+        ->postJson("/api/staff-invitations/{$token}/accept", [
+            'password' => 'a-strong-password',
+            'password_confirmation' => 'a-strong-password',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.skipped_location_ids', [])
+        ->assertJsonPath('data.session.user.email', 'nueva@wasiy.test');
+
+    $staff = User::query()->where('email', 'nueva@wasiy.test')->sole();
+
+    $this->assertAuthenticatedAs($staff);
+    $this->assertDatabaseHas('account_user_roles', [
+        'account_id' => $account->id,
+        'user_id' => $staff->id,
+        'role' => AccountRole::AccountAdmin->value,
+    ]);
+    $this->assertDatabaseHas('location_user_roles', [
+        'account_id' => $account->id,
+        'location_id' => $location->id,
+        'user_id' => $staff->id,
+        'role' => LocationRole::LocationManager->value,
+    ]);
+
+    $invitation = UserInvitation::query()->where('email', 'nueva@wasiy.test')->sole();
+
+    expect($invitation->status)->toBe(UserInvitationStatus::Accepted)
+        ->and($invitation->user_id)->toBe($staff->id)
+        ->and($invitation->accepted_at)->not->toBeNull();
+
+    expect(ActivityLog::query()
+        ->where('event_type', ActivityEventType::StaffInvitationAccepted->value)
+        ->count())->toBe(1);
+});
+
+test('accepting twice is gone', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'once@wasiy.test',
+        'first_name' => 'Once',
+        'last_name' => 'Only',
+        'account_role' => null,
+        'location_assignments' => [
+            ['location_id' => $location->id, 'role' => LocationRole::FrontDesk->value],
+        ],
+    ]);
+
+    $payload = [
+        'password' => 'a-strong-password',
+        'password_confirmation' => 'a-strong-password',
+    ];
+
+    $this->postJson("/api/staff-invitations/{$token}/accept", $payload)->assertOk();
+
+    $this->app['auth']->forgetGuards();
+
+    $this->postJson("/api/staff-invitations/{$token}/accept", $payload)->assertGone();
+});
+
+test('an existing user must be signed in as themselves to accept', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+    $existing = User::factory()->create(['email' => 'veteran@wasiy.test']);
+    $someoneElse = User::factory()->create();
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'veteran@wasiy.test',
+        'first_name' => 'Veteran',
+        'last_name' => 'Staffer',
+        'account_role' => null,
+        'location_assignments' => [
+            ['location_id' => $location->id, 'role' => LocationRole::FrontDesk->value],
+        ],
+    ]);
+
+    $this->getJson("/api/staff-invitations/{$token}")
+        ->assertOk()
+        ->assertJsonPath('data.requires_account_creation', false);
+
+    // Unauthenticated: the SPA is told to send them through login.
+    $this->postJson("/api/staff-invitations/{$token}/accept")->assertUnauthorized();
+
+    // Signed in as the wrong person.
+    $this->actingAs($someoneElse)
+        ->postJson("/api/staff-invitations/{$token}/accept")
+        ->assertStatus(409);
+
+    $this->assertDatabaseCount('location_user_roles', 0);
+
+    // Signed in as the invitee.
+    $this->actingAs($existing)
+        ->postJson("/api/staff-invitations/{$token}/accept")
+        ->assertOk();
+
+    $this->assertDatabaseHas('location_user_roles', [
+        'account_id' => $account->id,
+        'location_id' => $location->id,
+        'user_id' => $existing->id,
+        'role' => LocationRole::FrontDesk->value,
+    ]);
+});
+
+test('a location deleted before acceptance is skipped rather than fatal', function () {
+    $account = Account::factory()->create();
+    $liveLocation = Location::factory()->for($account)->create();
+    $doomedLocation = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'partial@wasiy.test',
+        'first_name' => 'Partial',
+        'last_name' => 'Grant',
+        'account_role' => null,
+        'location_assignments' => [
+            ['location_id' => $liveLocation->id, 'role' => LocationRole::FrontDesk->value],
+            ['location_id' => $doomedLocation->id, 'role' => LocationRole::LocationManager->value],
+        ],
+    ]);
+
+    $doomedLocation->delete();
+
+    $this->postJson("/api/staff-invitations/{$token}/accept", [
+        'password' => 'a-strong-password',
+        'password_confirmation' => 'a-strong-password',
+    ])
+        ->assertOk()
+        ->assertJsonPath('data.skipped_location_ids', [$doomedLocation->id]);
+
+    $staff = User::query()->where('email', 'partial@wasiy.test')->sole();
+
+    $this->assertDatabaseHas('location_user_roles', [
+        'location_id' => $liveLocation->id,
+        'user_id' => $staff->id,
+    ]);
+    $this->assertDatabaseMissing('location_user_roles', [
+        'location_id' => $doomedLocation->id,
+        'user_id' => $staff->id,
+    ]);
+});
+
+test('an invitation whose only location is gone cannot be accepted', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'empty@wasiy.test',
+        'first_name' => 'Empty',
+        'last_name' => 'Grant',
+        'account_role' => null,
+        'location_assignments' => [
+            ['location_id' => $location->id, 'role' => LocationRole::FrontDesk->value],
+        ],
+    ]);
+
+    $location->delete();
+
+    $this->postJson("/api/staff-invitations/{$token}/accept", [
+        'password' => 'a-strong-password',
+        'password_confirmation' => 'a-strong-password',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('token');
+
+    expect(User::query()->where('email', 'empty@wasiy.test')->exists())->toBeFalse();
+});
+
+test('the staff list surfaces pending invitations separately from active staff', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+
+    inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'waiting@wasiy.test',
+        'first_name' => 'Waiting',
+        'last_name' => 'Person',
+        'account_role' => null,
+        'location_assignments' => [
+            ['location_id' => $location->id, 'role' => LocationRole::FrontDesk->value],
+        ],
+    ]);
+
+    $response = $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/staff")
+        ->assertOk()
+        ->assertJsonPath('pending_invitations.0.email', 'waiting@wasiy.test')
+        ->assertJsonPath('pending_invitations.0.invited_by.name', $admin->name)
+        ->assertJsonPath(
+            'pending_invitations.0.invited_location_assignments.0.role',
+            LocationRole::FrontDesk->value,
+        );
+
+    // The invitee holds no roles, so they are absent from the staff list itself.
+    $staffEmails = collect($response->json('data'))->pluck('email');
+
+    expect($staffEmails)->not->toContain('waiting@wasiy.test')
+        ->and($staffEmails)->toContain($admin->email);
+});
+
+test('cancelling a pending staff invitation kills its token', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'revoked@wasiy.test',
+        'first_name' => 'Revoked',
+        'last_name' => 'Person',
+        'account_role' => AccountRole::AccountAdmin->value,
+        'location_assignments' => [],
+    ]);
+
+    $invitation = UserInvitation::query()->where('email', 'revoked@wasiy.test')->sole();
+
+    $this->actingAs($admin)
+        ->deleteJson("/api/accounts/{$account->id}/staff/invitations/{$invitation->id}")
+        ->assertOk()
+        ->assertJsonPath('data.invitation.status', UserInvitationStatus::Cancelled->value);
+
+    app('auth')->forgetGuards();
+
+    $this->getJson("/api/staff-invitations/{$token}")->assertGone();
+    $this->postJson("/api/staff-invitations/{$token}/accept", [
+        'password' => 'a-strong-password',
+        'password_confirmation' => 'a-strong-password',
+    ])->assertGone();
+
+    expect(ActivityLog::query()
+        ->where('event_type', ActivityEventType::StaffInvitationCancelled->value)
+        ->count())->toBe(1);
+
+    // Cancelling frees the pending-unique slot for a fresh invitation.
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/invitations", [
+            'email' => 'revoked@wasiy.test',
+            'first_name' => 'Revoked',
+            'last_name' => 'Person',
+            'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [],
+        ])
+        ->assertCreated();
+});
+
+test('resending a staff invitation invalidates the previous token', function () {
+    $account = Account::factory()->create();
+    $admin = createAccountAdmin($account);
+
+    $firstToken = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'resend@wasiy.test',
+        'first_name' => 'Resend',
+        'last_name' => 'Person',
+        'account_role' => AccountRole::AccountAdmin->value,
+        'location_assignments' => [],
+    ]);
+
+    $invitation = UserInvitation::query()->where('email', 'resend@wasiy.test')->sole();
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/invitations/{$invitation->id}/resend")
+        ->assertOk()
+        ->assertJsonPath('data.invitation.status', UserInvitationStatus::Pending->value);
+
+    $secondToken = null;
+
+    Notification::assertSentOnDemandTimes(StaffInvitationNotification::class, 2);
+    Notification::assertSentOnDemand(
+        StaffInvitationNotification::class,
+        function (StaffInvitationNotification $notification) use (&$secondToken, $firstToken): bool {
+            if ($notification->token === $firstToken) {
+                return false;
+            }
+
+            $secondToken = $notification->token;
+
+            return true;
+        },
+    );
+
+    app('auth')->forgetGuards();
+
+    $this->getJson("/api/staff-invitations/{$firstToken}")->assertGone();
+    $this->getJson("/api/staff-invitations/{$secondToken}")->assertOk();
+});
+
+test('invitation cancel and resend are scoped to the account and to admins', function () {
+    $account = Account::factory()->create();
+    $otherAccount = Account::factory()->create();
+    $admin = createAccountAdmin($account);
+    $otherAdmin = createAccountAdmin($otherAccount);
+
+    inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'scoped@wasiy.test',
+        'first_name' => 'Scoped',
+        'last_name' => 'Person',
+        'account_role' => AccountRole::AccountAdmin->value,
+        'location_assignments' => [],
+    ]);
+
+    $invitation = UserInvitation::query()->where('email', 'scoped@wasiy.test')->sole();
+
+    // Reaching another Account's invitation through your own Account 404s.
+    $this->actingAs($otherAdmin)
+        ->deleteJson("/api/accounts/{$otherAccount->id}/staff/invitations/{$invitation->id}")
+        ->assertNotFound();
+
+    // Reaching it through the owning Account is a plain authorization failure.
+    $this->actingAs($otherAdmin)
+        ->deleteJson("/api/accounts/{$account->id}/staff/invitations/{$invitation->id}")
+        ->assertForbidden();
+
+    expect($invitation->fresh()->status)->toBe(UserInvitationStatus::Pending);
+});
+
+test('an already cancelled invitation cannot be cancelled or resent again', function () {
+    $account = Account::factory()->create();
+    $admin = createAccountAdmin($account);
+
+    inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'twice@wasiy.test',
+        'first_name' => 'Twice',
+        'last_name' => 'Person',
+        'account_role' => AccountRole::AccountAdmin->value,
+        'location_assignments' => [],
+    ]);
+
+    $invitation = UserInvitation::query()->where('email', 'twice@wasiy.test')->sole();
+
+    $this->actingAs($admin)
+        ->deleteJson("/api/accounts/{$account->id}/staff/invitations/{$invitation->id}")
+        ->assertOk();
+
+    $this->actingAs($admin)
+        ->deleteJson("/api/accounts/{$account->id}/staff/invitations/{$invitation->id}")
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('invitation');
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/invitations/{$invitation->id}/resend")
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('invitation');
 });

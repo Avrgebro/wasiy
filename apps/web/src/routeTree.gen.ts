@@ -19,6 +19,16 @@ import { Route as AuthenticatedFrontDeskRouteRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as InvitationsStaffTokenRouteImport } from './routes/invitations/staff.$token'
+import { Route as InvitationsResidentTokenRouteImport } from './routes/invitations/resident.$token'
+import { Route as AuthenticatedAdminVisitorsRouteImport } from './routes/_authenticated/admin/visitors'
+import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated/admin/staff'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminReservationsRouteImport } from './routes/_authenticated/admin/reservations'
+import { Route as AuthenticatedAdminLocationsRouteImport } from './routes/_authenticated/admin/locations'
+import { Route as AuthenticatedAdminFinancesRouteImport } from './routes/_authenticated/admin/finances'
+import { Route as AuthenticatedAdminAnnouncementsRouteImport } from './routes/_authenticated/admin/announcements'
+import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin/activity'
 import { Route as AuthenticatedAdminRegistryVehiclesRouteImport } from './routes/_authenticated/admin/registry/vehicles'
 import { Route as AuthenticatedAdminRegistryUnitsRouteImport } from './routes/_authenticated/admin/registry/units'
 import { Route as AuthenticatedAdminRegistryResidentsRouteImport } from './routes/_authenticated/admin/registry/residents'
@@ -77,6 +87,64 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const InvitationsStaffTokenRoute = InvitationsStaffTokenRouteImport.update({
+  id: '/invitations/staff/$token',
+  path: '/invitations/staff/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationsResidentTokenRoute =
+  InvitationsResidentTokenRouteImport.update({
+    id: '/invitations/resident/$token',
+    path: '/invitations/resident/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAdminVisitorsRoute =
+  AuthenticatedAdminVisitorsRouteImport.update({
+    id: '/visitors',
+    path: '/visitors',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminStaffRoute = AuthenticatedAdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
+const AuthenticatedAdminSettingsRoute =
+  AuthenticatedAdminSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminReservationsRoute =
+  AuthenticatedAdminReservationsRouteImport.update({
+    id: '/reservations',
+    path: '/reservations',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminLocationsRoute =
+  AuthenticatedAdminLocationsRouteImport.update({
+    id: '/locations',
+    path: '/locations',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminFinancesRoute =
+  AuthenticatedAdminFinancesRouteImport.update({
+    id: '/finances',
+    path: '/finances',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminAnnouncementsRoute =
+  AuthenticatedAdminAnnouncementsRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminActivityRoute =
+  AuthenticatedAdminActivityRouteImport.update({
+    id: '/activity',
+    path: '/activity',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminRegistryVehiclesRoute =
   AuthenticatedAdminRegistryVehiclesRouteImport.update({
     id: '/registry/vehicles',
@@ -110,6 +178,16 @@ export interface FileRoutesByFullPath {
   '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
   '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/select-account': typeof AuthenticatedSelectAccountRoute
+  '/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
+  '/admin/finances': typeof AuthenticatedAdminFinancesRoute
+  '/admin/locations': typeof AuthenticatedAdminLocationsRoute
+  '/admin/reservations': typeof AuthenticatedAdminReservationsRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
+  '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
+  '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
@@ -123,6 +201,16 @@ export interface FileRoutesByTo {
   '/no-access': typeof NoAccessRoute
   '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
+  '/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
+  '/admin/finances': typeof AuthenticatedAdminFinancesRoute
+  '/admin/locations': typeof AuthenticatedAdminLocationsRoute
+  '/admin/reservations': typeof AuthenticatedAdminReservationsRoute
+  '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
+  '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
+  '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
@@ -140,6 +228,16 @@ export interface FileRoutesById {
   '/_authenticated/front-desk': typeof AuthenticatedFrontDeskRouteRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
+  '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
+  '/_authenticated/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
+  '/_authenticated/admin/finances': typeof AuthenticatedAdminFinancesRoute
+  '/_authenticated/admin/locations': typeof AuthenticatedAdminLocationsRoute
+  '/_authenticated/admin/reservations': typeof AuthenticatedAdminReservationsRoute
+  '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/_authenticated/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
+  '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
+  '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
@@ -157,6 +255,16 @@ export interface FileRouteTypes {
     | '/front-desk'
     | '/portal'
     | '/select-account'
+    | '/admin/activity'
+    | '/admin/announcements'
+    | '/admin/finances'
+    | '/admin/locations'
+    | '/admin/reservations'
+    | '/admin/settings'
+    | '/admin/staff'
+    | '/admin/visitors'
+    | '/invitations/resident/$token'
+    | '/invitations/staff/$token'
     | '/admin/'
     | '/portal/'
     | '/admin/registry/imports'
@@ -170,6 +278,16 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/front-desk'
     | '/select-account'
+    | '/admin/activity'
+    | '/admin/announcements'
+    | '/admin/finances'
+    | '/admin/locations'
+    | '/admin/reservations'
+    | '/admin/settings'
+    | '/admin/staff'
+    | '/admin/visitors'
+    | '/invitations/resident/$token'
+    | '/invitations/staff/$token'
     | '/admin'
     | '/portal'
     | '/admin/registry/imports'
@@ -186,6 +304,16 @@ export interface FileRouteTypes {
     | '/_authenticated/front-desk'
     | '/_authenticated/portal'
     | '/_authenticated/select-account'
+    | '/_authenticated/admin/activity'
+    | '/_authenticated/admin/announcements'
+    | '/_authenticated/admin/finances'
+    | '/_authenticated/admin/locations'
+    | '/_authenticated/admin/reservations'
+    | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/staff'
+    | '/_authenticated/admin/visitors'
+    | '/invitations/resident/$token'
+    | '/invitations/staff/$token'
     | '/_authenticated/admin/'
     | '/_authenticated/portal/'
     | '/_authenticated/admin/registry/imports'
@@ -199,6 +327,8 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
+  InvitationsResidentTokenRoute: typeof InvitationsResidentTokenRoute
+  InvitationsStaffTokenRoute: typeof InvitationsStaffTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -273,6 +403,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/invitations/staff/$token': {
+      id: '/invitations/staff/$token'
+      path: '/invitations/staff/$token'
+      fullPath: '/invitations/staff/$token'
+      preLoaderRoute: typeof InvitationsStaffTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitations/resident/$token': {
+      id: '/invitations/resident/$token'
+      path: '/invitations/resident/$token'
+      fullPath: '/invitations/resident/$token'
+      preLoaderRoute: typeof InvitationsResidentTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/visitors': {
+      id: '/_authenticated/admin/visitors'
+      path: '/visitors'
+      fullPath: '/admin/visitors'
+      preLoaderRoute: typeof AuthenticatedAdminVisitorsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/staff': {
+      id: '/_authenticated/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AuthenticatedAdminStaffRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/reservations': {
+      id: '/_authenticated/admin/reservations'
+      path: '/reservations'
+      fullPath: '/admin/reservations'
+      preLoaderRoute: typeof AuthenticatedAdminReservationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/locations': {
+      id: '/_authenticated/admin/locations'
+      path: '/locations'
+      fullPath: '/admin/locations'
+      preLoaderRoute: typeof AuthenticatedAdminLocationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/finances': {
+      id: '/_authenticated/admin/finances'
+      path: '/finances'
+      fullPath: '/admin/finances'
+      preLoaderRoute: typeof AuthenticatedAdminFinancesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/announcements': {
+      id: '/_authenticated/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AuthenticatedAdminAnnouncementsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/activity': {
+      id: '/_authenticated/admin/activity'
+      path: '/activity'
+      fullPath: '/admin/activity'
+      preLoaderRoute: typeof AuthenticatedAdminActivityRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/registry/vehicles': {
       id: '/_authenticated/admin/registry/vehicles'
       path: '/registry/vehicles'
@@ -305,6 +505,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminActivityRoute: typeof AuthenticatedAdminActivityRoute
+  AuthenticatedAdminAnnouncementsRoute: typeof AuthenticatedAdminAnnouncementsRoute
+  AuthenticatedAdminFinancesRoute: typeof AuthenticatedAdminFinancesRoute
+  AuthenticatedAdminLocationsRoute: typeof AuthenticatedAdminLocationsRoute
+  AuthenticatedAdminReservationsRoute: typeof AuthenticatedAdminReservationsRoute
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminStaffRoute: typeof AuthenticatedAdminStaffRoute
+  AuthenticatedAdminVisitorsRoute: typeof AuthenticatedAdminVisitorsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminRegistryImportsRoute: typeof AuthenticatedAdminRegistryImportsRoute
   AuthenticatedAdminRegistryResidentsRoute: typeof AuthenticatedAdminRegistryResidentsRoute
@@ -314,6 +522,14 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminActivityRoute: AuthenticatedAdminActivityRoute,
+    AuthenticatedAdminAnnouncementsRoute: AuthenticatedAdminAnnouncementsRoute,
+    AuthenticatedAdminFinancesRoute: AuthenticatedAdminFinancesRoute,
+    AuthenticatedAdminLocationsRoute: AuthenticatedAdminLocationsRoute,
+    AuthenticatedAdminReservationsRoute: AuthenticatedAdminReservationsRoute,
+    AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+    AuthenticatedAdminStaffRoute: AuthenticatedAdminStaffRoute,
+    AuthenticatedAdminVisitorsRoute: AuthenticatedAdminVisitorsRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminRegistryImportsRoute:
       AuthenticatedAdminRegistryImportsRoute,
@@ -366,6 +582,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
+  InvitationsResidentTokenRoute: InvitationsResidentTokenRoute,
+  InvitationsStaffTokenRoute: InvitationsStaffTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

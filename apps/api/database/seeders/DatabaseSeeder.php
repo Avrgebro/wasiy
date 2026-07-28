@@ -222,6 +222,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->residentInvitation($account, $centralLocation, $invitedResident, $manager);
+        $this->seedInvitationStates($account, $centralLocation, $northTower, $claimedResident, $manager);
 
         $this->vehicle($account, $centralLocation, $central101, 'ABC-101', [
             'vehicle_type' => VehicleType::Car,
@@ -337,6 +338,110 @@ class DatabaseSeeder extends Seeder
                 'token_hash' => hash('sha256', 'resident-demo-invitation-token'),
                 'status' => UserInvitationStatus::Pending,
                 'expires_at' => now()->addDays((int) config('wasiy.invitations.resident_expires_days', 14)),
+                'accepted_at' => null,
+                'invited_by_user_id' => $manager->id,
+            ],
+        );
+    }
+
+    /**
+     * Cover every invitation state so each one is reachable while browsing
+     * locally. The Staff tokens are fixed strings, so the acceptance pages can
+     * be opened by hand at /invitations/staff/{token}.
+     */
+    private function seedInvitationStates(
+        Account $account,
+        Location $centralLocation,
+        Location $northTower,
+        Resident $claimedResident,
+        User $manager,
+    ): void {
+        $this->staffInvitation($account, 'staff.invitado@wasiy.test', 'staff-demo-invitation-token', $manager, [
+            'first_name' => 'Sofia',
+            'last_name' => 'Invitada',
+            'status' => UserInvitationStatus::Pending,
+            'expires_at' => now()->addDays((int) config('wasiy.invitations.staff_expires_days', 14)),
+            'role_assignments' => [
+                'account_role' => null,
+                'location_assignments' => [
+                    ['location_id' => $northTower->id, 'role' => LocationRole::FrontDesk->value],
+                ],
+            ],
+        ]);
+
+        $this->staffInvitation($account, 'staff.vencido@wasiy.test', 'staff-expired-invitation-token', $manager, [
+            'first_name' => 'Bruno',
+            'last_name' => 'Vencido',
+            'status' => UserInvitationStatus::Expired,
+            'expires_at' => now()->subDays(3),
+            'role_assignments' => [
+                'account_role' => AccountRole::AccountAdmin->value,
+                'location_assignments' => [],
+            ],
+        ]);
+
+        $this->staffInvitation($account, 'staff.cancelado@wasiy.test', 'staff-cancelled-invitation-token', $manager, [
+            'first_name' => 'Nadia',
+            'last_name' => 'Cancelada',
+            'status' => UserInvitationStatus::Cancelled,
+            'expires_at' => now()->addDays(7),
+            'role_assignments' => [
+                'account_role' => null,
+                'location_assignments' => [
+                    ['location_id' => $centralLocation->id, 'role' => LocationRole::LocationManager->value],
+                ],
+            ],
+        ]);
+
+        // The already-claimed portal resident, with the invitation that let
+        // them in still on record.
+        UserInvitation::query()->updateOrCreate(
+            [
+                'account_id' => $account->id,
+                'resident_id' => $claimedResident->id,
+                'purpose' => UserInvitationPurpose::Resident,
+            ],
+            [
+                'location_id' => $centralLocation->id,
+                'user_id' => $claimedResident->user_id,
+                'email' => $claimedResident->email,
+                'first_name' => $claimedResident->first_name,
+                'last_name' => $claimedResident->last_name,
+                'token_hash' => hash('sha256', 'resident-accepted-invitation-token'),
+                'status' => UserInvitationStatus::Accepted,
+                'expires_at' => now()->subDays(20),
+                'accepted_at' => now()->subDays(25),
+                'invited_by_user_id' => $manager->id,
+            ],
+        );
+    }
+
+    /**
+     * @param  array{first_name: string, last_name: string, status: UserInvitationStatus, expires_at: mixed, role_assignments: array<string, mixed>}  $attributes
+     */
+    private function staffInvitation(
+        Account $account,
+        string $email,
+        string $token,
+        User $manager,
+        array $attributes,
+    ): UserInvitation {
+        return UserInvitation::query()->updateOrCreate(
+            [
+                'account_id' => $account->id,
+                'email' => $email,
+                'purpose' => UserInvitationPurpose::Staff,
+            ],
+            [
+                'location_id' => null,
+                'user_id' => null,
+                'resident_id' => null,
+                'first_name' => $attributes['first_name'],
+                'last_name' => $attributes['last_name'],
+                'token_hash' => hash('sha256', $token),
+                'role_assignments' => $attributes['role_assignments'],
+                'status' => $attributes['status'],
+                'expires_at' => $attributes['expires_at'],
                 'accepted_at' => null,
                 'invited_by_user_id' => $manager->id,
             ],

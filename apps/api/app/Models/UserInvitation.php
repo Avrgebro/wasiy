@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'last_name',
     'token_hash',
     'purpose',
+    'role_assignments',
     'status',
     'expires_at',
     'accepted_at',
@@ -39,9 +40,41 @@ class UserInvitation extends Model
         return [
             'purpose' => UserInvitationPurpose::class,
             'status' => UserInvitationStatus::class,
+            'role_assignments' => 'array',
             'expires_at' => 'datetime',
             'accepted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * The Account role this invitation grants on acceptance, if any.
+     */
+    public function invitedAccountRole(): ?string
+    {
+        $role = $this->role_assignments['account_role'] ?? null;
+
+        return is_string($role) ? $role : null;
+    }
+
+    /**
+     * The Location roles this invitation grants on acceptance.
+     *
+     * @return array<int, array{location_id: string, role: string}>
+     */
+    public function invitedLocationAssignments(): array
+    {
+        $assignments = $this->role_assignments['location_assignments'] ?? [];
+
+        if (! is_array($assignments)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $assignments,
+            fn ($assignment): bool => is_array($assignment)
+                && is_string($assignment['location_id'] ?? null)
+                && is_string($assignment['role'] ?? null),
+        ));
     }
 
     /**

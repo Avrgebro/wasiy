@@ -249,3 +249,45 @@ test('clearing context clears active account and location for multi account user
         ->assertJsonPath('active_location', null)
         ->assertJsonCount(0, 'accessible_locations');
 });
+
+test('an account admin with several locations gets the first one selected', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create();
+
+    // Created out of alphabetical order so the assertion pins the ordering
+    // rather than insertion order.
+    Location::factory()->for($account)->create(['name' => 'Torre Norte']);
+    $firstByName = Location::factory()->for($account)->create(['name' => 'Edificio Central']);
+
+    AccountUserRole::query()->create([
+        'account_id' => $account->id,
+        'user_id' => $user->id,
+        'role' => AccountRole::AccountAdmin,
+    ]);
+
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('active_location.id', $firstByName->id)
+        ->assertJsonCount(2, 'accessible_locations');
+});
+
+test('an account admin with no locations has no active location', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create();
+
+    AccountUserRole::query()->create([
+        'account_id' => $account->id,
+        'user_id' => $user->id,
+        'role' => AccountRole::AccountAdmin,
+    ]);
+
+    // A brand new Account has nothing to scope to yet. The null is what tells
+    // the admin surface to offer location creation instead of a dashboard.
+    $this->actingAs($user)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('active_account.id', $account->id)
+        ->assertJsonPath('active_location', null)
+        ->assertJsonCount(0, 'accessible_locations');
+});

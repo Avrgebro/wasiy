@@ -144,6 +144,42 @@ class AccessAuthorizationService
             ->exists();
     }
 
+    /**
+     * The Location an invitation for this Resident should be scoped to, or null
+     * when the actor may not manage the Resident's portal access at all.
+     *
+     * Prefers a Location the actor can manage the Resident in; Account Admins
+     * fall back to any Location the Resident has a membership in.
+     */
+    public function manageableInvitationLocationForResident(User $user, Resident $resident): ?Location
+    {
+        $location = $resident->unitMemberships()
+            ->whereHas('location')
+            ->where('account_id', $resident->account_id)
+            ->where('status', RegistryStatus::Active)
+            ->with('location')
+            ->get()
+            ->pluck('location')
+            ->filter(fn (?Location $location): bool => $location !== null
+                && $this->canManageResidentInLocation($user, $resident, $location))
+            ->first();
+
+        if ($location instanceof Location) {
+            return $location;
+        }
+
+        if ($this->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
+            return $resident->unitMemberships()
+                ->whereHas('location')
+                ->where('account_id', $resident->account_id)
+                ->with('location')
+                ->first()
+                ?->location;
+        }
+
+        return null;
+    }
+
     public function canManageVehicle(User $user, Vehicle $vehicle): bool
     {
         if (! $this->registryRecordLocationMatches($vehicle->location, $vehicle->account_id)) {

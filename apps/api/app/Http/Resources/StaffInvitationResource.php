@@ -27,6 +27,8 @@ class StaffInvitationResource extends JsonResource
             'last_name' => $this->last_name,
             'purpose' => $this->purpose->value,
             'status' => $this->status->value,
+            'invited_account_role' => $this->invitedAccountRole(),
+            'invited_location_assignments' => $this->invitedLocationAssignments(),
             'expires_at' => $this->expires_at?->toJSON(),
             'accepted_at' => $this->accepted_at?->toJSON(),
             'invited_by_user_id' => $this->invited_by_user_id,

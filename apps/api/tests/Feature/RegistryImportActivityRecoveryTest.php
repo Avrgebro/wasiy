@@ -307,4 +307,3 @@ test('retry rejects failed commit imports without dispatching or logging activit
     Queue::assertNotPushed(ValidateRegistryImport::class);
     expect(ActivityLog::query()->count())->toBe($activityCount);
 });
-

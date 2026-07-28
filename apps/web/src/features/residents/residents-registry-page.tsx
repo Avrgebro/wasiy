@@ -13,6 +13,7 @@ import {
 import { showNotification } from '@mantine/notifications'
 import { AddCircle } from '@solar-icons/react'
 import { getRouteApi } from '@tanstack/react-router'
+import { ImportRegistryButton } from '../imports/import-registry-button'
 import {
   flexRender,
   getCoreRowModel,
@@ -179,9 +180,12 @@ export function ResidentsRegistryPage() {
         <h1 className="text-2xl font-bold text-[var(--foreground)]">
           {t('registry.residents.title')}
         </h1>
-        <Button leftSection={<AddCircle size={16} />} onClick={openCreate}>
-          {t('registry.residents.new')}
-        </Button>
+        <Group gap="sm">
+          <ImportRegistryButton />
+          <Button leftSection={<AddCircle size={16} />} onClick={openCreate}>
+            {t('registry.residents.new')}
+          </Button>
+        </Group>
       </Group>
       <div className="grid gap-3 md:grid-cols-[1fr_180px]">
         <TextInput

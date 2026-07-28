@@ -2,19 +2,19 @@
 
 namespace App\Actions\Staff;
 
-use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
 use App\Models\User;
 use App\Models\UserInvitation;
+use App\Notifications\StaffInvitationNotification;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -23,10 +23,13 @@ class InviteStaffUser
     public function __construct(
         private readonly AccessAuthorizationService $access,
         private readonly ActivityLogger $activityLogger,
-        private readonly SyncStaffLocationAssignments $syncLocationAssignments,
     ) {}
 
     /**
+     * Record the intent to grant access and email the invitee. No User row and
+     * no role row is written here; AcceptStaffInvitation does both once the
+     * recipient proves control of the address.
+     *
      * @param  array{
      *     email: string,
      *     first_name: string,
@@ -34,21 +37,20 @@ class InviteStaffUser
      *     account_role?: string|null,
      *     location_assignments?: array<int, array{location_id: string, role: string}>
      * }  $data
-     * @return array{staff: User, invitation: UserInvitation}
      */
-    public function handle(Account $account, User $actor, array $data): array
+    public function handle(Account $account, User $actor, array $data): UserInvitation
     {
-        return DB::transaction(function () use ($account, $actor, $data): array {
+        return DB::transaction(function () use ($account, $actor, $data): UserInvitation {
             $email = $data['email'];
-            $user = User::query()->where('email', $email)->first();
+            $existingUser = User::query()->where('email', $email)->first();
 
-            if ($user instanceof User && $user->isDeactivated()) {
+            if ($existingUser instanceof User && $existingUser->isDeactivated()) {
                 throw ValidationException::withMessages([
                     'email' => __('This user is deactivated and cannot be invited.'),
                 ]);
             }
 
-            if ($user instanceof User && $this->access->isStaffForAccount($user, $account)) {
+            if ($existingUser instanceof User && $this->access->isStaffForAccount($existingUser, $account)) {
                 throw ValidationException::withMessages([
                     'email' => __('This user is already staff for this account.'),
                 ]);
@@ -75,35 +77,25 @@ class InviteStaffUser
                 ]);
             }
 
-            if (! $user instanceof User) {
-                try {
-                    $user = User::query()->create([
-                        'first_name' => $data['first_name'],
-                        'last_name' => $data['last_name'],
-                        'email' => $email,
-                        'password' => Str::random(64),
-                    ]);
-                } catch (UniqueConstraintViolationException) {
-                    throw ValidationException::withMessages([
-                        'email' => __('This email was registered by a concurrent request. Try again.'),
-                    ]);
-                }
-            }
-
             $token = Str::random(64);
             $expiresDays = max(1, (int) config('wasiy.invitations.staff_expires_days', 14));
+            $locationAssignments = array_values($data['location_assignments'] ?? []);
 
             try {
                 $invitation = UserInvitation::query()->create([
                     'account_id' => $account->id,
                     'location_id' => null,
-                    'user_id' => $user->id,
+                    'user_id' => null,
                     'email' => $email,
                     // Snapshot the real identity when the User already exists.
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
+                    'first_name' => $existingUser->first_name ?? $data['first_name'],
+                    'last_name' => $existingUser->last_name ?? $data['last_name'],
                     'token_hash' => hash('sha256', $token),
                     'purpose' => UserInvitationPurpose::Staff,
+                    'role_assignments' => [
+                        'account_role' => $data['account_role'] ?? null,
+                        'location_assignments' => $locationAssignments,
+                    ],
                     'status' => UserInvitationStatus::Pending,
                     'expires_at' => now()->addDays($expiresDays),
                     'accepted_at' => null,
@@ -115,61 +107,33 @@ class InviteStaffUser
                 ]);
             }
 
-            if (($data['account_role'] ?? null) !== null) {
-                AccountUserRole::query()->updateOrCreate(
-                    [
-                        'account_id' => $account->id,
-                        'user_id' => $user->id,
-                    ],
-                    ['role' => AccountRole::from($data['account_role'])],
-                );
-            }
-
-            $this->syncLocationAssignments->sync(
-                $account,
-                $user,
-                $data['location_assignments'] ?? [],
-            );
-
             $this->activityLogger->log(
                 account: $account,
                 eventType: ActivityEventType::StaffInvited,
-                summary: "Se invitó a {$user->name} al equipo de {$account->name}.",
-                metadata: $this->invitationMetadata(
-                    account: $account,
-                    actor: $actor,
-                    staff: $user,
-                    invitation: $invitation,
-                    accountRole: $data['account_role'] ?? null,
-                    locationAssignments: $data['location_assignments'] ?? [],
-                ),
+                summary: "Se invitó a {$invitation->first_name} {$invitation->last_name} al equipo de {$account->name}.",
+                metadata: $this->invitationMetadata($account, $actor, $invitation),
                 actor: $actor,
-                subjectType: 'user',
-                subjectId: $user->id,
+                subjectType: 'user_invitation',
+                subjectId: $invitation->id,
             );
 
-            return [
-                'staff' => $user->loadStaffRelationsForAccount($account),
-                'invitation' => $invitation,
-            ];
+            Notification::route('mail', $email)
+                ->notify(new StaffInvitationNotification($invitation, $token));
+
+            return $invitation;
         });
     }
 
     /**
-     * @param  array<int, array{location_id: string, role: string}>  $locationAssignments
      * @return array<string, mixed>
      */
-    private function invitationMetadata(
-        Account $account,
-        User $actor,
-        User $staff,
-        UserInvitation $invitation,
-        ?string $accountRole,
-        array $locationAssignments,
-    ): array {
+    private function invitationMetadata(Account $account, User $actor, UserInvitation $invitation): array
+    {
+        $assignments = $invitation->invitedLocationAssignments();
+
         $locations = Location::query()
             ->where('account_id', $account->id)
-            ->whereIn('id', collect($locationAssignments)->pluck('location_id'))
+            ->whereIn('id', collect($assignments)->pluck('location_id'))
             ->get()
             ->keyBy('id');
 
@@ -179,12 +143,13 @@ class InviteStaffUser
             'actor_user_email' => $actor->email,
             'account_id' => $account->id,
             'account_name' => $account->name,
-            'staff_user_id' => $staff->id,
-            'staff_user_name' => $staff->name,
-            'staff_user_email' => $staff->email,
             'invitation_id' => $invitation->id,
-            'account_role_after' => $accountRole,
-            'location_assignments_after' => collect($locationAssignments)
+            'invitation_email' => $invitation->email,
+            'invitation_first_name' => $invitation->first_name,
+            'invitation_last_name' => $invitation->last_name,
+            // Named "invited" rather than "after": nothing has been granted yet.
+            'invited_account_role' => $invitation->invitedAccountRole(),
+            'invited_location_assignments' => collect($assignments)
                 ->map(fn (array $assignment): array => [
                     'location_id' => $assignment['location_id'],
                     'location_name' => $locations->get($assignment['location_id'])?->name,

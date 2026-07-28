@@ -3,8 +3,10 @@ import { AdminLayout } from '../../../components/layout/admin/admin-layout'
 import {
   canAccessAdmin,
   getAvailableNavigationItems,
+  getRoleLabelKey,
   hasAccountRole,
   accountRoles,
+  locationRoles,
 } from '../../../features/auth/access'
 import { checkSurfaceAccess } from '../../../features/auth/guards'
 import { useMe } from '../../../features/auth/hooks'
@@ -21,10 +23,11 @@ function AdminRouteLayout() {
   const navItems = meQuery.data
     ? getAvailableNavigationItems(meQuery.data, 'admin')
     : []
-  const roleLabelKey =
+  const roleLabelKey = getRoleLabelKey(
     meQuery.data && hasAccountRole(meQuery.data, accountRoles.accountAdmin)
-      ? 'roles.accountAdmin'
-      : 'roles.locationManager'
+      ? accountRoles.accountAdmin
+      : locationRoles.locationManager,
+  )
 
   return (
     <AdminLayout navItems={navItems} roleLabelKey={roleLabelKey}>

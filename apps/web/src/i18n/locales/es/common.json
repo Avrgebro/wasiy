@@ -4,7 +4,8 @@
     "export": "Exportar",
     "newVisitor": "Registrar visitante",
     "save": "Guardar",
-    "search": "Buscar"
+    "search": "Buscar",
+    "import": "Importar"
   },
   "common": {
     "loading": "Cargando",
@@ -104,7 +105,9 @@
     "unitLookup": "Buscar unidad",
     "units": "Unidades",
     "vehicles": "Vehículos",
-    "visitors": "Visitantes"
+    "visitors": "Visitantes",
+    "finances": "Finanzas",
+    "settings": "Configuración"
   },
   "notifications": {
     "label": "Ver notificaciones"
@@ -116,7 +119,9 @@
     "operations": "Operación",
     "overview": "Resumen",
     "portal": "Portal",
-    "registry": "Registro"
+    "registry": "Registro",
+    "location": "Ubicación",
+    "administration": "Administración"
   },
   "registry": {
     "imports": {
@@ -257,6 +262,35 @@
     "lastNameRequired": "Ingresa los apellidos.",
     "passwordRequired": "Ingresa tu contraseña.",
     "phoneTooLong": "El teléfono no puede superar 255 caracteres.",
-    "unitRequired": "Selecciona una unidad."
+    "unitRequired": "Selecciona una unidad.",
+    "passwordTooShort": "Usa al menos 8 caracteres.",
+    "passwordConfirmRequired": "Confirma tu contraseña.",
+    "passwordMismatch": "Las contraseñas no coinciden."
+  },
+  "invitations": {
+    "residentTitle": "Activa tu portal de residentes",
+    "residentIntro": "Te invitaron al portal de residentes de {{account}} como {{name}}. Elige una contraseña para activar tu acceso.",
+    "newPassword": "Crea una contraseña",
+    "confirmPassword": "Confirma la contraseña",
+    "activateAccess": "Activar acceso",
+    "claimFailed": "No se pudo activar el acceso",
+    "unavailableTitle": "Invitación no disponible",
+    "unavailableBody": "Este enlace de invitación ya no es válido. Puede haber vencido o haber sido usado. Pide a la administración que envíe uno nuevo.",
+    "staffTitle": "Únete a {{account}}",
+    "staffIntro": "Te invitaron a formar parte del equipo de {{account}} en Wasiy. Este es el acceso que recibirás:",
+    "staffIntroByInviter": "{{inviter}} te invitó a formar parte del equipo de {{account}} en Wasiy. Este es el acceso que recibirás:",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "acceptInvitation": "Aceptar invitación",
+    "acceptFailed": "No se pudo aceptar la invitación",
+    "signInRequiredTitle": "Inicia sesión para continuar",
+    "signInRequiredBody": "Esta invitación es para {{email}}, que ya tiene una cuenta. Inicia sesión para aceptarla.",
+    "wrongAccountTitle": "Iniciaste sesión con otra cuenta",
+    "wrongAccountBody": "Esta invitación es para {{email}}. Cierra sesión e ingresa con esa dirección para aceptarla.",
+    "signInAs": "Ingresar como {{email}}"
+  },
+  "placeholder": {
+    "title": "Aún no implementado",
+    "body": "Esta página ya tiene un lugar en el menú pero todavía no está construida. Nada de lo que ves aquí son datos reales."
   }
 }

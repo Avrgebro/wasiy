@@ -2,12 +2,10 @@
 
 namespace App\Actions\Residents;
 
-use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
-use App\Models\Location;
 use App\Models\Resident;
 use App\Models\User;
 use App\Models\UserInvitation;
@@ -38,7 +36,7 @@ class InviteResidentUser
 
             // Authorize before any state check, so the validation messages below
             // cannot be used to probe residents in other accounts.
-            $location = $this->manageableInvitationLocation($resident, $actor);
+            $location = $this->access->manageableInvitationLocationForResident($actor, $resident);
 
             if (! $location) {
                 abort(403);
@@ -142,33 +140,5 @@ class InviteResidentUser
                 'invitation' => $invitation,
             ];
         });
-    }
-
-    private function manageableInvitationLocation(Resident $resident, User $actor): ?Location
-    {
-        $location = $resident->unitMemberships()
-            ->whereHas('location')
-            ->where('account_id', $resident->account_id)
-            ->where('status', RegistryStatus::Active)
-            ->with('location')
-            ->get()
-            ->pluck('location')
-            ->filter(fn (?Location $location): bool => $location !== null && $this->access->canManageResidentInLocation($actor, $resident, $location))
-            ->first();
-
-        if ($location instanceof Location) {
-            return $location;
-        }
-
-        if ($this->access->hasAccountRole($actor, $resident->account, AccountRole::AccountAdmin)) {
-            return $resident->unitMemberships()
-                ->whereHas('location')
-                ->where('account_id', $resident->account_id)
-                ->with('location')
-                ->first()
-                ?->location;
-        }
-
-        return null;
     }
 }

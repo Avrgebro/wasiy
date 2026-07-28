@@ -65,7 +65,7 @@ function invalidateContextDependentQueries(queryClient: QueryClient) {
   })
 }
 
-function applyAuthenticatedMe(queryClient: QueryClient, me: MeResponse) {
+export function applyAuthenticatedMe(queryClient: QueryClient, me: MeResponse) {
   const session: Session = { status: 'authenticated', me }
 
   queryClient.setQueryData(sessionQueryKey, session)

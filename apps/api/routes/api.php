@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/resident-invitations/{token}', [ResidentInvitationController::class, 'show']);
 Route::post('/resident-invitations/{token}/claim', [ResidentInvitationController::class, 'claim']);
+Route::get('/staff-invitations/{token}', [StaffInvitationController::class, 'show']);
+Route::post('/staff-invitations/{token}/accept', [StaffInvitationController::class, 'accept']);
 
 Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function () {
     Route::get('/me', MeController::class);
@@ -27,6 +29,10 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::get('/accounts/{account}/staff', [AccountStaffController::class, 'index'])
         ->can('manageStaff', 'account');
     Route::post('/accounts/{account}/staff/invitations', [StaffInvitationController::class, 'store'])
+        ->can('manageStaff', 'account');
+    Route::delete('/accounts/{account}/staff/invitations/{invitation}', [StaffInvitationController::class, 'destroy'])
+        ->can('manageStaff', 'account');
+    Route::post('/accounts/{account}/staff/invitations/{invitation}/resend', [StaffInvitationController::class, 'resend'])
         ->can('manageStaff', 'account');
     Route::patch('/accounts/{account}/staff/{user}/roles', [AccountStaffController::class, 'updateRoles'])
         ->can('manageStaff', 'account');
@@ -51,6 +57,8 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::patch('/residents/{resident}', [ResidentController::class, 'update']);
     Route::delete('/residents/{resident}', [ResidentController::class, 'destroy']);
     Route::post('/residents/{resident}/invitations', [ResidentInvitationController::class, 'store']);
+    Route::delete('/residents/{resident}/invitations/{invitation}', [ResidentInvitationController::class, 'destroy']);
+    Route::post('/residents/{resident}/invitations/{invitation}/resend', [ResidentInvitationController::class, 'resend']);
     Route::post('/residents/{resident}/memberships', [UnitMembershipController::class, 'store']);
     Route::patch('/unit-memberships/{membership}', [UnitMembershipController::class, 'update']);
     Route::delete('/unit-memberships/{membership}', [UnitMembershipController::class, 'destroy']);

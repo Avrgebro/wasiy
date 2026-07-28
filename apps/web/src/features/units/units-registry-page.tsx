@@ -13,6 +13,7 @@ import {
 import { showNotification } from '@mantine/notifications'
 import { AddCircle } from '@solar-icons/react'
 import { getRouteApi } from '@tanstack/react-router'
+import { ImportRegistryButton } from '../imports/import-registry-button'
 import {
   flexRender,
   getCoreRowModel,
@@ -264,9 +265,12 @@ function RegistryHeader({
   return (
     <Group justify="space-between">
       <h1 className="text-2xl font-bold text-[var(--foreground)]">{title}</h1>
-      <Button leftSection={<AddCircle size={16} />} onClick={onAction}>
-        {actionLabel}
-      </Button>
+      <Group gap="sm">
+        <ImportRegistryButton />
+        <Button leftSection={<AddCircle size={16} />} onClick={onAction}>
+          {actionLabel}
+        </Button>
+      </Group>
     </Group>
   )
 }

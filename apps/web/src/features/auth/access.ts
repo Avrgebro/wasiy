@@ -2,15 +2,22 @@ import {
   Buildings2,
   Calendar,
   ClipboardList,
-  Import,
   KeySquare,
   Magnifier,
+  Settings,
   Speaker,
   UserCheckRounded,
   UsersGroupRounded,
+  Wallet,
   Widget,
 } from '@solar-icons/react'
-import type { LayoutNavEntry } from '../../components/layout/shared/types'
+import type {
+  LayoutNavCollapsible,
+  LayoutNavEntry,
+  LayoutNavGroup,
+  LayoutNavItem,
+  LayoutNavLeaf,
+} from '../../components/layout/shared/types'
 import type { LocationRole, MeResponse } from './types'
 
 export const accountRoles = {
@@ -31,6 +38,33 @@ export function hasAccountRole(
 
 export function hasLocationRole(me: MeResponse, role: LocationRole) {
   return me.roles.location.some((assignment) => assignment.role === role)
+}
+
+const roleLabelKeys: Record<string, string> = {
+  [accountRoles.accountAdmin]: 'roles.accountAdmin',
+  [locationRoles.locationManager]: 'roles.locationManager',
+  [locationRoles.frontDesk]: 'roles.frontDesk',
+}
+
+/**
+ * Map an API role value onto its i18n key. Role values are snake_case on the
+ * wire and camelCase in the locale files.
+ */
+export function getRoleLabelKey(role: string) {
+  return roleLabelKeys[role] ?? role
+}
+
+/**
+ * Manager and above: every staff role except front desk. Gates the
+ * registry-mutating actions and the location entries front desk must not see.
+ * Currently identical to canAccessAdmin, and will diverge from it the moment
+ * front desk joins this surface.
+ */
+export function canManageRegistry(me: MeResponse) {
+  return (
+    hasAccountRole(me, accountRoles.accountAdmin) ||
+    hasLocationRole(me, locationRoles.locationManager)
+  )
 }
 
 export function canAccessAdmin(me: MeResponse) {
@@ -80,144 +114,186 @@ export function getDefaultAuthenticatedRoute(me: MeResponse) {
   return '/no-access' as const
 }
 
-export function getAvailableNavigationItems(
+
+/**
+ * Navigation is declared once as a spec tree; each entry decides for itself who
+ * may see it. Filtering happens at render, so adding a role means adding a
+ * predicate rather than another hand-maintained copy of the whole menu.
+ */
+type NavPredicate = (me: MeResponse) => boolean
+
+type NavLeafSpec = LayoutNavLeaf & { visibleTo?: NavPredicate }
+
+type NavCollapsibleSpec = Omit<LayoutNavCollapsible, 'children'> & {
+  children: NavLeafSpec[]
+  visibleTo?: NavPredicate
+}
+
+type NavItemSpec = NavLeafSpec | NavCollapsibleSpec
+
+type NavGroupSpec = Omit<LayoutNavGroup, 'items'> & {
+  items: NavItemSpec[]
+  visibleTo?: NavPredicate
+}
+
+export type NavEntrySpec = NavItemSpec | NavGroupSpec
+
+function isVisible(spec: { visibleTo?: NavPredicate }, me: MeResponse) {
+  return spec.visibleTo?.(me) ?? true
+}
+
+function isCollapsible(item: NavItemSpec): item is NavCollapsibleSpec {
+  return item.type === 'collapsible'
+}
+
+function isGroup(entry: NavEntrySpec): entry is NavGroupSpec {
+  return entry.type === 'group'
+}
+
+function filterNavigationItems(
+  items: NavItemSpec[],
   me: MeResponse,
-  surface: 'admin' | 'front-desk' | 'portal',
+): LayoutNavItem[] {
+  return items.flatMap((item): LayoutNavItem[] => {
+    if (!isVisible(item, me)) {
+      return []
+    }
+
+    if (!isCollapsible(item)) {
+      return [item]
+    }
+
+    const children = item.children.filter((child) => isVisible(child, me))
+
+    // A collapsible that expands to nothing is noise.
+    return children.length > 0 ? [{ ...item, children }] : []
+  })
+}
+
+export function filterNavigationEntries(
+  entries: NavEntrySpec[],
+  me: MeResponse,
 ): LayoutNavEntry[] {
-  if (surface === 'admin') {
-    if (hasAccountRole(me, accountRoles.accountAdmin)) {
-      return accountAdminNavigationItems
+  return entries.flatMap((entry): LayoutNavEntry[] => {
+    if (!isVisible(entry, me)) {
+      return []
     }
 
-    if (hasLocationRole(me, locationRoles.locationManager)) {
-      return locationManagerNavigationItems
+    if (!isGroup(entry)) {
+      return filterNavigationItems([entry], me)
     }
 
-    return []
-  }
+    const items = filterNavigationItems(entry.items, me)
 
-  if (surface === 'front-desk') {
-    return canAccessFrontDesk(me) ? frontDeskNavigationItems : []
-  }
-
-  return canAccessPortal(me) ? portalNavigationItems : []
+    // An empty section renders nothing rather than an orphan heading.
+    return items.length > 0 ? [{ ...entry, items }] : []
+  })
 }
 
-const overviewNavigationGroup: LayoutNavEntry = {
-  type: 'group',
-  titleKey: 'navGroups.overview',
-  items: [{ icon: Widget, labelKey: 'nav.dashboard', to: '/admin' }],
+/**
+ * Account-wide administration rights. Exported so route guards enforce exactly
+ * what the sidebar gates on — hiding an entry is not enforcement on its own.
+ */
+export function isAccountAdmin(me: MeResponse) {
+  return hasAccountRole(me, accountRoles.accountAdmin)
 }
 
-const operationsNavigationGroup: LayoutNavEntry = {
+/**
+ * Everything scoped to the currently selected Location. Visible to any staff
+ * role that reaches this surface; the manage-only entries carry their own
+ * predicate so front desk keeps the read-only subset when it joins here.
+ */
+const locationNavigationGroup: NavGroupSpec = {
   type: 'group',
-  titleKey: 'navGroups.operations',
+  titleKey: 'navGroups.location',
   items: [
+    { icon: Widget, labelKey: 'nav.dashboard', to: '/admin' },
     {
       type: 'collapsible',
       icon: UsersGroupRounded,
       labelKey: 'nav.people',
       children: [
-        { icon: KeySquare, labelKey: 'nav.visitors', to: '/admin/visitors' },
+        {
+          icon: UserCheckRounded,
+          labelKey: 'nav.residents',
+          to: '/admin/registry/residents',
+        },
+        { icon: Magnifier, labelKey: 'nav.visitors', to: '/admin/visitors' },
       ],
     },
+    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units' },
+    { icon: KeySquare, labelKey: 'nav.vehicles', to: '/admin/registry/vehicles' },
     {
       icon: Calendar,
       labelKey: 'nav.reservations',
       to: '/admin/reservations',
     },
-  ],
-}
-
-const registryNavigationGroup: LayoutNavEntry = {
-  type: 'group',
-  titleKey: 'navGroups.registry',
-  items: [
-    {
-      icon: Buildings2,
-      labelKey: 'nav.units',
-      to: '/admin/registry/units',
-    },
-    {
-      icon: UsersGroupRounded,
-      labelKey: 'nav.residents',
-      to: '/admin/registry/residents',
-    },
-    {
-      icon: KeySquare,
-      labelKey: 'nav.vehicles',
-      to: '/admin/registry/vehicles',
-    },
-    {
-      icon: Import,
-      labelKey: 'nav.imports',
-      to: '/admin/registry/imports',
-    },
-  ],
-}
-
-const communicationNavigationGroup: LayoutNavEntry = {
-  type: 'group',
-  titleKey: 'navGroups.communication',
-  items: [
     {
       icon: Speaker,
       labelKey: 'nav.announcements',
       to: '/admin/announcements',
+      visibleTo: canManageRegistry,
     },
-    { icon: ClipboardList, labelKey: 'nav.activity', to: '/admin/activity' },
+    {
+      icon: Wallet,
+      labelKey: 'nav.finances',
+      to: '/admin/finances',
+      visibleTo: canManageRegistry,
+    },
   ],
 }
 
-const accountNavigationGroup: LayoutNavEntry = {
+/**
+ * Account-wide administration, scoped above any single Location.
+ */
+const administrationNavigationGroup: NavGroupSpec = {
   type: 'group',
-  titleKey: 'navGroups.account',
+  titleKey: 'navGroups.administration',
+  visibleTo: isAccountAdmin,
   items: [
     { icon: Buildings2, labelKey: 'nav.locations', to: '/admin/locations' },
     { icon: UsersGroupRounded, labelKey: 'nav.staff', to: '/admin/staff' },
+    { icon: ClipboardList, labelKey: 'nav.activity', to: '/admin/activity' },
+    { icon: Settings, labelKey: 'nav.settings', to: '/admin/settings' },
   ],
 }
 
-const locationManagerNavigationItems: LayoutNavEntry[] = [
-  overviewNavigationGroup,
-  registryNavigationGroup,
-  operationsNavigationGroup,
-  communicationNavigationGroup,
+const adminSurfaceNavigation: NavEntrySpec[] = [
+  locationNavigationGroup,
+  administrationNavigationGroup,
 ]
 
-const accountAdminNavigationItems: LayoutNavEntry[] = [
-  overviewNavigationGroup,
-  accountNavigationGroup,
-  registryNavigationGroup,
-  operationsNavigationGroup,
-  communicationNavigationGroup,
-]
-
-const frontDeskNavigationItems: LayoutNavEntry[] = [
+const frontDeskNavigation: NavEntrySpec[] = [
   {
     type: 'group',
     titleKey: 'navGroups.frontDesk',
-    items: [
-      { icon: UserCheckRounded, labelKey: 'nav.checkIn', to: '/front-desk' },
-      {
-        icon: KeySquare,
-        labelKey: 'nav.todaysVisitors',
-        to: '/front-desk/visitors',
-      },
-      { icon: Magnifier, labelKey: 'nav.unitLookup', to: '/front-desk/units' },
-      {
-        icon: Calendar,
-        labelKey: 'nav.reservations',
-        to: '/front-desk/reservations',
-      },
-    ],
+    items: [{ icon: UserCheckRounded, labelKey: 'nav.checkIn', to: '/front-desk' }],
   },
 ]
 
-const portalNavigationItems: LayoutNavEntry[] = [
+const portalNavigation: NavEntrySpec[] = [
   {
     type: 'group',
     titleKey: 'navGroups.portal',
     items: [{ icon: Widget, labelKey: 'nav.home', to: '/portal' }],
   },
 ]
+
+export function getAvailableNavigationItems(
+  me: MeResponse,
+  surface: 'admin' | 'front-desk' | 'portal',
+): LayoutNavEntry[] {
+  if (surface === 'admin') {
+    return canAccessAdmin(me)
+      ? filterNavigationEntries(adminSurfaceNavigation, me)
+      : []
+  }
+
+  if (surface === 'front-desk') {
+    return canAccessFrontDesk(me)
+      ? filterNavigationEntries(frontDeskNavigation, me)
+      : []
+  }
+
+  return canAccessPortal(me) ? filterNavigationEntries(portalNavigation, me) : []
+}

@@ -2,22 +2,33 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Invitations\CancelUserInvitation;
+use App\Actions\Invitations\ResendUserInvitation;
 use App\Actions\Residents\ClaimResidentInvitation;
 use App\Actions\Residents\InviteResidentUser;
 use App\Enums\UserInvitationPurpose;
-use App\Enums\UserInvitationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentInvitationResource;
 use App\Http\Resources\ResidentResource;
 use App\Models\Resident;
 use App\Models\User;
 use App\Models\UserInvitation;
+use App\Services\AccessAuthorizationService;
+use App\Services\AccessContextService;
+use App\Services\UserInvitationTokenResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 
 class ResidentInvitationController extends Controller
 {
+    public function __construct(
+        private readonly UserInvitationTokenResolver $tokenResolver,
+        private readonly AccessContextService $accessContext,
+        private readonly AccessAuthorizationService $access,
+    ) {}
+
     public function store(
         Request $request,
         Resident $resident,
@@ -40,9 +51,74 @@ class ResidentInvitationController extends Controller
         ], 201);
     }
 
+    public function destroy(
+        Request $request,
+        Resident $resident,
+        UserInvitation $invitation,
+        CancelUserInvitation $cancelUserInvitation,
+    ): JsonResponse {
+        $actor = $this->authorizeResidentInvitation($request, $resident, $invitation);
+
+        return response()->json([
+            'data' => [
+                'invitation' => (new ResidentInvitationResource(
+                    $cancelUserInvitation->handle($invitation, $actor),
+                ))->toArray($request),
+            ],
+        ]);
+    }
+
+    public function resend(
+        Request $request,
+        Resident $resident,
+        UserInvitation $invitation,
+        ResendUserInvitation $resendUserInvitation,
+    ): JsonResponse {
+        $actor = $this->authorizeResidentInvitation($request, $resident, $invitation);
+
+        return response()->json([
+            'data' => [
+                'invitation' => (new ResidentInvitationResource(
+                    $resendUserInvitation->handle($invitation, $actor),
+                ))->toArray($request),
+            ],
+        ]);
+    }
+
+    /**
+     * Same authority as issuing the invitation in the first place. The 404
+     * comes first so an invitation belonging to another Resident is not
+     * distinguishable from one that does not exist.
+     */
+    private function authorizeResidentInvitation(
+        Request $request,
+        Resident $resident,
+        UserInvitation $invitation,
+    ): User {
+        abort_unless(
+            $invitation->resident_id === $resident->id
+                && $invitation->purpose === UserInvitationPurpose::Resident,
+            404,
+        );
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        abort_unless(
+            $this->access->manageableInvitationLocationForResident($actor, $resident) !== null,
+            403,
+        );
+
+        return $actor;
+    }
+
     public function show(Request $request, string $token): JsonResponse
     {
-        $invitation = $this->validPendingInvitationForToken($token);
+        $invitation = $this->tokenResolver->resolve(
+            $token,
+            UserInvitationPurpose::Resident,
+            ['account', 'resident'],
+        );
 
         return response()->json([
             'data' => [
@@ -69,34 +145,40 @@ class ResidentInvitationController extends Controller
             'password' => ['required', 'string', Password::default(), 'confirmed'],
         ]);
 
-        $invitation = $this->validPendingInvitationForToken($token);
+        $invitation = $this->tokenResolver->resolve(
+            $token,
+            UserInvitationPurpose::Resident,
+            ['account', 'resident'],
+        );
         $invitation = $claimResidentInvitation->handle($invitation, $validated['password']);
 
         return response()->json([
             'data' => [
                 'resident' => (new ResidentResource($invitation->resident->loadSummary()))->toArray($request),
                 'invitation' => (new ResidentInvitationResource($invitation))->toArray($request),
+                'session' => $this->authenticateClaimedUser($request, $invitation),
             ],
         ]);
     }
 
-    private function validPendingInvitationForToken(string $token): UserInvitation
+    /**
+     * Sign the resident in as part of the claim, so activating an account does
+     * not dead-end at a login form. Returns the same payload as /api/me for the
+     * SPA to seed its session cache with.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function authenticateClaimedUser(Request $request, UserInvitation $invitation): ?array
     {
-        $invitation = UserInvitation::query()
-            ->with(['account', 'resident'])
-            ->where('token_hash', hash('sha256', $token))
-            ->where('purpose', UserInvitationPurpose::Resident->value)
-            ->first();
+        $user = $invitation->user;
 
-        if (! $invitation || $invitation->status !== UserInvitationStatus::Pending) {
-            abort(410);
+        if (! $user instanceof User || ! $request->hasSession()) {
+            return null;
         }
 
-        if ($invitation->expires_at->isPast()) {
-            $invitation->forceFill(['status' => UserInvitationStatus::Expired])->save();
-            abort(410);
-        }
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
 
-        return $invitation;
+        return $this->accessContext->resolve($user, $request);
     }
 }

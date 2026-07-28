@@ -230,3 +230,183 @@ test('inactive resident cannot claim portal access', function () {
 
     expect($resident->fresh()->user_id)->toBeNull();
 });
+
+test('claiming signs the resident in and returns a session payload', function () {
+    Notification::fake();
+
+    $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
+    $resident = Resident::factory()->for($location->account)->create([
+        'first_name' => 'Sofia',
+        'last_name' => 'Rivas',
+        'email' => 'sofia.rivas@wasiy.test',
+    ]);
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->create();
+    $manager = createResidentInvitationManager($location);
+
+    $this->actingAs($manager)->postJson("/api/residents/{$resident->id}/invitations")->assertCreated();
+
+    $token = null;
+    Notification::assertSentOnDemand(
+        ResidentInvitationNotification::class,
+        function (ResidentInvitationNotification $notification) use (&$token): bool {
+            $token = $notification->token;
+
+            return true;
+        },
+    );
+
+    // Drop the inviting manager's guard state so the claim runs as a guest,
+    // the way the emailed link is actually opened.
+    $this->app['auth']->forgetGuards();
+
+    $response = $this->withHeader('Origin', 'http://localhost:5174')
+        ->postJson("/api/resident-invitations/{$token}/claim", [
+            'password' => 'new-secure-password',
+            'password_confirmation' => 'new-secure-password',
+        ])
+        ->assertOk();
+
+    $user = User::query()->where('email', 'sofia.rivas@wasiy.test')->sole();
+
+    $this->assertAuthenticatedAs($user);
+
+    expect($response->json('data.session'))->not->toBeNull()
+        ->and($response->json('data.session.user.email'))->toBe('sofia.rivas@wasiy.test')
+        ->and($response->json('data.session.resident_memberships'))->not->toBeEmpty();
+});
+
+function inviteResidentAndCaptureToken(Resident $resident, User $actor): string
+{
+    test()->actingAs($actor)
+        ->postJson("/api/residents/{$resident->id}/invitations")
+        ->assertCreated();
+
+    $token = null;
+
+    Notification::assertSentOnDemand(
+        ResidentInvitationNotification::class,
+        function (ResidentInvitationNotification $notification) use (&$token, $resident): bool {
+            if ($notification->invitation->resident_id !== $resident->id) {
+                return false;
+            }
+
+            $token = $notification->token;
+
+            return true;
+        },
+    );
+
+    return $token;
+}
+
+function makeInvitableResident(Location $location): Resident
+{
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
+    $resident = Resident::factory()->for($location->account)->create([
+        'email' => 'invitable@wasiy.test',
+    ]);
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->create();
+
+    return $resident;
+}
+
+test('cancelling a resident invitation kills its token and frees a new invite', function () {
+    Notification::fake();
+
+    $location = Location::factory()->create();
+    $resident = makeInvitableResident($location);
+    $manager = createResidentInvitationManager($location);
+
+    $token = inviteResidentAndCaptureToken($resident, $manager);
+    $invitation = UserInvitation::query()->where('resident_id', $resident->id)->sole();
+
+    $this->actingAs($manager)
+        ->deleteJson("/api/residents/{$resident->id}/invitations/{$invitation->id}")
+        ->assertOk()
+        ->assertJsonPath('data.invitation.status', UserInvitationStatus::Cancelled->value);
+
+    app('auth')->forgetGuards();
+
+    $this->getJson("/api/resident-invitations/{$token}")->assertGone();
+
+    expect(ActivityLog::query()
+        ->where('event_type', ActivityEventType::ResidentInvitationCancelled->value)
+        ->count())->toBe(1);
+
+    $this->actingAs($manager)
+        ->postJson("/api/residents/{$resident->id}/invitations")
+        ->assertCreated();
+});
+
+test('resending a resident invitation rotates the token', function () {
+    Notification::fake();
+
+    $location = Location::factory()->create();
+    $resident = makeInvitableResident($location);
+    $manager = createResidentInvitationManager($location);
+
+    $firstToken = inviteResidentAndCaptureToken($resident, $manager);
+    $invitation = UserInvitation::query()->where('resident_id', $resident->id)->sole();
+
+    $this->actingAs($manager)
+        ->postJson("/api/residents/{$resident->id}/invitations/{$invitation->id}/resend")
+        ->assertOk();
+
+    $secondToken = null;
+    Notification::assertSentOnDemand(
+        ResidentInvitationNotification::class,
+        function (ResidentInvitationNotification $notification) use (&$secondToken, $firstToken): bool {
+            if ($notification->token === $firstToken) {
+                return false;
+            }
+
+            $secondToken = $notification->token;
+
+            return true;
+        },
+    );
+
+    app('auth')->forgetGuards();
+
+    $this->getJson("/api/resident-invitations/{$firstToken}")->assertGone();
+    $this->getJson("/api/resident-invitations/{$secondToken}")->assertOk();
+});
+
+test('resident invitation cancel is refused for managers outside the location', function () {
+    Notification::fake();
+
+    $account = Location::factory()->create()->account;
+    $residentLocation = Location::factory()->for($account)->create();
+    $otherLocation = Location::factory()->for($account)->create();
+    $resident = makeInvitableResident($residentLocation);
+    $manager = createResidentInvitationManager($residentLocation);
+    $outsider = createResidentInvitationManager($otherLocation);
+
+    inviteResidentAndCaptureToken($resident, $manager);
+    $invitation = UserInvitation::query()->where('resident_id', $resident->id)->sole();
+
+    $this->actingAs($outsider)
+        ->deleteJson("/api/residents/{$resident->id}/invitations/{$invitation->id}")
+        ->assertForbidden();
+
+    // An invitation belonging to a different Resident is indistinguishable
+    // from one that does not exist.
+    $otherResident = Resident::factory()->for($account)->create();
+
+    $this->actingAs($manager)
+        ->deleteJson("/api/residents/{$otherResident->id}/invitations/{$invitation->id}")
+        ->assertNotFound();
+
+    expect($invitation->fresh()->status)->toBe(UserInvitationStatus::Pending);
+});

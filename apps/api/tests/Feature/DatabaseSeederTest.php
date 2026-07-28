@@ -27,8 +27,11 @@ use App\Models\UnitMembership;
 use App\Models\User;
 use App\Models\UserInvitation;
 use App\Models\Vehicle;
+use App\Notifications\StaffInvitationNotification;
+use App\Services\UserInvitationTokenResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
@@ -104,11 +107,13 @@ test('seeded users expose the final m2 access context scenarios', function () {
     $frontDesk = User::query()->where('email', 'frontdesk@wasiy.test')->sole();
     $multiAccountUser = User::query()->where('email', 'multi@wasiy.test')->sole();
 
+    // An admin with several Locations gets the first by name selected for
+    // them, so the location-scoped surface is usable without a picker.
     $this->actingAs($admin)
         ->getJson('/api/me')
         ->assertOk()
         ->assertJsonPath('active_account.id', $demoAccount->id)
-        ->assertJsonPath('active_location', null)
+        ->assertJsonPath('active_location.id', $centralLocation->id)
         ->assertJsonPath('roles.account.0.role', AccountRole::AccountAdmin->value)
         ->assertJsonCount(2, 'accessible_locations');
 
@@ -155,6 +160,7 @@ test('seeded users expose the final m2 access context scenarios', function () {
 });
 
 test('seeded account admin can complete staff workflow and activity logging acceptance', function () {
+    Notification::fake();
     $this->seed();
 
     $account = Account::query()->where('slug', 'wasiy-demo')->sole();
@@ -176,8 +182,33 @@ test('seeded account admin can complete staff workflow and activity logging acce
         ])
         ->assertCreated();
 
-    $staff = User::query()->where('email', 'slice7.staff@wasiy.test')->sole();
     $invitation = UserInvitation::query()->where('email', 'slice7.staff@wasiy.test')->sole();
+    $token = null;
+
+    Notification::assertSentOnDemand(
+        StaffInvitationNotification::class,
+        function (StaffInvitationNotification $notification) use (&$token): bool {
+            if ($notification->invitation->email !== 'slice7.staff@wasiy.test') {
+                return false;
+            }
+
+            $token = $notification->token;
+
+            return true;
+        },
+    );
+
+    // The invitee has no access yet; accepting is what creates them.
+    expect(User::query()->where('email', 'slice7.staff@wasiy.test')->exists())->toBeFalse();
+
+    app('auth')->forgetGuards();
+
+    $this->postJson("/api/staff-invitations/{$token}/accept", [
+        'password' => 'a-strong-password',
+        'password_confirmation' => 'a-strong-password',
+    ])->assertOk();
+
+    $staff = User::query()->where('email', 'slice7.staff@wasiy.test')->sole();
 
     $this->actingAs($admin)
         ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
@@ -185,8 +216,14 @@ test('seeded account admin can complete staff workflow and activity logging acce
         ])
         ->assertOk();
 
-    expect(ActivityLog::query()->count())->toBe(2)
+    expect(ActivityLog::query()->count())->toBe(3)
         ->and(ActivityLog::query()->where('event_type', ActivityEventType::StaffInvited->value)->sole()->metadata)
+        ->toMatchArray([
+            'invitation_id' => $invitation->id,
+            'invitation_email' => 'slice7.staff@wasiy.test',
+            'account_id' => $account->id,
+        ])
+        ->and(ActivityLog::query()->where('event_type', ActivityEventType::StaffInvitationAccepted->value)->sole()->metadata)
         ->toMatchArray([
             'invitation_id' => $invitation->id,
             'staff_user_id' => $staff->id,
@@ -514,3 +551,74 @@ function m4RegistryImportConfirmableFixture(string $fixture): string
         ->reject(fn (string $line): bool => str_starts_with($line, ',Torre Error,'))
         ->implode("\n")."\n";
 }
+
+test('it seeds every invitation state idempotently with resolvable tokens', function () {
+    $this->seed();
+    $this->seed();
+
+    $account = Account::query()->where('slug', 'wasiy-demo')->sole();
+
+    $staffInvitations = UserInvitation::query()
+        ->where('account_id', $account->id)
+        ->where('purpose', UserInvitationPurpose::Staff)
+        ->pluck('status', 'email');
+
+    expect($staffInvitations)->toHaveCount(3)
+        ->and($staffInvitations['staff.invitado@wasiy.test'])->toBe(UserInvitationStatus::Pending)
+        ->and($staffInvitations['staff.vencido@wasiy.test'])->toBe(UserInvitationStatus::Expired)
+        ->and($staffInvitations['staff.cancelado@wasiy.test'])->toBe(UserInvitationStatus::Cancelled);
+
+    $residentStatuses = UserInvitation::query()
+        ->where('account_id', $account->id)
+        ->where('purpose', UserInvitationPurpose::Resident)
+        ->pluck('status')
+        ->map(fn (UserInvitationStatus $status): string => $status->value)
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($residentStatuses)->toBe([
+        UserInvitationStatus::Accepted->value,
+        UserInvitationStatus::Pending->value,
+    ]);
+
+    // The pending Staff token is fixed so the acceptance page can be opened by
+    // hand, and it must resolve through the real endpoint.
+    $this->getJson('/api/staff-invitations/staff-demo-invitation-token')
+        ->assertOk()
+        ->assertJsonPath('data.email', 'staff.invitado@wasiy.test')
+        ->assertJsonPath('data.requires_account_creation', true)
+        ->assertJsonPath('data.roles.locations.0.role', LocationRole::FrontDesk->value);
+
+    $this->getJson('/api/resident-invitations/resident-demo-invitation-token')->assertOk();
+
+    // Non-pending states are terminal at the token endpoints.
+    $this->getJson('/api/staff-invitations/staff-expired-invitation-token')->assertGone();
+    $this->getJson('/api/staff-invitations/staff-cancelled-invitation-token')->assertGone();
+    $this->getJson('/api/resident-invitations/resident-accepted-invitation-token')->assertGone();
+});
+
+test('factory built invitations can be resolved by their token', function () {
+    $account = Account::factory()->create();
+
+    ['invitation' => $invitation, 'token' => $token] = UserInvitation::factory()
+        ->for($account)
+        ->createWithToken(['email' => 'factory@wasiy.test']);
+
+    $resolved = app(UserInvitationTokenResolver::class)
+        ->resolve($token, UserInvitationPurpose::Staff);
+
+    expect($resolved->id)->toBe($invitation->id);
+
+    // The purpose and status helpers compose with the token helper.
+    ['token' => $residentToken] = UserInvitation::factory()
+        ->for($account)
+        ->resident()
+        ->createWithToken(['email' => 'factory.resident@wasiy.test']);
+
+    expect(
+        app(UserInvitationTokenResolver::class)
+            ->resolve($residentToken, UserInvitationPurpose::Resident)
+            ->purpose,
+    )->toBe(UserInvitationPurpose::Resident);
+});

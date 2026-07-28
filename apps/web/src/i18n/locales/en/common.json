@@ -4,7 +4,8 @@
     "export": "Export",
     "newVisitor": "Register visitor",
     "save": "Save",
-    "search": "Search"
+    "search": "Search",
+    "import": "Import"
   },
   "common": {
     "loading": "Loading",
@@ -104,7 +105,9 @@
     "unitLookup": "Unit lookup",
     "units": "Units",
     "vehicles": "Vehicles",
-    "visitors": "Visitors"
+    "visitors": "Visitors",
+    "finances": "Finances",
+    "settings": "Settings"
   },
   "notifications": {
     "label": "View notifications"
@@ -116,7 +119,9 @@
     "operations": "Operations",
     "overview": "Overview",
     "portal": "Portal",
-    "registry": "Registry"
+    "registry": "Registry",
+    "location": "Location",
+    "administration": "Administration"
   },
   "registry": {
     "imports": {
@@ -257,6 +262,35 @@
     "lastNameRequired": "Enter the last name.",
     "passwordRequired": "Enter your password.",
     "phoneTooLong": "Phone cannot exceed 255 characters.",
-    "unitRequired": "Select a unit."
+    "unitRequired": "Select a unit.",
+    "passwordTooShort": "Use at least 8 characters.",
+    "passwordConfirmRequired": "Confirm your password.",
+    "passwordMismatch": "Passwords do not match."
+  },
+  "invitations": {
+    "residentTitle": "Activate your resident portal",
+    "residentIntro": "You have been invited to the {{account}} resident portal as {{name}}. Choose a password to activate your access.",
+    "newPassword": "Create a password",
+    "confirmPassword": "Confirm password",
+    "activateAccess": "Activate access",
+    "claimFailed": "Could not activate access",
+    "unavailableTitle": "Invitation unavailable",
+    "unavailableBody": "This invitation link is no longer valid. It may have expired or already been used. Ask your building administrator to send a new one.",
+    "staffTitle": "Join {{account}}",
+    "staffIntro": "You have been invited to join the {{account}} team on Wasiy. Here is the access you will receive:",
+    "staffIntroByInviter": "{{inviter}} invited you to join the {{account}} team on Wasiy. Here is the access you will receive:",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "acceptInvitation": "Accept invitation",
+    "acceptFailed": "Could not accept the invitation",
+    "signInRequiredTitle": "Sign in to continue",
+    "signInRequiredBody": "This invitation is for {{email}}, which already has an account. Sign in to accept it.",
+    "wrongAccountTitle": "Signed in as someone else",
+    "wrongAccountBody": "This invitation is for {{email}}. Sign out and sign back in with that address to accept it.",
+    "signInAs": "Sign in as {{email}}"
+  },
+  "placeholder": {
+    "title": "Not built yet",
+    "body": "This page has a place in the navigation but no implementation. Nothing here is real data."
   }
 }

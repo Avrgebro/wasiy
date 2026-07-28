@@ -5,6 +5,9 @@ namespace App\Enums;
 enum ActivityEventType: string
 {
     case StaffInvited = 'staff.invited';
+    case StaffInvitationAccepted = 'staff.invitation_accepted';
+    case StaffInvitationCancelled = 'staff.invitation_cancelled';
+    case StaffInvitationResent = 'staff.invitation_resent';
     case StaffRoleAssigned = 'staff.role_assigned';
     case StaffRoleRemoved = 'staff.role_removed';
     case StaffLocationsChanged = 'staff.locations_changed';
@@ -15,6 +18,8 @@ enum ActivityEventType: string
     case ResidentUpdated = 'resident.updated';
     case ResidentInactivated = 'resident.inactivated';
     case ResidentInvited = 'resident.invited';
+    case ResidentInvitationCancelled = 'resident.invitation_cancelled';
+    case ResidentInvitationResent = 'resident.invitation_resent';
     case ResidentClaimed = 'resident.claimed';
     case ResidentPhoneUpdated = 'resident.phone_updated';
     case UnitMembershipCreated = 'unit_membership.created';

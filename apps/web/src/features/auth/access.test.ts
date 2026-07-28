@@ -1,8 +1,12 @@
+import { Widget } from '@solar-icons/react'
 import { describe, expect, it } from 'vitest'
 import {
   canAccessFrontDesk,
   canAccessPortal,
+  canManageRegistry,
+  filterNavigationEntries,
   getAvailableNavigationItems,
+  isAccountAdmin,
   getDefaultAuthenticatedRoute,
   getDefaultLocation,
   requiresAccountSelection,
@@ -128,7 +132,7 @@ describe('access helpers', () => {
     expect(getDefaultAuthenticatedRoute(residentMe)).toBe('/portal')
   })
 
-  it('derives admin navigation from account admin context', () => {
+  it('gives account admins the location section', () => {
     const me = makeMe({
       roles: {
         account: [
@@ -142,17 +146,29 @@ describe('access helpers', () => {
     })
 
     const navItems = getAvailableNavigationItems(me, 'admin')
+    const serialized = JSON.stringify(navItems)
 
-    expect(JSON.stringify(navItems)).toContain('nav.staff')
-    expect(JSON.stringify(navItems)).toContain('nav.locations')
-    expect(JSON.stringify(navItems)).toContain('navGroups.registry')
-    expect(JSON.stringify(navItems)).toContain('/admin/registry/units')
-    expect(JSON.stringify(navItems)).toContain('/admin/registry/residents')
-    expect(JSON.stringify(navItems)).toContain('/admin/registry/vehicles')
-    expect(JSON.stringify(navItems)).toContain('/admin/registry/imports')
+    expect(serialized).toContain('navGroups.location')
+    expect(serialized).toContain('/admin')
+    expect(serialized).toContain('/admin/registry/units')
+    expect(serialized).toContain('/admin/registry/vehicles')
+
+    // Residents sits inside the People group rather than at the top level.
+    expect(serialized).toContain('nav.people')
+    expect(serialized).toContain('/admin/registry/residents')
+
+    // Imports is reached from the pages it loads, not from the sidebar.
+    expect(serialized).not.toContain('/admin/registry/imports')
+
+    // Manage-only entries and the whole administration section.
+    expect(serialized).toContain('/admin/announcements')
+    expect(serialized).toContain('/admin/finances')
+    expect(serialized).toContain('navGroups.administration')
+    expect(serialized).toContain('/admin/staff')
+    expect(serialized).toContain('/admin/locations')
   })
 
-  it('shows registry navigation to location managers', () => {
+  it('shows location managers the same location section', () => {
     const me = makeMe({
       roles: {
         account: [],
@@ -167,10 +183,126 @@ describe('access helpers', () => {
     })
 
     const navItems = getAvailableNavigationItems(me, 'admin')
+    const serialized = JSON.stringify(navItems)
 
-    expect(JSON.stringify(navItems)).toContain('navGroups.registry')
-    expect(JSON.stringify(navItems)).toContain('/admin/registry/vehicles')
-    expect(JSON.stringify(navItems)).toContain('/admin/registry/imports')
+    expect(serialized).toContain('navGroups.location')
+    expect(serialized).toContain('/admin/registry/vehicles')
+
+    // A manager manages the registry, so the manage-only entries stay.
+    expect(canManageRegistry(me)).toBe(true)
+    expect(serialized).toContain('/admin/announcements')
+    expect(serialized).toContain('/admin/finances')
+
+    // Account-wide administration is not theirs.
+    expect(isAccountAdmin(me)).toBe(false)
+    expect(serialized).not.toContain('navGroups.administration')
+    expect(serialized).not.toContain('/admin/staff')
+    expect(serialized).not.toContain('/admin/locations')
+    expect(serialized).not.toContain('/admin/settings')
+  })
+
+  it('separates registry management from surface access for front desk', () => {
+    const frontDeskMe = makeMe({
+      roles: {
+        account: [],
+        location: [
+          { account_id: 'acc_1', location_id: 'loc_1', role: 'front_desk' },
+        ],
+      },
+    })
+
+    // Front desk reaches no staff surface yet, and must never be treated as
+    // able to write to the registry once it does.
+    expect(canManageRegistry(frontDeskMe)).toBe(false)
+    expect(canAccessFrontDesk(frontDeskMe)).toBe(true)
+  })
+
+})
+
+describe('navigation filtering', () => {
+  const me = makeMe()
+  const leaf = (labelKey: string, visibleTo?: (me: MeResponse) => boolean) => ({
+    icon: Widget,
+    labelKey,
+    to: '/admin' as const,
+    ...(visibleTo ? { visibleTo } : {}),
+  })
+
+  it('drops entries whose predicate fails and keeps unguarded ones', () => {
+    const entries = filterNavigationEntries(
+      [leaf('nav.open'), leaf('nav.hidden', () => false)],
+      me,
+    )
+
+    expect(entries).toHaveLength(1)
+    expect(JSON.stringify(entries)).toContain('nav.open')
+  })
+
+  it('drops a group whose own predicate fails', () => {
+    const entries = filterNavigationEntries(
+      [
+        {
+          type: 'group',
+          titleKey: 'navGroups.secret',
+          visibleTo: () => false,
+          items: [leaf('nav.inside')],
+        },
+      ],
+      me,
+    )
+
+    expect(entries).toEqual([])
+  })
+
+  it('drops a visible group once every item inside it is filtered out', () => {
+    const entries = filterNavigationEntries(
+      [
+        {
+          type: 'group',
+          titleKey: 'navGroups.empty',
+          items: [leaf('nav.hidden', () => false)],
+        },
+      ],
+      me,
+    )
+
+    // An orphan heading with nothing under it is worse than no section.
+    expect(entries).toEqual([])
+  })
+
+  it('drops a collapsible whose children are all filtered out', () => {
+    const entries = filterNavigationEntries(
+      [
+        {
+          type: 'collapsible',
+          icon: Widget,
+          labelKey: 'nav.people',
+          children: [leaf('nav.hidden', () => false)],
+        },
+      ],
+      me,
+    )
+
+    expect(entries).toEqual([])
+  })
+
+  it('keeps a collapsible with at least one visible child', () => {
+    const entries = filterNavigationEntries(
+      [
+        {
+          type: 'collapsible',
+          icon: Widget,
+          labelKey: 'nav.people',
+          children: [leaf('nav.hidden', () => false), leaf('nav.shown')],
+        },
+      ],
+      me,
+    )
+
+    expect(entries).toHaveLength(1)
+    const serialized = JSON.stringify(entries)
+    expect(serialized).toContain('nav.shown')
+    expect(serialized).not.toContain('nav.hidden')
   })
 
   it('does not expose admin navigation to front desk users', () => {
