@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Data\RegistryImports\NormalizedRegistryRow;
 use App\Enums\ActivityEventType;
 use App\Enums\ImportRowStatus;
 use App\Enums\ImportStatus;
@@ -15,7 +16,6 @@ use App\Services\ActivityLogger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Throwable;
 
 class CommitRegistryImport implements ShouldQueue
@@ -78,7 +78,7 @@ class CommitRegistryImport implements ShouldQueue
                     eventType: ActivityEventType::ImportCompleted,
                     summary: 'Importacion CSV completada.',
                     metadata: [
-                        ...$this->activityMetadata($import),
+                        ...$import->activityMetadata(),
                         'created_unit_ids' => $this->uniqueIds($results->pluck('unit_ids')->flatten()->all()),
                         'created_resident_ids' => $this->uniqueIds($results->pluck('resident_ids')->flatten()->all()),
                         'created_unit_membership_ids' => $this->uniqueIds($results->pluck('unit_membership_ids')->flatten()->all()),
@@ -105,7 +105,7 @@ class CommitRegistryImport implements ShouldQueue
                 eventType: ActivityEventType::ImportFailed,
                 summary: 'Importacion CSV fallida.',
                 metadata: [
-                    ...$this->activityMetadata($import),
+                    ...$import->activityMetadata(),
                     'failure_reason' => $exception->getMessage(),
                 ],
                 location: $import->location,
@@ -133,14 +133,14 @@ class CommitRegistryImport implements ShouldQueue
             'resident_ids' => [],
             'unit_membership_ids' => [],
         ];
-        $normalized = $row->normalized_data;
+        $normalized = NormalizedRegistryRow::fromArray($row->normalized_data);
         [$unit, $unitCreated] = $this->resolveUnit($import, $normalized);
 
         if ($unitCreated) {
             $created['unit_ids'][] = $unit->id;
         }
 
-        if (! $this->isResidentRow($normalized)) {
+        if (! $normalized->isResidentRow()) {
             $row->forceFill([
                 'status' => ImportRowStatus::Imported,
                 'committed_unit_id' => $unit->id,
@@ -173,14 +173,14 @@ class CommitRegistryImport implements ShouldQueue
             'location_id' => $import->location_id,
             'unit_id' => $unit->id,
             'resident_id' => $resident->id,
-            'resident_type' => $normalized['resident_type'],
-            'status' => $normalized['membership_status'] ?? RegistryStatus::Active,
+            'resident_type' => $normalized->residentType,
+            'status' => $normalized->membershipStatus,
             'is_primary_contact' => false,
             'started_at' => null,
             'ended_at' => null,
         ]);
 
-        if (($normalized['is_primary_contact'] ?? false) === true) {
+        if ($normalized->isPrimaryContact) {
             $membership->markAsPrimaryContact();
             $membership->refresh();
         }
@@ -198,35 +198,28 @@ class CommitRegistryImport implements ShouldQueue
     }
 
     /**
-     * @param  array<string, mixed>  $normalized
      * @return array{0: Unit, 1: bool}
      */
-    private function resolveUnit(RegistryImport $import, array $normalized): array
+    private function resolveUnit(RegistryImport $import, NormalizedRegistryRow $normalized): array
     {
-        $existingUnitId = $normalized['existing_unit_id'] ?? null;
-
-        if (is_string($existingUnitId)) {
+        if ($normalized->existingUnitId !== null) {
             $unit = Unit::query()
                 ->where('account_id', $import->account_id)
                 ->where('location_id', $import->location_id)
-                ->find($existingUnitId);
+                ->find($normalized->existingUnitId);
 
             if ($unit) {
                 return [$unit, false];
             }
         }
 
-        $unitNumber = $normalized['unit_number'] ?? null;
-        $buildingName = $normalized['building_name'] ?? null;
-
         $unit = null;
 
-        if (is_string($unitNumber)) {
+        if ($normalized->unitNumber !== null) {
             $unit = Unit::query()
                 ->where('account_id', $import->account_id)
                 ->where('location_id', $import->location_id)
-                ->whereRaw('LOWER(unit_number) = ?', [Str::lower($unitNumber)])
-                ->whereRaw("LOWER(COALESCE(building_name, '')) = ?", [Str::lower((string) $buildingName)])
+                ->matchingImportIdentity($normalized->unitNumber, $normalized->buildingName)
                 ->first();
         }
 
@@ -237,38 +230,33 @@ class CommitRegistryImport implements ShouldQueue
         return [Unit::query()->create([
             'account_id' => $import->account_id,
             'location_id' => $import->location_id,
-            'unit_number' => $unitNumber,
-            'building_name' => $buildingName,
-            'floor' => $normalized['floor'] ?? null,
+            'unit_number' => $normalized->unitNumber,
+            'building_name' => $normalized->buildingName,
+            'floor' => $normalized->floor,
             'status' => RegistryStatus::Active,
-            'notes' => $normalized['unit_notes'] ?? null,
+            'notes' => $normalized->unitNotes,
         ]), true];
     }
 
     /**
-     * @param  array<string, mixed>  $normalized
      * @return array{0: Resident, 1: bool}
      */
-    private function resolveResident(RegistryImport $import, array $normalized): array
+    private function resolveResident(RegistryImport $import, NormalizedRegistryRow $normalized): array
     {
-        $existingResidentId = $normalized['existing_resident_id'] ?? null;
-
-        if (is_string($existingResidentId)) {
+        if ($normalized->existingResidentId !== null) {
             $resident = Resident::query()
                 ->where('account_id', $import->account_id)
-                ->find($existingResidentId);
+                ->find($normalized->existingResidentId);
 
             if ($resident) {
                 return [$resident, false];
             }
         }
 
-        $email = $normalized['email'] ?? null;
-
-        if (is_string($email)) {
+        if ($normalized->email !== null) {
             $resident = Resident::query()
                 ->where('account_id', $import->account_id)
-                ->whereRaw('LOWER(email) = ?', [Str::lower($email)])
+                ->matchingEmail($normalized->email)
                 ->first();
 
             if ($resident) {
@@ -278,55 +266,17 @@ class CommitRegistryImport implements ShouldQueue
 
         return [Resident::query()->create([
             'account_id' => $import->account_id,
-            'first_name' => $normalized['first_name'],
-            'last_name' => $normalized['last_name'],
-            'phone' => $normalized['phone'] ?? null,
-            'email' => $email,
+            'first_name' => $normalized->firstName,
+            'last_name' => $normalized->lastName,
+            'phone' => $normalized->phone,
+            'email' => $normalized->email,
             'status' => RegistryStatus::Active,
         ]), true];
     }
 
     private function existingActiveMembership(Unit $unit, Resident $resident): ?UnitMembership
     {
-        return UnitMembership::query()
-            ->where('account_id', $unit->account_id)
-            ->where('location_id', $unit->location_id)
-            ->where('unit_id', $unit->id)
-            ->where('resident_id', $resident->id)
-            ->where('status', RegistryStatus::Active)
-            ->first();
-    }
-
-    /**
-     * @param  array<string, mixed>  $normalized
-     */
-    private function isResidentRow(array $normalized): bool
-    {
-        return ($normalized['first_name'] ?? null) !== null
-            || ($normalized['last_name'] ?? null) !== null
-            || ($normalized['phone'] ?? null) !== null
-            || ($normalized['email'] ?? null) !== null
-            || ($normalized['resident_type'] ?? null) !== null
-            || ($normalized['is_primary_contact'] ?? false) === true;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function activityMetadata(RegistryImport $import): array
-    {
-        return [
-            'import_id' => $import->id,
-            'import_type' => $import->import_type->value,
-            'filename' => $import->original_filename,
-            'location_id' => $import->location_id,
-            'total_rows' => $import->total_rows,
-            'valid_rows' => $import->valid_rows,
-            'error_rows' => $import->error_rows,
-            'duplicate_rows' => $import->duplicate_rows,
-            'warning_rows' => $import->warning_rows,
-            'actor_user_id' => $import->requested_by_user_id,
-        ];
+        return UnitMembership::query()->activeFor($unit, $resident)->first();
     }
 
     /**

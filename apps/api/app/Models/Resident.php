@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Enums\RegistryStatus;
 use Database\Factories\ResidentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable(['account_id', 'user_id', 'first_name', 'last_name', 'phone', 'email', 'status'])]
 class Resident extends Model
@@ -31,6 +33,16 @@ class Resident extends Model
     public function getNameAttribute(): string
     {
         return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    /**
+     * Case-insensitive email identity used by registry imports.
+     *
+     * @param  Builder<Resident>  $query
+     */
+    public function scopeMatchingEmail(Builder $query, string $email): void
+    {
+        $query->whereRaw('LOWER(email) = ?', [Str::lower($email)]);
     }
 
     /**

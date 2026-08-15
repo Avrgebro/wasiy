@@ -69,6 +69,22 @@ class UnitMembership extends Model
     }
 
     /**
+     * The active membership linking a unit and a resident, scoped to the
+     * unit's tenant. Shared identity rule for registry imports.
+     *
+     * @param  Builder<UnitMembership>  $query
+     */
+    public function scopeActiveFor(Builder $query, Unit $unit, Resident $resident): void
+    {
+        $query
+            ->where('account_id', $unit->account_id)
+            ->where('location_id', $unit->location_id)
+            ->where('unit_id', $unit->id)
+            ->where('resident_id', $resident->id)
+            ->where('status', RegistryStatus::Active);
+    }
+
+    /**
      * @return BelongsTo<Account, $this>
      */
     public function account(): BelongsTo

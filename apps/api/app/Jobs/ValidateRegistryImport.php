@@ -70,7 +70,7 @@ class ValidateRegistryImport implements ShouldQueue
             $parsedRows = $parser->parse($contents);
             $previews = $duplicateDetector->detect(
                 $import->location,
-                $validator->validate($import->location, $parsedRows),
+                $validator->validate($parsedRows),
             );
 
             DB::transaction(function () use ($import, $previews): void {
@@ -105,7 +105,7 @@ class ValidateRegistryImport implements ShouldQueue
                 eventType: ActivityEventType::ImportValidationFailed,
                 summary: 'Validacion de importacion CSV fallida.',
                 metadata: [
-                    ...$this->activityMetadata($import),
+                    ...$import->activityMetadata(),
                     'failure_reason' => $exception->getMessage(),
                 ],
                 location: $import->location,
@@ -125,7 +125,7 @@ class ValidateRegistryImport implements ShouldQueue
             'row_number' => $preview->rowNumber,
             'status' => $preview->status,
             'raw_data' => $preview->rawData,
-            'normalized_data' => $preview->normalizedData,
+            'normalized_data' => $preview->normalizedData->toArray(),
             'errors' => $preview->errors,
             'warnings' => $preview->warnings,
             'duplicate_key' => $preview->duplicateKey,
@@ -138,38 +138,13 @@ class ValidateRegistryImport implements ShouldQueue
      */
     private function statusCounts(array $previews): array
     {
-        $counts = [
-            ImportRowStatus::Valid->value => 0,
-            ImportRowStatus::Error->value => 0,
-            ImportRowStatus::Duplicate->value => 0,
-            ImportRowStatus::Warning->value => 0,
-        ];
+        $counts = collect($previews)->countBy(fn (RegistryImportRowPreview $preview): string => $preview->status->value);
 
-        foreach ($previews as $preview) {
-            if (array_key_exists($preview->status->value, $counts)) {
-                $counts[$preview->status->value]++;
-            }
-        }
-
-        return $counts;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function activityMetadata(RegistryImport $import): array
-    {
         return [
-            'import_id' => $import->id,
-            'import_type' => $import->import_type->value,
-            'filename' => $import->original_filename,
-            'location_id' => $import->location_id,
-            'total_rows' => $import->total_rows,
-            'valid_rows' => $import->valid_rows,
-            'error_rows' => $import->error_rows,
-            'duplicate_rows' => $import->duplicate_rows,
-            'warning_rows' => $import->warning_rows,
-            'actor_user_id' => $import->requested_by_user_id,
+            ImportRowStatus::Valid->value => $counts->get(ImportRowStatus::Valid->value, 0),
+            ImportRowStatus::Error->value => $counts->get(ImportRowStatus::Error->value, 0),
+            ImportRowStatus::Duplicate->value => $counts->get(ImportRowStatus::Duplicate->value, 0),
+            ImportRowStatus::Warning->value => $counts->get(ImportRowStatus::Warning->value, 0),
         ];
     }
 }

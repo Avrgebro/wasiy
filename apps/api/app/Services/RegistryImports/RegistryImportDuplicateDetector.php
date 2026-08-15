@@ -34,22 +34,23 @@ class RegistryImportDuplicateDetector
         $seenResidentMembershipRows = [];
 
         foreach ($candidates as $preview) {
-            $unit = $unitsByKey[$this->unitLookupKey($preview)] ?? null;
-            $email = $this->normalizedEmail($preview);
+            $row = $preview->normalizedData;
+            $unit = $unitsByKey[$row->unitMatchKey()] ?? null;
+            $email = $row->normalizedEmail();
             $resident = $email !== null ? ($residentsByEmail[$email] ?? null) : null;
 
             if ($unit) {
-                $preview->normalizedData['existing_unit_id'] = $unit->id;
+                $row->existingUnitId = $unit->id;
                 $preview->addWarning('La unidad existente sera reutilizada.');
             }
 
             if ($resident) {
-                $preview->normalizedData['existing_resident_id'] = $resident->id;
+                $row->existingResidentId = $resident->id;
                 $preview->addWarning('El residente existente sera reutilizado.');
             }
 
-            $isResidentRow = $this->isResidentRow($preview);
-            $unitKey = $this->unitKey($preview);
+            $isResidentRow = $row->isResidentRow();
+            $unitKey = $row->unitKey();
 
             if (! $isResidentRow) {
                 if (isset($seenUnitOnlyRows[$unitKey])) {
@@ -86,7 +87,7 @@ class RegistryImportDuplicateDetector
     private function preloadUnits(Location $location, array $previews): array
     {
         $unitNumbers = collect($previews)
-            ->map(fn (RegistryImportRowPreview $preview): string => Str::lower((string) $preview->normalizedData['unit_number']))
+            ->map(fn (RegistryImportRowPreview $preview): string => Str::lower((string) $preview->normalizedData->unitNumber))
             ->unique()
             ->values();
 
@@ -100,8 +101,7 @@ class RegistryImportDuplicateDetector
             ->whereIn(DB::raw('LOWER(unit_number)'), $unitNumbers)
             ->get()
             ->reduce(function (array $map, Unit $unit): array {
-                $key = Str::lower((string) $unit->unit_number).'|'.Str::lower((string) ($unit->building_name ?? ''));
-                $map[$key] ??= $unit;
+                $map[$unit->importMatchKey()] ??= $unit;
 
                 return $map;
             }, []);
@@ -114,7 +114,7 @@ class RegistryImportDuplicateDetector
     private function preloadResidents(Location $location, array $previews): array
     {
         $emails = collect($previews)
-            ->map(fn (RegistryImportRowPreview $preview): ?string => $this->normalizedEmail($preview))
+            ->map(fn (RegistryImportRowPreview $preview): ?string => $preview->normalizedData->normalizedEmail())
             ->filter()
             ->unique()
             ->values();
@@ -149,8 +149,8 @@ class RegistryImportDuplicateDetector
         $residentIds = [];
 
         foreach ($previews as $preview) {
-            $unit = $unitsByKey[$this->unitLookupKey($preview)] ?? null;
-            $email = $this->normalizedEmail($preview);
+            $unit = $unitsByKey[$preview->normalizedData->unitMatchKey()] ?? null;
+            $email = $preview->normalizedData->normalizedEmail();
             $resident = $email !== null ? ($residentsByEmail[$email] ?? null) : null;
 
             if ($unit && $resident) {
@@ -177,38 +177,4 @@ class RegistryImportDuplicateDetector
             }, []);
     }
 
-    private function unitLookupKey(RegistryImportRowPreview $preview): string
-    {
-        return Str::lower((string) $preview->normalizedData['unit_number'])
-            .'|'
-            .Str::lower((string) ($preview->normalizedData['building_name'] ?? ''));
-    }
-
-    private function isResidentRow(RegistryImportRowPreview $preview): bool
-    {
-        return $preview->normalizedData['first_name'] !== null
-            || $preview->normalizedData['last_name'] !== null
-            || $preview->normalizedData['phone'] !== null
-            || $preview->normalizedData['email'] !== null
-            || $preview->normalizedData['resident_type'] !== null
-            || $preview->normalizedData['is_primary_contact'] === true;
-    }
-
-    private function normalizedEmail(RegistryImportRowPreview $preview): ?string
-    {
-        $email = $preview->normalizedData['email'] ?? null;
-
-        return is_string($email) ? Str::lower($email) : null;
-    }
-
-    private function unitKey(RegistryImportRowPreview $preview): string
-    {
-        return Str::of((string) ($preview->normalizedData['building_name'] ?? ''))
-            ->ascii()
-            ->lower()
-            ->trim()
-            ->append(':')
-            ->append(Str::of((string) $preview->normalizedData['unit_number'])->ascii()->lower()->trim())
-            ->toString();
-    }
 }

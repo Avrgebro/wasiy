@@ -21,9 +21,9 @@ function parseRegistryCsv(string $csv): array
     return app(RegistryCsvParser::class)->parse($csv);
 }
 
-function validateRegistryCsvRows(Location $location, array $rows): array
+function validateRegistryCsvRows(array $rows): array
 {
-    return app(RegistryImportValidator::class)->validate($location, $rows);
+    return app(RegistryImportValidator::class)->validate($rows);
 }
 
 function detectRegistryCsvDuplicates(Location $location, array $previews): array
@@ -89,11 +89,11 @@ test('validator accepts unit only rows and normalizes resident aliases', functio
         '302,Torre A,3,Ana,Salas,ana@example.test,propietario,si,activo',
     ]));
 
-    $previews = validateRegistryCsvRows($location, $rows);
+    $previews = validateRegistryCsvRows($rows);
 
     expect($previews[0]->status)->toBe(ImportRowStatus::Valid)
         ->and($previews[0]->errors)->toBe([])
-        ->and($previews[0]->normalizedData)->toMatchArray([
+        ->and($previews[0]->normalizedData->toArray())->toMatchArray([
             'unit_number' => '301',
             'building_name' => 'Torre A',
             'resident_type' => null,
@@ -101,7 +101,7 @@ test('validator accepts unit only rows and normalizes resident aliases', functio
             'is_primary_contact' => false,
         ])
         ->and($previews[1]->status)->toBe(ImportRowStatus::Valid)
-        ->and($previews[1]->normalizedData)->toMatchArray([
+        ->and($previews[1]->normalizedData->toArray())->toMatchArray([
             'resident_type' => ResidentType::Owner->value,
             'membership_status' => RegistryStatus::Active->value,
             'is_primary_contact' => true,
@@ -116,7 +116,7 @@ test('validator returns spanish row errors for invalid resident rows', function 
         "301,{$longName},,correo-invalido,desconocido,pausado",
     ]));
 
-    $previews = validateRegistryCsvRows($location, $rows);
+    $previews = validateRegistryCsvRows($rows);
 
     expect($previews[0]->status)->toBe(ImportRowStatus::Error)
         ->and($previews[0]->errors)->toContain('El campo nombres no puede superar 255 caracteres.')
@@ -134,7 +134,7 @@ test('validator rejects more than one imported primary contact for the same unit
         '301,Luis,Rojas,tenant,si',
     ]));
 
-    $previews = validateRegistryCsvRows($location, $rows);
+    $previews = validateRegistryCsvRows($rows);
 
     expect($previews[0]->status)->toBe(ImportRowStatus::Error)
         ->and($previews[1]->status)->toBe(ImportRowStatus::Error)
@@ -170,7 +170,7 @@ test('duplicate detector distinguishes reusable units and skipped duplicates', f
         '301,Torre A,,,',
     ]));
 
-    $previews = detectRegistryCsvDuplicates($location, validateRegistryCsvRows($location, $rows));
+    $previews = detectRegistryCsvDuplicates($location, validateRegistryCsvRows($rows));
 
     expect($previews[0]->status)->toBe(ImportRowStatus::Duplicate)
         ->and($previews[0]->duplicateKey)->toBe("membership:{$unit->id}:{$resident->id}")
@@ -190,7 +190,7 @@ test('multiple resident rows for one unit are not treated as duplicate unit rows
         '501,Torre C,Luis,Rojas,luis@example.test,tenant',
     ]));
 
-    $previews = detectRegistryCsvDuplicates($location, validateRegistryCsvRows($location, $rows));
+    $previews = detectRegistryCsvDuplicates($location, validateRegistryCsvRows($rows));
 
     expect($previews[0]->status)->toBe(ImportRowStatus::Valid)
         ->and($previews[1]->status)->toBe(ImportRowStatus::Valid)
@@ -214,7 +214,7 @@ test('duplicate detector runs a bounded number of queries regardless of row coun
         '104,Torre B,,,,',
         '105,Torre C,Juan,Vega,juan@example.test,inquilino',
     ]);
-    $previews = validateRegistryCsvRows($location, parseRegistryCsv($csv));
+    $previews = validateRegistryCsvRows(parseRegistryCsv($csv));
 
     DB::flushQueryLog();
     DB::enableQueryLog();

@@ -51,6 +51,27 @@ class RegistryImport extends Model
     }
 
     /**
+     * The import's own summary shape for activity-log entries.
+     *
+     * @return array<string, mixed>
+     */
+    public function activityMetadata(): array
+    {
+        return [
+            'import_id' => $this->id,
+            'import_type' => $this->import_type->value,
+            'filename' => $this->original_filename,
+            'location_id' => $this->location_id,
+            'total_rows' => $this->total_rows,
+            'valid_rows' => $this->valid_rows,
+            'error_rows' => $this->error_rows,
+            'duplicate_rows' => $this->duplicate_rows,
+            'warning_rows' => $this->warning_rows,
+            'actor_user_id' => $this->requested_by_user_id,
+        ];
+    }
+
+    /**
      * @return BelongsTo<Account, $this>
      */
     public function account(): BelongsTo

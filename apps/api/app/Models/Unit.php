@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\RegistryStatus;
 use Database\Factories\UnitFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,6 +28,28 @@ class Unit extends Model
         return [
             'status' => RegistryStatus::class,
         ];
+    }
+
+    /**
+     * Case-insensitive unit identity used by registry imports. Must stay in
+     * lockstep with importMatchKey() and
+     * NormalizedRegistryRow::unitMatchKey().
+     *
+     * @param  Builder<Unit>  $query
+     */
+    public function scopeMatchingImportIdentity(Builder $query, ?string $unitNumber, ?string $buildingName): void
+    {
+        $query
+            ->whereRaw('LOWER(unit_number) = ?', [Str::lower((string) $unitNumber)])
+            ->whereRaw("LOWER(COALESCE(building_name, '')) = ?", [Str::lower((string) $buildingName)]);
+    }
+
+    /**
+     * The in-memory counterpart of scopeMatchingImportIdentity.
+     */
+    public function importMatchKey(): string
+    {
+        return Str::lower((string) $this->unit_number).'|'.Str::lower((string) ($this->building_name ?? ''));
     }
 
     /**

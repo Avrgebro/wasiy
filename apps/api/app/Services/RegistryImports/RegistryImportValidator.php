@@ -2,11 +2,12 @@
 
 namespace App\Services\RegistryImports;
 
+use App\Data\RegistryImports\NormalizedRegistryRow;
 use App\Data\RegistryImports\ParsedRegistryImportRow;
 use App\Data\RegistryImports\RegistryImportRowPreview;
+use App\Enums\ImportRowStatus;
 use App\Enums\RegistryStatus;
 use App\Enums\ResidentType;
-use App\Models\Location;
 use Illuminate\Support\Str;
 
 class RegistryImportValidator
@@ -15,7 +16,7 @@ class RegistryImportValidator
      * @param  array<int, ParsedRegistryImportRow>  $rows
      * @return array<int, RegistryImportRowPreview>
      */
-    public function validate(Location $location, array $rows): array
+    public function validate(array $rows): array
     {
         $previews = array_map(fn (ParsedRegistryImportRow $row): RegistryImportRowPreview => $this->validateRow($row), $rows);
 
@@ -26,63 +27,85 @@ class RegistryImportValidator
 
     private function validateRow(ParsedRegistryImportRow $row): RegistryImportRowPreview
     {
-        $normalized = $row->normalizedData;
-        $normalized['resident_type'] = $this->normalizeResidentType($normalized['resident_type']);
-        $normalized['membership_status'] = $this->normalizeMembershipStatus($normalized['membership_status']);
-        $normalized['is_primary_contact'] = $this->normalizeBoolean($normalized['is_primary_contact']);
+        $raw = $row->normalizedData;
+
+        [$residentType, $residentTypeInvalid] = $this->normalizeResidentType($raw['resident_type']);
+        [$membershipStatus, $membershipStatusInvalid] = $this->normalizeMembershipStatus($raw['membership_status']);
+        [$isPrimaryContact, $isPrimaryContactInvalid] = $this->normalizeBoolean($raw['is_primary_contact']);
 
         $preview = new RegistryImportRowPreview(
             rowNumber: $row->rowNumber,
             rawData: $row->rawData,
-            normalizedData: $normalized,
+            normalizedData: new NormalizedRegistryRow(
+                unitNumber: $raw['unit_number'],
+                buildingName: $raw['building_name'],
+                floor: $raw['floor'],
+                unitNotes: $raw['unit_notes'],
+                firstName: $raw['first_name'],
+                lastName: $raw['last_name'],
+                phone: $raw['phone'],
+                email: $raw['email'],
+                residentType: $residentType,
+                membershipStatus: $membershipStatus,
+                isPrimaryContact: $isPrimaryContact,
+            ),
         );
+        $normalized = $preview->normalizedData;
 
-        if ($normalized['unit_number'] === null) {
+        if ($normalized->unitNumber === null) {
             $preview->addError('El campo unidad es obligatorio.');
         }
 
-        foreach (['unit_number' => 'unidad', 'building_name' => 'edificio', 'floor' => 'piso', 'unit_notes' => 'notas de unidad'] as $field => $label) {
-            $this->validateMaxLength($preview, $normalized[$field], $label);
+        foreach (['unitNumber' => 'unidad', 'buildingName' => 'edificio', 'floor' => 'piso', 'unitNotes' => 'notas de unidad'] as $property => $label) {
+            $this->validateMaxLength($preview, $normalized->{$property}, $label);
         }
 
-        $hasResidentData = $this->hasResidentData($normalized);
+        // Presence is judged on the raw input, not the typed values: an
+        // unrecognized resident type still marks the row as a resident row so
+        // it fails loudly instead of silently importing as unit-only.
+        $hasResidentData = $normalized->firstName !== null
+            || $normalized->lastName !== null
+            || $normalized->phone !== null
+            || $normalized->email !== null
+            || $raw['resident_type'] !== null
+            || $normalized->isPrimaryContact;
 
         if (! $hasResidentData) {
             return $preview;
         }
 
-        foreach (['first_name' => 'nombres', 'last_name' => 'apellidos'] as $field => $label) {
-            if ($normalized[$field] === null) {
+        foreach (['firstName' => 'nombres', 'lastName' => 'apellidos'] as $property => $label) {
+            if ($normalized->{$property} === null) {
                 $preview->addError("El campo {$label} es obligatorio para filas de residente.");
             }
         }
 
-        foreach (['first_name' => 'nombres', 'last_name' => 'apellidos', 'phone' => 'telefono', 'email' => 'email'] as $field => $label) {
-            $this->validateMaxLength($preview, $normalized[$field], $label);
+        foreach (['firstName' => 'nombres', 'lastName' => 'apellidos', 'phone' => 'telefono', 'email' => 'email'] as $property => $label) {
+            $this->validateMaxLength($preview, $normalized->{$property}, $label);
         }
 
-        if ($normalized['email'] !== null && filter_var($normalized['email'], FILTER_VALIDATE_EMAIL) === false) {
+        if ($normalized->email !== null && filter_var($normalized->email, FILTER_VALIDATE_EMAIL) === false) {
             $preview->addError('El correo electronico no tiene un formato valido.');
         }
 
-        if ($normalized['resident_type'] === null) {
+        if ($raw['resident_type'] === null) {
             $preview->addError('El tipo de residente es obligatorio para filas de residente.');
-        } elseif (! ResidentType::tryFrom($normalized['resident_type'])) {
+        } elseif ($residentTypeInvalid) {
             $preview->addError('El tipo de residente no es valido.');
         }
 
-        if (! RegistryStatus::tryFrom($normalized['membership_status'])) {
+        if ($membershipStatusInvalid) {
             $preview->addError('El estado de membresia no es valido.');
         }
 
-        if (! is_bool($normalized['is_primary_contact'])) {
+        if ($isPrimaryContactInvalid) {
             $preview->addError('El valor de contacto principal no es valido.');
         }
 
         return $preview;
     }
 
-    private function validateMaxLength(RegistryImportRowPreview $preview, mixed $value, string $label): void
+    private function validateMaxLength(RegistryImportRowPreview $preview, ?string $value, string $label): void
     {
         if (is_string($value) && mb_strlen($value) > 255) {
             $preview->addError("El campo {$label} no puede superar 255 caracteres.");
@@ -90,63 +113,59 @@ class RegistryImportValidator
     }
 
     /**
-     * @param  array<string, mixed>  $normalized
+     * @return array{0: ?ResidentType, 1: bool}  typed value + whether the input was unrecognized
      */
-    private function hasResidentData(array $normalized): bool
-    {
-        return $normalized['first_name'] !== null
-            || $normalized['last_name'] !== null
-            || $normalized['phone'] !== null
-            || $normalized['email'] !== null
-            || $normalized['resident_type'] !== null
-            || $normalized['is_primary_contact'] === true;
-    }
-
-    private function normalizeResidentType(?string $value): ?string
+    private function normalizeResidentType(?string $value): array
     {
         if ($value === null) {
-            return null;
+            return [null, false];
         }
 
-        $normalized = $this->normalizeToken($value);
-
-        return match ($normalized) {
-            'owner', 'propietario', 'propietaria', 'dueno', 'duena' => ResidentType::Owner->value,
-            'tenant', 'inquilino', 'inquilina', 'arrendatario', 'arrendataria' => ResidentType::Tenant->value,
-            'occupant', 'ocupante' => ResidentType::Occupant->value,
-            'guest_resident', 'residente_invitado', 'residente_invitada', 'invitado', 'invitada' => ResidentType::GuestResident->value,
-            default => $value,
+        $type = match ($this->normalizeToken($value)) {
+            'owner', 'propietario', 'propietaria', 'dueno', 'duena' => ResidentType::Owner,
+            'tenant', 'inquilino', 'inquilina', 'arrendatario', 'arrendataria' => ResidentType::Tenant,
+            'occupant', 'ocupante' => ResidentType::Occupant,
+            'guest_resident', 'residente_invitado', 'residente_invitada', 'invitado', 'invitada' => ResidentType::GuestResident,
+            default => null,
         };
+
+        return [$type, $type === null];
     }
 
-    private function normalizeMembershipStatus(?string $value): string
+    /**
+     * @return array{0: RegistryStatus, 1: bool}  typed value + whether the input was unrecognized
+     */
+    private function normalizeMembershipStatus(?string $value): array
     {
         if ($value === null) {
-            return RegistryStatus::Active->value;
+            return [RegistryStatus::Active, false];
         }
 
-        $normalized = $this->normalizeToken($value);
-
-        return match ($normalized) {
-            'active', 'activo', 'activa' => RegistryStatus::Active->value,
-            'inactive', 'inactivo', 'inactiva' => RegistryStatus::Inactive->value,
-            default => $value,
+        $status = match ($this->normalizeToken($value)) {
+            'active', 'activo', 'activa' => RegistryStatus::Active,
+            'inactive', 'inactivo', 'inactiva' => RegistryStatus::Inactive,
+            default => null,
         };
+
+        return [$status ?? RegistryStatus::Active, $status === null];
     }
 
-    private function normalizeBoolean(?string $value): bool|string
+    /**
+     * @return array{0: bool, 1: bool}  typed value + whether the input was unrecognized
+     */
+    private function normalizeBoolean(?string $value): array
     {
         if ($value === null) {
-            return false;
+            return [false, false];
         }
 
-        $normalized = $this->normalizeToken($value);
-
-        return match ($normalized) {
+        $bool = match ($this->normalizeToken($value)) {
             'si', 's', 'true', '1', 'yes' => true,
             'no', 'n', 'false', '0' => false,
-            default => $value,
+            default => null,
         };
+
+        return [$bool ?? false, $bool === null];
     }
 
     private function normalizeToken(string $value): string
@@ -167,12 +186,11 @@ class RegistryImportValidator
         $primaryContactsByUnit = [];
 
         foreach ($previews as $preview) {
-            if ($preview->normalizedData['is_primary_contact'] !== true || $preview->status->value === 'error') {
+            if (! $preview->normalizedData->isPrimaryContact || $preview->status === ImportRowStatus::Error) {
                 continue;
             }
 
-            $key = $this->unitKey($preview->normalizedData);
-            $primaryContactsByUnit[$key][] = $preview;
+            $primaryContactsByUnit[$preview->normalizedData->unitKey()][] = $preview;
         }
 
         foreach ($primaryContactsByUnit as $unitPreviews) {
@@ -184,19 +202,5 @@ class RegistryImportValidator
                 $preview->addError('Solo puede haber un contacto principal importado por unidad.');
             }
         }
-    }
-
-    /**
-     * @param  array<string, mixed>  $normalized
-     */
-    private function unitKey(array $normalized): string
-    {
-        return Str::of((string) ($normalized['building_name'] ?? ''))
-            ->ascii()
-            ->lower()
-            ->trim()
-            ->append(':')
-            ->append(Str::of((string) ($normalized['unit_number'] ?? ''))->ascii()->lower()->trim())
-            ->toString();
     }
 }

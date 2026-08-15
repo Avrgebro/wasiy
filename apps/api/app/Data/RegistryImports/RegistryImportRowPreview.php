@@ -8,14 +8,13 @@ class RegistryImportRowPreview
 {
     /**
      * @param  array<string, string|null>  $rawData
-     * @param  array<string, mixed>  $normalizedData
      * @param  array<int, string>  $errors
      * @param  array<int, string>  $warnings
      */
     public function __construct(
         public readonly int $rowNumber,
         public readonly array $rawData,
-        public array $normalizedData,
+        public NormalizedRegistryRow $normalizedData,
         public ImportRowStatus $status = ImportRowStatus::Valid,
         public array $errors = [],
         public array $warnings = [],
