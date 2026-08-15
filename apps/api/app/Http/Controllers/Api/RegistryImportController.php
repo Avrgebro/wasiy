@@ -23,12 +23,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class RegistryImportController extends Controller
 {
@@ -99,42 +101,57 @@ class RegistryImportController extends Controller
         $disk = config('wasiy.imports.disk', 'local');
         $file = $validated['file'];
 
-        $import = RegistryImport::query()->create([
-            'account_id' => $location->account_id,
-            'location_id' => $location->id,
-            'requested_by_user_id' => $user->id,
-            'import_type' => $validated['import_type'],
-            'status' => ImportStatus::Pending,
-            'original_filename' => $file->getClientOriginalName(),
-            'disk' => $disk,
-            'path' => null,
-            'total_rows' => 0,
-            'valid_rows' => 0,
-            'error_rows' => 0,
-            'duplicate_rows' => 0,
-            'warning_rows' => 0,
-        ]);
+        // Store the file before touching the database, keyed by a
+        // pre-generated id: a storage failure must not strand a Pending
+        // import row with no file behind it.
+        $importId = (string) Str::ulid();
 
         $path = Storage::disk($disk)->putFileAs(
-            "imports/{$location->account_id}/{$import->id}",
+            "imports/{$location->account_id}/{$importId}",
             $file,
             $this->storedFilename($file->getClientOriginalName()),
         );
 
-        $import->forceFill([
-            'path' => $path,
-        ])->save();
+        try {
+            $import = DB::transaction(function () use ($validated, $location, $user, $disk, $file, $path, $importId): RegistryImport {
+                $import = new RegistryImport([
+                    'account_id' => $location->account_id,
+                    'location_id' => $location->id,
+                    'requested_by_user_id' => $user->id,
+                    'import_type' => $validated['import_type'],
+                    'status' => ImportStatus::Pending,
+                    'original_filename' => $file->getClientOriginalName(),
+                    'disk' => $disk,
+                    'path' => $path,
+                    'total_rows' => 0,
+                    'valid_rows' => 0,
+                    'error_rows' => 0,
+                    'duplicate_rows' => 0,
+                    'warning_rows' => 0,
+                ]);
+                // id is deliberately not fillable; the pre-generated ULID
+                // keys the already-stored file path.
+                $import->id = $importId;
+                $import->save();
 
-        $this->activityLogger->log(
-            account: $location->account,
-            eventType: ActivityEventType::ImportUploaded,
-            summary: 'Importacion CSV cargada.',
-            metadata: $this->activityMetadata($import, $user),
-            location: $location,
-            actor: $user,
-            subjectType: RegistryImport::class,
-            subjectId: $import->id,
-        );
+                $this->activityLogger->log(
+                    account: $location->account,
+                    eventType: ActivityEventType::ImportUploaded,
+                    summary: 'Importacion CSV cargada.',
+                    metadata: $this->activityMetadata($import, $user),
+                    location: $location,
+                    actor: $user,
+                    subjectType: RegistryImport::class,
+                    subjectId: $import->id,
+                );
+
+                return $import;
+            });
+        } catch (Throwable $exception) {
+            Storage::disk($disk)->delete($path);
+
+            throw $exception;
+        }
 
         ValidateRegistryImport::dispatch($import);
 

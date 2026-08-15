@@ -347,3 +347,26 @@ test('commit job does not run for an import another worker already claimed', fun
         ->and(Unit::query()->count())->toBe(0)
         ->and($import->rows()->where('status', ImportRowStatus::Imported)->count())->toBe(0);
 });
+
+test('a failing row rolls back every committed row in the same import', function () {
+    $location = Location::factory()->create();
+    $import = createReadyRegistryImport($location, [
+        'total_rows' => 2,
+        'valid_rows' => 2,
+    ]);
+    createImportCommitRow($import, ['unit_number' => '101'], ['row_number' => 2]);
+    // A null unit number blows up inside the commit; the first row must not
+    // survive the failure.
+    createImportCommitRow($import, ['unit_number' => null], ['row_number' => 3]);
+
+    (new CommitRegistryImport($import))->handle();
+
+    $import->refresh();
+
+    expect($import->status)->toBe(ImportStatus::Failed)
+        ->and($import->failed_at)->not->toBeNull()
+        ->and($import->failure_reason)->not->toBeNull()
+        ->and(Unit::query()->count())->toBe(0)
+        ->and($import->rows()->where('status', ImportRowStatus::Imported)->count())->toBe(0)
+        ->and($import->rows()->whereNotNull('committed_unit_id')->count())->toBe(0);
+});

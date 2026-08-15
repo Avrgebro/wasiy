@@ -9,6 +9,7 @@ use App\Models\Location;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RegistryImportDuplicateDetector
@@ -19,16 +20,23 @@ class RegistryImportDuplicateDetector
      */
     public function detect(Location $location, array $previews): array
     {
+        $candidates = array_filter(
+            $previews,
+            fn (RegistryImportRowPreview $preview): bool => $preview->status !== ImportRowStatus::Error,
+        );
+
+        // Three batched lookups replace up to three queries per row.
+        $unitsByKey = $this->preloadUnits($location, $candidates);
+        $residentsByEmail = $this->preloadResidents($location, $candidates);
+        $activeMembershipPairs = $this->preloadActiveMembershipPairs($location, $candidates, $unitsByKey, $residentsByEmail);
+
         $seenUnitOnlyRows = [];
         $seenResidentMembershipRows = [];
 
-        foreach ($previews as $preview) {
-            if ($preview->status === ImportRowStatus::Error) {
-                continue;
-            }
-
-            $unit = $this->existingUnit($location, $preview);
-            $resident = $this->existingResident($location, $preview);
+        foreach ($candidates as $preview) {
+            $unit = $unitsByKey[$this->unitLookupKey($preview)] ?? null;
+            $email = $this->normalizedEmail($preview);
+            $resident = $email !== null ? ($residentsByEmail[$email] ?? null) : null;
 
             if ($unit) {
                 $preview->normalizedData['existing_unit_id'] = $unit->id;
@@ -53,13 +61,12 @@ class RegistryImportDuplicateDetector
                 continue;
             }
 
-            if ($unit && $resident && $this->activeMembershipExists($unit, $resident)) {
+            if ($unit && $resident && isset($activeMembershipPairs["{$unit->id}:{$resident->id}"])) {
                 $preview->markDuplicate("membership:{$unit->id}:{$resident->id}");
 
                 continue;
             }
 
-            $email = $this->normalizedEmail($preview);
             $membershipKey = "{$unitKey}:{$email}";
 
             if ($email !== null && isset($seenResidentMembershipRows[$membershipKey])) {
@@ -72,39 +79,109 @@ class RegistryImportDuplicateDetector
         return $previews;
     }
 
-    private function existingUnit(Location $location, RegistryImportRowPreview $preview): ?Unit
+    /**
+     * @param  array<int, RegistryImportRowPreview>  $previews
+     * @return array<string, Unit>
+     */
+    private function preloadUnits(Location $location, array $previews): array
     {
+        $unitNumbers = collect($previews)
+            ->map(fn (RegistryImportRowPreview $preview): string => Str::lower((string) $preview->normalizedData['unit_number']))
+            ->unique()
+            ->values();
+
+        if ($unitNumbers->isEmpty()) {
+            return [];
+        }
+
         return Unit::query()
             ->where('account_id', $location->account_id)
             ->where('location_id', $location->id)
-            ->whereRaw('LOWER(unit_number) = ?', [Str::lower((string) $preview->normalizedData['unit_number'])])
-            ->whereRaw("LOWER(COALESCE(building_name, '')) = ?", [Str::lower((string) ($preview->normalizedData['building_name'] ?? ''))])
-            ->first();
+            ->whereIn(DB::raw('LOWER(unit_number)'), $unitNumbers)
+            ->get()
+            ->reduce(function (array $map, Unit $unit): array {
+                $key = Str::lower((string) $unit->unit_number).'|'.Str::lower((string) ($unit->building_name ?? ''));
+                $map[$key] ??= $unit;
+
+                return $map;
+            }, []);
     }
 
-    private function existingResident(Location $location, RegistryImportRowPreview $preview): ?Resident
+    /**
+     * @param  array<int, RegistryImportRowPreview>  $previews
+     * @return array<string, Resident>
+     */
+    private function preloadResidents(Location $location, array $previews): array
     {
-        $email = $this->normalizedEmail($preview);
+        $emails = collect($previews)
+            ->map(fn (RegistryImportRowPreview $preview): ?string => $this->normalizedEmail($preview))
+            ->filter()
+            ->unique()
+            ->values();
 
-        if ($email === null) {
-            return null;
+        if ($emails->isEmpty()) {
+            return [];
         }
 
         return Resident::query()
             ->where('account_id', $location->account_id)
-            ->whereRaw('LOWER(email) = ?', [$email])
-            ->first();
+            ->whereIn(DB::raw('LOWER(email)'), $emails)
+            ->get()
+            ->reduce(function (array $map, Resident $resident): array {
+                $map[Str::lower((string) $resident->email)] ??= $resident;
+
+                return $map;
+            }, []);
     }
 
-    private function activeMembershipExists(Unit $unit, Resident $resident): bool
+    /**
+     * Set of "unit_id:resident_id" pairs with an active membership, limited
+     * to the units and residents the previews actually matched.
+     *
+     * @param  array<int, RegistryImportRowPreview>  $previews
+     * @param  array<string, Unit>  $unitsByKey
+     * @param  array<string, Resident>  $residentsByEmail
+     * @return array<string, true>
+     */
+    private function preloadActiveMembershipPairs(Location $location, array $previews, array $unitsByKey, array $residentsByEmail): array
     {
+        $unitIds = [];
+        $residentIds = [];
+
+        foreach ($previews as $preview) {
+            $unit = $unitsByKey[$this->unitLookupKey($preview)] ?? null;
+            $email = $this->normalizedEmail($preview);
+            $resident = $email !== null ? ($residentsByEmail[$email] ?? null) : null;
+
+            if ($unit && $resident) {
+                $unitIds[$unit->id] = true;
+                $residentIds[$resident->id] = true;
+            }
+        }
+
+        if ($unitIds === [] || $residentIds === []) {
+            return [];
+        }
+
         return UnitMembership::query()
-            ->where('account_id', $unit->account_id)
-            ->where('location_id', $unit->location_id)
-            ->where('unit_id', $unit->id)
-            ->where('resident_id', $resident->id)
+            ->where('account_id', $location->account_id)
+            ->where('location_id', $location->id)
             ->where('status', RegistryStatus::Active)
-            ->exists();
+            ->whereIn('unit_id', array_keys($unitIds))
+            ->whereIn('resident_id', array_keys($residentIds))
+            ->get(['unit_id', 'resident_id'])
+            ->reduce(function (array $pairs, UnitMembership $membership): array {
+                $pairs["{$membership->unit_id}:{$membership->resident_id}"] = true;
+
+                return $pairs;
+            }, []);
+    }
+
+    private function unitLookupKey(RegistryImportRowPreview $preview): string
+    {
+        return Str::lower((string) $preview->normalizedData['unit_number'])
+            .'|'
+            .Str::lower((string) ($preview->normalizedData['building_name'] ?? ''));
     }
 
     private function isResidentRow(RegistryImportRowPreview $preview): bool

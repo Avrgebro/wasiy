@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -94,34 +95,38 @@ class RegistryExportController extends Controller
 
         Gate::authorize('create', [RegistryExport::class, $account, $location]);
 
-        $export = RegistryExport::query()->create([
-            'account_id' => $account->id,
-            'location_id' => $location?->id,
-            'requested_by_user_id' => $user->id,
-            'export_type' => $validated['export_type'],
-            'filters' => $validated['filters'] ?? [],
-            'status' => ExportStatus::Pending,
-            'disk' => config('wasiy.exports.disk', 'local'),
-            'filename' => $this->filename($validated['export_type'], $location),
-            'expires_at' => now()->addDays((int) config('wasiy.exports.expires_days', 7)),
-        ]);
-
-        $this->activityLogger->log(
-            account: $account,
-            eventType: ActivityEventType::ExportRequested,
-            summary: 'Exportacion CSV solicitada.',
-            metadata: [
-                'export_id' => $export->id,
-                'export_type' => $export->export_type->value,
-                'filters' => $export->filters,
+        $export = DB::transaction(function () use ($validated, $account, $location, $user): RegistryExport {
+            $export = RegistryExport::query()->create([
+                'account_id' => $account->id,
                 'location_id' => $location?->id,
-                'actor_user_id' => $user->id,
-            ],
-            location: $location,
-            actor: $user,
-            subjectType: RegistryExport::class,
-            subjectId: $export->id,
-        );
+                'requested_by_user_id' => $user->id,
+                'export_type' => $validated['export_type'],
+                'filters' => $validated['filters'] ?? [],
+                'status' => ExportStatus::Pending,
+                'disk' => config('wasiy.exports.disk', 'local'),
+                'filename' => $this->filename($validated['export_type'], $location),
+                'expires_at' => now()->addDays((int) config('wasiy.exports.expires_days', 7)),
+            ]);
+
+            $this->activityLogger->log(
+                account: $account,
+                eventType: ActivityEventType::ExportRequested,
+                summary: 'Exportacion CSV solicitada.',
+                metadata: [
+                    'export_id' => $export->id,
+                    'export_type' => $export->export_type->value,
+                    'filters' => $export->filters,
+                    'location_id' => $location?->id,
+                    'actor_user_id' => $user->id,
+                ],
+                location: $location,
+                actor: $user,
+                subjectType: RegistryExport::class,
+                subjectId: $export->id,
+            );
+
+            return $export;
+        });
 
         GenerateCsvExport::dispatch($export);
 

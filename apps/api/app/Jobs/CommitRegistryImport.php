@@ -53,47 +53,47 @@ class CommitRegistryImport implements ShouldQueue
 
         $import->refresh();
 
-        $createdUnitIds = [];
-        $createdResidentIds = [];
-        $createdMembershipIds = [];
-
         try {
-            $this->skipDuplicateRows($import);
+            // One transaction for the whole run: a failure on any row rolls
+            // back every row, so an import is either fully Completed or
+            // untouched-and-Failed — never half-committed.
+            DB::transaction(function () use ($import, $activityLogger): void {
+                $this->skipDuplicateRows($import);
 
-            $import->rows()
-                ->whereIn('status', [ImportRowStatus::Valid, ImportRowStatus::Warning])
-                ->orderBy('row_number')
-                ->each(function (RegistryImportRow $row) use ($import, &$createdUnitIds, &$createdResidentIds, &$createdMembershipIds): void {
-                    $created = $this->commitRow($import, $row);
+                $results = $import->rows()
+                    ->whereIn('status', [ImportRowStatus::Valid, ImportRowStatus::Warning])
+                    ->orderBy('row_number')
+                    ->get()
+                    ->map(fn (RegistryImportRow $row): array => $this->commitRow($import, $row));
 
-                    array_push($createdUnitIds, ...$created['unit_ids']);
-                    array_push($createdResidentIds, ...$created['resident_ids']);
-                    array_push($createdMembershipIds, ...$created['unit_membership_ids']);
-                });
+                $import->forceFill([
+                    'status' => ImportStatus::Completed,
+                    'completed_at' => now(),
+                    'failed_at' => null,
+                    'failure_reason' => null,
+                ])->save();
 
-            $import->forceFill([
-                'status' => ImportStatus::Completed,
-                'completed_at' => now(),
-                'failed_at' => null,
-                'failure_reason' => null,
-            ])->save();
-
-            $activityLogger->log(
-                account: $import->account,
-                eventType: ActivityEventType::ImportCompleted,
-                summary: 'Importacion CSV completada.',
-                metadata: [
-                    ...$this->activityMetadata($import),
-                    'created_unit_ids' => $this->uniqueIds($createdUnitIds),
-                    'created_resident_ids' => $this->uniqueIds($createdResidentIds),
-                    'created_unit_membership_ids' => $this->uniqueIds($createdMembershipIds),
-                ],
-                location: $import->location,
-                actor: $import->requestedBy,
-                subjectType: RegistryImport::class,
-                subjectId: $import->id,
-            );
+                $activityLogger->log(
+                    account: $import->account,
+                    eventType: ActivityEventType::ImportCompleted,
+                    summary: 'Importacion CSV completada.',
+                    metadata: [
+                        ...$this->activityMetadata($import),
+                        'created_unit_ids' => $this->uniqueIds($results->pluck('unit_ids')->flatten()->all()),
+                        'created_resident_ids' => $this->uniqueIds($results->pluck('resident_ids')->flatten()->all()),
+                        'created_unit_membership_ids' => $this->uniqueIds($results->pluck('unit_membership_ids')->flatten()->all()),
+                    ],
+                    location: $import->location,
+                    actor: $import->requestedBy,
+                    subjectType: RegistryImport::class,
+                    subjectId: $import->id,
+                );
+            });
         } catch (Throwable $exception) {
+            // The rollback reverted the database but not the in-memory
+            // model; re-sync before stamping the failure.
+            $import->refresh();
+
             $import->forceFill([
                 'status' => ImportStatus::Failed,
                 'failed_at' => now(),
@@ -128,75 +128,73 @@ class CommitRegistryImport implements ShouldQueue
      */
     private function commitRow(RegistryImport $import, RegistryImportRow $row): array
     {
-        return DB::transaction(function () use ($import, $row): array {
-            $created = [
-                'unit_ids' => [],
-                'resident_ids' => [],
-                'unit_membership_ids' => [],
-            ];
-            $normalized = $row->normalized_data;
-            [$unit, $unitCreated] = $this->resolveUnit($import, $normalized);
+        $created = [
+            'unit_ids' => [],
+            'resident_ids' => [],
+            'unit_membership_ids' => [],
+        ];
+        $normalized = $row->normalized_data;
+        [$unit, $unitCreated] = $this->resolveUnit($import, $normalized);
 
-            if ($unitCreated) {
-                $created['unit_ids'][] = $unit->id;
-            }
+        if ($unitCreated) {
+            $created['unit_ids'][] = $unit->id;
+        }
 
-            if (! $this->isResidentRow($normalized)) {
-                $row->forceFill([
-                    'status' => ImportRowStatus::Imported,
-                    'committed_unit_id' => $unit->id,
-                ])->save();
-
-                return $created;
-            }
-
-            [$resident, $residentCreated] = $this->resolveResident($import, $normalized);
-
-            if ($residentCreated) {
-                $created['resident_ids'][] = $resident->id;
-            }
-
-            $membership = $this->existingActiveMembership($unit, $resident);
-
-            if ($membership) {
-                $row->forceFill([
-                    'status' => ImportRowStatus::Skipped,
-                    'committed_unit_id' => $unit->id,
-                    'committed_resident_id' => $resident->id,
-                    'committed_unit_membership_id' => $membership->id,
-                ])->save();
-
-                return $created;
-            }
-
-            $membership = UnitMembership::query()->create([
-                'account_id' => $import->account_id,
-                'location_id' => $import->location_id,
-                'unit_id' => $unit->id,
-                'resident_id' => $resident->id,
-                'resident_type' => $normalized['resident_type'],
-                'status' => $normalized['membership_status'] ?? RegistryStatus::Active,
-                'is_primary_contact' => false,
-                'started_at' => null,
-                'ended_at' => null,
-            ]);
-
-            if (($normalized['is_primary_contact'] ?? false) === true) {
-                $membership->markAsPrimaryContact();
-                $membership->refresh();
-            }
-
-            $created['unit_membership_ids'][] = $membership->id;
-
+        if (! $this->isResidentRow($normalized)) {
             $row->forceFill([
                 'status' => ImportRowStatus::Imported,
+                'committed_unit_id' => $unit->id,
+            ])->save();
+
+            return $created;
+        }
+
+        [$resident, $residentCreated] = $this->resolveResident($import, $normalized);
+
+        if ($residentCreated) {
+            $created['resident_ids'][] = $resident->id;
+        }
+
+        $membership = $this->existingActiveMembership($unit, $resident);
+
+        if ($membership) {
+            $row->forceFill([
+                'status' => ImportRowStatus::Skipped,
                 'committed_unit_id' => $unit->id,
                 'committed_resident_id' => $resident->id,
                 'committed_unit_membership_id' => $membership->id,
             ])->save();
 
             return $created;
-        });
+        }
+
+        $membership = UnitMembership::query()->create([
+            'account_id' => $import->account_id,
+            'location_id' => $import->location_id,
+            'unit_id' => $unit->id,
+            'resident_id' => $resident->id,
+            'resident_type' => $normalized['resident_type'],
+            'status' => $normalized['membership_status'] ?? RegistryStatus::Active,
+            'is_primary_contact' => false,
+            'started_at' => null,
+            'ended_at' => null,
+        ]);
+
+        if (($normalized['is_primary_contact'] ?? false) === true) {
+            $membership->markAsPrimaryContact();
+            $membership->refresh();
+        }
+
+        $created['unit_membership_ids'][] = $membership->id;
+
+        $row->forceFill([
+            'status' => ImportRowStatus::Imported,
+            'committed_unit_id' => $unit->id,
+            'committed_resident_id' => $resident->id,
+            'committed_unit_membership_id' => $membership->id,
+        ])->save();
+
+        return $created;
     }
 
     /**

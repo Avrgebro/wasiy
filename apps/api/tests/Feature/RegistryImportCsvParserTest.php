@@ -12,6 +12,7 @@ use App\Services\RegistryImports\RegistryCsvParser;
 use App\Services\RegistryImports\RegistryImportDuplicateDetector;
 use App\Services\RegistryImports\RegistryImportValidator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
@@ -195,4 +196,33 @@ test('multiple resident rows for one unit are not treated as duplicate unit rows
         ->and($previews[1]->status)->toBe(ImportRowStatus::Valid)
         ->and($previews[0]->duplicateKey)->toBeNull()
         ->and($previews[1]->duplicateKey)->toBeNull();
+});
+
+test('duplicate detector runs a bounded number of queries regardless of row count', function () {
+    $location = Location::factory()->create();
+    Unit::factory()->for($location->account)->for($location)->create([
+        'unit_number' => '101',
+        'building_name' => 'Torre A',
+    ]);
+    Resident::factory()->for($location->account)->create(['email' => 'ana@example.test']);
+
+    $csv = implode("\n", [
+        'unidad,edificio,nombres,apellidos,email,tipo_residente',
+        '101,Torre A,Ana,Salas,ana@example.test,propietario',
+        '102,Torre A,Luis,Rojas,luis@example.test,inquilino',
+        '103,Torre B,Rosa,Diaz,rosa@example.test,propietario',
+        '104,Torre B,,,,',
+        '105,Torre C,Juan,Vega,juan@example.test,inquilino',
+    ]);
+    $previews = validateRegistryCsvRows($location, parseRegistryCsv($csv));
+
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    detectRegistryCsvDuplicates($location, $previews);
+    $queryCount = count(DB::getQueryLog());
+    DB::disableQueryLog();
+
+    // One batched query each for units, residents, and memberships —
+    // never per-row.
+    expect($queryCount)->toBeLessThanOrEqual(3);
 });

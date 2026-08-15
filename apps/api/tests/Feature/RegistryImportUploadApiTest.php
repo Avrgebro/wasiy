@@ -304,3 +304,20 @@ test('validation job does not run for an import another worker already claimed',
     expect($import->fresh()->status)->toBe(ImportStatus::Processing)
         ->and(RegistryImportRow::query()->where('registry_import_id', $import->id)->count())->toBe(0);
 });
+
+test('a storage failure during upload leaves no import record behind', function () {
+    $location = Location::factory()->create();
+    $manager = createRegistryImportManager($location);
+
+    Storage::shouldReceive('disk')
+        ->andThrow(new RuntimeException('disk unavailable'));
+
+    $this->actingAs($manager)
+        ->postJson("/api/locations/{$location->id}/registry-imports", [
+            'file' => Illuminate\Http\UploadedFile::fake()->createWithContent('registro.csv', "unidad\n101"),
+            'import_type' => ImportType::RegistryUnitsResidents->value,
+        ])
+        ->assertServerError();
+
+    expect(RegistryImport::query()->count())->toBe(0);
+});
