@@ -18,10 +18,7 @@ import {
 import { ApiError } from '../../app/api-client'
 import { getDefaultAuthenticatedRoute, getRoleLabelKey } from '../auth/access'
 import { useLogout } from '../auth/hooks'
-import {
-  applyLaravelValidationErrors,
-  getErrorMessage,
-} from '../../lib/errors'
+import { getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 
 export function StaffInvitationPage({ token }: { token: string }) {
   const invitationQuery = useStaffInvitation(token)
@@ -67,7 +64,7 @@ function CreateAccountMode({
   const rootError = form.formState.errors.root?.message
 
   async function handleSubmit(values: CreateStaffAccountFormValues) {
-    try {
+    await submitHandlingServerErrors(form, async () => {
       const result = await acceptMutation.mutateAsync({
         firstName: values.firstName,
         lastName: values.lastName,
@@ -81,19 +78,7 @@ function CreateAccountMode({
           ? getDefaultAuthenticatedRoute(result.session)
           : '/login',
       })
-    } catch (error) {
-      if (
-        !applyLaravelValidationErrors<CreateStaffAccountFormValues>(
-          error,
-          form.setError,
-        )
-      ) {
-        form.setError('root', {
-          message: getErrorMessage(error),
-          type: 'server',
-        })
-      }
-    }
+    })
   }
 
   return (

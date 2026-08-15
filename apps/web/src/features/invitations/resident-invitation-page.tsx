@@ -14,10 +14,7 @@ import {
   type ClaimInvitationFormValues,
 } from './schemas'
 import { getDefaultAuthenticatedRoute } from '../auth/access'
-import {
-  applyLaravelValidationErrors,
-  getErrorMessage,
-} from '../../lib/errors'
+import { submitHandlingServerErrors } from '../../lib/errors'
 
 export function ResidentInvitationPage({ token }: { token: string }) {
   const { t } = useTranslation('common')
@@ -35,7 +32,7 @@ export function ResidentInvitationPage({ token }: { token: string }) {
   const rootError = form.formState.errors.root?.message
 
   async function handleSubmit(values: ClaimInvitationFormValues) {
-    try {
+    await submitHandlingServerErrors(form, async () => {
       const result = await claimMutation.mutateAsync({
         password: values.password,
         passwordConfirmation: values.passwordConfirmation,
@@ -49,19 +46,7 @@ export function ResidentInvitationPage({ token }: { token: string }) {
           ? getDefaultAuthenticatedRoute(result.session)
           : '/login',
       })
-    } catch (error) {
-      if (
-        !applyLaravelValidationErrors<ClaimInvitationFormValues>(
-          error,
-          form.setError,
-        )
-      ) {
-        form.setError('root', {
-          message: getErrorMessage(error),
-          type: 'server',
-        })
-      }
-    }
+    })
   }
 
   if (invitationQuery.isPending) {

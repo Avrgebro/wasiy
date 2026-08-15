@@ -11,10 +11,7 @@ import {
   portalPhoneSchema,
   type PortalPhoneFormValues,
 } from './schemas'
-import {
-  applyLaravelValidationErrors,
-  getErrorMessage,
-} from '../../lib/errors'
+import { submitHandlingServerErrors } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 
 const residentTypeLabelKey: Record<ResidentMembership['resident_type'], string> = {
@@ -69,22 +66,10 @@ export function PortalDashboardPage() {
   })
 
   async function handleSubmit(values: PortalPhoneFormValues) {
-    try {
+    await submitHandlingServerErrors(form, async () => {
       await phoneMutation.mutateAsync(values)
       form.reset(values)
-    } catch (error) {
-      if (
-        !applyLaravelValidationErrors<PortalPhoneFormValues>(
-          error,
-          form.setError,
-        )
-      ) {
-        form.setError('root', {
-          message: getErrorMessage(error),
-          type: 'server',
-        })
-      }
-    }
+    })
   }
 
   if (meQuery.isLoading) {

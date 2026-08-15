@@ -1,39 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Alert,
-  Button,
-  Drawer,
-  Group,
-  Loader,
-  Pagination,
-  Select,
-  Table,
-  TextInput,
-} from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
-import { AddCircle } from '@solar-icons/react'
+import { Alert, Button, Select } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  type ColumnDef,
-} from '@tanstack/react-table'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Controller, useForm } from 'react-hook-form'
-import { useState } from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
+import { Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { getDefaultLocation } from '../auth/access'
 import { useMe } from '../auth/hooks'
+import { NullableTextInput } from '../registry/nullable-text-input'
+import { RegistryCrudPage } from '../registry/registry-crud-page'
+import { statusOptions } from '../registry/status-options'
 import { normalizedRegistrySearch } from '../registry/types'
-import { getUnits } from '../units/api'
+import { formatUnitLabel } from '../units/unit-label'
+import { useActiveUnitOptions } from '../units/use-active-unit-options'
 import { createVehicle, getVehicles, updateVehicle, type VehicleSummary } from './api'
 import { vehicleSchema, type VehicleFormValues } from './schemas'
-import {
-  applyLaravelValidationErrors,
-  fieldErrorMessage,
-  getErrorMessage,
-} from '../../lib/errors'
+import { fieldErrorMessage } from '../../lib/errors'
 
 const routeApi = getRouteApi('/_authenticated/admin/registry/vehicles')
 
@@ -50,56 +31,50 @@ function vehicleDefaults(vehicle?: VehicleSummary): VehicleFormValues {
   }
 }
 
+function vehicleTypeOptions(t: (key: string) => string) {
+  return [
+    { label: t('registry.vehicleTypes.car'), value: 'car' },
+    { label: t('registry.vehicleTypes.motorcycle'), value: 'motorcycle' },
+    { label: t('registry.vehicleTypes.bicycle'), value: 'bicycle' },
+    { label: t('registry.vehicleTypes.other'), value: 'other' },
+  ]
+}
+
 export function VehiclesRegistryPage() {
   const { t } = useTranslation('common')
-  const queryClient = useQueryClient()
+  const meQuery = useMe()
+  const location = meQuery.data ? getDefaultLocation(meQuery.data) : null
+
+  if (!location) {
+    return (
+      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+        {t('auth.selectLocationRequired')}
+      </Alert>
+    )
+  }
+
+  return <VehiclesRegistryContent location={location} />
+}
+
+function VehiclesRegistryContent({ location }: { location: { id: string } }) {
+  const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const routeSearch = routeApi.useSearch()
   const search = normalizedRegistrySearch(routeSearch)
   const vehicleType = typeof routeSearch.vehicle_type === 'string' ? routeSearch.vehicle_type : ''
-  const meQuery = useMe()
-  const location = meQuery.data ? getDefaultLocation(meQuery.data) : null
-  const [editingVehicle, setEditingVehicle] = useState<VehicleSummary | null>(null)
-  const [drawerOpened, setDrawerOpened] = useState(false)
-  const vehiclesQuery = useQuery({
-    enabled: Boolean(location),
-    queryKey: ['registry', 'vehicles', location?.id, search, vehicleType],
-    queryFn: () =>
-      getVehicles(location?.id ?? '', {
-        ...search,
-        vehicle_type: vehicleType,
+  const unitOptions = useActiveUnitOptions(location)
+
+  function updateSearch(next: Partial<typeof search> & { vehicle_type?: string }) {
+    void navigate({
+      search: (current) => ({
+        ...current,
+        ...next,
+        page: next.page ?? 1,
       }),
-  })
-  const unitsQuery = useQuery({
-    enabled: Boolean(location),
-    queryKey: ['registry', 'units', location?.id, { per_page: 100, status: 'active' }],
-    queryFn: () =>
-      getUnits(location?.id ?? '', {
-        page: 1,
-        per_page: 100,
-        status: 'active',
-      }),
-  })
-  const form = useForm<VehicleFormValues>({
-    defaultValues: vehicleDefaults(),
-    resolver: zodResolver(vehicleSchema),
-  })
-  const mutation = useMutation({
-    mutationFn: (values: VehicleFormValues) =>
-      editingVehicle
-        ? updateVehicle(editingVehicle.id, values)
-        : createVehicle(location?.id ?? '', values),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['registry', 'vehicles'] })
-      setDrawerOpened(false)
-      showNotification({
-        color: 'green',
-        message: t('registry.saved'),
-        title: t('registry.savedTitle'),
-      })
-    },
-  })
-  const columns: ColumnDef<VehicleSummary>[] = [
+    })
+  }
+
+  const columns = (openEdit: (vehicle: VehicleSummary) => void): ColumnDef<VehicleSummary>[] => [
     { accessorKey: 'plate', header: t('registry.vehicles.plate') },
     {
       accessorKey: 'vehicle_type',
@@ -110,11 +85,7 @@ export function VehiclesRegistryPage() {
       accessorKey: 'unit_id',
       header: t('registry.vehicles.unit'),
       cell: ({ row }) =>
-        row.original.unit
-          ? [row.original.unit.building_name, row.original.unit.unit_number]
-              .filter(Boolean)
-              .join(' / ')
-          : row.original.unit_id,
+        row.original.unit ? formatUnitLabel(row.original.unit) : row.original.unit_id,
     },
     { accessorKey: 'color', header: t('registry.vehicles.color') },
     { accessorKey: 'make', header: t('registry.vehicles.make') },
@@ -129,83 +100,14 @@ export function VehiclesRegistryPage() {
       ),
     },
   ]
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
-    columns,
-    data: vehiclesQuery.data?.data ?? [],
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
-  })
-
-  function updateSearch(next: Partial<typeof search> & { vehicle_type?: string }) {
-    void navigate({
-      search: (current) => ({
-        ...current,
-        ...next,
-        page: next.page ?? 1,
-      }),
-    })
-  }
-
-  function openCreate() {
-    setEditingVehicle(null)
-    form.reset(vehicleDefaults())
-    setDrawerOpened(true)
-  }
-
-  function openEdit(vehicle: VehicleSummary) {
-    setEditingVehicle(vehicle)
-    form.reset(vehicleDefaults(vehicle))
-    setDrawerOpened(true)
-  }
-
-  async function handleSubmit(values: VehicleFormValues) {
-    try {
-      await mutation.mutateAsync(values)
-    } catch (error) {
-      if (!applyLaravelValidationErrors<VehicleFormValues>(error, form.setError)) {
-        form.setError('root', {
-          message: getErrorMessage(error),
-          type: 'server',
-        })
-      }
-    }
-  }
-
-  if (!location) {
-    return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
-        {t('auth.selectLocationRequired')}
-      </Alert>
-    )
-  }
 
   return (
-    <div className="flex flex-col gap-5">
-      <Group justify="space-between">
-        <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
-          {t('registry.vehicles.title')}
-        </h1>
-        <Button leftSection={<AddCircle size={16} />} onClick={openCreate}>
-          {t('registry.vehicles.new')}
-        </Button>
-      </Group>
-      <div className="grid gap-3 md:grid-cols-[1fr_180px_180px]">
-        <TextInput
-          defaultValue={search.search}
-          label={t('actions.search')}
-          onBlur={(event) => updateSearch({ search: event.currentTarget.value })}
-        />
-        <Select
-          clearable
-          data={[
-            { label: t('registry.statuses.active'), value: 'active' },
-            { label: t('registry.statuses.inactive'), value: 'inactive' },
-          ]}
-          label={t('registry.status')}
-          value={search.status || null}
-          onChange={(value) => updateSearch({ status: value ?? '' })}
-        />
+    <RegistryCrudPage<VehicleSummary, VehicleFormValues>
+      columns={columns}
+      title={t('registry.vehicles.title')}
+      newLabel={t('registry.vehicles.new')}
+      editLabel={t('registry.vehicles.edit')}
+      extraFilters={
         <Select
           clearable
           data={vehicleTypeOptions(t)}
@@ -213,41 +115,25 @@ export function VehiclesRegistryPage() {
           value={vehicleType || null}
           onChange={(value) => updateSearch({ vehicle_type: value ?? '' })}
         />
-      </div>
-      {vehiclesQuery.isLoading ? (
-        <div className="grid min-h-64 place-items-center">
-          <Loader aria-label={t('common.loading')} />
-        </div>
-      ) : (
-        <RegistryTable table={table} />
-      )}
-      <Pagination
-        onChange={(page) => updateSearch({ page })}
-        total={vehiclesQuery.data?.meta.last_page ?? 1}
-        value={search.page}
-      />
-      <Drawer
-        opened={drawerOpened}
-        position="right"
-        title={editingVehicle ? t('registry.vehicles.edit') : t('registry.vehicles.new')}
-        onClose={() => setDrawerOpened(false)}
-      >
-        <form className="grid gap-4" onSubmit={form.handleSubmit(handleSubmit)}>
-          {form.formState.errors.root?.message ? (
-            <Alert color="red" title={t('errors.actionFailed')}>
-              {form.formState.errors.root.message}
-            </Alert>
-          ) : null}
+      }
+      search={search}
+      onSearchChange={updateSearch}
+      queryKey={['registry', 'vehicles', location.id, search, vehicleType]}
+      invalidateKey={['registry', 'vehicles']}
+      fetch={() => getVehicles(location.id, { ...search, vehicle_type: vehicleType })}
+      create={(values) => createVehicle(location.id, values)}
+      update={(vehicle, values) => updateVehicle(vehicle.id, values)}
+      resolver={zodResolver(vehicleSchema)}
+      defaults={vehicleDefaults}
+      renderFormFields={(form) => (
+        <>
           <Controller
             control={form.control}
             name="unit_id"
             render={({ field, fieldState }) => (
               <Select
                 {...field}
-                data={(unitsQuery.data?.data ?? []).map((unit) => ({
-                  label: [unit.building_name, unit.unit_number].filter(Boolean).join(' / '),
-                  value: unit.id,
-                }))}
+                data={unitOptions}
                 error={fieldErrorMessage(fieldState.error)}
                 label={t('registry.vehicles.unit')}
               />
@@ -257,11 +143,7 @@ export function VehiclesRegistryPage() {
             control={form.control}
             name="vehicle_type"
             render={({ field }) => (
-              <Select
-                {...field}
-                data={vehicleTypeOptions(t)}
-                label={t('registry.vehicles.type')}
-              />
+              <Select {...field} data={vehicleTypeOptions(t)} label={t('registry.vehicles.type')} />
             )}
           />
           {(['plate', 'make', 'model', 'color', 'notes'] as const).map((name) => (
@@ -276,86 +158,10 @@ export function VehiclesRegistryPage() {
             control={form.control}
             name="status"
             render={({ field }) => (
-              <Select
-                {...field}
-                data={[
-                  { label: t('registry.statuses.active'), value: 'active' },
-                  { label: t('registry.statuses.inactive'), value: 'inactive' },
-                ]}
-                label={t('registry.status')}
-              />
+              <Select {...field} data={statusOptions(t)} label={t('registry.status')} />
             )}
           />
-          <Button loading={mutation.isPending} type="submit">
-            {t('actions.save')}
-          </Button>
-        </form>
-      </Drawer>
-    </div>
-  )
-}
-
-function vehicleTypeOptions(t: (key: string) => string) {
-  return [
-    { label: t('registry.vehicleTypes.car'), value: 'car' },
-    { label: t('registry.vehicleTypes.motorcycle'), value: 'motorcycle' },
-    { label: t('registry.vehicleTypes.bicycle'), value: 'bicycle' },
-    { label: t('registry.vehicleTypes.other'), value: 'other' },
-  ]
-}
-
-function RegistryTable<T>({ table }: { table: ReturnType<typeof useReactTable<T>> }) {
-  return (
-    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
-      <Table highlightOnHover verticalSpacing="sm">
-        <Table.Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <Table.Tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <Table.Th key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </Table.Th>
-              ))}
-            </Table.Tr>
-          ))}
-        </Table.Thead>
-        <Table.Tbody>
-          {table.getRowModel().rows.map((row) => (
-            <Table.Tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <Table.Td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </Table.Td>
-              ))}
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </section>
-  )
-}
-
-function NullableTextInput({
-  control,
-  label,
-  name,
-}: {
-  control: ReturnType<typeof useForm<VehicleFormValues>>['control']
-  label: string
-  name: 'color' | 'make' | 'model' | 'notes' | 'plate'
-}) {
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field, fieldState }) => (
-        <TextInput
-          {...field}
-          value={field.value ?? ''}
-          error={fieldErrorMessage(fieldState.error)}
-          label={label}
-          onChange={(event) => field.onChange(event.currentTarget.value || null)}
-        />
+        </>
       )}
     />
   )

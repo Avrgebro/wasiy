@@ -29,6 +29,26 @@ export function getErrorMessage(error: unknown) {
   return i18next.t('errors.unexpected')
 }
 
+/**
+ * Runs a form submit, mapping Laravel 422 payloads onto their fields and
+ * anything else onto the form's root error.
+ */
+export async function submitHandlingServerErrors<T extends FieldValues>(
+  form: { setError: UseFormSetError<T> },
+  submit: () => Promise<unknown>,
+) {
+  try {
+    await submit()
+  } catch (error) {
+    if (!applyLaravelValidationErrors<T>(error, form.setError)) {
+      form.setError('root', {
+        message: getErrorMessage(error),
+        type: 'server',
+      })
+    }
+  }
+}
+
 export function applyLaravelValidationErrors<T extends FieldValues>(
   error: unknown,
   setError: UseFormSetError<T>,

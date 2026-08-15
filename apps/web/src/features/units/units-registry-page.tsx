@@ -1,39 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-  Alert,
-  Button,
-  Drawer,
-  Group,
-  Loader,
-  Pagination,
-  Select,
-  Table,
-  TextInput,
-} from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
-import { AddCircle } from '@solar-icons/react'
+import { Alert, Button, Select, TextInput } from '@mantine/core'
 import { getRouteApi } from '@tanstack/react-router'
-import { ImportRegistryButton } from '../imports/import-registry-button'
-import {
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  type ColumnDef,
-} from '@tanstack/react-table'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Controller, useForm } from 'react-hook-form'
-import { useState } from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
+import { Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { getDefaultLocation } from '../auth/access'
 import { useMe } from '../auth/hooks'
+import { ImportRegistryButton } from '../imports/import-registry-button'
+import { NullableTextInput } from '../registry/nullable-text-input'
+import { RegistryCrudPage } from '../registry/registry-crud-page'
+import { statusOptions } from '../registry/status-options'
 import { normalizedRegistrySearch } from '../registry/types'
 import { createUnit, getUnits, updateUnit, type UnitSummary } from './api'
 import { unitSchema, type UnitFormValues } from './schemas'
-import {
-  applyLaravelValidationErrors,
-  fieldErrorMessage,
-  getErrorMessage,
-} from '../../lib/errors'
+import { formatUnitLabel } from './unit-label'
+import { fieldErrorMessage } from '../../lib/errors'
 
 const routeApi = getRouteApi('/_authenticated/admin/registry/units')
 
@@ -49,48 +30,40 @@ function unitDefaults(unit?: UnitSummary): UnitFormValues {
 
 export function UnitsRegistryPage() {
   const { t } = useTranslation('common')
-  const queryClient = useQueryClient()
-  const navigate = routeApi.useNavigate()
-  const routeSearch = routeApi.useSearch()
-  const search = normalizedRegistrySearch(routeSearch)
   const meQuery = useMe()
   const location = meQuery.data ? getDefaultLocation(meQuery.data) : null
-  const [editingUnit, setEditingUnit] = useState<UnitSummary | null>(null)
-  const [drawerOpened, setDrawerOpened] = useState(false)
-  const queryKey = ['registry', 'units', location?.id, search] as const
-  const unitsQuery = useQuery({
-    enabled: Boolean(location),
-    queryKey,
-    queryFn: () => getUnits(location?.id ?? '', search),
-  })
-  const form = useForm<UnitFormValues>({
-    defaultValues: unitDefaults(),
-    resolver: zodResolver(unitSchema),
-  })
-  const mutation = useMutation({
-    mutationFn: (values: UnitFormValues) =>
-      editingUnit
-        ? updateUnit(editingUnit.id, values)
-        : createUnit(location?.id ?? '', values),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['registry', 'units'] })
-      setDrawerOpened(false)
-      showNotification({
-        color: 'green',
-        message: t('registry.saved'),
-        title: t('registry.savedTitle'),
-      })
-    },
-  })
-  const columns: ColumnDef<UnitSummary>[] = [
+
+  if (!location) {
+    return (
+      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+        {t('auth.selectLocationRequired')}
+      </Alert>
+    )
+  }
+
+  return <UnitsRegistryContent location={location} />
+}
+
+function UnitsRegistryContent({ location }: { location: { id: string } }) {
+  const { t } = useTranslation('common')
+  const navigate = routeApi.useNavigate()
+  const search = normalizedRegistrySearch(routeApi.useSearch())
+
+  function updateSearch(next: Partial<typeof search>) {
+    void navigate({
+      search: (current) => ({
+        ...current,
+        ...next,
+        page: next.page ?? 1,
+      }),
+    })
+  }
+
+  const columns = (openEdit: (unit: UnitSummary) => void): ColumnDef<UnitSummary>[] => [
     {
       accessorKey: 'unit_number',
       header: t('registry.units.unit'),
-      cell: ({ row }) => {
-        const unit = row.original
-
-        return [unit.building_name, unit.unit_number].filter(Boolean).join(' / ')
-      },
+      cell: ({ row }) => formatUnitLabel(row.original),
     },
     { accessorKey: 'floor', header: t('registry.units.floor') },
     { accessorKey: 'status', header: t('registry.status') },
@@ -111,100 +84,26 @@ export function UnitsRegistryPage() {
       ),
     },
   ]
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
-    columns,
-    data: unitsQuery.data?.data ?? [],
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
-    manualSorting: true,
-  })
-
-  function updateSearch(next: Partial<typeof search>) {
-    void navigate({
-      search: (current) => ({
-        ...current,
-        ...next,
-        page: next.page ?? 1,
-      }),
-    })
-  }
-
-  function openCreate() {
-    setEditingUnit(null)
-    form.reset(unitDefaults())
-    setDrawerOpened(true)
-  }
-
-  function openEdit(unit: UnitSummary) {
-    setEditingUnit(unit)
-    form.reset(unitDefaults(unit))
-    setDrawerOpened(true)
-  }
-
-  async function handleSubmit(values: UnitFormValues) {
-    try {
-      await mutation.mutateAsync(values)
-    } catch (error) {
-      if (!applyLaravelValidationErrors<UnitFormValues>(error, form.setError)) {
-        form.setError('root', {
-          message: getErrorMessage(error),
-          type: 'server',
-        })
-      }
-    }
-  }
-
-  if (!location) {
-    return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
-        {t('auth.selectLocationRequired')}
-      </Alert>
-    )
-  }
 
   return (
-    <div className="flex flex-col gap-5">
-      <RegistryHeader
-        actionLabel={t('registry.units.new')}
-        onAction={openCreate}
-        title={t('registry.units.title')}
-      />
-      <RegistryFilters
-        onSearch={(value) => updateSearch({ search: value })}
-        onStatus={(value) => updateSearch({ status: value ?? '' })}
-        search={search.search}
-        status={search.status}
-      />
-      {unitsQuery.isError ? (
-        <Alert color="red" title={t('errors.loadFailed')}>
-          {getErrorMessage(unitsQuery.error)}
-        </Alert>
-      ) : null}
-      {unitsQuery.isLoading ? (
-        <div className="grid min-h-64 place-items-center">
-          <Loader aria-label={t('common.loading')} />
-        </div>
-      ) : (
-        <RegistryTable table={table} />
-      )}
-      <Pagination
-        onChange={(page) => updateSearch({ page })}
-        total={unitsQuery.data?.meta.last_page ?? 1}
-        value={search.page}
-      />
-      <Drawer
-        opened={drawerOpened}
-        position="right"
-        title={editingUnit ? t('registry.units.edit') : t('registry.units.new')}
-        onClose={() => setDrawerOpened(false)}
-      >
-        <form className="grid gap-4" onSubmit={form.handleSubmit(handleSubmit)}>
-          {form.formState.errors.root?.message ? (
-            <Alert color="red" title={t('errors.actionFailed')}>
-              {form.formState.errors.root.message}
-            </Alert>
-          ) : null}
+    <RegistryCrudPage<UnitSummary, UnitFormValues>
+      columns={columns}
+      title={t('registry.units.title')}
+      newLabel={t('registry.units.new')}
+      editLabel={t('registry.units.edit')}
+      headerExtra={<ImportRegistryButton />}
+      search={search}
+      onSearchChange={updateSearch}
+      queryKey={['registry', 'units', location.id, search]}
+      invalidateKey={['registry', 'units']}
+      fetch={() => getUnits(location.id, search)}
+      create={(values) => createUnit(location.id, values)}
+      update={(unit, values) => updateUnit(unit.id, values)}
+      resolver={zodResolver(unitSchema)}
+      defaults={unitDefaults}
+      manualSorting
+      renderFormFields={(form) => (
+        <>
           <Controller
             control={form.control}
             name="unit_number"
@@ -230,14 +129,7 @@ export function UnitsRegistryPage() {
             control={form.control}
             name="status"
             render={({ field }) => (
-              <Select
-                {...field}
-                data={[
-                  { label: t('registry.statuses.active'), value: 'active' },
-                  { label: t('registry.statuses.inactive'), value: 'inactive' },
-                ]}
-                label={t('registry.status')}
-              />
+              <Select {...field} data={statusOptions(t)} label={t('registry.status')} />
             )}
           />
           <NullableTextInput
@@ -245,123 +137,7 @@ export function UnitsRegistryPage() {
             label={t('registry.notes')}
             name="notes"
           />
-          <Button loading={mutation.isPending} type="submit">
-            {t('actions.save')}
-          </Button>
-        </form>
-      </Drawer>
-    </div>
-  )
-}
-
-function RegistryHeader({
-  actionLabel,
-  onAction,
-  title,
-}: {
-  actionLabel: string
-  onAction: () => void
-  title: string
-}) {
-  return (
-    <Group justify="space-between">
-      <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">{title}</h1>
-      <Group gap="sm">
-        <ImportRegistryButton />
-        <Button leftSection={<AddCircle size={16} />} onClick={onAction}>
-          {actionLabel}
-        </Button>
-      </Group>
-    </Group>
-  )
-}
-
-function RegistryFilters({
-  onSearch,
-  onStatus,
-  search,
-  status,
-}: {
-  onSearch: (value: string) => void
-  onStatus: (value: string | null) => void
-  search: string
-  status: string
-}) {
-  const { t } = useTranslation('common')
-
-  return (
-    <div className="grid gap-3 md:grid-cols-[1fr_180px]">
-      <TextInput
-        defaultValue={search}
-        label={t('actions.search')}
-        onBlur={(event) => onSearch(event.currentTarget.value)}
-      />
-      <Select
-        clearable
-        data={[
-          { label: t('registry.statuses.active'), value: 'active' },
-          { label: t('registry.statuses.inactive'), value: 'inactive' },
-        ]}
-        label={t('registry.status')}
-        value={status || null}
-        onChange={onStatus}
-      />
-    </div>
-  )
-}
-
-function RegistryTable<T>({ table }: { table: ReturnType<typeof useReactTable<T>> }) {
-  return (
-    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
-      <Table highlightOnHover verticalSpacing="sm">
-        <Table.Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <Table.Tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <Table.Th key={header.id}>
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                </Table.Th>
-              ))}
-            </Table.Tr>
-          ))}
-        </Table.Thead>
-        <Table.Tbody>
-          {table.getRowModel().rows.map((row) => (
-            <Table.Tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <Table.Td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </Table.Td>
-              ))}
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-    </section>
-  )
-}
-
-function NullableTextInput({
-  control,
-  label,
-  name,
-}: {
-  control: ReturnType<typeof useForm<UnitFormValues>>['control']
-  label: string
-  name: 'building_name' | 'floor' | 'notes'
-}) {
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field, fieldState }) => (
-        <TextInput
-          {...field}
-          value={field.value ?? ''}
-          error={fieldErrorMessage(fieldState.error)}
-          label={label}
-          onChange={(event) => field.onChange(event.currentTarget.value || null)}
-        />
+        </>
       )}
     />
   )
