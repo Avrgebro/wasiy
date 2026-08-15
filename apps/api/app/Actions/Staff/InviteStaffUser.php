@@ -2,20 +2,17 @@
 
 namespace App\Actions\Staff;
 
+use App\Actions\Invitations\IssueUserInvitation;
 use App\Enums\ActivityEventType;
 use App\Enums\UserInvitationPurpose;
-use App\Enums\UserInvitationStatus;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\User;
 use App\Models\UserInvitation;
-use App\Notifications\StaffInvitationNotification;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class InviteStaffUser
@@ -23,6 +20,7 @@ class InviteStaffUser
     public function __construct(
         private readonly AccessAuthorizationService $access,
         private readonly ActivityLogger $activityLogger,
+        private readonly IssueUserInvitation $issueInvitation,
     ) {}
 
     /**
@@ -56,56 +54,22 @@ class InviteStaffUser
                 ]);
             }
 
-            UserInvitation::query()
-                ->where('account_id', $account->id)
-                ->where('email', $email)
-                ->where('purpose', UserInvitationPurpose::Staff->value)
-                ->where('status', UserInvitationStatus::Pending->value)
-                ->where('expires_at', '<=', now())
-                ->update(['status' => UserInvitationStatus::Expired->value]);
-
-            $pendingInvitationExists = UserInvitation::query()
-                ->where('account_id', $account->id)
-                ->where('email', $email)
-                ->where('purpose', UserInvitationPurpose::Staff->value)
-                ->where('status', UserInvitationStatus::Pending->value)
-                ->exists();
-
-            if ($pendingInvitationExists) {
-                throw ValidationException::withMessages([
-                    'email' => __('This email already has a pending staff invitation for this account.'),
-                ]);
-            }
-
-            $token = Str::random(64);
-            $expiresDays = max(1, (int) config('wasiy.invitations.staff_expires_days', 14));
-            $locationAssignments = array_values($data['location_assignments'] ?? []);
-
-            try {
-                $invitation = UserInvitation::query()->create([
-                    'account_id' => $account->id,
+            [$invitation, $token] = $this->issueInvitation->handle(
+                purpose: UserInvitationPurpose::Staff,
+                account: $account,
+                email: $email,
+                invitedBy: $actor,
+                attributes: [
                     'location_id' => null,
-                    'user_id' => null,
-                    'email' => $email,
                     // Snapshot the real identity when the User already exists.
                     'first_name' => $existingUser->first_name ?? $data['first_name'],
                     'last_name' => $existingUser->last_name ?? $data['last_name'],
-                    'token_hash' => hash('sha256', $token),
-                    'purpose' => UserInvitationPurpose::Staff,
                     'role_assignments' => [
                         'account_role' => $data['account_role'] ?? null,
-                        'location_assignments' => $locationAssignments,
+                        'location_assignments' => array_values($data['location_assignments'] ?? []),
                     ],
-                    'status' => UserInvitationStatus::Pending,
-                    'expires_at' => now()->addDays($expiresDays),
-                    'accepted_at' => null,
-                    'invited_by_user_id' => $actor->id,
-                ]);
-            } catch (UniqueConstraintViolationException) {
-                throw ValidationException::withMessages([
-                    'email' => __('This email already has a pending staff invitation for this account.'),
-                ]);
-            }
+                ],
+            );
 
             $this->activityLogger->log(
                 account: $account,
@@ -118,7 +82,7 @@ class InviteStaffUser
             );
 
             Notification::route('mail', $email)
-                ->notify(new StaffInvitationNotification($invitation, $token));
+                ->notify(UserInvitationPurpose::Staff->notification($invitation, $token));
 
             return $invitation;
         });

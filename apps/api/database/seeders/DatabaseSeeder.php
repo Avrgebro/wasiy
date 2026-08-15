@@ -337,7 +337,7 @@ class DatabaseSeeder extends Seeder
                 'last_name' => $resident->last_name,
                 'token_hash' => hash('sha256', 'resident-demo-invitation-token'),
                 'status' => UserInvitationStatus::Pending,
-                'expires_at' => now()->addDays((int) config('wasiy.invitations.resident_expires_days', 14)),
+                'expires_at' => now()->addDays(UserInvitationPurpose::Resident->expiresDays()),
                 'accepted_at' => null,
                 'invited_by_user_id' => $manager->id,
             ],
@@ -360,7 +360,7 @@ class DatabaseSeeder extends Seeder
             'first_name' => 'Sofia',
             'last_name' => 'Invitada',
             'status' => UserInvitationStatus::Pending,
-            'expires_at' => now()->addDays((int) config('wasiy.invitations.staff_expires_days', 14)),
+            'expires_at' => now()->addDays(UserInvitationPurpose::Staff->expiresDays()),
             'role_assignments' => [
                 'account_role' => null,
                 'location_assignments' => [

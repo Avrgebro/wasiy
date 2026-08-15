@@ -2,17 +2,15 @@
 
 namespace App\Actions\Residents;
 
+use App\Actions\Invitations\IssueUserInvitation;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
 use App\Enums\UserInvitationPurpose;
-use App\Enums\UserInvitationStatus;
 use App\Models\Resident;
 use App\Models\User;
 use App\Models\UserInvitation;
-use App\Notifications\ResidentInvitationNotification;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -23,6 +21,7 @@ class InviteResidentUser
     public function __construct(
         private readonly AccessAuthorizationService $access,
         private readonly ActivityLogger $activityLogger,
+        private readonly IssueUserInvitation $issueInvitation,
     ) {}
 
     /**
@@ -64,51 +63,18 @@ class InviteResidentUser
 
             $email = Str::lower(trim($email));
 
-            UserInvitation::query()
-                ->where('account_id', $resident->account_id)
-                ->where('email', $email)
-                ->where('purpose', UserInvitationPurpose::Resident->value)
-                ->where('status', UserInvitationStatus::Pending->value)
-                ->where('expires_at', '<=', now())
-                ->update(['status' => UserInvitationStatus::Expired->value]);
-
-            $pendingInvitationExists = UserInvitation::query()
-                ->where('account_id', $resident->account_id)
-                ->where('email', $email)
-                ->where('purpose', UserInvitationPurpose::Resident->value)
-                ->where('status', UserInvitationStatus::Pending->value)
-                ->exists();
-
-            if ($pendingInvitationExists) {
-                throw ValidationException::withMessages([
-                    'email' => __('This email already has a pending resident invitation for this account.'),
-                ]);
-            }
-
-            $token = Str::random(64);
-            $expiresDays = max(1, (int) config('wasiy.invitations.resident_expires_days', 14));
-
-            try {
-                $invitation = UserInvitation::query()->create([
-                    'account_id' => $resident->account_id,
+            [$invitation, $token] = $this->issueInvitation->handle(
+                purpose: UserInvitationPurpose::Resident,
+                account: $resident->account,
+                email: $email,
+                invitedBy: $actor,
+                attributes: [
                     'location_id' => $location->id,
-                    'user_id' => null,
                     'resident_id' => $resident->id,
-                    'email' => $email,
                     'first_name' => $resident->first_name,
                     'last_name' => $resident->last_name,
-                    'token_hash' => hash('sha256', $token),
-                    'purpose' => UserInvitationPurpose::Resident,
-                    'status' => UserInvitationStatus::Pending,
-                    'expires_at' => now()->addDays($expiresDays),
-                    'accepted_at' => null,
-                    'invited_by_user_id' => $actor->id,
-                ]);
-            } catch (UniqueConstraintViolationException) {
-                throw ValidationException::withMessages([
-                    'email' => __('This email already has a pending resident invitation for this account.'),
-                ]);
-            }
+                ],
+            );
 
             $this->activityLogger->log(
                 account: $resident->account,
@@ -133,7 +99,7 @@ class InviteResidentUser
             );
 
             Notification::route('mail', $email)
-                ->notify(new ResidentInvitationNotification($invitation, $token));
+                ->notify(UserInvitationPurpose::Resident->notification($invitation, $token));
 
             return [
                 'resident' => $resident->fresh()->loadSummary(),
