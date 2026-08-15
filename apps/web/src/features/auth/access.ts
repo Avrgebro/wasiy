@@ -279,21 +279,25 @@ const portalNavigation: NavEntrySpec[] = [
   },
 ]
 
-export function getAvailableNavigationItems(
-  me: MeResponse,
-  surface: 'admin' | 'front-desk' | 'portal',
-): LayoutNavEntry[] {
-  if (surface === 'admin') {
-    return canAccessAdmin(me)
-      ? filterNavigationEntries(adminSurfaceNavigation, me)
-      : []
-  }
+export type Surface = 'admin' | 'front-desk' | 'portal'
 
-  if (surface === 'front-desk') {
-    return canAccessFrontDesk(me)
-      ? filterNavigationEntries(frontDeskNavigation, me)
-      : []
-  }
+/**
+ * The single map from surface to its access predicate. Route guards are the
+ * only enforcement point; navigation lookups below assume access was already
+ * checked.
+ */
+export const surfaceAccess: Record<Surface, (me: MeResponse) => boolean> = {
+  admin: canAccessAdmin,
+  'front-desk': canAccessFrontDesk,
+  portal: canAccessPortal,
+}
 
-  return canAccessPortal(me) ? filterNavigationEntries(portalNavigation, me) : []
+const surfaceNavigation: Record<Surface, NavEntrySpec[]> = {
+  admin: adminSurfaceNavigation,
+  'front-desk': frontDeskNavigation,
+  portal: portalNavigation,
+}
+
+export function getSurfaceNavigation(me: MeResponse, surface: Surface): LayoutNavEntry[] {
+  return filterNavigationEntries(surfaceNavigation[surface], me)
 }

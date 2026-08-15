@@ -5,7 +5,8 @@ import {
   canAccessPortal,
   canManageRegistry,
   filterNavigationEntries,
-  getAvailableNavigationItems,
+  getSurfaceNavigation,
+  surfaceAccess,
   isAccountAdmin,
   getDefaultAuthenticatedRoute,
   getDefaultLocation,
@@ -146,7 +147,7 @@ describe('access helpers', () => {
       },
     })
 
-    const navItems = getAvailableNavigationItems(me, 'admin')
+    const navItems = getSurfaceNavigation(me, 'admin')
     const serialized = JSON.stringify(navItems)
 
     expect(serialized).toContain('navGroups.location')
@@ -183,7 +184,7 @@ describe('access helpers', () => {
       },
     })
 
-    const navItems = getAvailableNavigationItems(me, 'admin')
+    const navItems = getSurfaceNavigation(me, 'admin')
     const serialized = JSON.stringify(navItems)
 
     expect(serialized).toContain('navGroups.location')
@@ -320,8 +321,9 @@ describe('navigation filtering', () => {
       },
     })
 
-    expect(getAvailableNavigationItems(me, 'admin')).toEqual([])
-    expect(JSON.stringify(getAvailableNavigationItems(me, 'front-desk'))).toContain(
+    expect(surfaceAccess.admin(me)).toBe(false)
+    expect(surfaceAccess['front-desk'](me)).toBe(true)
+    expect(JSON.stringify(getSurfaceNavigation(me, 'front-desk'))).toContain(
       'nav.checkIn',
     )
   })
