@@ -27,6 +27,15 @@ class ClaimResidentInvitation
                 ->lockForUpdate()
                 ->findOrFail($invitation->id);
 
+            // Re-check under the lock: a concurrent claim, cancel, or expiry
+            // may have landed between the token resolving and this
+            // transaction opening.
+            if ($invitation->status !== UserInvitationStatus::Pending) {
+                throw ValidationException::withMessages([
+                    'token' => __('This resident invitation cannot be claimed.'),
+                ]);
+            }
+
             $resident = $invitation->resident;
 
             if (! $resident || $resident->status !== RegistryStatus::Active) {

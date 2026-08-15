@@ -229,3 +229,23 @@ test('download is denied until export is ready', function () {
         ->assertOk()
         ->assertHeader('content-disposition');
 });
+
+test('export job does not run for an export another worker already claimed', function () {
+    Storage::fake('local');
+
+    $location = Location::factory()->create();
+    $manager = createExportManager($location);
+    $export = RegistryExport::factory()
+        ->for($location->account)
+        ->for($location)
+        ->for($manager, 'requestedBy')
+        ->create([
+            'export_type' => ExportType::RegistryUnitsResidents,
+            'status' => ExportStatus::Processing,
+        ]);
+
+    (new GenerateCsvExport($export))->handle();
+
+    expect($export->fresh()->status)->toBe(ExportStatus::Processing)
+        ->and($export->fresh()->path)->toBeNull();
+});

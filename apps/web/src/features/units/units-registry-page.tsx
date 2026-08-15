@@ -31,6 +31,7 @@ import { createUnit, getUnits, updateUnit, type UnitSummary } from './api'
 import { unitSchema, type UnitFormValues } from './schemas'
 import {
   applyLaravelValidationErrors,
+  fieldErrorMessage,
   getErrorMessage,
 } from '../../lib/errors'
 
@@ -210,7 +211,7 @@ export function UnitsRegistryPage() {
             render={({ field, fieldState }) => (
               <TextInput
                 {...field}
-                error={fieldState.error?.message}
+                error={fieldErrorMessage(fieldState.error)}
                 label={t('registry.units.unit')}
               />
             )}
@@ -357,7 +358,7 @@ function NullableTextInput({
         <TextInput
           {...field}
           value={field.value ?? ''}
-          error={fieldState.error?.message}
+          error={fieldErrorMessage(fieldState.error)}
           label={label}
           onChange={(event) => field.onChange(event.currentTarget.value || null)}
         />

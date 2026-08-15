@@ -280,3 +280,27 @@ test('validation job marks import failed when parser rejects csv contents', func
         ->and($import->failed_at)->not->toBeNull()
         ->and($import->failure_reason)->toBe('Falta el encabezado requerido: unidad.');
 });
+
+test('validation job does not run for an import another worker already claimed', function () {
+    Storage::fake('local');
+
+    $location = Location::factory()->create();
+    $import = RegistryImport::factory()
+        ->for($location->account)
+        ->for($location)
+        ->create([
+            'status' => ImportStatus::Processing,
+            'disk' => 'local',
+            'path' => 'imports/test/claimed.csv',
+        ]);
+
+    Storage::disk('local')->put($import->path, implode("\n", [
+        'unidad,edificio,nombres,apellidos,email,tipo_residente',
+        '301,Torre A,Ana,Salas,ana@example.test,owner',
+    ]));
+
+    (new ValidateRegistryImport($import))->handle();
+
+    expect($import->fresh()->status)->toBe(ImportStatus::Processing)
+        ->and(RegistryImportRow::query()->where('registry_import_id', $import->id)->count())->toBe(0);
+});

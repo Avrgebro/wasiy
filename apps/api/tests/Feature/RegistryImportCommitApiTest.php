@@ -331,3 +331,19 @@ test('failed commit is visible on the import record', function () {
         ->and($import->failed_at)->not->toBeNull()
         ->and($import->failure_reason)->not->toBeNull();
 });
+
+test('commit job does not run for an import another worker already claimed', function () {
+    $location = Location::factory()->create();
+    $import = createReadyRegistryImport($location, [
+        'status' => ImportStatus::Processing,
+        'total_rows' => 1,
+        'valid_rows' => 1,
+    ]);
+    createImportCommitRow($import, ['unit_number' => '101']);
+
+    (new CommitRegistryImport($import))->handle();
+
+    expect($import->fresh()->status)->toBe(ImportStatus::Processing)
+        ->and(Unit::query()->count())->toBe(0)
+        ->and($import->rows()->where('status', ImportRowStatus::Imported)->count())->toBe(0);
+});

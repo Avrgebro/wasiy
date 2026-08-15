@@ -32,15 +32,26 @@ class CommitRegistryImport implements ShouldQueue
 
         $import = $this->import->fresh(['account', 'location', 'requestedBy']);
 
-        if (! $import || $import->status !== ImportStatus::ReadyForReview || $import->error_rows > 0) {
+        if (! $import || $import->error_rows > 0) {
             return;
         }
 
-        $import->forceFill([
-            'status' => ImportStatus::Processing,
-            'failed_at' => null,
-            'failure_reason' => null,
-        ])->save();
+        // Claim atomically: a conditional update guarantees only one worker
+        // transitions the import into Processing.
+        $claimed = RegistryImport::query()
+            ->whereKey($import->id)
+            ->where('status', ImportStatus::ReadyForReview)
+            ->update([
+                'status' => ImportStatus::Processing,
+                'failed_at' => null,
+                'failure_reason' => null,
+            ]);
+
+        if ($claimed !== 1) {
+            return;
+        }
+
+        $import->refresh();
 
         $createdUnitIds = [];
         $createdResidentIds = [];

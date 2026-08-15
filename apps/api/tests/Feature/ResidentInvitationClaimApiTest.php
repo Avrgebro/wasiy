@@ -383,6 +383,39 @@ test('resending a resident invitation rotates the token', function () {
     $this->getJson("/api/resident-invitations/{$secondToken}")->assertOk();
 });
 
+test('claim rejects an invitation that lost pending status after token resolution', function () {
+    $location = Location::factory()->create();
+    $resident = makeInvitableResident($location);
+    $user = User::factory()->create(['email' => $resident->email]);
+    $resident->forceFill(['user_id' => $user->id])->save();
+    $originalPasswordHash = $user->password;
+
+    $invitation = UserInvitation::factory()->for($resident->account)->for($resident)->create([
+        'email' => $resident->email,
+        'first_name' => $resident->first_name,
+        'last_name' => $resident->last_name,
+        'token_hash' => hash('sha256', 'raced-token'),
+        'purpose' => UserInvitationPurpose::Resident,
+        'status' => UserInvitationStatus::Pending,
+        'expires_at' => now()->addDay(),
+    ]);
+
+    // Simulate a cancel landing between the token resolving and the claim
+    // transaction opening: the in-memory model still says Pending while the
+    // database row no longer does.
+    $staleInvitation = $invitation->fresh();
+    UserInvitation::query()->whereKey($invitation->id)
+        ->update(['status' => UserInvitationStatus::Cancelled->value]);
+
+    expect(fn () => app(App\Actions\Residents\ClaimResidentInvitation::class)
+        ->handle($staleInvitation, 'new-secure-password'))
+        ->toThrow(Illuminate\Validation\ValidationException::class);
+
+    expect($invitation->fresh()->status)->toBe(UserInvitationStatus::Cancelled)
+        ->and($user->fresh()->password)->toBe($originalPasswordHash)
+        ->and(ActivityLog::query()->where('event_type', ActivityEventType::ResidentClaimed->value)->count())->toBe(0);
+});
+
 test('resident invitation cancel is refused for managers outside the location', function () {
     Notification::fake();
 

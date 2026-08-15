@@ -40,15 +40,26 @@ class ValidateRegistryImport implements ShouldQueue
 
         $import = $this->import->fresh(['account', 'location', 'requestedBy']);
 
-        if (! $import || $import->status !== ImportStatus::Pending) {
+        if (! $import) {
             return;
         }
 
-        $import->forceFill([
-            'status' => ImportStatus::Processing,
-            'failed_at' => null,
-            'failure_reason' => null,
-        ])->save();
+        // Claim atomically: a conditional update guarantees only one worker
+        // transitions the import into Processing.
+        $claimed = RegistryImport::query()
+            ->whereKey($import->id)
+            ->where('status', ImportStatus::Pending)
+            ->update([
+                'status' => ImportStatus::Processing,
+                'failed_at' => null,
+                'failure_reason' => null,
+            ]);
+
+        if ($claimed !== 1) {
+            return;
+        }
+
+        $import->refresh();
 
         try {
             if ($import->disk === null || $import->path === null || ! Storage::disk($import->disk)->exists($import->path)) {

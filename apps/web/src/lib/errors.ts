@@ -1,6 +1,15 @@
 import { ApiError } from '../app/api-client'
 import { i18next } from '../i18n'
-import type { FieldValues, Path, UseFormSetError } from 'react-hook-form'
+import type { FieldError, FieldValues, Path, UseFormSetError } from 'react-hook-form'
+
+/**
+ * Schema messages are i18n keys ('validation.firstNameRequired') while
+ * server-set errors are already-localized text; i18next returns unknown
+ * keys unchanged, so both come out display-ready.
+ */
+export function fieldErrorMessage(error: FieldError | undefined): string | undefined {
+  return error?.message ? i18next.t(error.message) : undefined
+}
 
 export function getErrorMessage(error: unknown) {
   if (error instanceof ApiError) {

@@ -29,15 +29,26 @@ class GenerateCsvExport implements ShouldQueue
 
         $export = $this->export->fresh(['account', 'location', 'requestedBy']);
 
-        if (! $export || $export->status !== ExportStatus::Pending) {
+        if (! $export) {
             return;
         }
 
-        $export->forceFill([
-            'status' => ExportStatus::Processing,
-            'failure_reason' => null,
-            'failed_at' => null,
-        ])->save();
+        // Claim atomically: a conditional update guarantees only one worker
+        // transitions the export into Processing.
+        $claimed = RegistryExport::query()
+            ->whereKey($export->id)
+            ->where('status', ExportStatus::Pending)
+            ->update([
+                'status' => ExportStatus::Processing,
+                'failure_reason' => null,
+                'failed_at' => null,
+            ]);
+
+        if ($claimed !== 1) {
+            return;
+        }
+
+        $export->refresh();
 
         try {
             $csv = match ($export->export_type) {

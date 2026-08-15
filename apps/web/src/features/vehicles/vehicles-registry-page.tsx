@@ -31,6 +31,7 @@ import { createVehicle, getVehicles, updateVehicle, type VehicleSummary } from '
 import { vehicleSchema, type VehicleFormValues } from './schemas'
 import {
   applyLaravelValidationErrors,
+  fieldErrorMessage,
   getErrorMessage,
 } from '../../lib/errors'
 
@@ -247,7 +248,7 @@ export function VehiclesRegistryPage() {
                   label: [unit.building_name, unit.unit_number].filter(Boolean).join(' / '),
                   value: unit.id,
                 }))}
-                error={fieldState.error?.message}
+                error={fieldErrorMessage(fieldState.error)}
                 label={t('registry.vehicles.unit')}
               />
             )}
@@ -351,7 +352,7 @@ function NullableTextInput({
         <TextInput
           {...field}
           value={field.value ?? ''}
-          error={fieldState.error?.message}
+          error={fieldErrorMessage(fieldState.error)}
           label={label}
           onChange={(event) => field.onChange(event.currentTarget.value || null)}
         />

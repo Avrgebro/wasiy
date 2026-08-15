@@ -32,6 +32,7 @@ import { createResident, getResidents, updateResident, type ResidentSummary } fr
 import { residentSchema, type ResidentFormValues } from './schemas'
 import {
   applyLaravelValidationErrors,
+  fieldErrorMessage,
   getErrorMessage,
 } from '../../lib/errors'
 
@@ -236,28 +237,28 @@ export function ResidentsRegistryPage() {
             control={form.control}
             name="first_name"
             render={({ field, fieldState }) => (
-              <TextInput {...field} error={fieldState.error?.message} label={t('registry.residents.firstName')} />
+              <TextInput {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.residents.firstName')} />
             )}
           />
           <Controller
             control={form.control}
             name="last_name"
             render={({ field, fieldState }) => (
-              <TextInput {...field} error={fieldState.error?.message} label={t('registry.residents.lastName')} />
+              <TextInput {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.residents.lastName')} />
             )}
           />
           <Controller
             control={form.control}
             name="phone"
             render={({ field, fieldState }) => (
-              <TextInput {...field} error={fieldState.error?.message} label={t('registry.residents.phone')} />
+              <TextInput {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.residents.phone')} />
             )}
           />
           <Controller
             control={form.control}
             name="email"
             render={({ field, fieldState }) => (
-              <TextInput {...field} error={fieldState.error?.message} label={t('auth.email')} />
+              <TextInput {...field} error={fieldErrorMessage(fieldState.error)} label={t('auth.email')} />
             )}
           />
           {editingResident ? null : (

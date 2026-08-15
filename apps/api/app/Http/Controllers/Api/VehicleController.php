@@ -185,6 +185,8 @@ class VehicleController extends Controller
         $validated = $this->validatePortalVehiclePayload($request, $user);
         $unit = Unit::query()->findOrFail($validated['unit_id']);
 
+        Gate::authorize('createAsResident', [Vehicle::class, $unit]);
+
         $vehicle = DB::transaction(function () use ($validated, $unit, $user): Vehicle {
             $vehicle = Vehicle::query()->create([
                 ...collect($validated)->only(['vehicle_type', 'plate', 'make', 'model', 'color', 'notes'])->all(),

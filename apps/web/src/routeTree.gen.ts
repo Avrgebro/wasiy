@@ -18,6 +18,7 @@ import { Route as AuthenticatedPortalRouteRouteImport } from './routes/_authenti
 import { Route as AuthenticatedFrontDeskRouteRouteImport } from './routes/_authenticated/front-desk/route'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal/index'
+import { Route as AuthenticatedFrontDeskIndexRouteImport } from './routes/_authenticated/front-desk/index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as InvitationsStaffTokenRouteImport } from './routes/invitations/staff.$token'
 import { Route as InvitationsResidentTokenRouteImport } from './routes/invitations/resident.$token'
@@ -81,6 +82,12 @@ const AuthenticatedPortalIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
+const AuthenticatedFrontDeskIndexRoute =
+  AuthenticatedFrontDeskIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedFrontDeskRouteRoute,
   } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
@@ -175,7 +182,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
+  '/front-desk': typeof AuthenticatedFrontDeskRouteRouteWithChildren
   '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/front-desk/': typeof AuthenticatedFrontDeskIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
@@ -199,7 +207,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
-  '/front-desk': typeof AuthenticatedFrontDeskRouteRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/front-desk': typeof AuthenticatedFrontDeskIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
@@ -225,7 +233,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/_authenticated/front-desk': typeof AuthenticatedFrontDeskRouteRoute
+  '/_authenticated/front-desk': typeof AuthenticatedFrontDeskRouteRouteWithChildren
   '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/front-desk/': typeof AuthenticatedFrontDeskIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/_authenticated/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/invitations/resident/$token'
     | '/invitations/staff/$token'
     | '/admin/'
+    | '/front-desk/'
     | '/portal/'
     | '/admin/registry/imports'
     | '/admin/registry/residents'
@@ -276,7 +286,6 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/no-access'
-    | '/front-desk'
     | '/select-account'
     | '/admin/activity'
     | '/admin/announcements'
@@ -289,6 +298,7 @@ export interface FileRouteTypes {
     | '/invitations/resident/$token'
     | '/invitations/staff/$token'
     | '/admin'
+    | '/front-desk'
     | '/portal'
     | '/admin/registry/imports'
     | '/admin/registry/residents'
@@ -315,6 +325,7 @@ export interface FileRouteTypes {
     | '/invitations/resident/$token'
     | '/invitations/staff/$token'
     | '/_authenticated/admin/'
+    | '/_authenticated/front-desk/'
     | '/_authenticated/portal/'
     | '/_authenticated/admin/registry/imports'
     | '/_authenticated/admin/registry/residents'
@@ -395,6 +406,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/'
       preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
       parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
+    '/_authenticated/front-desk/': {
+      id: '/_authenticated/front-desk/'
+      path: '/'
+      fullPath: '/front-desk/'
+      preLoaderRoute: typeof AuthenticatedFrontDeskIndexRouteImport
+      parentRoute: typeof AuthenticatedFrontDeskRouteRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -545,6 +563,20 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
+interface AuthenticatedFrontDeskRouteRouteChildren {
+  AuthenticatedFrontDeskIndexRoute: typeof AuthenticatedFrontDeskIndexRoute
+}
+
+const AuthenticatedFrontDeskRouteRouteChildren: AuthenticatedFrontDeskRouteRouteChildren =
+  {
+    AuthenticatedFrontDeskIndexRoute: AuthenticatedFrontDeskIndexRoute,
+  }
+
+const AuthenticatedFrontDeskRouteRouteWithChildren =
+  AuthenticatedFrontDeskRouteRoute._addFileChildren(
+    AuthenticatedFrontDeskRouteRouteChildren,
+  )
+
 interface AuthenticatedPortalRouteRouteChildren {
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
 }
@@ -561,14 +593,15 @@ const AuthenticatedPortalRouteRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
-  AuthenticatedFrontDeskRouteRoute: typeof AuthenticatedFrontDeskRouteRoute
+  AuthenticatedFrontDeskRouteRoute: typeof AuthenticatedFrontDeskRouteRouteWithChildren
   AuthenticatedPortalRouteRoute: typeof AuthenticatedPortalRouteRouteWithChildren
   AuthenticatedSelectAccountRoute: typeof AuthenticatedSelectAccountRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
-  AuthenticatedFrontDeskRouteRoute: AuthenticatedFrontDeskRouteRoute,
+  AuthenticatedFrontDeskRouteRoute:
+    AuthenticatedFrontDeskRouteRouteWithChildren,
   AuthenticatedPortalRouteRoute: AuthenticatedPortalRouteRouteWithChildren,
   AuthenticatedSelectAccountRoute: AuthenticatedSelectAccountRoute,
 }

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Location;
+use App\Models\Unit;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\AccessAuthorizationService;
@@ -44,6 +45,11 @@ class VehiclePolicy
      * cannot reach the staff endpoints, which allow setting status and
      * reassigning a vehicle to any unit in the location.
      */
+    public function createAsResident(User $user, Unit $unit): bool
+    {
+        return $this->access->canResidentAccessUnit($user, $unit);
+    }
+
     public function updateAsResident(User $user, Vehicle $vehicle): bool
     {
         return $this->access->canResidentManageVehicle($user, $vehicle);

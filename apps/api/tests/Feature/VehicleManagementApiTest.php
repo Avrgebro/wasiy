@@ -218,3 +218,12 @@ test('resident cannot create vehicle for inactive unit or inactive membership', 
         ->assertUnprocessable()
         ->assertJsonValidationErrors('unit_id');
 });
+
+test('createAsResident gate requires an active membership in the target unit', function () {
+    $unit = Unit::factory()->create();
+    $otherUnit = Unit::factory()->for($unit->account)->for($unit->location)->create();
+    $residentUser = createResidentUserForUnit($unit);
+
+    expect(Illuminate\Support\Facades\Gate::forUser($residentUser)->allows('createAsResident', [Vehicle::class, $unit]))->toBeTrue()
+        ->and(Illuminate\Support\Facades\Gate::forUser($residentUser)->denies('createAsResident', [Vehicle::class, $otherUnit]))->toBeTrue();
+});
