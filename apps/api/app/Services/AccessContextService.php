@@ -267,20 +267,11 @@ class AccessContextService
                 'account_id' => $membership->account_id,
                 'location_id' => $membership->location_id,
                 'unit_id' => $membership->unit_id,
-                'unit_label' => $this->unitLabel($membership),
+                'unit_label' => $membership->unit->label(),
                 'resident_type' => $membership->resident_type->value,
                 'is_primary_contact' => $membership->is_primary_contact,
             ])
             ->values()
             ->all();
-    }
-
-    private function unitLabel(UnitMembership $membership): string
-    {
-        $unit = $membership->unit;
-
-        return collect([$unit->building_name, $unit->unit_number])
-            ->filter(fn (?string $part): bool => is_string($part) && trim($part) !== '')
-            ->implode(' / ');
     }
 }

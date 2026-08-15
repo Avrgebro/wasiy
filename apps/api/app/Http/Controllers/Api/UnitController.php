@@ -12,6 +12,7 @@ use App\Models\Location;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Support\SortParser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -33,8 +34,7 @@ class UnitController extends Controller
         Gate::authorize('viewAny', [Unit::class, $location]);
 
         $validated = $request->validate([
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            ...$this->paginationRules(),
             'search' => ['sometimes', 'nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', Rule::enum(RegistryStatus::class)],
             'sort' => ['sometimes', 'nullable', 'string', 'max:255'],
@@ -46,23 +46,24 @@ class UnitController extends Controller
             ->where('account_id', $location->account_id)
             ->where('location_id', $location->id)
             ->when($status, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($validated['search'] ?? null, function (Builder $query, string $search): void {
-                $likeSearch = '%'.addcslashes(Str::lower(trim($search)), '\\%_').'%';
-
-                $query->where(function (Builder $query) use ($likeSearch): void {
-                    $query
-                        ->whereRaw('LOWER(unit_number) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(building_name) LIKE ?', [$likeSearch]);
-                });
-            })
+            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->searchLike(['unit_number', 'building_name'], $search))
             ->with(Unit::summaryRelations())
             ->withCount(Unit::summaryCounts());
 
-        $this->applySort($units, $validated['sort'] ?? null);
+        SortParser::apply($units, $validated['sort'] ?? null, [
+            'building_name' => 'building_name',
+            'floor' => fn (Builder $query, string $direction) => $query
+                ->orderByRaw("NULLIF(regexp_replace(floor, '[^0-9]', '', 'g'), '')::int {$direction} NULLS LAST")
+                ->orderBy('floor', $direction),
+            'unit_number' => 'unit_number',
+            'status' => 'status',
+            'resident_count' => 'active_unit_memberships_count',
+            'created_at' => 'created_at',
+        ], default: 'building_name,floor,unit_number');
 
         return UnitResource::collection(
             $units
-                ->paginate((int) ($validated['per_page'] ?? 15))
+                ->paginate($this->perPage($validated))
                 ->withQueryString()
         );
     }
@@ -85,7 +86,7 @@ class UnitController extends Controller
             $this->logUnitActivity(
                 unit: $unit,
                 eventType: ActivityEventType::UnitCreated,
-                summary: "Unidad {$this->unitLabel($unit)} creada.",
+                summary: "Unidad {$unit->label()} creada.",
                 actor: $actor,
             );
 
@@ -135,8 +136,8 @@ class UnitController extends Controller
                 unit: $unit,
                 eventType: $eventType,
                 summary: $eventType === ActivityEventType::UnitInactivated
-                    ? "Unidad {$this->unitLabel($unit)} inactivada."
-                    : "Unidad {$this->unitLabel($unit)} actualizada.",
+                    ? "Unidad {$unit->label()} inactivada."
+                    : "Unidad {$unit->label()} actualizada.",
                 actor: $actor,
                 changed: $changed,
             );
@@ -166,7 +167,7 @@ class UnitController extends Controller
             $this->logUnitActivity(
                 unit: $unit,
                 eventType: ActivityEventType::UnitInactivated,
-                summary: "Unidad {$this->unitLabel($unit)} inactivada.",
+                summary: "Unidad {$unit->label()} inactivada.",
                 actor: $actor,
                 changed: ['status'],
             );
@@ -178,35 +179,6 @@ class UnitController extends Controller
     /**
      * @param  Builder<Unit>  $query
      */
-    private function applySort(Builder $query, ?string $sort): void
-    {
-        $sort = $sort ?: 'building_name,floor,unit_number';
-
-        foreach (explode(',', $sort) as $sortPart) {
-            $sortPart = trim($sortPart);
-
-            if ($sortPart === '') {
-                continue;
-            }
-
-            $descending = str_starts_with($sortPart, '-');
-            $field = ltrim($sortPart, '-');
-            $direction = $descending ? 'desc' : 'asc';
-
-            match ($field) {
-                'building_name' => $query->orderBy('building_name', $direction),
-                'floor' => $query->orderByRaw("NULLIF(regexp_replace(floor, '[^0-9]', '', 'g'), '')::int {$direction} NULLS LAST")->orderBy('floor', $direction),
-                'unit_number' => $query->orderBy('unit_number', $direction),
-                'status' => $query->orderBy('status', $direction),
-                'resident_count' => $query->orderBy('active_unit_memberships_count', $direction),
-                'created_at' => $query->orderBy('created_at', $direction),
-                default => null,
-            };
-        }
-
-        $query->orderBy('id');
-    }
-
     /**
      * @param  array<int, string>  $changed
      */
@@ -218,7 +190,7 @@ class UnitController extends Controller
             summary: $summary,
             metadata: [
                 'unit_id' => $unit->id,
-                'unit_label' => $this->unitLabel($unit),
+                'unit_label' => $unit->label(),
                 'location_id' => $unit->location_id,
                 'location_name' => $unit->location->name,
                 'actor_user_id' => $actor->id,
@@ -230,10 +202,5 @@ class UnitController extends Controller
             subjectType: Unit::class,
             subjectId: $unit->id,
         );
-    }
-
-    private function unitLabel(Unit $unit): string
-    {
-        return trim(collect([$unit->building_name, $unit->unit_number])->filter()->implode(' / '));
     }
 }

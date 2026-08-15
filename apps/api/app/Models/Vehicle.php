@@ -45,6 +45,14 @@ class Vehicle extends Model
     }
 
     /**
+     * Display label: the plate when present, otherwise the vehicle type.
+     */
+    public function label(): string
+    {
+        return $this->plate ?: $this->vehicle_type->value;
+    }
+
+    /**
      * @return BelongsTo<Unit, $this>
      */
     public function unit(): BelongsTo

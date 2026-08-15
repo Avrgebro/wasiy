@@ -41,8 +41,7 @@ class RegistryExportController extends Controller
             'location_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('locations', 'id')->where('account_id', $request->input('account_id'))->whereNull('deleted_at')],
             'status' => ['sometimes', 'nullable', Rule::enum(ExportStatus::class)],
             'export_type' => ['sometimes', 'nullable', Rule::enum(ExportType::class)],
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            ...$this->paginationRules(),
         ]);
 
         $account = Account::query()->findOrFail($validated['account_id']);
@@ -65,7 +64,7 @@ class RegistryExportController extends Controller
         return RegistryExportResource::collection(
             $exports
                 ->orderByDesc('created_at')
-                ->paginate((int) ($validated['per_page'] ?? 15))
+                ->paginate($this->perPage($validated))
                 ->withQueryString()
         );
     }

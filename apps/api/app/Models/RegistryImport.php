@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 #[Fillable([
     'account_id',
@@ -48,6 +50,53 @@ class RegistryImport extends Model
             'completed_at' => 'datetime',
             'failed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Mark the import confirmed for commit. Owns the state-transition rules
+     * so every entry point (HTTP, jobs, future CLI) agrees on them.
+     */
+    public function confirm(): void
+    {
+        if ($this->status !== ImportStatus::ReadyForReview) {
+            throw ValidationException::withMessages([
+                'import' => __('Only imports ready for review can be confirmed.'),
+            ]);
+        }
+
+        if ($this->error_rows > 0) {
+            throw ValidationException::withMessages([
+                'import' => __('Imports with blocking row errors cannot be confirmed.'),
+            ]);
+        }
+
+        $this->forceFill([
+            'confirmed_at' => now(),
+        ])->save();
+    }
+
+    /**
+     * Reset a failed, unconfirmed import back to Pending for re-validation.
+     */
+    public function retryValidation(): void
+    {
+        if ($this->status !== ImportStatus::Failed || $this->confirmed_at !== null) {
+            throw ValidationException::withMessages([
+                'import' => __('Only failed validation imports can be retried.'),
+            ]);
+        }
+
+        if ($this->disk === null || $this->path === null || ! Storage::disk($this->disk)->exists($this->path)) {
+            throw ValidationException::withMessages([
+                'import' => __('The original import file is no longer available.'),
+            ]);
+        }
+
+        $this->forceFill([
+            'status' => ImportStatus::Pending,
+            'failed_at' => null,
+            'failure_reason' => null,
+        ])->save();
     }
 
     /**

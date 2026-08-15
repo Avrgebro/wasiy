@@ -45,6 +45,16 @@ class Unit extends Model
     }
 
     /**
+     * Canonical display label: "building / number", omitting blank parts.
+     */
+    public function label(): string
+    {
+        return collect([$this->building_name, $this->unit_number])
+            ->filter(fn (?string $part): bool => is_string($part) && trim($part) !== '')
+            ->implode(' / ');
+    }
+
+    /**
      * The in-memory counterpart of scopeMatchingImportIdentity.
      */
     public function importMatchKey(): string

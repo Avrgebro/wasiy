@@ -32,8 +32,7 @@ class AccountStaffController extends Controller
     public function index(Request $request, Account $account): AnonymousResourceCollection
     {
         $validated = $request->validate([
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            ...$this->paginationRules(),
             'search' => ['sometimes', 'nullable', 'string', 'max:255'],
             'role' => [
                 'sometimes',
@@ -56,17 +55,10 @@ class AccountStaffController extends Controller
         ]);
 
         $staff = $this->access->staffForAccount($account)
-            ->when($validated['search'] ?? null, function (Builder $query, string $search): void {
-                $likeSearch = '%'.addcslashes(Str::lower(trim($search)), '\\%_').'%';
-
-                $query->where(function (Builder $query) use ($likeSearch): void {
-                    $query
-                        ->whereRaw('LOWER(first_name) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(last_name) LIKE ?', [$likeSearch])
-                        ->orWhereRaw("LOWER(first_name || ' ' || last_name) LIKE ?", [$likeSearch])
-                        ->orWhereRaw('LOWER(email) LIKE ?', [$likeSearch]);
-                });
-            })
+            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->searchLike(
+                ['first_name', 'last_name', "first_name || ' ' || last_name", 'email'],
+                $search,
+            ))
             ->when($validated['role'] ?? null, function (Builder $query, string $role) use ($account): void {
                 if ($role === AccountRole::AccountAdmin->value) {
                     $query->whereHas('accountUserRoles', fn (Builder $query) => $query
@@ -88,7 +80,7 @@ class AccountStaffController extends Controller
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->orderBy('email')
-            ->paginate((int) ($validated['per_page'] ?? 15))
+            ->paginate($this->perPage($validated))
             ->withQueryString();
 
         return StaffResource::collection($staff)

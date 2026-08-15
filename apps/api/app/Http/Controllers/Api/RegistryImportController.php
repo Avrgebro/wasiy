@@ -46,8 +46,7 @@ class RegistryImportController extends Controller
             'location_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('locations', 'id')->where('account_id', $request->input('account_id'))->whereNull('deleted_at')],
             'status' => ['sometimes', 'nullable', Rule::enum(ImportStatus::class)],
             'import_type' => ['sometimes', 'nullable', Rule::enum(ImportType::class)],
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            ...$this->paginationRules(),
         ]);
 
         $account = Account::query()->findOrFail($validated['account_id']);
@@ -78,7 +77,7 @@ class RegistryImportController extends Controller
             $imports
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
-                ->paginate((int) ($validated['per_page'] ?? 15))
+                ->paginate($this->perPage($validated))
                 ->withQueryString()
         );
     }
@@ -138,7 +137,7 @@ class RegistryImportController extends Controller
                     account: $location->account,
                     eventType: ActivityEventType::ImportUploaded,
                     summary: 'Importacion CSV cargada.',
-                    metadata: $this->activityMetadata($import, $user),
+                    metadata: $import->activityMetadata(),
                     location: $location,
                     actor: $user,
                     subjectType: RegistryImport::class,
@@ -172,30 +171,21 @@ class RegistryImportController extends Controller
         $validated = $request->validate([
             'status' => ['sometimes', 'nullable', Rule::enum(ImportRowStatus::class)],
             'search' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            ...$this->paginationRules(),
         ]);
 
         $rows = RegistryImportRow::query()
             ->where('registry_import_id', $import->id)
             ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($validated['search'] ?? null, function (Builder $query, string $search): void {
-                $likeSearch = '%'.addcslashes(Str::lower(trim($search)), '\\%_').'%';
-
-                $query->where(function (Builder $query) use ($likeSearch): void {
-                    $query
-                        ->whereRaw('LOWER(raw_data::text) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(normalized_data::text) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(errors::text) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(warnings::text) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(COALESCE(duplicate_key, \'\')) LIKE ?', [$likeSearch]);
-                });
-            });
+            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->searchLike(
+                ['raw_data::text', 'normalized_data::text', 'errors::text', 'warnings::text', "COALESCE(duplicate_key, '')"],
+                $search,
+            ));
 
         return RegistryImportRowResource::collection(
             $rows
                 ->orderBy('row_number')
-                ->paginate((int) ($validated['per_page'] ?? 15))
+                ->paginate($this->perPage($validated))
                 ->withQueryString()
         );
     }
@@ -204,21 +194,7 @@ class RegistryImportController extends Controller
     {
         Gate::authorize('confirm', $import);
 
-        if ($import->status !== ImportStatus::ReadyForReview) {
-            throw ValidationException::withMessages([
-                'import' => __('Only imports ready for review can be confirmed.'),
-            ]);
-        }
-
-        if ($import->error_rows > 0) {
-            throw ValidationException::withMessages([
-                'import' => __('Imports with blocking row errors cannot be confirmed.'),
-            ]);
-        }
-
-        $import->forceFill([
-            'confirmed_at' => now(),
-        ])->save();
+        $import->confirm();
 
         CommitRegistryImport::dispatch($import);
 
@@ -229,23 +205,7 @@ class RegistryImportController extends Controller
     {
         Gate::authorize('retry', $import);
 
-        if ($import->status !== ImportStatus::Failed || $import->confirmed_at !== null) {
-            throw ValidationException::withMessages([
-                'import' => __('Only failed validation imports can be retried.'),
-            ]);
-        }
-
-        if ($import->disk === null || $import->path === null || ! Storage::disk($import->disk)->exists($import->path)) {
-            throw ValidationException::withMessages([
-                'import' => __('The original import file is no longer available.'),
-            ]);
-        }
-
-        $import->forceFill([
-            'status' => ImportStatus::Pending,
-            'failed_at' => null,
-            'failure_reason' => null,
-        ])->save();
+        $import->retryValidation();
 
         ValidateRegistryImport::dispatch($import);
 
@@ -261,22 +221,4 @@ class RegistryImportController extends Controller
         return "{$slug}.{$extension}";
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function activityMetadata(RegistryImport $import, User $actor): array
-    {
-        return [
-            'import_id' => $import->id,
-            'import_type' => $import->import_type->value,
-            'filename' => $import->original_filename,
-            'location_id' => $import->location_id,
-            'total_rows' => $import->total_rows,
-            'valid_rows' => $import->valid_rows,
-            'error_rows' => $import->error_rows,
-            'duplicate_rows' => $import->duplicate_rows,
-            'warning_rows' => $import->warning_rows,
-            'actor_user_id' => $actor->id,
-        ];
-    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Registry\CreateUnitMembership;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
 use App\Enums\ResidentType;
@@ -11,7 +12,6 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
 use App\Models\User;
-use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +22,7 @@ use Illuminate\Validation\ValidationException;
 class UnitMembershipController extends Controller
 {
     public function __construct(
-        private readonly ActivityLogger $activityLogger,
+        private readonly CreateUnitMembership $createMembership,
     ) {}
 
     public function store(Request $request, Resident $resident): JsonResponse
@@ -35,44 +35,7 @@ class UnitMembershipController extends Controller
         /** @var User $actor */
         $actor = $request->user();
 
-        $membership = DB::transaction(function () use ($resident, $unit, $validated, $actor): UnitMembership {
-            $membership = $resident->unitMemberships()->create([
-                'account_id' => $resident->account_id,
-                'location_id' => $unit->location_id,
-                'unit_id' => $unit->id,
-                'resident_type' => $validated['resident_type'],
-                'status' => $validated['status'] ?? RegistryStatus::Active,
-                'is_primary_contact' => false,
-                'started_at' => $validated['started_at'] ?? null,
-                'ended_at' => $validated['ended_at'] ?? null,
-            ]);
-
-            if (($validated['is_primary_contact'] ?? false) === true) {
-                $membership->markAsPrimaryContact();
-                $membership->refresh();
-            }
-
-            $this->logMembershipActivity(
-                membership: $membership,
-                eventType: ActivityEventType::UnitMembershipCreated,
-                summary: "{$resident->name} fue asignado a la unidad {$this->unitLabel($unit)}.",
-                actor: $actor,
-            );
-
-            if (($validated['is_primary_contact'] ?? false) === true) {
-                $this->logMembershipActivity(
-                    membership: $membership,
-                    eventType: ActivityEventType::UnitMembershipPrimaryContactChanged,
-                    summary: "{$resident->name} quedo como contacto principal de la unidad {$this->unitLabel($unit)}.",
-                    actor: $actor,
-                    extraMetadata: [
-                        'new_primary_membership_id' => $membership->id,
-                    ],
-                );
-            }
-
-            return $membership;
-        });
+        $membership = DB::transaction(fn (): UnitMembership => $this->createMembership->handle($resident, $unit, $validated, $actor));
 
         return (new UnitMembershipResource($membership->loadSummary()))->response()->setStatusCode(201);
     }
@@ -111,12 +74,12 @@ class UnitMembershipController extends Controller
                     ? ActivityEventType::UnitMembershipInactivated
                     : ActivityEventType::UnitMembershipUpdated;
 
-                $this->logMembershipActivity(
+                $this->createMembership->logMembershipActivity(
                     membership: $membership,
                     eventType: $eventType,
                     summary: $eventType === ActivityEventType::UnitMembershipInactivated
-                        ? "{$membership->resident->name} fue inactivado en la unidad {$this->unitLabel($membership->unit)}."
-                        : "Membresia de {$membership->resident->name} actualizada para la unidad {$this->unitLabel($membership->unit)}.",
+                        ? "{$membership->resident->name} fue inactivado en la unidad {$membership->unit->label()}."
+                        : "Membresia de {$membership->resident->name} actualizada para la unidad {$membership->unit->label()}.",
                     actor: $actor,
                     changed: $dirtyBeforePrimary,
                 );
@@ -126,10 +89,10 @@ class UnitMembershipController extends Controller
                 $membership->markAsPrimaryContact();
                 $membership->refresh();
 
-                $this->logMembershipActivity(
+                $this->createMembership->logMembershipActivity(
                     membership: $membership,
                     eventType: ActivityEventType::UnitMembershipPrimaryContactChanged,
-                    summary: "{$membership->resident->name} quedo como contacto principal de la unidad {$this->unitLabel($membership->unit)}.",
+                    summary: "{$membership->resident->name} quedo como contacto principal de la unidad {$membership->unit->label()}.",
                     actor: $actor,
                     extraMetadata: [
                         'new_primary_membership_id' => $membership->id,
@@ -138,10 +101,10 @@ class UnitMembershipController extends Controller
             } elseif (array_key_exists('is_primary_contact', $validated) && $validated['is_primary_contact'] === false && $membership->is_primary_contact) {
                 $membership->forceFill(['is_primary_contact' => false])->save();
 
-                $this->logMembershipActivity(
+                $this->createMembership->logMembershipActivity(
                     membership: $membership,
                     eventType: ActivityEventType::UnitMembershipUpdated,
-                    summary: "Membresia de {$membership->resident->name} actualizada para la unidad {$this->unitLabel($membership->unit)}.",
+                    summary: "Membresia de {$membership->resident->name} actualizada para la unidad {$membership->unit->label()}.",
                     actor: $actor,
                     changed: ['is_primary_contact'],
                 );
@@ -165,10 +128,10 @@ class UnitMembershipController extends Controller
                 'ended_at' => $membership->ended_at ?? now()->toDateString(),
             ])->save();
 
-            $this->logMembershipActivity(
+            $this->createMembership->logMembershipActivity(
                 membership: $membership,
                 eventType: ActivityEventType::UnitMembershipInactivated,
-                summary: "{$membership->resident->name} fue inactivado en la unidad {$this->unitLabel($membership->unit)}.",
+                summary: "{$membership->resident->name} fue inactivado en la unidad {$membership->unit->label()}.",
                 actor: $actor,
                 changed: ['status', 'is_primary_contact', 'ended_at'],
             );
@@ -206,40 +169,4 @@ class UnitMembershipController extends Controller
         return $validated;
     }
 
-    /**
-     * @param  array<int, string>  $changed
-     * @param  array<string, mixed>  $extraMetadata
-     */
-    private function logMembershipActivity(UnitMembership $membership, ActivityEventType $eventType, string $summary, User $actor, array $changed = [], array $extraMetadata = []): void
-    {
-        $membership->loadMissing(['account', 'location', 'resident', 'unit']);
-
-        $this->activityLogger->log(
-            account: $membership->account,
-            eventType: $eventType,
-            summary: $summary,
-            metadata: [
-                'membership_id' => $membership->id,
-                'resident_id' => $membership->resident_id,
-                'resident_name' => $membership->resident->name,
-                'unit_id' => $membership->unit_id,
-                'unit_label' => $this->unitLabel($membership->unit),
-                'location_id' => $membership->location_id,
-                'location_name' => $membership->location->name,
-                'actor_user_id' => $actor->id,
-                'actor_user_name' => $actor->name,
-                'changed' => $changed,
-                ...$extraMetadata,
-            ],
-            location: $membership->location,
-            actor: $actor,
-            subjectType: UnitMembership::class,
-            subjectId: $membership->id,
-        );
-    }
-
-    private function unitLabel(Unit $unit): string
-    {
-        return trim(collect([$unit->building_name, $unit->unit_number])->filter()->implode(' / '));
-    }
 }

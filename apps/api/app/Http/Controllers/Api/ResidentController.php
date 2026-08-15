@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Registry\CreateUnitMembership;
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
@@ -31,6 +32,7 @@ class ResidentController extends Controller
     public function __construct(
         private readonly AccessAuthorizationService $access,
         private readonly ActivityLogger $activityLogger,
+        private readonly CreateUnitMembership $createMembership,
     ) {}
 
     public function index(Request $request, Account $account): AnonymousResourceCollection
@@ -38,8 +40,7 @@ class ResidentController extends Controller
         abort_unless($this->access->canAccessAccount($request->user(), $account), 403);
 
         $validated = $request->validate([
-            'page' => ['sometimes', 'integer', 'min:1'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            ...$this->paginationRules(),
             'search' => ['sometimes', 'nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', Rule::enum(RegistryStatus::class)],
             'location_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('locations', 'id')->where('account_id', $account->id)->whereNull('deleted_at')],
@@ -49,18 +50,10 @@ class ResidentController extends Controller
         $residents = Resident::query()
             ->where('account_id', $account->id)
             ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($validated['search'] ?? null, function (Builder $query, string $search): void {
-                $likeSearch = '%'.addcslashes(Str::lower(trim($search)), '\\%_').'%';
-
-                $query->where(function (Builder $query) use ($likeSearch): void {
-                    $query
-                        ->whereRaw('LOWER(first_name) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(last_name) LIKE ?', [$likeSearch])
-                        ->orWhereRaw("LOWER(first_name || ' ' || last_name) LIKE ?", [$likeSearch])
-                        ->orWhereRaw('LOWER(email) LIKE ?', [$likeSearch])
-                        ->orWhereRaw('LOWER(phone) LIKE ?', [$likeSearch]);
-                });
-            });
+            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->searchLike(
+                ['first_name', 'last_name', "first_name || ' ' || last_name", 'email', 'phone'],
+                $search,
+            ));
 
         $accessibleLocationIds = $this->access->accessibleLocationsForAccount($request->user(), $account)->pluck('id');
 
@@ -81,7 +74,7 @@ class ResidentController extends Controller
                 ->with(Resident::summaryRelations())
                 ->orderBy('last_name')
                 ->orderBy('first_name')
-                ->paginate((int) ($validated['per_page'] ?? 15))
+                ->paginate($this->perPage($validated))
                 ->withQueryString()
         );
     }
@@ -112,7 +105,7 @@ class ResidentController extends Controller
             foreach ($validated['memberships'] ?? [] as $membership) {
                 $unit = Unit::query()->where('account_id', $account->id)->findOrFail($membership['unit_id']);
                 Gate::forUser($user)->authorize('create', [UnitMembership::class, $unit->location]);
-                $this->createMembership($resident, $unit, $membership, $user);
+                $this->createMembership->handle($resident, $unit, $membership, $user);
             }
 
             return $resident;
@@ -245,48 +238,6 @@ class ResidentController extends Controller
         }
     }
 
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    private function createMembership(Resident $resident, Unit $unit, array $payload, User $actor): UnitMembership
-    {
-        $membership = $resident->unitMemberships()->create([
-            'account_id' => $resident->account_id,
-            'location_id' => $unit->location_id,
-            'unit_id' => $unit->id,
-            'resident_type' => $payload['resident_type'],
-            'status' => $payload['status'] ?? RegistryStatus::Active,
-            'is_primary_contact' => false,
-            'started_at' => $payload['started_at'] ?? null,
-            'ended_at' => $payload['ended_at'] ?? null,
-        ]);
-
-        if (($payload['is_primary_contact'] ?? false) === true) {
-            $membership->markAsPrimaryContact();
-            $membership->refresh();
-        }
-
-        $this->logMembershipActivity(
-            membership: $membership,
-            eventType: ActivityEventType::UnitMembershipCreated,
-            summary: "{$resident->name} fue asignado a la unidad {$this->unitLabel($unit)}.",
-            actor: $actor,
-        );
-
-        if (($payload['is_primary_contact'] ?? false) === true) {
-            $this->logMembershipActivity(
-                membership: $membership,
-                eventType: ActivityEventType::UnitMembershipPrimaryContactChanged,
-                summary: "{$resident->name} quedo como contacto principal de la unidad {$this->unitLabel($unit)}.",
-                actor: $actor,
-                extraMetadata: [
-                    'new_primary_membership_id' => $membership->id,
-                ],
-            );
-        }
-
-        return $membership;
-    }
 
     private function authorizeResidentAccess(Request $request, Resident $resident, bool $mutate = false): void
     {
@@ -328,38 +279,4 @@ class ResidentController extends Controller
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $extraMetadata
-     */
-    private function logMembershipActivity(UnitMembership $membership, ActivityEventType $eventType, string $summary, User $actor, array $extraMetadata = []): void
-    {
-        $membership->loadMissing(['account', 'location', 'resident', 'unit']);
-
-        $this->activityLogger->log(
-            account: $membership->account,
-            eventType: $eventType,
-            summary: $summary,
-            metadata: [
-                'membership_id' => $membership->id,
-                'resident_id' => $membership->resident_id,
-                'resident_name' => $membership->resident->name,
-                'unit_id' => $membership->unit_id,
-                'unit_label' => $this->unitLabel($membership->unit),
-                'location_id' => $membership->location_id,
-                'location_name' => $membership->location->name,
-                'actor_user_id' => $actor->id,
-                'actor_user_name' => $actor->name,
-                ...$extraMetadata,
-            ],
-            location: $membership->location,
-            actor: $actor,
-            subjectType: UnitMembership::class,
-            subjectId: $membership->id,
-        );
-    }
-
-    private function unitLabel(Unit $unit): string
-    {
-        return trim(collect([$unit->building_name, $unit->unit_number])->filter()->implode(' / '));
-    }
 }
