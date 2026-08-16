@@ -4,14 +4,16 @@ import {
   canAccessFrontDesk,
   canAccessPortal,
   canManageRegistry,
-  filterNavigationEntries,
-  getSurfaceNavigation,
-  surfaceAccess,
-  isAccountAdmin,
   getDefaultAuthenticatedRoute,
   getDefaultLocation,
+  isAccountAdmin,
   requiresAccountSelection,
+  surfaceAccess,
 } from './access'
+import {
+  filterNavigationEntries,
+  getSurfaceNavigation,
+} from '../navigation/navigation'
 import type { MeResponse } from './types'
 
 function makeMe(overrides: Partial<MeResponse> = {}): MeResponse {
