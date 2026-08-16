@@ -51,7 +51,7 @@ class AccessAuthorizationService
 
     public function hasLocationRole(User $user, Location $location, LocationRole $role): bool
     {
-        if ($location->trashed() || ! $this->locationAccountExists($location)) {
+        if (! $this->isLiveLocation($location)) {
             return false;
         }
 
@@ -65,24 +65,14 @@ class AccessAuthorizationService
 
     public function canAccessAccount(User $user, Account $account): bool
     {
-        if ($account->trashed()) {
-            return false;
-        }
-
-        return AccountUserRole::query()
-            ->where('account_id', $account->id)
-            ->where('user_id', $user->id)
-            ->exists()
-            || LocationUserRole::query()
-                ->where('account_id', $account->id)
-                ->where('user_id', $user->id)
-                ->whereHas('location')
-                ->exists();
+        // accessibleAccounts() is the single encoding of the membership
+        // rule; the default soft-delete scope excludes trashed accounts.
+        return $this->accessibleAccounts($user)->whereKey($account->id)->exists();
     }
 
     public function canAccessLocation(User $user, Location $location): bool
     {
-        if ($location->trashed() || ! $this->locationAccountExists($location)) {
+        if (! $this->isLiveLocation($location)) {
             return false;
         }
 
@@ -105,7 +95,7 @@ class AccessAuthorizationService
 
     public function canManageRegistry(User $user, Location $location): bool
     {
-        if ($location->trashed() || ! $this->locationAccountExists($location)) {
+        if (! $this->isLiveLocation($location)) {
             return false;
         }
 
@@ -153,31 +143,46 @@ class AccessAuthorizationService
      */
     public function manageableInvitationLocationForResident(User $user, Resident $resident): ?Location
     {
-        $location = $resident->unitMemberships()
+        $memberships = $resident->unitMemberships()
             ->whereHas('location')
             ->where('account_id', $resident->account_id)
-            ->where('status', RegistryStatus::Active)
-            ->with('location')
-            ->get()
-            ->pluck('location')
-            ->filter(fn (?Location $location): bool => $location !== null
-                && $this->canManageResidentInLocation($user, $resident, $location))
-            ->first();
+            ->with('location');
 
-        if ($location instanceof Location) {
-            return $location;
-        }
-
+        // Admin fast-path: one role check instead of a per-location query
+        // fan-out. Prefer an active membership's location, then any.
         if ($this->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
-            return $resident->unitMemberships()
-                ->whereHas('location')
-                ->where('account_id', $resident->account_id)
-                ->with('location')
-                ->first()
-                ?->location;
+            $active = (clone $memberships)->where('status', RegistryStatus::Active)->first()?->location;
+
+            return $active ?? $memberships->first()?->location;
         }
 
-        return null;
+        return $memberships
+            ->where('status', RegistryStatus::Active)
+            ->whereIn('location_id', LocationUserRole::query()
+                ->select('location_id')
+                ->where('account_id', $resident->account_id)
+                ->where('user_id', $user->id)
+                ->where('role', LocationRole::LocationManager->value))
+            ->first()
+            ?->location;
+    }
+
+    /**
+     * Whether the user can manage the registry in at least one of the
+     * account's locations. One query instead of a per-location fan-out.
+     */
+    public function canManageAnyRegistryInAccount(User $user, Account $account): bool
+    {
+        if ($this->hasAccountRole($user, $account, AccountRole::AccountAdmin)) {
+            return true;
+        }
+
+        return LocationUserRole::query()
+            ->where('account_id', $account->id)
+            ->where('user_id', $user->id)
+            ->where('role', LocationRole::LocationManager->value)
+            ->whereHas('location.account')
+            ->exists();
     }
 
     public function canManageVehicle(User $user, Vehicle $vehicle): bool
@@ -287,18 +292,20 @@ class AccessAuthorizationService
                 ->where('user_id', $user->id));
     }
 
-    private function locationAccountExists(Location $location): bool
+    /**
+     * The single owner of soft-delete liveness: a location counts only when
+     * neither it nor its account is trashed.
+     */
+    private function isLiveLocation(Location $location): bool
     {
-        return Account::query()
-            ->whereKey($location->account_id)
-            ->exists();
+        return ! $location->trashed()
+            && Account::query()->whereKey($location->account_id)->exists();
     }
 
     private function registryRecordLocationMatches(?Location $location, string $accountId): bool
     {
         return $location !== null
             && $location->account_id === $accountId
-            && ! $location->trashed()
-            && $this->locationAccountExists($location);
+            && $this->isLiveLocation($location);
     }
 }

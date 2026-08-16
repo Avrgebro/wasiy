@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Enums\AccountRole;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\Resident;
@@ -22,13 +21,7 @@ class ResidentPolicy
 
     public function createInAccount(User $user, Account $account): bool
     {
-        if ($this->access->hasAccountRole($user, $account, AccountRole::AccountAdmin)) {
-            return true;
-        }
-
-        return $this->access->accessibleLocationsForAccount($user, $account)
-            ->get()
-            ->contains(fn (Location $location): bool => $this->access->canManageRegistry($user, $location));
+        return $this->access->canManageAnyRegistryInAccount($user, $account);
     }
 
     public function viewInLocation(User $user, Resident $resident, Location $location): bool

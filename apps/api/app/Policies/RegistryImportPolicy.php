@@ -26,9 +26,7 @@ class RegistryImportPolicy
                 && $this->access->canManageRegistry($user, $location);
         }
 
-        return $this->access->accessibleLocationsForAccount($user, $account)
-            ->get()
-            ->contains(fn (Location $location): bool => $this->access->canManageRegistry($user, $location));
+        return $this->access->canManageAnyRegistryInAccount($user, $account);
     }
 
     public function create(User $user, Location $location): bool
