@@ -6,6 +6,7 @@ use App\Actions\Invitations\CancelUserInvitation;
 use App\Actions\Invitations\ResendUserInvitation;
 use App\Actions\Residents\ClaimResidentInvitation;
 use App\Actions\Residents\InviteResidentUser;
+use App\Data\AccessContext;
 use App\Enums\UserInvitationPurpose;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentInvitationResource;
@@ -168,7 +169,7 @@ class ResidentInvitationController extends Controller
      *
      * @return array<string, mixed>|null
      */
-    private function authenticateClaimedUser(Request $request, UserInvitation $invitation): ?array
+    private function authenticateClaimedUser(Request $request, UserInvitation $invitation): ?AccessContext
     {
         $user = $invitation->user;
 
@@ -179,6 +180,6 @@ class ResidentInvitationController extends Controller
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
-        return $this->accessContext->resolve($user, $request);
+        return $this->accessContext->sync($user, $request);
     }
 }

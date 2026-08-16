@@ -6,6 +6,7 @@ use App\Actions\Invitations\CancelUserInvitation;
 use App\Actions\Invitations\ResendUserInvitation;
 use App\Actions\Staff\AcceptStaffInvitation;
 use App\Actions\Staff\InviteStaffUser;
+use App\Data\AccessContext;
 use App\Enums\UserInvitationPurpose;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffInvitationRequest;
@@ -194,7 +195,7 @@ class StaffInvitationController extends Controller
     /**
      * @return array<string, mixed>|null
      */
-    private function authenticateAcceptedUser(Request $request, User $user): ?array
+    private function authenticateAcceptedUser(Request $request, User $user): ?AccessContext
     {
         if (! $request->hasSession()) {
             return null;
@@ -205,6 +206,6 @@ class StaffInvitationController extends Controller
             $request->session()->regenerate();
         }
 
-        return $this->accessContext->resolve($user, $request);
+        return $this->accessContext->sync($user, $request);
     }
 }

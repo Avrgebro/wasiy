@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\AccessContext;
 use App\Enums\AccountRole;
 use App\Models\Account;
 use App\Models\Location;
@@ -21,9 +22,26 @@ class AccessContextService
     ) {}
 
     /**
-     * @return array<string, mixed>
+     * Pure read of the app-shell context: never touches the session. Use
+     * sync() on endpoints that should also repair stale or missing session
+     * selections.
      */
-    public function resolve(User $user, Request $request): array
+    public function resolve(User $user, Request $request): AccessContext
+    {
+        return $this->buildContext($user, $request, persist: false);
+    }
+
+    /**
+     * resolve() plus session repair: stale selections are forgotten and
+     * auto-selections (single account, first location) are persisted so
+     * follow-up requests see them. This is the app-shell bootstrap path.
+     */
+    public function sync(User $user, Request $request): AccessContext
+    {
+        return $this->buildContext($user, $request, persist: true);
+    }
+
+    private function buildContext(User $user, Request $request, bool $persist): AccessContext
     {
         $user->loadMissing([
             'accountUserRoles.account',
@@ -34,7 +52,7 @@ class AccessContextService
         $accounts = $this->access->accessibleAccounts($user)
             ->orderBy('name')
             ->get();
-        $activeAccount = $this->resolveActiveAccount($request, $accounts);
+        $activeAccount = $this->resolveActiveAccount($request, $accounts, $persist);
         $accountRoles = collect();
         $locationRoles = collect();
         $locations = collect();
@@ -52,28 +70,28 @@ class AccessContextService
             $locations = $this->access->accessibleLocationsForAccount($user, $activeAccount)
                 ->orderBy('name')
                 ->get();
-            $activeLocation = $this->resolveActiveLocation($request, $locations);
+            $activeLocation = $this->resolveActiveLocation($request, $locations, $persist);
         }
 
         $isAccountAdmin = $activeAccount instanceof Account
             && $this->access->hasAccountRole($user, $activeAccount, AccountRole::AccountAdmin);
 
-        return [
-            'user' => [
+        return new AccessContext(
+            user: [
                 'id' => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'name' => $user->name,
                 'email' => $user->email,
             ],
-            'accounts' => $accounts->map(fn (Account $account) => $this->accountSummary($account))->all(),
-            'active_account' => $activeAccount instanceof Account
+            accounts: $accounts->map(fn (Account $account) => $this->accountSummary($account))->all(),
+            activeAccount: $activeAccount instanceof Account
                 ? $this->accountSummary($activeAccount)
                 : null,
-            'active_location' => $activeLocation instanceof Location
+            activeLocation: $activeLocation instanceof Location
                 ? $this->locationSummary($activeLocation, $user, $isAccountAdmin)
                 : null,
-            'roles' => [
+            roles: [
                 'account' => $accountRoles->map(fn ($assignment) => [
                     'account_id' => $assignment->account_id,
                     'role' => $assignment->role->value,
@@ -84,50 +102,51 @@ class AccessContextService
                     'role' => $assignment->role->value,
                 ])->all(),
             ],
-            'accessible_locations' => $locations
+            accessibleLocations: $locations
                 ->map(fn (Location $location) => $this->locationSummary($location, $user, $isAccountAdmin))
                 ->all(),
-            'resident_memberships' => $this->residentMemberships($user),
-        ];
+            residentMemberships: $this->residentMemberships($user),
+        );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function selectAccount(User $user, Request $request, Account $account): array
+    public function selectAccount(User $user, Request $request, Account $account): AccessContext
     {
         $request->session()->put(self::ACTIVE_ACCOUNT_KEY, $account->id);
         $request->session()->forget(self::ACTIVE_LOCATION_KEY);
 
-        $locations = $this->access->accessibleLocationsForAccount($user, $account)
-            ->orderBy('name')
-            ->get();
-
-        if ($locations->count() === 1) {
-            $request->session()->put(self::ACTIVE_LOCATION_KEY, $locations->first()->id);
-        }
-
-        return $this->resolve($user, $request);
+        return $this->sync($user, $request);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function selectLocation(User $user, Request $request, Location $location): array
+    public function selectLocation(User $user, Request $request, Location $location): AccessContext
     {
         $request->session()->put(self::ACTIVE_LOCATION_KEY, $location->id);
 
-        return $this->resolve($user, $request);
+        return $this->sync($user, $request);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function clear(Request $request, User $user): array
+    public function clear(Request $request, User $user): AccessContext
     {
         $this->forget($request);
 
-        return $this->resolve($user, $request);
+        return $this->sync($user, $request);
+    }
+
+    /**
+     * The session's active Account, verified to still exist and be
+     * accessible; forgets the stale selection and 409s otherwise. Owns the
+     * invariant so controllers don't re-derive it from primitives.
+     */
+    public function activeAccountOrFail(Request $request, User $user): Account
+    {
+        $activeAccountId = $this->activeAccountId($request);
+        $account = $activeAccountId ? Account::query()->find($activeAccountId) : null;
+
+        if (! $account instanceof Account || ! $this->access->canAccessAccount($user, $account)) {
+            $this->forget($request);
+            abort(409, 'Select an active Account before selecting a Location.');
+        }
+
+        return $account;
     }
 
     public function forget(Request $request): void
@@ -153,14 +172,14 @@ class AccessContextService
     /**
      * @param  Collection<int, Account>  $accounts
      */
-    private function resolveActiveAccount(Request $request, Collection $accounts): ?Account
+    private function resolveActiveAccount(Request $request, Collection $accounts, bool $persist): ?Account
     {
         $activeAccountId = $this->activeAccountId($request);
         $activeAccount = $activeAccountId
             ? $accounts->firstWhere('id', $activeAccountId)
             : null;
 
-        if ($activeAccountId && ! $activeAccount instanceof Account) {
+        if ($persist && $activeAccountId && ! $activeAccount instanceof Account) {
             $request->session()->forget([
                 self::ACTIVE_ACCOUNT_KEY,
                 self::ACTIVE_LOCATION_KEY,
@@ -169,7 +188,10 @@ class AccessContextService
 
         if (! $activeAccount instanceof Account && $accounts->count() === 1) {
             $activeAccount = $accounts->first();
-            $request->session()->put(self::ACTIVE_ACCOUNT_KEY, $activeAccount->id);
+
+            if ($persist) {
+                $request->session()->put(self::ACTIVE_ACCOUNT_KEY, $activeAccount->id);
+            }
         }
 
         return $activeAccount instanceof Account ? $activeAccount : null;
@@ -178,14 +200,14 @@ class AccessContextService
     /**
      * @param  Collection<int, Location>  $locations
      */
-    private function resolveActiveLocation(Request $request, Collection $locations): ?Location
+    private function resolveActiveLocation(Request $request, Collection $locations, bool $persist): ?Location
     {
         $activeLocationId = $request->session()->get(self::ACTIVE_LOCATION_KEY);
         $activeLocation = is_string($activeLocationId)
             ? $locations->firstWhere('id', $activeLocationId)
             : null;
 
-        if ($activeLocationId && ! $activeLocation instanceof Location) {
+        if ($persist && $activeLocationId && ! $activeLocation instanceof Location) {
             $request->session()->forget(self::ACTIVE_LOCATION_KEY);
         }
 
@@ -196,7 +218,10 @@ class AccessContextService
         // which is the signal for an admin to go create one.
         if (! $activeLocation instanceof Location && $locations->isNotEmpty()) {
             $activeLocation = $locations->first();
-            $request->session()->put(self::ACTIVE_LOCATION_KEY, $activeLocation->id);
+
+            if ($persist) {
+                $request->session()->put(self::ACTIVE_LOCATION_KEY, $activeLocation->id);
+            }
         }
 
         return $activeLocation instanceof Location ? $activeLocation : null;

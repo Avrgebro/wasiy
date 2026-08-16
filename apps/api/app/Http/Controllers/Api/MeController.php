@@ -19,6 +19,6 @@ class MeController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        return response()->json($this->accessContext->resolve($user, $request));
+        return response()->json($this->accessContext->sync($user, $request));
     }
 }

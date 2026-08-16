@@ -58,15 +58,7 @@ class AccessContextController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        abort_unless($this->accessContext->hasActiveAccount($request), 409, 'Select an active Account before selecting a Location.');
-
-        $activeAccountId = $this->accessContext->activeAccountId($request);
-        $activeAccount = $activeAccountId ? Account::query()->find($activeAccountId) : null;
-
-        if (! $activeAccount instanceof Account || ! $this->access->canAccessAccount($user, $activeAccount)) {
-            $this->accessContext->forget($request);
-            abort(409, 'Select an active Account before selecting a Location.');
-        }
+        $activeAccount = $this->accessContext->activeAccountOrFail($request, $user);
 
         /** @var Location $location */
         $location = Location::query()->findOrFail($validated['location_id']);
