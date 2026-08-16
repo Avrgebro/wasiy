@@ -1,0 +1,147 @@
+---
+import { Font } from 'astro:assets';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Wasiy — Software de operación residencial, en español',
+  description =
+    'Visitas, reservas de amenidades y registro del edificio, en orden. Wasiy es el centro de operación para administradoras, juntas de propietarios y edificios recién entregados.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <Font cssVariable="--font-sora" preload />
+    <Font cssVariable="--font-instrument" preload />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --bg: #f7f5f0;
+    --ink: #1c2b2c;
+    --teal: #124e52;
+    --teal-dark: #0a3538;
+    --teal-deep: #0f4245;
+    --teal-soft: #1a5f63;
+    --teal-mid: #3e7c80;
+    --teal-pale: #a9c4c0;
+    --teal-faded: #8fb3af;
+    --gold: #e0a438;
+    --gold-light: #e8b45c;
+    --muted: #5a6b6b;
+    --faint: #9aa6a4;
+    --border: #e4e0d6;
+    --card-border: #dde4e1;
+    --cream: #efebe2;
+    --hero-arch: #e8e4da;
+    --green: #2e7d5b;
+    --green-bg: #e6f1eb;
+    --amber-text: #b97f24;
+    --amber-bg: #f7eedd;
+    --white: #ffffff;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-instrument), sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--teal);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--teal-dark);
+  }
+
+  @keyframes wa-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-9px);
+    }
+  }
+
+  @keyframes wa-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes wa-bar {
+    0% {
+      width: 12%;
+    }
+    60% {
+      width: 74%;
+    }
+    100% {
+      width: 74%;
+    }
+  }
+
+  @keyframes wa-tick {
+    0%,
+    45% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    55% {
+      transform: scale(1.15);
+      opacity: 1;
+    }
+    65%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+    html {
+      scroll-behavior: auto;
+    }
+  }
+</style>

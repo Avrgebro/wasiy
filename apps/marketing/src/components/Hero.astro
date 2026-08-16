@@ -1,0 +1,385 @@
+---
+
+---
+
+<header>
+  <svg
+    class="arches"
+    viewBox="0 0 1400 700"
+    preserveAspectRatio="xMidYMax slice"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M1060 320 v190 a120 120 0 0 0 240 0 v-190"
+      stroke="var(--hero-arch)"
+      stroke-width="64"
+      stroke-linecap="round"></path>
+    <path
+      d="M-40 420 v130 a100 100 0 0 0 200 0 v-130"
+      stroke="var(--hero-arch)"
+      stroke-width="56"
+      stroke-linecap="round"></path>
+  </svg>
+
+  <div class="inner">
+    <div class="copy">
+      <div class="kicker">
+        <span class="kicker-dash"></span>Software de operación residencial, en español
+      </div>
+      <h1>Tu edificio tiene una vida secreta.</h1>
+      <p class="lead">
+        Visitas que llegan, parrillas que se reservan, mudanzas a deshora y un cuaderno en
+        recepción que ya no aguanta más. Wasiy pone todo eso en orden — sin volverse un software
+        de contabilidad.
+      </p>
+      <div class="actions">
+        <button type="button" class="cta">
+          Solicitar demo
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+            <path
+              d="M3 8 h9 M8.5 4.5 L12 8 L8.5 11.5"
+              stroke="var(--ink)"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <a class="secondary" href="#dia">Ver un día completo ↓</a>
+      </div>
+      <div class="audience">
+        Para administradoras, juntas de propietarios y edificios recién entregados.
+      </div>
+    </div>
+
+    <!-- Producto vivo -->
+    <div class="product">
+      <div class="card visitors">
+        <div class="card-head">
+          <span class="card-title">Registro de visitantes</span>
+          <span class="live"><span class="live-dot"></span>En vivo</span>
+        </div>
+        <div class="row">
+          <span><strong>Carlos Mendoza</strong> · Depto. 402</span>
+          <span class="pill green">Dentro</span>
+        </div>
+        <div class="row">
+          <span><strong>Mensajería</strong> · Depto. 210</span>
+          <span class="pill amber">Esperado</span>
+        </div>
+      </div>
+
+      <div class="card approval">
+        <div class="approval-title">
+          Reserva aprobada
+          <span class="tick">
+            <svg viewBox="0 0 12 12" width="10" height="10" fill="none" aria-hidden="true">
+              <path
+                d="M2.5 6.3 L4.8 8.5 L9.5 3.5"
+                stroke="var(--ink)"
+                stroke-width="1.9"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </span>
+        </div>
+        <div class="approval-detail">Parrilla / terraza · sáb 16, 19:00 · Depto. 704</div>
+      </div>
+
+      <div class="card adoption">
+        <div class="adoption-head">
+          <span>Residentes en el portal</span>
+          <span class="adoption-value">74%</span>
+        </div>
+        <div class="bar"><div class="bar-fill"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  header {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 48px 120px;
+  }
+
+  .arches {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+  }
+
+  .inner {
+    position: relative;
+    max-width: 1160px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 12.5px var(--font-instrument);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal-mid);
+  }
+
+  .kicker-dash {
+    width: 22px;
+    height: 2px;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  h1 {
+    margin: 0;
+    font: 700 62px/1.06 var(--font-sora);
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .lead {
+    margin: 0;
+    font: 400 19px/1.6 var(--font-instrument);
+    color: var(--muted);
+    max-width: 520px;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 12px;
+    padding: 15px 26px;
+    font: 600 16px var(--font-instrument);
+    cursor: pointer;
+  }
+
+  .cta:hover {
+    background: var(--gold-light);
+  }
+
+  .secondary {
+    font: 600 15px var(--font-instrument);
+    padding: 15px 10px;
+  }
+
+  .audience {
+    font: 400 13px var(--font-instrument);
+    color: var(--faint);
+  }
+
+  .product {
+    position: relative;
+    height: 430px;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(28, 43, 44, 0.1);
+  }
+
+  .visitors {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 40px;
+    padding: 18px 20px;
+    animation: wa-float 7s ease-in-out infinite;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font: 600 14px var(--font-sora);
+  }
+
+  .live {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font: 600 11px var(--font-instrument);
+    color: var(--green);
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 99px;
+    background: var(--green);
+    animation: wa-pulse 2.4s ease-in-out infinite;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 10px 13px;
+    margin-top: 12px;
+    font: 400 13px var(--font-instrument);
+  }
+
+  .row + .row {
+    margin-top: 8px;
+  }
+
+  .pill {
+    font: 600 11px var(--font-instrument);
+    border-radius: 99px;
+    padding: 3px 10px;
+    white-space: nowrap;
+  }
+
+  .pill.green {
+    color: var(--green);
+    background: var(--green-bg);
+  }
+
+  .pill.amber {
+    color: var(--amber-text);
+    background: var(--amber-bg);
+  }
+
+  .approval {
+    position: absolute;
+    top: 178px;
+    right: 0;
+    width: 300px;
+    background: var(--teal);
+    border: none;
+    padding: 18px 20px;
+    box-shadow: 0 12px 40px rgba(28, 43, 44, 0.18);
+    animation: wa-float 7s ease-in-out 0.9s infinite;
+  }
+
+  .approval-title {
+    font: 600 13.5px var(--font-instrument);
+    color: var(--bg);
+  }
+
+  .tick {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    border-radius: 99px;
+    background: var(--gold);
+    align-items: center;
+    justify-content: center;
+    vertical-align: -3px;
+    animation: wa-tick 5s ease infinite;
+  }
+
+  .approval-detail {
+    font: 400 12.5px var(--font-instrument);
+    color: var(--teal-pale);
+    margin-top: 5px;
+  }
+
+  .adoption {
+    position: absolute;
+    top: 296px;
+    left: 24px;
+    width: 290px;
+    padding: 16px 20px;
+    animation: wa-float 7s ease-in-out 1.8s infinite;
+  }
+
+  .adoption-head {
+    display: flex;
+    justify-content: space-between;
+    font: 400 12.5px var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .adoption-value {
+    font-weight: 700;
+    color: var(--teal);
+  }
+
+  .bar {
+    height: 6px;
+    border-radius: 99px;
+    background: var(--cream);
+    overflow: hidden;
+    margin-top: 9px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: var(--teal);
+    animation: wa-bar 6s ease-out infinite;
+  }
+
+  @media (max-width: 1024px) {
+    h1 {
+      font-size: 48px;
+    }
+
+    .inner {
+      gap: 40px;
+    }
+  }
+
+  @media (max-width: 860px) {
+    header {
+      padding: 56px 20px 72px;
+    }
+
+    .inner {
+      grid-template-columns: 1fr;
+    }
+
+    h1 {
+      font-size: 40px;
+    }
+
+    .product {
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 420px;
+    }
+
+    .visitors,
+    .approval,
+    .adoption {
+      position: static;
+      width: auto;
+    }
+  }
+</style>

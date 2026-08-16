@@ -1,0 +1,71 @@
+---
+import LogoMark from './LogoMark.astro';
+---
+
+<footer>
+  <div class="brand">
+    <LogoMark size={20} color="var(--bg)" />
+    <span class="wordmark">wasiy</span>
+    <span class="tagline">Hecho para edificios que hablan español.</span>
+  </div>
+  <div class="links">
+    <a href="#modulos">Producto</a>
+    <a href="#precios">Precios</a>
+    <a href="#faq">FAQ</a>
+    <span class="copyright">© 2026 Wasiy</span>
+  </div>
+</footer>
+
+<style>
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 28px 48px;
+    background: var(--teal-dark);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .wordmark {
+    font: 600 15px var(--font-sora);
+    color: var(--bg);
+  }
+
+  .tagline {
+    font: 400 12.5px var(--font-instrument);
+    color: var(--teal-faded);
+    margin-left: 10px;
+  }
+
+  .links {
+    display: flex;
+    gap: 22px;
+    font: 500 13px var(--font-instrument);
+  }
+
+  .links a {
+    color: var(--teal-pale);
+  }
+
+  .links a:hover {
+    color: var(--bg);
+  }
+
+  .copyright {
+    color: var(--teal-faded);
+  }
+
+  @media (max-width: 700px) {
+    footer {
+      padding: 24px 20px;
+    }
+  }
+</style>

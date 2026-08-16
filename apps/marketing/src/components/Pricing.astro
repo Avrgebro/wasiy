@@ -1,0 +1,217 @@
+---
+
+---
+
+<section id="precios">
+  <div class="inner">
+    <div class="intro">
+      <div class="kicker">Precios</div>
+      <h2>Por unidad, por mes. Sin letra chica.</h2>
+      <p>
+        Precios de referencia. El edificio paga por lo que tiene, no por lo que el vendedor
+        soñó.
+      </p>
+    </div>
+
+    <div class="grid">
+      <div class="plan">
+        <div class="plan-name">Esencial</div>
+        <div class="price"><span class="amount">S/ 2.50</span><span class="per"> / unidad / mes</span></div>
+        <div class="pitch">Para un solo edificio que quiere dejar el cuaderno.</div>
+        <div class="features">
+          <span>✓ Registro de visitantes</span>
+          <span>✓ Unidades y residentes</span>
+          <span>✓ Anuncios</span>
+          <span>✓ Portal del residente</span>
+        </div>
+        <button type="button" class="action outline">Empezar</button>
+      </div>
+
+      <div class="plan featured">
+        <span class="badge">El favorito</span>
+        <div class="plan-name">Operativo</div>
+        <div class="price"><span class="amount">S/ 4.00</span><span class="per"> / unidad / mes</span></div>
+        <div class="pitch">La operación completa: recepción, reservas y auditoría.</div>
+        <div class="features">
+          <span>✓ Todo lo de Esencial</span>
+          <span>✓ Reservas con aprobación y cuotas</span>
+          <span>✓ Vehículos</span>
+          <span>✓ Registro de actividad</span>
+          <span>✓ Exportaciones CSV</span>
+        </div>
+        <button type="button" class="action solid">Solicitar demo</button>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Portafolio</div>
+        <div class="price"><span class="amount">Hablemos</span></div>
+        <div class="pitch">
+          Para administradoras con varios edificios y desarrolladoras que entregan proyectos.
+        </div>
+        <div class="features">
+          <span>✓ Todo lo de Operativo</span>
+          <span>✓ Múltiples ubicaciones</span>
+          <span>✓ Vista consolidada de cuenta</span>
+          <span>✓ Onboarding asistido con CSV</span>
+        </div>
+        <button type="button" class="action outline">Contactar</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 96px 48px;
+  }
+
+  .inner {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+
+  .intro {
+    max-width: 640px;
+    margin-bottom: 48px;
+  }
+
+  .kicker {
+    font: 600 12.5px var(--font-instrument);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal-mid);
+  }
+
+  h2 {
+    margin: 12px 0 0;
+    font: 700 42px/1.12 var(--font-sora);
+    letter-spacing: -0.02em;
+  }
+
+  .intro p {
+    margin: 14px 0 0;
+    font: 400 17px/1.6 var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  .plan {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .plan.featured {
+    background: var(--teal);
+    border: none;
+    position: relative;
+    box-shadow: 0 16px 48px rgba(18, 78, 82, 0.25);
+  }
+
+  .badge {
+    position: absolute;
+    top: -13px;
+    left: 30px;
+    font: 600 11.5px var(--font-instrument);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: var(--ink);
+    border-radius: 99px;
+    padding: 5px 13px;
+  }
+
+  .plan-name {
+    font: 600 16px var(--font-sora);
+  }
+
+  .amount {
+    font: 700 44px var(--font-sora);
+    letter-spacing: -0.02em;
+  }
+
+  .per {
+    font: 400 14px var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .pitch {
+    font: 400 13.5px var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .features {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font: 400 14px var(--font-instrument);
+    color: var(--ink);
+  }
+
+  .featured .plan-name,
+  .featured .amount,
+  .featured .features {
+    color: var(--bg);
+  }
+
+  .featured .per,
+  .featured .pitch {
+    color: var(--teal-pale);
+  }
+
+  .action {
+    margin-top: auto;
+    text-align: center;
+    font: 600 14px var(--font-instrument);
+    border-radius: 10px;
+    padding: 12px 0;
+    cursor: pointer;
+  }
+
+  .action.outline {
+    color: var(--teal);
+    border: 1.5px solid var(--teal);
+    background: transparent;
+  }
+
+  .action.solid {
+    color: var(--ink);
+    background: var(--gold);
+    border: none;
+  }
+
+  .action.solid:hover {
+    background: var(--gold-light);
+  }
+
+  @media (max-width: 900px) {
+    section {
+      padding: 56px 20px;
+    }
+
+    h2 {
+      font-size: 30px;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .plan.featured {
+      margin-top: 8px;
+    }
+  }
+</style>

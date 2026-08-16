@@ -1,0 +1,104 @@
+---
+const faqs = [
+  {
+    q: '¿Wasiy maneja las cuotas de mantenimiento y la contabilidad?',
+    a: 'No, y es a propósito. Wasiy es el centro de operación del edificio: visitas, reservas, registro y comunicación. Las cuotas de reservas se marcan como pagadas o pendientes de forma manual; la contabilidad completa vendrá como módulo futuro, no como estorbo presente.',
+    open: true,
+  },
+  {
+    q: '¿Cuánto demora poner en marcha un edificio?',
+    a: 'Una tarde, con honestidad. Se importan unidades y residentes por CSV, se invita a los residentes al portal y recepción empieza a registrar visitas ese mismo día.',
+    open: false,
+  },
+  {
+    q: '¿Los residentes necesitan descargar una app?',
+    a: 'No. El portal del residente funciona en el navegador del celular — pre-registrar una visita o reservar la parrilla toma menos que abrir la tienda de apps.',
+    open: false,
+  },
+  {
+    q: '¿Qué pasa si una visita llega sin anunciarse?',
+    a: 'Recepción la registra como walk-in en segundos, anotando cómo se confirmó (intercom, teléfono, gerencia). Wasiy registra la realidad del edificio; no la bloquea con flujos de aprobación que nadie va a usar a las 10 de la noche.',
+    open: false,
+  },
+  {
+    q: '¿Sirve para varias propiedades?',
+    a: 'Sí — es multi-ubicación de nacimiento. Cada edificio ve solo lo suyo, y la administradora cambia de contexto en un clic con vista consolidada de pendientes.',
+    open: false,
+  },
+];
+---
+
+<section id="faq">
+  <div class="inner">
+    <h2>Preguntas que nos hacen siempre</h2>
+    <div class="list">
+      {
+        faqs.map((f) => (
+          <details open={f.open}>
+            <summary>{f.q}</summary>
+            <div class="answer">{f.a}</div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    padding: 96px 48px;
+  }
+
+  .inner {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  h2 {
+    margin: 0 0 36px;
+    font: 700 36px/1.15 var(--font-sora);
+    letter-spacing: -0.02em;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  details {
+    border-bottom: 1px solid var(--cream);
+    padding: 20px 4px;
+  }
+
+  details:last-child {
+    border-bottom: none;
+  }
+
+  summary {
+    font: 600 17px var(--font-sora);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .answer {
+    font: 400 15px/1.65 var(--font-instrument);
+    color: var(--muted);
+    padding-top: 10px;
+  }
+
+  @media (max-width: 700px) {
+    section {
+      padding: 56px 20px;
+    }
+
+    h2 {
+      font-size: 28px;
+    }
+  }
+</style>

@@ -1,0 +1,130 @@
+---
+import LogoMark from './LogoMark.astro';
+---
+
+<section>
+  <svg
+    class="arches"
+    viewBox="0 0 1400 500"
+    preserveAspectRatio="xMidYMid slice"
+    fill="none"
+    aria-hidden="true"
+  >
+    <path
+      d="M-60 160 v160 a110 110 0 0 0 220 0 v-160 M160 160 v160 a110 110 0 0 0 220 0 v-160 M380 300 v52 a22 22 0 0 1 -22 22 h-64"
+      stroke="var(--teal-soft)"
+      stroke-width="60"
+      stroke-linecap="round"></path>
+    <path
+      d="M1120 200 v130 a90 90 0 0 0 180 0 v-130"
+      stroke="var(--teal-deep)"
+      stroke-width="48"
+      stroke-linecap="round"></path>
+    <circle cx="270" cy="322" r="10" fill="var(--gold)" class="pulse-dot"></circle>
+  </svg>
+
+  <div class="inner">
+    <LogoMark size={44} color="var(--bg)" />
+    <h2>Tu edificio ya trabaja 24/7. Dale un sistema que también lo haga.</h2>
+    <p>
+      Demo de 30 minutos, con tus propios casos: la visita conflictiva, la parrilla del sábado,
+      la mudanza sorpresa.
+    </p>
+    <div class="actions">
+      <button type="button" class="primary">Solicitar demo</button>
+      <button type="button" class="secondary">Escribir a hola@wasiy.pe</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    position: relative;
+    overflow: hidden;
+    background: var(--teal);
+    padding: 110px 48px;
+  }
+
+  .arches {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .pulse-dot {
+    animation: wa-pulse 3s ease-in-out infinite;
+  }
+
+  .inner {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 26px;
+  }
+
+  h2 {
+    margin: 0;
+    font: 700 46px/1.1 var(--font-sora);
+    letter-spacing: -0.02em;
+    color: var(--bg);
+    text-wrap: pretty;
+  }
+
+  p {
+    margin: 0;
+    font: 400 17px/1.6 var(--font-instrument);
+    color: var(--teal-pale);
+    max-width: 520px;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .primary {
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 12px;
+    padding: 16px 30px;
+    font: 600 16px var(--font-instrument);
+    cursor: pointer;
+  }
+
+  .primary:hover {
+    background: var(--gold-light);
+  }
+
+  .secondary {
+    border: 1.5px solid var(--teal-mid);
+    background: transparent;
+    color: var(--bg);
+    border-radius: 12px;
+    padding: 16px 26px;
+    font: 600 15px var(--font-instrument);
+    cursor: pointer;
+  }
+
+  .secondary:hover {
+    background: var(--teal-dark);
+  }
+
+  @media (max-width: 700px) {
+    section {
+      padding: 64px 20px;
+    }
+
+    h2 {
+      font-size: 32px;
+    }
+  }
+</style>

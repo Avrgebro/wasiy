@@ -1,0 +1,153 @@
+---
+
+---
+
+<section id="modulos">
+  <div class="inner">
+    <div class="intro">
+      <div class="kicker">El producto</div>
+      <h2>Tres cosas, muy bien hechas</h2>
+      <p>
+        Sin contabilidad, sin CRM, sin 40 módulos que nadie abre. Lo que un edificio usa todos
+        los días.
+      </p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 20 20" width="22" height="22" fill="none" aria-hidden="true">
+            <circle cx="10" cy="6.8" r="3.2" stroke="var(--bg)" stroke-width="1.6"></circle>
+            <path d="M3.5 17 a6.5 6.5 0 0 1 13 0" stroke="var(--bg)" stroke-width="1.6" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div class="title">Visitas sin drama</div>
+        <div class="body">
+          Residentes anuncian visitas desde su portal; recepción registra llegadas y walk-ins en
+          segundos, con método de confirmación incluido. Historial completo, exportable.
+        </div>
+        <div class="tags">Pre-registro · check-in · historial</div>
+      </div>
+
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 20 20" width="22" height="22" fill="none" aria-hidden="true">
+            <rect x="3" y="4" width="14" height="13" rx="2" stroke="var(--bg)" stroke-width="1.6"></rect>
+            <path d="M3 8.2 h14 M7 2.5 v3 M13 2.5 v3" stroke="var(--bg)" stroke-width="1.6" stroke-linecap="round"></path>
+            <circle cx="10" cy="12.5" r="1.6" fill="var(--bg)"></circle>
+          </svg>
+        </div>
+        <div class="title">Reservas que se respetan</div>
+        <div class="body">
+          Amenidades con horarios, cuotas y depósitos. Aprobación instantánea o con visto bueno
+          del administrador. La parrilla deja de ser tierra de nadie.
+        </div>
+        <div class="tags">Amenidades · aprobaciones · cuotas manuales</div>
+      </div>
+
+      <div class="card">
+        <div class="icon">
+          <svg viewBox="0 0 20 20" width="22" height="22" fill="none" aria-hidden="true">
+            <rect x="4" y="2.5" width="12" height="15" rx="1.8" stroke="var(--bg)" stroke-width="1.6"></rect>
+            <path d="M7.5 6.5 h2 M11.5 6.5 h2 M7.5 10 h2 M11.5 10 h2" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div class="title">Un registro que sí está al día</div>
+        <div class="body">
+          Unidades, residentes, vehículos y quién vive dónde — importado por CSV en una tarde.
+          Con invitaciones al portal y actividad auditada de todo lo sensible.
+        </div>
+        <div class="tags">Unidades · vehículos · anuncios · actividad</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 96px 48px;
+  }
+
+  .inner {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+
+  .intro {
+    max-width: 640px;
+    margin-bottom: 48px;
+  }
+
+  .kicker {
+    font: 600 12.5px var(--font-instrument);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal-mid);
+  }
+
+  h2 {
+    margin: 12px 0 0;
+    font: 700 42px/1.12 var(--font-sora);
+    letter-spacing: -0.02em;
+  }
+
+  .intro p {
+    margin: 14px 0 0;
+    font: 400 17px/1.6 var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title {
+    font: 600 20px var(--font-sora);
+  }
+
+  .body {
+    font: 400 14.5px/1.6 var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .tags {
+    font: 600 13px var(--font-instrument);
+    color: var(--teal-mid);
+  }
+
+  @media (max-width: 900px) {
+    section {
+      padding: 56px 20px;
+    }
+
+    h2 {
+      font-size: 30px;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
