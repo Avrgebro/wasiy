@@ -20,7 +20,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UnitController extends Controller
@@ -176,9 +175,6 @@ class UnitController extends Controller
         return new UnitResource($unit->loadSummary());
     }
 
-    /**
-     * @param  Builder<Unit>  $query
-     */
     /**
      * @param  array<int, string>  $changed
      */

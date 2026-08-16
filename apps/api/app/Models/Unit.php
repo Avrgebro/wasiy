@@ -6,13 +6,13 @@ use App\Enums\RegistryStatus;
 use Database\Factories\UnitFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 #[Fillable(['account_id', 'location_id', 'unit_number', 'building_name', 'floor', 'status', 'notes'])]
 class Unit extends Model

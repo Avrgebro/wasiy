@@ -21,7 +21,7 @@ class IssueUserInvitation
 {
     /**
      * @param  array<string, mixed>  $attributes  purpose-specific UserInvitation columns
-     * @return array{0: UserInvitation, 1: string}  the invitation and its plaintext token
+     * @return array{0: UserInvitation, 1: string} the invitation and its plaintext token
      */
     public function handle(
         UserInvitationPurpose $purpose,

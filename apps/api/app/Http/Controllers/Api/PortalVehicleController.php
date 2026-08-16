@@ -22,8 +22,10 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Resident-facing vehicle CRUD. Residents may only touch vehicles in units
- * where they hold an active membership, and can never set status or reassign
- * across locations — those abilities are staff-only (VehicleController).
+ * where they hold an active membership, and can never set a vehicle's
+ * status — that ability is staff-only (VehicleController). Reassignment is
+ * limited to the resident's own units, which may span locations within
+ * their account.
  */
 class PortalVehicleController extends Controller
 {
@@ -34,6 +36,8 @@ class PortalVehicleController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
+        $validated = $request->validate($this->paginationRules());
+
         /** @var User $user */
         $user = $request->user();
         $unitIds = $this->unitIdsFor($user);
@@ -46,7 +50,11 @@ class PortalVehicleController extends Controller
             ->orderBy('plate')
             ->orderBy('id');
 
-        return VehicleResource::collection($vehicles->paginate(15));
+        return VehicleResource::collection(
+            $vehicles
+                ->paginate($this->perPage($validated))
+                ->withQueryString()
+        );
     }
 
     public function store(Request $request): JsonResponse
@@ -76,8 +84,9 @@ class PortalVehicleController extends Controller
             if (isset($validated['unit_id'])) {
                 $unit = Unit::query()->findOrFail($validated['unit_id']);
 
+                // Memberships are pinned to the resident's account, so only
+                // the location can legitimately change with the unit.
                 $vehicle->forceFill([
-                    'account_id' => $unit->account_id,
                     'location_id' => $unit->location_id,
                     'unit_id' => $unit->id,
                 ]);

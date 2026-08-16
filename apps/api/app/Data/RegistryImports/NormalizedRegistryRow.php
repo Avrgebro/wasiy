@@ -115,7 +115,9 @@ class NormalizedRegistryRow
 
     /**
      * Database-identity key; mirrors Unit::scopeMatchingImportIdentity and
-     * Unit::importMatchKey.
+     * Unit::importMatchKey. Deliberately lowercases without trimming: the
+     * CSV parser already trims cell values, which is what keeps this key
+     * coherent with the trim-happy unitKey() above.
      */
     public function unitMatchKey(): string
     {

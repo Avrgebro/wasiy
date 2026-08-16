@@ -47,6 +47,7 @@ function createImportRecoveryReadyImport(Location $location, User $requestedBy, 
         ->for($requestedBy, 'requestedBy')
         ->create([
             'status' => ImportStatus::ReadyForReview,
+            'confirmed_at' => now(),
             'import_type' => ImportType::RegistryUnitsResidents,
             'total_rows' => 0,
             'valid_rows' => 0,

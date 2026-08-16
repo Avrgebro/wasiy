@@ -81,8 +81,10 @@ class InviteStaffUser
                 subjectId: $invitation->id,
             );
 
-            Notification::route('mail', $email)
-                ->notify(UserInvitationPurpose::Staff->notification($invitation, $token));
+            // After commit: a rolled-back transaction must not have mailed a
+            // token whose hash never landed.
+            DB::afterCommit(fn () => Notification::route('mail', $email)
+                ->notify(UserInvitationPurpose::Staff->notification($invitation, $token)));
 
             return $invitation;
         });

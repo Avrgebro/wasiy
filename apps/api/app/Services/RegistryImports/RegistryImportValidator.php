@@ -60,6 +60,16 @@ class RegistryImportValidator
             $this->validateMaxLength($preview, $normalized->{$property}, $label);
         }
 
+        // Unrecognized values fail loudly on every row — a unit-only row
+        // carrying garbage in these columns must not import clean.
+        if ($membershipStatusInvalid) {
+            $preview->addError('El estado de membresia no es valido.');
+        }
+
+        if ($isPrimaryContactInvalid) {
+            $preview->addError('El valor de contacto principal no es valido.');
+        }
+
         // Presence is judged on the raw input, not the typed values: an
         // unrecognized resident type still marks the row as a resident row so
         // it fails loudly instead of silently importing as unit-only.
@@ -94,12 +104,10 @@ class RegistryImportValidator
             $preview->addError('El tipo de residente no es valido.');
         }
 
-        if ($membershipStatusInvalid) {
-            $preview->addError('El estado de membresia no es valido.');
-        }
-
-        if ($isPrimaryContactInvalid) {
-            $preview->addError('El valor de contacto principal no es valido.');
+        // A primary contact on an inactive membership is contradictory:
+        // markAsPrimaryContact() would silently reactivate it on commit.
+        if ($normalized->isPrimaryContact && $normalized->membershipStatus === RegistryStatus::Inactive) {
+            $preview->addError('El contacto principal no puede tener una membresia inactiva.');
         }
 
         return $preview;
@@ -113,7 +121,7 @@ class RegistryImportValidator
     }
 
     /**
-     * @return array{0: ?ResidentType, 1: bool}  typed value + whether the input was unrecognized
+     * @return array{0: ?ResidentType, 1: bool} typed value + whether the input was unrecognized
      */
     private function normalizeResidentType(?string $value): array
     {
@@ -133,7 +141,7 @@ class RegistryImportValidator
     }
 
     /**
-     * @return array{0: RegistryStatus, 1: bool}  typed value + whether the input was unrecognized
+     * @return array{0: RegistryStatus, 1: bool} typed value + whether the input was unrecognized
      */
     private function normalizeMembershipStatus(?string $value): array
     {
@@ -151,7 +159,7 @@ class RegistryImportValidator
     }
 
     /**
-     * @return array{0: bool, 1: bool}  typed value + whether the input was unrecognized
+     * @return array{0: bool, 1: bool} typed value + whether the input was unrecognized
      */
     private function normalizeBoolean(?string $value): array
     {

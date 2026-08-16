@@ -62,9 +62,11 @@ class ResendUserInvitation
                 subjectId: $invitation->id,
             );
 
-            Notification::route('mail', $invitation->email)->notify(
+            // After commit: rolling back would leave the recipient holding a
+            // dead link while the old token stays live.
+            DB::afterCommit(fn () => Notification::route('mail', $invitation->email)->notify(
                 $invitation->purpose->notification($invitation, $token),
-            );
+            ));
 
             return $invitation;
         });

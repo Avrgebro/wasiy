@@ -11,7 +11,8 @@ class SortParser
      * Apply a "field,-other" sort string against an allowlist. Each allowed
      * field maps to a column name or a Closure(Builder, string $direction)
      * for custom ordering. Unknown fields are ignored; a trailing id order
-     * keeps pagination stable.
+     * keeps pagination stable. Closures receive only the literal strings
+     * 'asc'/'desc', so interpolating $direction into raw SQL is safe.
      *
      * @param  Builder<covariant \Illuminate\Database\Eloquent\Model>  $query
      * @param  array<string, string|Closure>  $fields

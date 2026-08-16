@@ -226,3 +226,28 @@ test('duplicate detector runs a bounded number of queries regardless of row coun
     // never per-row.
     expect($queryCount)->toBeLessThanOrEqual(3);
 });
+
+test('unit only rows fail loudly on invalid membership status or primary contact values', function () {
+    $rows = parseRegistryCsv(implode("\n", [
+        'unidad,estado_membresia,contacto_principal',
+        '301,pausado,quizas',
+    ]));
+
+    $previews = validateRegistryCsvRows($rows);
+
+    expect($previews[0]->status)->toBe(ImportRowStatus::Error)
+        ->and($previews[0]->errors)->toContain('El estado de membresia no es valido.')
+        ->and($previews[0]->errors)->toContain('El valor de contacto principal no es valido.');
+});
+
+test('a primary contact with an inactive membership is rejected', function () {
+    $rows = parseRegistryCsv(implode("\n", [
+        'unidad,nombres,apellidos,tipo_residente,estado_membresia,contacto_principal',
+        '301,Ana,Salas,propietario,inactivo,si',
+    ]));
+
+    $previews = validateRegistryCsvRows($rows);
+
+    expect($previews[0]->status)->toBe(ImportRowStatus::Error)
+        ->and($previews[0]->errors)->toContain('El contacto principal no puede tener una membresia inactiva.');
+});

@@ -98,8 +98,10 @@ class InviteResidentUser
                 subjectId: $resident->id,
             );
 
-            Notification::route('mail', $email)
-                ->notify(UserInvitationPurpose::Resident->notification($invitation, $token));
+            // After commit: a rolled-back transaction must not have mailed a
+            // token whose hash never landed.
+            DB::afterCommit(fn () => Notification::route('mail', $email)
+                ->notify(UserInvitationPurpose::Resident->notification($invitation, $token)));
 
             return [
                 'resident' => $resident->fresh()->loadSummary(),

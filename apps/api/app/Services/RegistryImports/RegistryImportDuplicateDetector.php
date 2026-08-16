@@ -68,12 +68,17 @@ class RegistryImportDuplicateDetector
                 continue;
             }
 
-            $membershipKey = "{$unitKey}:{$email}";
+            // Email-less resident rows are never in-file duplicates: without
+            // an email there is no reliable identity to match on, so each
+            // such row commits as its own resident.
+            if ($email !== null) {
+                $membershipKey = "{$unitKey}:{$email}";
 
-            if ($email !== null && isset($seenResidentMembershipRows[$membershipKey])) {
-                $preview->markDuplicate("resident-row:{$membershipKey}");
-            } else {
-                $seenResidentMembershipRows[$membershipKey] = true;
+                if (isset($seenResidentMembershipRows[$membershipKey])) {
+                    $preview->markDuplicate("resident-row:{$membershipKey}");
+                } else {
+                    $seenResidentMembershipRows[$membershipKey] = true;
+                }
             }
         }
 
@@ -176,5 +181,4 @@ class RegistryImportDuplicateDetector
                 return $pairs;
             }, []);
     }
-
 }

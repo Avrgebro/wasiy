@@ -38,6 +38,14 @@ enum UserInvitationPurpose: string
         };
     }
 
+    public function cancelledActivityEvent(): ActivityEventType
+    {
+        return match ($this) {
+            self::Staff => ActivityEventType::StaffInvitationCancelled,
+            self::Resident => ActivityEventType::ResidentInvitationCancelled,
+        };
+    }
+
     public function pendingConflictMessage(): string
     {
         return match ($this) {

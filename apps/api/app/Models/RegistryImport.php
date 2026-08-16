@@ -58,7 +58,7 @@ class RegistryImport extends Model
      */
     public function confirm(): void
     {
-        if ($this->status !== ImportStatus::ReadyForReview) {
+        if ($this->status !== ImportStatus::ReadyForReview || $this->confirmed_at !== null) {
             throw ValidationException::withMessages([
                 'import' => __('Only imports ready for review can be confirmed.'),
             ]);

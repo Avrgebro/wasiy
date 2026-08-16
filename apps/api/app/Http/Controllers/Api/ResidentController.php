@@ -23,7 +23,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -238,7 +237,6 @@ class ResidentController extends Controller
         }
     }
 
-
     private function authorizeResidentAccess(Request $request, Resident $resident, bool $mutate = false): void
     {
         /** @var User $user */
@@ -278,5 +276,4 @@ class ResidentController extends Controller
             subjectId: $resident->id,
         );
     }
-
 }

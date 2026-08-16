@@ -57,6 +57,7 @@ function createReadyRegistryImport(Location $location, array $attributes = []): 
         ->for($location)
         ->create([
             'status' => ImportStatus::ReadyForReview,
+            'confirmed_at' => now(),
             'import_type' => ImportType::RegistryUnitsResidents,
             'total_rows' => 0,
             'valid_rows' => 0,
@@ -120,6 +121,7 @@ test('confirm rejects imports with blocking error rows', function () {
     $location = Location::factory()->create();
     $admin = createImportCommitAdmin($location->account);
     $import = createReadyRegistryImport($location, [
+        'confirmed_at' => null,
         'total_rows' => 1,
         'error_rows' => 1,
     ]);
@@ -137,7 +139,7 @@ test('confirm dispatches commit job for manageable ready import', function () {
 
     $location = Location::factory()->create();
     $manager = createImportCommitLocationUser($location, LocationRole::LocationManager);
-    $import = createReadyRegistryImport($location);
+    $import = createReadyRegistryImport($location, ['confirmed_at' => null]);
 
     $this->actingAs($manager)
         ->postJson("/api/registry-imports/{$import->id}/confirm")

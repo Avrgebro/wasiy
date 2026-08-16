@@ -2,8 +2,6 @@
 
 namespace App\Actions\Invitations;
 
-use App\Enums\ActivityEventType;
-use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Models\User;
 use App\Models\UserInvitation;
@@ -42,9 +40,7 @@ class CancelUserInvitation
 
             $this->activityLogger->log(
                 account: $invitation->account,
-                eventType: $invitation->purpose === UserInvitationPurpose::Staff
-                    ? ActivityEventType::StaffInvitationCancelled
-                    : ActivityEventType::ResidentInvitationCancelled,
+                eventType: $invitation->purpose->cancelledActivityEvent(),
                 summary: "Se canceló la invitación de {$invitation->email}.",
                 metadata: [
                     'actor_user_id' => $actor->id,

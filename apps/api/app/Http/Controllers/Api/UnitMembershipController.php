@@ -153,7 +153,7 @@ class UnitMembershipController extends Controller
             'status' => ['sometimes', Rule::enum(RegistryStatus::class)],
             'is_primary_contact' => ['sometimes', 'boolean'],
             'started_at' => ['sometimes', 'nullable', 'date'],
-            'ended_at' => ['sometimes', 'nullable', 'date'],
+            'ended_at' => ['sometimes', 'nullable', 'date', 'after_or_equal:started_at'],
         ]);
 
         if (isset($validated['unit_id'])) {
@@ -168,5 +168,4 @@ class UnitMembershipController extends Controller
 
         return $validated;
     }
-
 }

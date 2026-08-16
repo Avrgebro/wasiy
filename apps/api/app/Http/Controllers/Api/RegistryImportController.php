@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class RegistryImportController extends Controller
@@ -220,5 +219,4 @@ class RegistryImportController extends Controller
 
         return "{$slug}.{$extension}";
     }
-
 }

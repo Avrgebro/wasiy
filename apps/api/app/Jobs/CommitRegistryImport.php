@@ -41,6 +41,7 @@ class CommitRegistryImport implements ShouldQueue
         $claimed = RegistryImport::query()
             ->whereKey($import->id)
             ->where('status', ImportStatus::ReadyForReview)
+            ->whereNotNull('confirmed_at')
             ->update([
                 'status' => ImportStatus::Processing,
                 'failed_at' => null,

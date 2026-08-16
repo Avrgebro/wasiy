@@ -210,6 +210,4 @@ class VehicleController extends Controller
 
         return $unit;
     }
-
-
 }
