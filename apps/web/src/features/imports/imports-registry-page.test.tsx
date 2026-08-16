@@ -281,6 +281,15 @@ describe('ImportsRegistryPage', () => {
         return Promise.resolve(axiosResponse(config, { data: importSummary() }, 201))
       }
 
+      if (config.url?.includes('/rows')) {
+        return Promise.resolve(
+          axiosResponse(config, {
+            data: [],
+            meta: { current_page: 1, last_page: 1, per_page: 15, total: 0 },
+          }),
+        )
+      }
+
       return Promise.resolve(axiosResponse(config, { data: importSummary() }))
     })
     apiClient.defaults.adapter = adapter
