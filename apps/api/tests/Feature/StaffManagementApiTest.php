@@ -1113,3 +1113,28 @@ test('an already cancelled invitation cannot be cancelled or resent again', func
         ->assertUnprocessable()
         ->assertJsonValidationErrors('invitation');
 });
+
+test('expected invitation outcomes are not reported to the logs', function () {
+    Illuminate\Support\Facades\Exceptions::fake();
+
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+    User::factory()->create(['email' => 'quiet@wasiy.test']);
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'quiet@wasiy.test',
+        'first_name' => 'Quiet',
+        'last_name' => 'Logs',
+        'account_role' => null,
+        'location_assignments' => [
+            ['location_id' => $location->id, 'role' => LocationRole::FrontDesk->value],
+        ],
+    ]);
+
+    app('auth')->forgetGuards();
+
+    $this->postJson("/api/staff-invitations/{$token}/accept")->assertUnauthorized();
+
+    Illuminate\Support\Facades\Exceptions::assertNotReported(App\Exceptions\InvitationException::class);
+});

@@ -3,14 +3,17 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Contracts\Debug\ShouldntReport;
 use Illuminate\Http\JsonResponse;
 
 /**
  * Domain failures in the invitation accept/claim flows. Each named
  * constructor is one business outcome; render() owns the HTTP mapping in
- * one place, so Actions never abort() with raw status codes.
+ * one place, so Actions never abort() with raw status codes. Implements
+ * ShouldntReport because every case is an expected user-facing outcome,
+ * not an error worth a stack trace in the logs.
  */
-class InvitationException extends Exception
+class InvitationException extends Exception implements ShouldntReport
 {
     private function __construct(
         string $message,

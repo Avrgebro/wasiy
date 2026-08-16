@@ -32,35 +32,29 @@ class ResidentPolicy
      */
     public function view(User $user, Resident $resident): bool
     {
-        if ($this->access->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
-            return true;
-        }
-
-        $location = $this->accessibleMembershipLocation($user, $resident);
-
-        return $location !== null && $this->viewInLocation($user, $resident, $location);
+        return $this->throughAnyAccessibleLocation(
+            $user,
+            $resident,
+            fn (Location $location): bool => $this->viewInLocation($user, $resident, $location),
+        );
     }
 
     public function update(User $user, Resident $resident): bool
     {
-        if ($this->access->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
-            return true;
-        }
-
-        $location = $this->accessibleMembershipLocation($user, $resident);
-
-        return $location !== null && $this->updateInLocation($user, $resident, $location);
+        return $this->throughAnyAccessibleLocation(
+            $user,
+            $resident,
+            fn (Location $location): bool => $this->updateInLocation($user, $resident, $location),
+        );
     }
 
     public function delete(User $user, Resident $resident): bool
     {
-        if ($this->access->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
-            return true;
-        }
-
-        $location = $this->accessibleMembershipLocation($user, $resident);
-
-        return $location !== null && $this->deleteInLocation($user, $resident, $location);
+        return $this->throughAnyAccessibleLocation(
+            $user,
+            $resident,
+            fn (Location $location): bool => $this->deleteInLocation($user, $resident, $location),
+        );
     }
 
     public function viewInLocation(User $user, Resident $resident, Location $location): bool
@@ -91,11 +85,33 @@ class ResidentPolicy
         return $this->access->residentForUser($user)?->is($resident) === true;
     }
 
-    private function accessibleMembershipLocation(User $user, Resident $resident): ?Location
+    /**
+     * Admins of the resident's account pass outright; everyone else passes
+     * when ANY membership location they can access satisfies the gate —
+     * checking every candidate keeps the decision deterministic for staff
+     * with different roles at different locations. A trashed account
+     * (null relation) denies instead of erroring.
+     *
+     * @param  \Closure(Location): bool  $allows
+     */
+    private function throughAnyAccessibleLocation(User $user, Resident $resident, \Closure $allows): bool
     {
+        $account = $resident->account;
+
+        if ($account === null) {
+            return false;
+        }
+
+        if ($this->access->hasAccountRole($user, $account, AccountRole::AccountAdmin)) {
+            return true;
+        }
+
         return $resident->unitMemberships()
-            ->whereIn('location_id', $this->access->accessibleLocationsForAccount($user, $resident->account)->pluck('id'))
-            ->first()
-            ?->location;
+            ->whereIn('location_id', $this->access->accessibleLocationsForAccount($user, $account)->pluck('id'))
+            ->with('location')
+            ->get()
+            ->pluck('location')
+            ->filter()
+            ->contains(fn (Location $location): bool => $allows($location));
     }
 }

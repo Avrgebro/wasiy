@@ -143,6 +143,12 @@ class AccessAuthorizationService
      */
     public function manageableInvitationLocationForResident(User $user, Resident $resident): ?Location
     {
+        // A trashed account resolves the relation to null; deny instead of
+        // erroring inside the role check.
+        if ($resident->account === null) {
+            return null;
+        }
+
         $memberships = $resident->unitMemberships()
             ->whereHas('location')
             ->where('account_id', $resident->account_id)

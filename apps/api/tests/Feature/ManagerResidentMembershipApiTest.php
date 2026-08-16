@@ -283,3 +283,69 @@ test('resident creation without memberships still requires registry rights in th
         'account_id' => $location->account_id,
     ]);
 });
+
+test('a resident in a trashed account is forbidden, not a server error', function () {
+    $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
+    $resident = Resident::factory()->for($location->account)->create();
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($unit)
+        ->for($location->account)
+        ->for($location)
+        ->create();
+    $manager = createRegistryManager($location);
+
+    $location->account->delete();
+
+    $this->actingAs($manager)
+        ->getJson("/api/residents/{$resident->id}")
+        ->assertForbidden();
+
+    $this->actingAs($manager)
+        ->patchJson("/api/residents/{$resident->id}", ['first_name' => 'Nueva'])
+        ->assertForbidden();
+});
+
+test('resident update passes when any accessible membership location grants it', function () {
+    $account = Account::factory()->create();
+    $frontDeskLocation = Location::factory()->for($account)->create();
+    $managedLocation = Location::factory()->for($account)->create();
+    $frontDeskUnit = Unit::factory()->for($account)->for($frontDeskLocation)->create();
+    $managedUnit = Unit::factory()->for($account)->for($managedLocation)->create();
+    $resident = Resident::factory()->for($account)->create();
+
+    // The front-desk membership is created first so a first-match policy
+    // would have gated on the location where the user may only view.
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($frontDeskUnit)
+        ->for($account)
+        ->for($frontDeskLocation)
+        ->create();
+    UnitMembership::factory()
+        ->for($resident)
+        ->for($managedUnit)
+        ->for($account)
+        ->for($managedLocation)
+        ->create();
+
+    $user = User::factory()->create();
+    LocationUserRole::query()->create([
+        'account_id' => $account->id,
+        'location_id' => $frontDeskLocation->id,
+        'user_id' => $user->id,
+        'role' => LocationRole::FrontDesk,
+    ]);
+    LocationUserRole::query()->create([
+        'account_id' => $account->id,
+        'location_id' => $managedLocation->id,
+        'user_id' => $user->id,
+        'role' => LocationRole::LocationManager,
+    ]);
+
+    $this->actingAs($user)
+        ->patchJson("/api/residents/{$resident->id}", ['first_name' => 'Determinista'])
+        ->assertOk()
+        ->assertJsonPath('data.first_name', 'Determinista');
+});
