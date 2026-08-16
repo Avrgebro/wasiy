@@ -2,13 +2,13 @@
 
 namespace App\Actions\Residents;
 
+use App\Actions\Invitations\CreateUserFromInvitation;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
 use App\Enums\UserInvitationStatus;
 use App\Models\User;
 use App\Models\UserInvitation;
 use App\Services\ActivityLogger;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -17,6 +17,7 @@ class ClaimResidentInvitation
 {
     public function __construct(
         private readonly ActivityLogger $activityLogger,
+        private readonly CreateUserFromInvitation $createUser,
     ) {}
 
     public function handle(UserInvitation $invitation, string $password): UserInvitation
@@ -53,18 +54,12 @@ class ClaimResidentInvitation
             }
 
             if (! $user instanceof User) {
-                try {
-                    $user = User::query()->create([
-                        'first_name' => $invitation->first_name,
-                        'last_name' => $invitation->last_name,
-                        'email' => $invitation->email,
-                        'password' => $password,
-                    ]);
-                } catch (UniqueConstraintViolationException) {
-                    throw ValidationException::withMessages([
-                        'email' => __('This email was registered by a concurrent request. Try again.'),
-                    ]);
-                }
+                $user = $this->createUser->handle(
+                    $invitation,
+                    $invitation->first_name,
+                    $invitation->last_name,
+                    $password,
+                );
             } else {
                 $user->forceFill([
                     'password' => Hash::make($password),

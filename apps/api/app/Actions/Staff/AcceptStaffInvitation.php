@@ -2,15 +2,16 @@
 
 namespace App\Actions\Staff;
 
+use App\Actions\Invitations\CreateUserFromInvitation;
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\UserInvitationStatus;
+use App\Exceptions\InvitationException;
 use App\Models\AccountUserRole;
 use App\Models\Location;
 use App\Models\User;
 use App\Models\UserInvitation;
 use App\Services\ActivityLogger;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -19,6 +20,7 @@ class AcceptStaffInvitation
     public function __construct(
         private readonly ActivityLogger $activityLogger,
         private readonly SyncStaffLocationAssignments $syncLocationAssignments,
+        private readonly CreateUserFromInvitation $createUser,
     ) {}
 
     /**
@@ -37,24 +39,40 @@ class AcceptStaffInvitation
 
             // Re-check under the lock: a concurrent accept may have landed
             // between the token resolving and this transaction opening.
-            abort_unless($invitation->status === UserInvitationStatus::Pending, 410);
+            if ($invitation->status !== UserInvitationStatus::Pending) {
+                throw InvitationException::noLongerValid();
+            }
 
             $account = $invitation->account;
 
-            abort_if($account === null || $account->trashed(), 410);
+            if ($account === null || $account->trashed()) {
+                throw InvitationException::noLongerValid();
+            }
 
             $user = User::query()->where('email', $invitation->email)->first();
 
             if ($user instanceof User) {
                 // An existing account must prove it is theirs before it gains
                 // access to another Account.
-                abort_if($authenticatedUser === null, 401);
-                abort_unless($authenticatedUser->id === $user->id, 409);
+                if ($authenticatedUser === null) {
+                    throw InvitationException::requiresAuthentication();
+                }
+
+                if ($authenticatedUser->id !== $user->id) {
+                    throw InvitationException::belongsToAnotherUser();
+                }
             } else {
-                $user = $this->createUserFromInvitation($invitation, $data);
+                $user = $this->createUser->handle(
+                    $invitation,
+                    $data['first_name'] ?? $invitation->first_name,
+                    $data['last_name'] ?? $invitation->last_name,
+                    $data['password'] ?? '',
+                );
             }
 
-            abort_if($user->isDeactivated(), 403);
+            if ($user->isDeactivated()) {
+                throw InvitationException::userDeactivated();
+            }
 
             [$assignments, $skippedLocationIds] = $this->partitionAssignments($invitation);
             $accountRole = $invitation->invitedAccountRole();
@@ -109,25 +127,6 @@ class AcceptStaffInvitation
                 'skipped_location_ids' => $skippedLocationIds,
             ];
         });
-    }
-
-    /**
-     * @param  array{first_name?: string, last_name?: string, password?: string}  $data
-     */
-    private function createUserFromInvitation(UserInvitation $invitation, array $data): User
-    {
-        try {
-            return User::query()->create([
-                'first_name' => $data['first_name'] ?? $invitation->first_name,
-                'last_name' => $data['last_name'] ?? $invitation->last_name,
-                'email' => $invitation->email,
-                'password' => $data['password'] ?? '',
-            ]);
-        } catch (UniqueConstraintViolationException) {
-            throw ValidationException::withMessages([
-                'email' => __('This email was registered by a concurrent request. Try again.'),
-            ]);
-        }
     }
 
     /**
