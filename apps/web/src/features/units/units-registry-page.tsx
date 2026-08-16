@@ -96,7 +96,7 @@ function UnitsRegistryContent({ location }: { location: { id: string } }) {
       onSearchChange={updateSearch}
       queryKey={['registry', 'units', location.id, search]}
       invalidateKey={['registry', 'units']}
-      fetch={() => getUnits(location.id, search)}
+      fetchPage={() => getUnits(location.id, search)}
       create={(values) => createUnit(location.id, values)}
       update={(unit, values) => updateUnit(unit.id, values)}
       resolver={zodResolver(unitSchema)}

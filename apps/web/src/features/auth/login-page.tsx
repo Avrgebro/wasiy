@@ -7,10 +7,7 @@ import { getDefaultAuthenticatedRoute } from './access'
 import { getSafeRedirectPath } from './guards'
 import { useLogin } from './hooks'
 import { loginSchema, type LoginFormValues } from './schemas'
-import {
-  applyLaravelValidationErrors,
-  getErrorMessage,
-} from '../../lib/errors'
+import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 
 const loginRouteApi = getRouteApi('/login')
 
@@ -30,7 +27,7 @@ export function LoginPage() {
   const rootError = form.formState.errors.root?.message
 
   async function handleSubmit(values: LoginFormValues) {
-    try {
+    await submitHandlingServerErrors(form, async () => {
       const session = await loginMutation.mutateAsync(values)
 
       // A non-authenticated session right after login (e.g. a deactivated
@@ -42,14 +39,7 @@ export function LoginPage() {
             ? getDefaultAuthenticatedRoute(session.me)
             : '/'),
       })
-    } catch (error) {
-      if (!applyLaravelValidationErrors<LoginFormValues>(error, form.setError)) {
-        form.setError('root', {
-          message: getErrorMessage(error),
-          type: 'server',
-        })
-      }
-    }
+    })
   }
 
   return (
@@ -74,11 +64,7 @@ export function LoginPage() {
               <TextInput
                 {...field}
                 autoComplete="email"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
+                error={fieldErrorMessage(fieldState.error)}
                 label={t('auth.email')}
                 placeholder="manager@wasiy.test"
               />
@@ -91,11 +77,7 @@ export function LoginPage() {
               <PasswordInput
                 {...field}
                 autoComplete="current-password"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
+                error={fieldErrorMessage(fieldState.error)}
                 label={t('auth.password')}
               />
             )}

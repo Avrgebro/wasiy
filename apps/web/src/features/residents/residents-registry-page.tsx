@@ -114,7 +114,7 @@ function ResidentsRegistryContent({
       onSearchChange={updateSearch}
       queryKey={['registry', 'residents', account.id, location?.id, search]}
       invalidateKey={['registry', 'residents']}
-      fetch={() => getResidents(account.id, { ...search, location_id: location?.id })}
+      fetchPage={() => getResidents(account.id, { ...search, location_id: location?.id })}
       create={(values) => createResident(account.id, values)}
       update={(resident, values) => updateResident(resident.id, values)}
       resolver={zodResolver(residentSchema)}

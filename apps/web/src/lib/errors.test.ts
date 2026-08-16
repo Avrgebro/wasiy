@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { ApiError } from '../app/api-client'
 import { i18next } from '../i18n'
-import { fieldErrorMessage } from './errors'
+import { applyLaravelValidationErrors, fieldErrorMessage } from './errors'
 import type { FieldError } from 'react-hook-form'
 
 describe('fieldErrorMessage', () => {
@@ -19,5 +20,40 @@ describe('fieldErrorMessage', () => {
 
   it('returns undefined when there is no error', () => {
     expect(fieldErrorMessage(undefined)).toBeUndefined()
+  })
+})
+
+describe('applyLaravelValidationErrors with known fields', () => {
+  function makeApiError(errors: Record<string, string[]>) {
+    return new ApiError('The given data was invalid.', 422, errors)
+  }
+
+  it('routes matched fields and reports a match', () => {
+    const setError = vi.fn()
+    const error = makeApiError({ email: ['Correo invalido.'] })
+
+    expect(applyLaravelValidationErrors(error, setError, ['email', 'password'])).toBe(true)
+    expect(setError).toHaveBeenCalledWith('email', {
+      message: 'Correo invalido.',
+      type: 'server',
+    })
+  })
+
+  it('reports no match when every server field is unknown to the form', () => {
+    const setError = vi.fn()
+    const error = makeApiError({
+      first_name: ['El nombre es obligatorio.'],
+      'memberships.0.unit_id': ['La unidad no esta disponible.'],
+    })
+
+    expect(applyLaravelValidationErrors(error, setError, ['firstName', 'lastName'])).toBe(false)
+    expect(setError).not.toHaveBeenCalled()
+  })
+
+  it('keeps legacy behavior when known fields are not provided', () => {
+    const setError = vi.fn()
+    const error = makeApiError({ anything: ['Mensaje.'] })
+
+    expect(applyLaravelValidationErrors(error, setError)).toBe(true)
   })
 })

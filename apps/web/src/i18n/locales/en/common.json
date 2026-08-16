@@ -250,7 +250,8 @@
     "openNav": "Open navigation",
     "productArea": "Residential operations",
     "selectLocation": "Select location",
-    "userMenu": "Open user menu"
+    "userMenu": "Open user menu",
+    "searchPlaceholder": "Search…"
   },
   "theme": {
     "dark": "Use dark mode",

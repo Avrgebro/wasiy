@@ -3,12 +3,17 @@ import { i18next } from '../i18n'
 import type { FieldError, FieldValues, Path, UseFormSetError } from 'react-hook-form'
 
 /**
- * Schema messages are i18n keys ('validation.firstNameRequired') while
- * server-set errors are already-localized text; i18next returns unknown
- * keys unchanged, so both come out display-ready.
+ * Schema messages are i18n keys ('validation.firstNameRequired') and get
+ * translated; server-set errors (type: 'server') are already-localized text
+ * and pass through untouched — running them through i18next could mangle
+ * messages containing ':' (namespace separator) or '{{' (interpolation).
  */
 export function fieldErrorMessage(error: FieldError | undefined): string | undefined {
-  return error?.message ? i18next.t(error.message) : undefined
+  if (!error?.message) {
+    return undefined
+  }
+
+  return error.type === 'server' ? error.message : i18next.t(error.message)
 }
 
 export function getErrorMessage(error: unknown) {
@@ -31,16 +36,19 @@ export function getErrorMessage(error: unknown) {
 
 /**
  * Runs a form submit, mapping Laravel 422 payloads onto their fields and
- * anything else onto the form's root error.
+ * anything else — including 422s whose field names don't exist in the form
+ * (naming-convention or nesting mismatches) — onto the form's root error.
  */
 export async function submitHandlingServerErrors<T extends FieldValues>(
-  form: { setError: UseFormSetError<T> },
+  form: { setError: UseFormSetError<T>; getValues: () => T },
   submit: () => Promise<unknown>,
 ) {
   try {
     await submit()
   } catch (error) {
-    if (!applyLaravelValidationErrors<T>(error, form.setError)) {
+    const knownFields = Object.keys(form.getValues())
+
+    if (!applyLaravelValidationErrors<T>(error, form.setError, knownFields)) {
       form.setError('root', {
         message: getErrorMessage(error),
         type: 'server',
@@ -49,20 +57,33 @@ export async function submitHandlingServerErrors<T extends FieldValues>(
   }
 }
 
+/**
+ * Returns true only when at least one server error landed on a real form
+ * field; unmatched-only payloads return false so the caller can surface
+ * them at the root instead of swallowing them.
+ */
 export function applyLaravelValidationErrors<T extends FieldValues>(
   error: unknown,
   setError: UseFormSetError<T>,
+  knownFields?: string[],
 ) {
   if (!(error instanceof ApiError) || !error.errors) {
     return false
   }
 
+  let matched = false
+
   Object.entries(error.errors).forEach(([field, messages]) => {
+    if (knownFields && !knownFields.includes(field)) {
+      return
+    }
+
+    matched = true
     setError(field as Path<T>, {
       message: messages[0] ?? error.message,
       type: 'server',
     })
   })
 
-  return true
+  return knownFields ? matched : true
 }

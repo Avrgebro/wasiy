@@ -7,14 +7,9 @@ import type { LayoutNavEntry } from './types'
 type AppShellProps = {
   children: ReactNode
   navItems: LayoutNavEntry[]
-  showNotifications?: boolean
 }
 
-export function AppShell({
-  children,
-  navItems,
-  showNotifications,
-}: AppShellProps) {
+export function AppShell({ children, navItems }: AppShellProps) {
   const [mobileNavOpened, setMobileNavOpened] = useState(false)
 
   return (
@@ -26,10 +21,7 @@ export function AppShell({
       />
 
       <div className="min-w-0">
-        <Topbar
-          onMobileNavOpen={() => setMobileNavOpened(true)}
-          showNotifications={showNotifications}
-        />
+        <Topbar onMobileNavOpen={() => setMobileNavOpened(true)} />
         <main className="px-4 pb-8 pt-2 lg:px-8">{children}</main>
       </div>
     </div>

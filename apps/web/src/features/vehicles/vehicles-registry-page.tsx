@@ -120,7 +120,7 @@ function VehiclesRegistryContent({ location }: { location: { id: string } }) {
       onSearchChange={updateSearch}
       queryKey={['registry', 'vehicles', location.id, search, vehicleType]}
       invalidateKey={['registry', 'vehicles']}
-      fetch={() => getVehicles(location.id, { ...search, vehicle_type: vehicleType })}
+      fetchPage={() => getVehicles(location.id, { ...search, vehicle_type: vehicleType })}
       create={(values) => createVehicle(location.id, values)}
       update={(vehicle, values) => updateVehicle(vehicle.id, values)}
       resolver={zodResolver(vehicleSchema)}

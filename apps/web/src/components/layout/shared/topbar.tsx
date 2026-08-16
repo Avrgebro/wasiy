@@ -31,7 +31,7 @@ export function Topbar({
             Remove or wire up when the search feature lands. */}
         <div className="hidden h-9 w-full max-w-md items-center gap-2 rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-3 text-sm text-[var(--mantine-color-dimmed)] md:flex">
           <Magnifer aria-hidden="true" size={16} />
-          <span>Search…</span>
+          <span>{t('shell.searchPlaceholder')}</span>
           <kbd className="ml-auto rounded border border-[var(--mantine-color-default-border)] px-1.5 py-0.5 font-sans text-[10px] font-semibold">
             ⌘K
           </kbd>

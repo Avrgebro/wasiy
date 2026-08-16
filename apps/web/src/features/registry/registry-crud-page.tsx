@@ -14,15 +14,9 @@ import { useTranslation } from 'react-i18next'
 import { getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { RegistryFilters, RegistryHeader } from './registry-page-chrome'
 import { RegistryTable } from './registry-table'
-import type { PaginatedApiResponse } from './types'
+import type { PaginatedApiResponse, normalizedRegistrySearch } from './types'
 
-export type RegistrySearchValues = {
-  page: number
-  per_page: number
-  search: string
-  status: string
-  sort: string
-}
+export type RegistrySearchValues = ReturnType<typeof normalizedRegistrySearch>
 
 type RegistryCrudPageProps<TRow, TForm extends FieldValues> = {
   columns: (openEdit: (row: TRow) => void) => ColumnDef<TRow>[]
@@ -35,7 +29,7 @@ type RegistryCrudPageProps<TRow, TForm extends FieldValues> = {
   onSearchChange: (next: { page?: number; search?: string; status?: string }) => void
   queryKey: QueryKey
   invalidateKey: QueryKey
-  fetch: () => Promise<PaginatedApiResponse<TRow>>
+  fetchPage: () => Promise<PaginatedApiResponse<TRow>>
   create: (values: TForm) => Promise<unknown>
   update: (row: TRow, values: TForm) => Promise<unknown>
   resolver: Resolver<TForm>
@@ -60,7 +54,7 @@ export function RegistryCrudPage<TRow, TForm extends FieldValues>({
   onSearchChange,
   queryKey,
   invalidateKey,
-  fetch,
+  fetchPage,
   create,
   update,
   resolver,
@@ -72,7 +66,7 @@ export function RegistryCrudPage<TRow, TForm extends FieldValues>({
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState<TRow | null>(null)
   const [drawerOpened, setDrawerOpened] = useState(false)
-  const listQuery = useQuery({ queryKey, queryFn: fetch })
+  const listQuery = useQuery({ queryKey, queryFn: fetchPage })
   const form = useForm<TForm>({
     defaultValues: defaults() as DefaultValues<TForm>,
     resolver,
