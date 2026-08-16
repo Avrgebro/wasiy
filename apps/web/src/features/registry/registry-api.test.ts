@@ -47,7 +47,7 @@ describe('registry API helpers', () => {
     })
 
     expect(adapter.mock.calls[0]?.[0].url).toBe(
-      '/api/locations/loc_1/units?page=2&per_page=25&search=torre&status=active&sort=-resident_count',
+      '/api/locations/loc_1/units?page=2&per_page=25&search=torre&sort=-resident_count&status=active',
     )
   })
 
@@ -66,7 +66,7 @@ describe('registry API helpers', () => {
     })
 
     expect(adapter.mock.calls[0]?.[0].url).toBe(
-      '/api/accounts/acc_1/residents?page=1&per_page=15&search=ana&status=inactive&location_id=loc_1',
+      '/api/accounts/acc_1/residents?location_id=loc_1&page=1&per_page=15&search=ana&status=inactive',
     )
   })
 
@@ -131,10 +131,10 @@ describe('registry API helpers', () => {
     })
 
     expect(adapter.mock.calls[0]?.[0].url).toBe(
-      '/api/registry-imports?account_id=acc_1&location_id=loc_1&status=ready_for_review&import_type=registry_units_residents&page=2&per_page=25',
+      '/api/registry-imports?account_id=acc_1&import_type=registry_units_residents&location_id=loc_1&page=2&per_page=25&status=ready_for_review',
     )
     expect(adapter.mock.calls[1]?.[0].url).toBe(
-      '/api/registry-imports/imp_1/rows?status=error&search=ana&page=3&per_page=10',
+      '/api/registry-imports/imp_1/rows?page=3&per_page=10&search=ana&status=error',
     )
   })
 

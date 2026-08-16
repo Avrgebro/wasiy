@@ -1,13 +1,14 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, PasswordInput, TextInput } from '@mantine/core'
+import { Alert, Button } from '@mantine/core'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { getDefaultAuthenticatedRoute } from './access'
 import { getSafeRedirectPath } from './guards'
 import { useLogin } from './hooks'
 import { loginSchema, type LoginFormValues } from './schemas'
-import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
+import { FormPasswordInput, FormTextInput } from '../../components/ui/form-fields'
+import { submitHandlingServerErrors } from '../../lib/errors'
 
 const loginRouteApi = getRouteApi('/login')
 
@@ -57,30 +58,18 @@ export function LoginPage() {
               {rootError}
             </Alert>
           ) : null}
-          <Controller
+          <FormTextInput
+            autoComplete="email"
             control={form.control}
+            label={t('auth.email')}
             name="email"
-            render={({ field, fieldState }) => (
-              <TextInput
-                {...field}
-                autoComplete="email"
-                error={fieldErrorMessage(fieldState.error)}
-                label={t('auth.email')}
-                placeholder="manager@wasiy.test"
-              />
-            )}
+            placeholder="manager@wasiy.test"
           />
-          <Controller
+          <FormPasswordInput
+            autoComplete="current-password"
             control={form.control}
+            label={t('auth.password')}
             name="password"
-            render={({ field, fieldState }) => (
-              <PasswordInput
-                {...field}
-                autoComplete="current-password"
-                error={fieldErrorMessage(fieldState.error)}
-                label={t('auth.password')}
-              />
-            )}
           />
           <Button loading={loginMutation.isPending} type="submit">
             {t('auth.login')}

@@ -1,9 +1,6 @@
 import { apiRequest } from '../../app/api-client'
-import {
-  appendRegistryParams,
-  type PaginatedApiResponse,
-  type RegistrySearch,
-} from '../registry/types'
+import { buildParams } from '../../lib/query-params'
+import type { PaginatedApiResponse, RegistrySearch } from '../registry/types'
 import type { UnitFormValues } from './schemas'
 
 export type UnitSummary = {
@@ -28,8 +25,7 @@ export type UnitSummary = {
 }
 
 export function getUnits(locationId: string, search: RegistrySearch) {
-  const params = new URLSearchParams()
-  appendRegistryParams(params, search)
+  const params = buildParams(search)
 
   return apiRequest<PaginatedApiResponse<UnitSummary>>(
     `/api/locations/${locationId}/units?${params.toString()}`,

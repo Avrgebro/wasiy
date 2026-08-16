@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, PasswordInput, TextInput } from '@mantine/core'
+import { Alert, Button } from '@mantine/core'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import type { StaffInvitationDetails } from './api'
 import { useAcceptStaffInvitation, useStaffInvitation } from './hooks'
@@ -11,12 +11,14 @@ import {
   InvitationShell,
   InvitationUnavailable,
 } from './invitation-shell'
+import { postInvitationRoute } from './post-invitation-route'
 import {
   createStaffAccountSchema,
   type CreateStaffAccountFormValues,
 } from './schemas'
 import { ApiError } from '../../app/api-client'
-import { getDefaultAuthenticatedRoute, getRoleLabelKey } from '../auth/access'
+import { FormPasswordInput, FormTextInput } from '../../components/ui/form-fields'
+import { getRoleLabelKey } from '../auth/access'
 import { useLogout } from '../auth/hooks'
 import { getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 
@@ -73,11 +75,7 @@ function CreateAccountMode({
         token,
       })
 
-      await navigate({
-        to: result.session
-          ? getDefaultAuthenticatedRoute(result.session)
-          : '/login',
-      })
+      await navigate({ to: postInvitationRoute(result.session) })
     })
   }
 
@@ -91,69 +89,29 @@ function CreateAccountMode({
               {rootError}
             </Alert>
           ) : null}
-          <Controller
+          <FormTextInput
+            autoComplete="given-name"
             control={form.control}
+            label={t('invitations.firstName')}
             name="firstName"
-            render={({ field, fieldState }) => (
-              <TextInput
-                {...field}
-                autoComplete="given-name"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
-                label={t('invitations.firstName')}
-              />
-            )}
           />
-          <Controller
+          <FormTextInput
+            autoComplete="family-name"
             control={form.control}
+            label={t('invitations.lastName')}
             name="lastName"
-            render={({ field, fieldState }) => (
-              <TextInput
-                {...field}
-                autoComplete="family-name"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
-                label={t('invitations.lastName')}
-              />
-            )}
           />
-          <Controller
+          <FormPasswordInput
+            autoComplete="new-password"
             control={form.control}
+            label={t('invitations.newPassword')}
             name="password"
-            render={({ field, fieldState }) => (
-              <PasswordInput
-                {...field}
-                autoComplete="new-password"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
-                label={t('invitations.newPassword')}
-              />
-            )}
           />
-          <Controller
+          <FormPasswordInput
+            autoComplete="new-password"
             control={form.control}
+            label={t('invitations.confirmPassword')}
             name="passwordConfirmation"
-            render={({ field, fieldState }) => (
-              <PasswordInput
-                {...field}
-                autoComplete="new-password"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
-                label={t('invitations.confirmPassword')}
-              />
-            )}
           />
           <Button loading={acceptMutation.isPending} type="submit">
             {t('invitations.acceptInvitation')}
@@ -183,6 +141,7 @@ function ConfirmJoinMode({
   const [error, setError] = useState<unknown>(null)
 
   const status = error instanceof ApiError ? error.status : null
+  const needsRelogin = status === 401 || status === 409
   const returnTo = `/invitations/staff/${token}`
 
   async function goToLogin() {
@@ -196,11 +155,7 @@ function ConfirmJoinMode({
     try {
       const result = await acceptMutation.mutateAsync({ token })
 
-      await navigate({
-        to: result.session
-          ? getDefaultAuthenticatedRoute(result.session)
-          : '/login',
-      })
+      await navigate({ to: postInvitationRoute(result.session) })
     } catch (caught) {
       setError(caught)
     }
@@ -220,13 +175,13 @@ function ConfirmJoinMode({
             {t('invitations.wrongAccountBody', { email: invitation.email })}
           </Alert>
         ) : null}
-        {error !== null && status !== 401 && status !== 409 ? (
+        {error !== null && !needsRelogin ? (
           <Alert color="red" title={t('invitations.acceptFailed')}>
             {getErrorMessage(error)}
           </Alert>
         ) : null}
 
-        {status === 401 || status === 409 ? (
+        {needsRelogin ? (
           <Button loading={logoutMutation.isPending} onClick={goToLogin}>
             {t('invitations.signInAs', { email: invitation.email })}
           </Button>

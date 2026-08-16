@@ -42,6 +42,9 @@ export function LocationSwitcher() {
     return null
   }
 
+  // The API auto-selects an active location during session sync whenever
+  // any is accessible, so this fallback only covers the transient frame
+  // before that sync lands — it is display-only, never a selection.
   const currentLocation = location ?? accessibleLocations[0]
   const hasMultipleLocations = accessibleLocations.length > 1
 

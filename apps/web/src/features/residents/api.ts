@@ -1,9 +1,6 @@
 import { apiRequest } from '../../app/api-client'
-import {
-  appendRegistryParams,
-  type PaginatedApiResponse,
-  type RegistrySearch,
-} from '../registry/types'
+import { buildParams } from '../../lib/query-params'
+import type { PaginatedApiResponse, RegistrySearch } from '../registry/types'
 import type { ResidentFormValues } from './schemas'
 
 export type ResidentSummary = {
@@ -29,9 +26,7 @@ export type ResidentSummary = {
 }
 
 export function getResidents(accountId: string, search: RegistrySearch & { location_id?: string }) {
-  const params = new URLSearchParams()
-  appendRegistryParams(params, search)
-  if (search.location_id) params.set('location_id', search.location_id)
+  const params = buildParams(search)
 
   return apiRequest<PaginatedApiResponse<ResidentSummary>>(
     `/api/accounts/${accountId}/residents?${params.toString()}`,

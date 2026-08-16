@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, PasswordInput } from '@mantine/core'
+import { Alert, Button } from '@mantine/core'
 import { useNavigate } from '@tanstack/react-router'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useClaimResidentInvitation, useResidentInvitation } from './hooks'
 import {
@@ -9,11 +9,12 @@ import {
   InvitationShell,
   InvitationUnavailable,
 } from './invitation-shell'
+import { postInvitationRoute } from './post-invitation-route'
 import {
   claimInvitationSchema,
   type ClaimInvitationFormValues,
 } from './schemas'
-import { getDefaultAuthenticatedRoute } from '../auth/access'
+import { FormPasswordInput } from '../../components/ui/form-fields'
 import { submitHandlingServerErrors } from '../../lib/errors'
 
 export function ResidentInvitationPage({ token }: { token: string }) {
@@ -39,13 +40,7 @@ export function ResidentInvitationPage({ token }: { token: string }) {
         token,
       })
 
-      // Without a session the claim still succeeded, so send them to sign in
-      // rather than into a surface they cannot load yet.
-      await navigate({
-        to: result.session
-          ? getDefaultAuthenticatedRoute(result.session)
-          : '/login',
-      })
+      await navigate({ to: postInvitationRoute(result.session) })
     })
   }
 
@@ -77,37 +72,17 @@ export function ResidentInvitationPage({ token }: { token: string }) {
               {rootError}
             </Alert>
           ) : null}
-          <Controller
+          <FormPasswordInput
+            autoComplete="new-password"
             control={form.control}
+            label={t('invitations.newPassword')}
             name="password"
-            render={({ field, fieldState }) => (
-              <PasswordInput
-                {...field}
-                autoComplete="new-password"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
-                label={t('invitations.newPassword')}
-              />
-            )}
           />
-          <Controller
+          <FormPasswordInput
+            autoComplete="new-password"
             control={form.control}
+            label={t('invitations.confirmPassword')}
             name="passwordConfirmation"
-            render={({ field, fieldState }) => (
-              <PasswordInput
-                {...field}
-                autoComplete="new-password"
-                error={
-                  fieldState.error?.message
-                    ? t(fieldState.error.message)
-                    : undefined
-                }
-                label={t('invitations.confirmPassword')}
-              />
-            )}
           />
           <Button loading={claimMutation.isPending} type="submit">
             {t('invitations.activateAccess')}

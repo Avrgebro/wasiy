@@ -255,7 +255,8 @@ describe('ImportsRegistryPage', () => {
     await waitFor(() => {
       expect(
         adapter.mock.calls.some((call) =>
-          call[0].url?.includes('/api/registry-imports/imp_1/rows?status=warning'),
+          call[0].url?.includes('/api/registry-imports/imp_1/rows?') &&
+          call[0].url.includes('status=warning'),
         ),
       ).toBe(true)
     })

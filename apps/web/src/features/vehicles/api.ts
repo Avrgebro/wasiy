@@ -1,9 +1,6 @@
 import { apiRequest } from '../../app/api-client'
-import {
-  appendRegistryParams,
-  type PaginatedApiResponse,
-  type RegistrySearch,
-} from '../registry/types'
+import { buildParams } from '../../lib/query-params'
+import type { PaginatedApiResponse, RegistrySearch } from '../registry/types'
 import type { VehicleFormValues } from './schemas'
 
 export type VehicleSummary = {
@@ -27,9 +24,7 @@ export type VehicleSummary = {
 }
 
 export function getVehicles(locationId: string, search: RegistrySearch & { vehicle_type?: string }) {
-  const params = new URLSearchParams()
-  appendRegistryParams(params, search)
-  if (search.vehicle_type) params.set('vehicle_type', search.vehicle_type)
+  const params = buildParams(search)
 
   return apiRequest<PaginatedApiResponse<VehicleSummary>>(
     `/api/locations/${locationId}/vehicles?${params.toString()}`,

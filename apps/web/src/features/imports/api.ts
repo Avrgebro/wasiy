@@ -1,4 +1,5 @@
 import { apiRequest } from '../../app/api-client'
+import { buildParams } from '../../lib/query-params'
 import type { PaginatedApiResponse } from '../registry/types'
 
 export type RegistryImportStatus =
@@ -75,14 +76,7 @@ export type RegistryImportRowsSearch = {
 }
 
 export function getRegistryImports(search: RegistryImportSearch) {
-  const params = new URLSearchParams()
-
-  params.set('account_id', search.account_id)
-  if (search.location_id) params.set('location_id', search.location_id)
-  if (search.status) params.set('status', search.status)
-  if (search.import_type) params.set('import_type', search.import_type)
-  if (search.page) params.set('page', String(search.page))
-  if (search.per_page) params.set('per_page', String(search.per_page))
+  const params = buildParams(search)
 
   return apiRequest<PaginatedApiResponse<RegistryImportSummary>>(
     `/api/registry-imports?${params.toString()}`,
@@ -97,12 +91,7 @@ export function getRegistryImportRows(
   importId: string,
   search: RegistryImportRowsSearch,
 ) {
-  const params = new URLSearchParams()
-
-  if (search.status) params.set('status', search.status)
-  if (search.search) params.set('search', search.search)
-  if (search.page) params.set('page', String(search.page))
-  if (search.per_page) params.set('per_page', String(search.per_page))
+  const params = buildParams(search)
 
   return apiRequest<PaginatedApiResponse<RegistryImportRow>>(
     `/api/registry-imports/${importId}/rows?${params.toString()}`,
