@@ -49,6 +49,40 @@ class RegistryExport extends Model
     }
 
     /**
+     * Atomically claim the export for a worker: a conditional update
+     * guarantees only one worker transitions it into Processing. Refreshes
+     * the model on success.
+     */
+    public function claimProcessing(): bool
+    {
+        $claimed = static::query()
+            ->whereKey($this->id)
+            ->where('status', ExportStatus::Pending)
+            ->update([
+                'status' => ExportStatus::Processing,
+                'failure_reason' => null,
+                'failed_at' => null,
+            ]);
+
+        if ($claimed !== 1) {
+            return false;
+        }
+
+        $this->refresh();
+
+        return true;
+    }
+
+    public function markFailed(string $reason): void
+    {
+        $this->forceFill([
+            'status' => ExportStatus::Failed,
+            'failed_at' => now(),
+            'failure_reason' => $reason,
+        ])->save();
+    }
+
+    /**
      * @return BelongsTo<Account, $this>
      */
     public function account(): BelongsTo

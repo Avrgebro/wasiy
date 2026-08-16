@@ -36,23 +36,9 @@ class CommitRegistryImport implements ShouldQueue
             return;
         }
 
-        // Claim atomically: a conditional update guarantees only one worker
-        // transitions the import into Processing.
-        $claimed = RegistryImport::query()
-            ->whereKey($import->id)
-            ->where('status', ImportStatus::ReadyForReview)
-            ->whereNotNull('confirmed_at')
-            ->update([
-                'status' => ImportStatus::Processing,
-                'failed_at' => null,
-                'failure_reason' => null,
-            ]);
-
-        if ($claimed !== 1) {
+        if (! $import->claimProcessing(ImportStatus::ReadyForReview, requireConfirmed: true)) {
             return;
         }
-
-        $import->refresh();
 
         try {
             // One transaction for the whole run: a failure on any row rolls
@@ -94,12 +80,7 @@ class CommitRegistryImport implements ShouldQueue
             // The rollback reverted the database but not the in-memory
             // model; re-sync before stamping the failure.
             $import->refresh();
-
-            $import->forceFill([
-                'status' => ImportStatus::Failed,
-                'failed_at' => now(),
-                'failure_reason' => $exception->getMessage(),
-            ])->save();
+            $import->markFailed($exception->getMessage());
 
             $activityLogger->log(
                 account: $import->account,

@@ -44,22 +44,9 @@ class ValidateRegistryImport implements ShouldQueue
             return;
         }
 
-        // Claim atomically: a conditional update guarantees only one worker
-        // transitions the import into Processing.
-        $claimed = RegistryImport::query()
-            ->whereKey($import->id)
-            ->where('status', ImportStatus::Pending)
-            ->update([
-                'status' => ImportStatus::Processing,
-                'failed_at' => null,
-                'failure_reason' => null,
-            ]);
-
-        if ($claimed !== 1) {
+        if (! $import->claimProcessing(ImportStatus::Pending)) {
             return;
         }
-
-        $import->refresh();
 
         try {
             if ($import->disk === null || $import->path === null || ! Storage::disk($import->disk)->exists($import->path)) {
@@ -94,11 +81,7 @@ class ValidateRegistryImport implements ShouldQueue
                 ])->save();
             });
         } catch (Throwable $exception) {
-            $import->forceFill([
-                'status' => ImportStatus::Failed,
-                'failed_at' => now(),
-                'failure_reason' => $exception->getMessage(),
-            ])->save();
+            $import->markFailed($exception->getMessage());
 
             $activityLogger->log(
                 account: $import->account,

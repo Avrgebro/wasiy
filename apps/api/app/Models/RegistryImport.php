@@ -53,6 +53,41 @@ class RegistryImport extends Model
     }
 
     /**
+     * Atomically claim the import for a worker: a conditional update
+     * guarantees only one worker transitions it into Processing. Refreshes
+     * the model on success.
+     */
+    public function claimProcessing(ImportStatus $from, bool $requireConfirmed = false): bool
+    {
+        $claimed = static::query()
+            ->whereKey($this->id)
+            ->where('status', $from)
+            ->when($requireConfirmed, fn ($query) => $query->whereNotNull('confirmed_at'))
+            ->update([
+                'status' => ImportStatus::Processing,
+                'failed_at' => null,
+                'failure_reason' => null,
+            ]);
+
+        if ($claimed !== 1) {
+            return false;
+        }
+
+        $this->refresh();
+
+        return true;
+    }
+
+    public function markFailed(string $reason): void
+    {
+        $this->forceFill([
+            'status' => ImportStatus::Failed,
+            'failed_at' => now(),
+            'failure_reason' => $reason,
+        ])->save();
+    }
+
+    /**
      * Mark the import confirmed for commit. Owns the state-transition rules
      * so every entry point (HTTP, jobs, future CLI) agrees on them.
      */

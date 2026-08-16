@@ -33,22 +33,9 @@ class GenerateCsvExport implements ShouldQueue
             return;
         }
 
-        // Claim atomically: a conditional update guarantees only one worker
-        // transitions the export into Processing.
-        $claimed = RegistryExport::query()
-            ->whereKey($export->id)
-            ->where('status', ExportStatus::Pending)
-            ->update([
-                'status' => ExportStatus::Processing,
-                'failure_reason' => null,
-                'failed_at' => null,
-            ]);
-
-        if ($claimed !== 1) {
+        if (! $export->claimProcessing()) {
             return;
         }
-
-        $export->refresh();
 
         try {
             $csv = match ($export->export_type) {
@@ -86,11 +73,7 @@ class GenerateCsvExport implements ShouldQueue
                 subjectId: $export->id,
             );
         } catch (Throwable $exception) {
-            $export->forceFill([
-                'status' => ExportStatus::Failed,
-                'failed_at' => now(),
-                'failure_reason' => $exception->getMessage(),
-            ])->save();
+            $export->markFailed($exception->getMessage());
 
             $activityLogger->log(
                 account: $export->account,
