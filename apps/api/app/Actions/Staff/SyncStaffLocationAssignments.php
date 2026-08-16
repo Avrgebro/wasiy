@@ -87,26 +87,4 @@ class SyncStaffLocationAssignments
 
         return $changes;
     }
-
-    /**
-     * Whether applying the submitted assignments would grant the staff User a
-     * Location role they do not already hold.
-     *
-     * @param  array<int, array{location_id: string, role: string}>  $locationAssignments
-     */
-    public function wouldGrantAccess(Account $account, User $staff, array $locationAssignments): bool
-    {
-        $existingAssignments = LocationUserRole::query()
-            ->where('account_id', $account->id)
-            ->where('user_id', $staff->id)
-            ->get()
-            ->keyBy('location_id');
-
-        return collect($locationAssignments)->contains(
-            fn (array $assignment): bool => $existingAssignments
-                ->get($assignment['location_id'])
-                ?->role
-                ->value !== $assignment['role'],
-        );
-    }
 }

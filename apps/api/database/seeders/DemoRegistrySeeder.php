@@ -207,7 +207,7 @@ class DemoRegistrySeeder extends Seeder
         );
 
         if ($attributes['is_primary_contact']) {
-            $membership->markAsPrimaryContact();
+            $membership->makeActivePrimaryContact();
             $membership->refresh();
         }
 

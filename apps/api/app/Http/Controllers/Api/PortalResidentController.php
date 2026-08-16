@@ -20,6 +20,9 @@ class PortalResidentController extends Controller
 
     public function updatePhone(Request $request): JsonResource
     {
+        // The prohibited rules are contract, not paranoia: tests pin that
+        // sending any other resident field here is a 422, so partial-update
+        // clients fail loudly instead of having fields silently ignored.
         $validated = $request->validate([
             'phone' => ['present', 'nullable', 'string', 'max:255'],
             'first_name' => ['prohibited'],

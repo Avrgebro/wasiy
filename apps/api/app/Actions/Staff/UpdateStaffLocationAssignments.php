@@ -23,14 +23,17 @@ class UpdateStaffLocationAssignments
     public function handle(Account $account, User $actor, User $staff, array $locationAssignments): User
     {
         return DB::transaction(function () use ($account, $actor, $staff, $locationAssignments): User {
+            $changes = $this->syncLocationAssignments->sync($account, $staff, $locationAssignments);
+
+            // Inspect the change-set instead of pre-querying: a grant to a
+            // deactivated user throws here and the transaction rolls the
+            // sync back.
             if ($staff->isDeactivated()
-                && $this->syncLocationAssignments->wouldGrantAccess($account, $staff, $locationAssignments)) {
+                && $changes->contains(fn (array $change): bool => $change['role_after'] !== null)) {
                 throw ValidationException::withMessages([
                     'location_assignments' => __('This user is deactivated and cannot be granted new access.'),
                 ]);
             }
-
-            $changes = $this->syncLocationAssignments->sync($account, $staff, $locationAssignments);
 
             foreach ($changes as $change) {
                 if ($change['location'] instanceof Location) {

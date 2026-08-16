@@ -39,10 +39,8 @@ class StaffInvitationController extends Controller
 
         $invitation = $inviteStaffUser->handle($account, $actor, $request->validated());
 
-        return response()->json([
-            'data' => [
-                'invitation' => (new StaffInvitationResource($invitation))->toArray($request),
-            ],
+        return $this->dataResponse([
+            'invitation' => (new StaffInvitationResource($invitation))->toArray($request),
         ], 201);
     }
 
@@ -57,12 +55,10 @@ class StaffInvitationController extends Controller
         /** @var User $actor */
         $actor = $request->user();
 
-        return response()->json([
-            'data' => [
-                'invitation' => (new StaffInvitationResource(
-                    $cancelUserInvitation->handle($invitation, $actor),
-                ))->toArray($request),
-            ],
+        return $this->dataResponse([
+            'invitation' => (new StaffInvitationResource(
+                $cancelUserInvitation->handle($invitation, $actor),
+            ))->toArray($request),
         ]);
     }
 
@@ -77,12 +73,10 @@ class StaffInvitationController extends Controller
         /** @var User $actor */
         $actor = $request->user();
 
-        return response()->json([
-            'data' => [
-                'invitation' => (new StaffInvitationResource(
-                    $resendUserInvitation->handle($invitation, $actor),
-                ))->toArray($request),
-            ],
+        return $this->dataResponse([
+            'invitation' => (new StaffInvitationResource(
+                $resendUserInvitation->handle($invitation, $actor),
+            ))->toArray($request),
         ]);
     }
 
@@ -107,24 +101,22 @@ class StaffInvitationController extends Controller
             ['account', 'invitedBy'],
         );
 
-        return response()->json([
-            'data' => [
-                'email' => $invitation->email,
-                'first_name' => $invitation->first_name,
-                'last_name' => $invitation->last_name,
-                'expires_at' => $invitation->expires_at?->toJSON(),
-                // Tells the SPA whether to collect a password or ask an
-                // existing user to confirm joining.
-                'requires_account_creation' => ! $this->userExistsFor($invitation),
-                'account' => [
-                    'id' => $invitation->account->id,
-                    'name' => $invitation->account->name,
-                ],
-                'invited_by' => [
-                    'name' => $invitation->invitedBy?->name,
-                ],
-                'roles' => $this->roleSummary($invitation),
+        return $this->dataResponse([
+            'email' => $invitation->email,
+            'first_name' => $invitation->first_name,
+            'last_name' => $invitation->last_name,
+            'expires_at' => $invitation->expires_at?->toJSON(),
+            // Tells the SPA whether to collect a password or ask an
+            // existing user to confirm joining.
+            'requires_account_creation' => ! $this->userExistsFor($invitation),
+            'account' => [
+                'id' => $invitation->account->id,
+                'name' => $invitation->account->name,
             ],
+            'invited_by' => [
+                'name' => $invitation->invitedBy?->name,
+            ],
+            'roles' => $this->roleSummary($invitation),
         ]);
     }
 
@@ -149,11 +141,9 @@ class StaffInvitationController extends Controller
 
         $result = $acceptStaffInvitation->handle($invitation, $request->user(), $validated);
 
-        return response()->json([
-            'data' => [
-                'skipped_location_ids' => $result['skipped_location_ids'],
-                'session' => $this->authenticateAcceptedUser($request, $result['user']),
-            ],
+        return $this->dataResponse([
+            'skipped_location_ids' => $result['skipped_location_ids'],
+            'session' => $this->authenticateAcceptedUser($request, $result['user']),
         ]);
     }
 

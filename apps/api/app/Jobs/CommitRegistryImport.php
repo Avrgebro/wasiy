@@ -163,7 +163,7 @@ class CommitRegistryImport implements ShouldQueue
         ]);
 
         if ($normalized->isPrimaryContact) {
-            $membership->markAsPrimaryContact();
+            $membership->makeActivePrimaryContact();
             $membership->refresh();
         }
 

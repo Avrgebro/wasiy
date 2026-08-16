@@ -44,11 +44,9 @@ class ResidentInvitationController extends Controller
 
         $result = $inviteResidentUser->handle($resident, $actor, $validated);
 
-        return response()->json([
-            'data' => [
-                'resident' => (new ResidentResource($result['resident']))->toArray($request),
-                'invitation' => (new ResidentInvitationResource($result['invitation']))->toArray($request),
-            ],
+        return $this->dataResponse([
+            'resident' => (new ResidentResource($result['resident']))->toArray($request),
+            'invitation' => (new ResidentInvitationResource($result['invitation']))->toArray($request),
         ], 201);
     }
 
@@ -60,12 +58,10 @@ class ResidentInvitationController extends Controller
     ): JsonResponse {
         $actor = $this->authorizeResidentInvitation($request, $resident, $invitation);
 
-        return response()->json([
-            'data' => [
-                'invitation' => (new ResidentInvitationResource(
-                    $cancelUserInvitation->handle($invitation, $actor),
-                ))->toArray($request),
-            ],
+        return $this->dataResponse([
+            'invitation' => (new ResidentInvitationResource(
+                $cancelUserInvitation->handle($invitation, $actor),
+            ))->toArray($request),
         ]);
     }
 
@@ -77,12 +73,10 @@ class ResidentInvitationController extends Controller
     ): JsonResponse {
         $actor = $this->authorizeResidentInvitation($request, $resident, $invitation);
 
-        return response()->json([
-            'data' => [
-                'invitation' => (new ResidentInvitationResource(
-                    $resendUserInvitation->handle($invitation, $actor),
-                ))->toArray($request),
-            ],
+        return $this->dataResponse([
+            'invitation' => (new ResidentInvitationResource(
+                $resendUserInvitation->handle($invitation, $actor),
+            ))->toArray($request),
         ]);
     }
 
@@ -121,18 +115,16 @@ class ResidentInvitationController extends Controller
             ['account', 'resident'],
         );
 
-        return response()->json([
-            'data' => [
-                ...(new ResidentInvitationResource($invitation))->toArray($request),
-                'resident' => [
-                    'id' => $invitation->resident->id,
-                    'name' => $invitation->resident->name,
-                    'status' => $invitation->resident->status->value,
-                ],
-                'account' => [
-                    'id' => $invitation->account->id,
-                    'name' => $invitation->account->name,
-                ],
+        return $this->dataResponse([
+            ...(new ResidentInvitationResource($invitation))->toArray($request),
+            'resident' => [
+                'id' => $invitation->resident->id,
+                'name' => $invitation->resident->name,
+                'status' => $invitation->resident->status->value,
+            ],
+            'account' => [
+                'id' => $invitation->account->id,
+                'name' => $invitation->account->name,
             ],
         ]);
     }
@@ -153,12 +145,10 @@ class ResidentInvitationController extends Controller
         );
         $invitation = $claimResidentInvitation->handle($invitation, $validated['password']);
 
-        return response()->json([
-            'data' => [
-                'resident' => (new ResidentResource($invitation->resident->loadSummary()))->toArray($request),
-                'invitation' => (new ResidentInvitationResource($invitation))->toArray($request),
-                'session' => $this->authenticateClaimedUser($request, $invitation),
-            ],
+        return $this->dataResponse([
+            'resident' => (new ResidentResource($invitation->resident->loadSummary()))->toArray($request),
+            'invitation' => (new ResidentInvitationResource($invitation))->toArray($request),
+            'session' => $this->authenticateClaimedUser($request, $invitation),
         ]);
     }
 

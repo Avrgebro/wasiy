@@ -40,7 +40,7 @@ class CreateUnitMembership
         $isPrimaryContact = ($payload['is_primary_contact'] ?? false) === true;
 
         if ($isPrimaryContact) {
-            $membership->markAsPrimaryContact();
+            $membership->makeActivePrimaryContact();
             $membership->refresh();
         }
 

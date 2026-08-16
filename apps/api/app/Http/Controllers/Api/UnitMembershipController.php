@@ -82,7 +82,7 @@ class UnitMembershipController extends Controller
             }
 
             if (($validated['is_primary_contact'] ?? false) === true && ! $membership->is_primary_contact) {
-                $membership->markAsPrimaryContact();
+                $membership->makeActivePrimaryContact();
                 $membership->refresh();
 
                 $this->createMembership->logMembershipActivity(

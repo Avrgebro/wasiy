@@ -43,7 +43,12 @@ class UnitMembership extends Model
         ];
     }
 
-    public function markAsPrimaryContact(): void
+    /**
+     * Make this membership the unit's primary contact. Named for its full
+     * effect: the membership is also forced Active, since an inactive
+     * primary contact is contradictory.
+     */
+    public function makeActivePrimaryContact(): void
     {
         DB::transaction(function () {
             static::query()

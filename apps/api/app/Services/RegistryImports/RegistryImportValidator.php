@@ -105,7 +105,7 @@ class RegistryImportValidator
         }
 
         // A primary contact on an inactive membership is contradictory:
-        // markAsPrimaryContact() would silently reactivate it on commit.
+        // makeActivePrimaryContact() would silently reactivate it on commit.
         if ($normalized->isPrimaryContact && $normalized->membershipStatus === RegistryStatus::Inactive) {
             $preview->addError('El contacto principal no puede tener una membresia inactiva.');
         }

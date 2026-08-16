@@ -87,7 +87,7 @@ test('setting a new primary contact clears the previous primary contact', functi
         ->for($unit->location)
         ->create();
 
-    $next->markAsPrimaryContact();
+    $next->makeActivePrimaryContact();
 
     expect($previous->fresh()->is_primary_contact)->toBeFalse()
         ->and($next->fresh()->is_primary_contact)->toBeTrue();
