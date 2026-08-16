@@ -56,7 +56,8 @@ export function DashboardPage() {
           <Button leftSection={<Download size={16} />} variant="default">
             {t('actions.export')}
           </Button>
-          <Button leftSection={<AddCircle size={16} />}>
+          {/* The screen's single amber CTA (colorschema.md rule 1). */}
+          <Button color="amber.4" leftSection={<AddCircle size={16} />}>
             {t('actions.newVisitor')}
           </Button>
         </div>

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { WasiyLogo } from './wasiy-logo'
 
 type BrandProps = {
   productAreaKey?: string
@@ -9,12 +10,11 @@ export function Brand({ productAreaKey }: BrandProps) {
 
   return (
     <div className="flex items-center gap-2.5 px-3 pb-5">
-      <div
-        aria-hidden="true"
-        className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--mantine-primary-color-5)] to-[var(--mantine-primary-color-8)] text-sm font-bold text-white"
-      >
-        W
-      </div>
+      {/* Rule 7: petróleo mark on light, inverted paper on dark. */}
+      <WasiyLogo
+        className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"
+        size={32}
+      />
       <div className="min-w-0">
         <p className="text-base font-bold leading-tight tracking-tight text-[var(--mantine-color-text)]">
           Wasiy

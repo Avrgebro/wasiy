@@ -6,19 +6,39 @@
 @import '@mantine/core/styles.layer.css';
 @import '@mantine/notifications/styles.layer.css';
 
-/* Mantine colors live in src/app/theme.ts; shell-specific tokens are defined
-   here on top of Mantine's CSS variables. */
+/* Paleta «Puerto» (colorschema.md). The Mantine scales live in
+   src/app/theme.ts; these are the semantic reference tokens plus the
+   shell-specific tokens built on top of Mantine's CSS variables. */
 
 :root {
-  /* App shell ("Soft workspace" layout) */
-  --app-canvas: light-dark(
-    var(--mantine-color-gray-0),
-    var(--mantine-color-dark-8)
-  );
-  --sidebar: var(--mantine-color-body);
+  --wa-primary: #124e52;
+  --wa-primary-dark: #0a3538;
+  --wa-secondary: #3e7c80;
+  --wa-accent: #e0a438;
+  --wa-accent-hover: #e8b45c;
+  --wa-bg: #f7f5f0;
+  --wa-surface: #ffffff;
+  --wa-text: #1c2b2c;
+  --wa-text-muted: #5a6b6b;
+  --wa-text-disabled: #9aa6a4;
+  --wa-border: #dde4e1;
+  --wa-success: #2e7d5b;
+  --wa-warning: #b97f24;
+  --wa-danger: #c0442e;
+  --wa-info: #2f6f8f;
+
+  /* Foco visible: anillo 2 px info en claro; en oscuro borde interactive +
+     halo (see the :focus-visible rule below). */
+  --wa-focus: var(--wa-info);
+  --wa-focus-halo: transparent;
+
+  /* App shell ("Soft workspace" layout). Light: white sidebar/surfaces float
+     on warm paper; dark: sunken sidebar per the elevation hierarchy. */
+  --app-canvas: var(--mantine-color-body);
+  --sidebar: light-dark(var(--wa-surface), var(--mantine-color-dark-8));
   --sidebar-foreground: var(--mantine-color-text);
   --sidebar-hover: light-dark(
-    var(--mantine-color-gray-1),
+    var(--mantine-color-teal-0),
     var(--mantine-color-dark-5)
   );
   --sidebar-accent: var(--mantine-primary-color-filled);
@@ -28,6 +48,46 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --wa-bg: #101d1e;
+  --wa-surface: #16282a;
+  --wa-surface-raised: #1d3335;
+  --wa-surface-sunken: #0d1a1b;
+  --wa-text: #e9ece8;
+  --wa-text-muted: #9fb0ae;
+  --wa-text-subtle: #5f7371;
+  --wa-border: #2a3f40;
+  --wa-interactive: #7fb5b0;
+  --wa-success: #6fbf97;
+  --wa-warning: #d9a64c;
+  --wa-danger: #e37b66;
+  --wa-info: #6fa8c9;
+
+  --wa-focus: var(--wa-interactive);
+  --wa-focus-halo: rgba(127, 181, 176, 0.18);
+
+  /* Petroleum stops being the interactive text color in dark (insufficient
+     contrast); links use teal.3 instead. */
+  --mantine-color-anchor: var(--mantine-color-teal-3);
+}
+
+/* Papel, no blanco: the light body (#F7F5F0) is set via cssVariablesResolver
+   in src/app/theme.ts — a stylesheet override here would lose to the
+   provider's runtime-injected style tag. The dark body comes from the
+   petroleum dark scale (dark-7). */
+
+/* Jerarquía por elevación en oscuro: no shadows, borders delimit. */
+:root[data-mantine-color-scheme='dark'] .mantine-Paper-root {
+  box-shadow: none;
+}
+
+/* Unlayered so it wins over Mantine's per-component focus styles. */
+:focus-visible {
+  outline: 2px solid var(--wa-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--wa-focus-halo);
 }
 
 html {
