@@ -9,7 +9,6 @@ import { useMe } from '../auth/hooks'
 import { NullableTextInput } from '../registry/nullable-text-input'
 import { RegistryCrudPage } from '../registry/registry-crud-page'
 import { statusOptions } from '../registry/status-options'
-import { normalizedRegistrySearch } from '../registry/types'
 import { formatUnitLabel } from '../units/unit-label'
 import { useActiveUnitOptions } from '../units/use-active-unit-options'
 import { createVehicle, getVehicles, updateVehicle, type VehicleSummary } from './api'
@@ -59,9 +58,8 @@ export function VehiclesRegistryPage() {
 function VehiclesRegistryContent({ location }: { location: { id: string } }) {
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
-  const routeSearch = routeApi.useSearch()
-  const search = normalizedRegistrySearch(routeSearch)
-  const vehicleType = typeof routeSearch.vehicle_type === 'string' ? routeSearch.vehicle_type : ''
+  const search = routeApi.useSearch()
+  const vehicleType = search.vehicle_type
   const unitOptions = useActiveUnitOptions(location)
 
   function updateSearch(next: Partial<typeof search> & { vehicle_type?: string }) {

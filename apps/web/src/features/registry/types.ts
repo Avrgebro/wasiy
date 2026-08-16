@@ -27,16 +27,3 @@ export function appendRegistryParams(
   if (search.status) params.set('status', search.status)
   if (search.sort) params.set('sort', search.sort)
 }
-
-export function normalizedRegistrySearch(search: RegistrySearch) {
-  return {
-    page: search.page && search.page > 0 ? search.page : 1,
-    per_page:
-      search.per_page && search.per_page > 0 && search.per_page <= 100
-        ? search.per_page
-        : 15,
-    search: search.search ?? '',
-    status: search.status ?? '',
-    sort: search.sort ?? '',
-  }
-}

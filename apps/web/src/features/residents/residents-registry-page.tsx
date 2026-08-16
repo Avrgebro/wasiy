@@ -9,7 +9,6 @@ import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { RegistryCrudPage } from '../registry/registry-crud-page'
 import { statusOptions } from '../registry/status-options'
-import { normalizedRegistrySearch } from '../registry/types'
 import { useActiveUnitOptions } from '../units/use-active-unit-options'
 import { createResident, getResidents, updateResident, type ResidentSummary } from './api'
 import { residentSchema, type ResidentFormValues } from './schemas'
@@ -64,7 +63,7 @@ function ResidentsRegistryContent({
 }) {
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
-  const search = normalizedRegistrySearch(routeApi.useSearch())
+  const search = routeApi.useSearch()
   const unitOptions = useActiveUnitOptions(location)
 
   function updateSearch(next: Partial<typeof search>) {

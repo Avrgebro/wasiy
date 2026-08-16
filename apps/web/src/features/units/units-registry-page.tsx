@@ -10,7 +10,6 @@ import { ImportRegistryButton } from '../imports/import-registry-button'
 import { NullableTextInput } from '../registry/nullable-text-input'
 import { RegistryCrudPage } from '../registry/registry-crud-page'
 import { statusOptions } from '../registry/status-options'
-import { normalizedRegistrySearch } from '../registry/types'
 import { createUnit, getUnits, updateUnit, type UnitSummary } from './api'
 import { unitSchema, type UnitFormValues } from './schemas'
 import { formatUnitLabel } from './unit-label'
@@ -47,7 +46,7 @@ export function UnitsRegistryPage() {
 function UnitsRegistryContent({ location }: { location: { id: string } }) {
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
-  const search = normalizedRegistrySearch(routeApi.useSearch())
+  const search = routeApi.useSearch()
 
   function updateSearch(next: Partial<typeof search>) {
     void navigate({

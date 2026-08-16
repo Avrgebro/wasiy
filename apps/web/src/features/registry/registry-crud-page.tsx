@@ -14,9 +14,10 @@ import { useTranslation } from 'react-i18next'
 import { getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { RegistryFilters, RegistryHeader } from './registry-page-chrome'
 import { RegistryTable } from './registry-table'
-import type { PaginatedApiResponse, normalizedRegistrySearch } from './types'
+import type { RegistrySearchValues } from './search'
+import type { PaginatedApiResponse } from './types'
 
-export type RegistrySearchValues = ReturnType<typeof normalizedRegistrySearch>
+export type { RegistrySearchValues }
 
 type RegistryCrudPageProps<TRow, TForm extends FieldValues> = {
   columns: (openEdit: (row: TRow) => void) => ColumnDef<TRow>[]
