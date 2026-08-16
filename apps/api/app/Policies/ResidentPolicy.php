@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\AccountRole;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\Resident;
@@ -22,6 +23,44 @@ class ResidentPolicy
     public function createInAccount(User $user, Account $account): bool
     {
         return $this->access->canManageAnyRegistryInAccount($user, $account);
+    }
+
+    /**
+     * Location-independent view access: admins of the resident's account,
+     * or anyone with view access via one of the resident's membership
+     * locations they can reach.
+     */
+    public function view(User $user, Resident $resident): bool
+    {
+        if ($this->access->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
+            return true;
+        }
+
+        $location = $this->accessibleMembershipLocation($user, $resident);
+
+        return $location !== null && $this->viewInLocation($user, $resident, $location);
+    }
+
+    public function update(User $user, Resident $resident): bool
+    {
+        if ($this->access->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
+            return true;
+        }
+
+        $location = $this->accessibleMembershipLocation($user, $resident);
+
+        return $location !== null && $this->updateInLocation($user, $resident, $location);
+    }
+
+    public function delete(User $user, Resident $resident): bool
+    {
+        if ($this->access->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
+            return true;
+        }
+
+        $location = $this->accessibleMembershipLocation($user, $resident);
+
+        return $location !== null && $this->deleteInLocation($user, $resident, $location);
     }
 
     public function viewInLocation(User $user, Resident $resident, Location $location): bool
@@ -50,5 +89,13 @@ class ResidentPolicy
     public function updatePortalPhone(User $user, Resident $resident): bool
     {
         return $this->access->residentForUser($user)?->is($resident) === true;
+    }
+
+    private function accessibleMembershipLocation(User $user, Resident $resident): ?Location
+    {
+        return $resident->unitMemberships()
+            ->whereIn('location_id', $this->access->accessibleLocationsForAccount($user, $resident->account)->pluck('id'))
+            ->first()
+            ?->location;
     }
 }

@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Registry\VehicleWriter;
 use App\Enums\ActivityEventType;
-use App\Enums\VehicleType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePortalVehicleRequest;
+use App\Http\Requests\UpdatePortalVehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Unit;
 use App\Models\User;
@@ -17,8 +18,6 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Resident-facing vehicle CRUD. Residents may only touch vehicles in units
@@ -57,12 +56,12 @@ class PortalVehicleController extends Controller
         );
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StorePortalVehicleRequest $request): JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
-        $validated = $this->validatePayload($request, $user);
-        $unit = Unit::query()->findOrFail($validated['unit_id']);
+        $validated = $request->validated();
+        $unit = $request->unit();
 
         Gate::authorize('createAsResident', [Vehicle::class, $unit]);
 
@@ -71,14 +70,11 @@ class PortalVehicleController extends Controller
         return (new VehicleResource($vehicle->load('unit')))->response()->setStatusCode(201);
     }
 
-    public function update(Request $request, Vehicle $vehicle): VehicleResource
+    public function update(UpdatePortalVehicleRequest $request, Vehicle $vehicle): VehicleResource
     {
         /** @var User $user */
         $user = $request->user();
-
-        Gate::authorize('updateAsResident', $vehicle);
-
-        $validated = $this->validatePayload($request, $user, partial: true);
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $vehicle, $user): void {
             if (isset($validated['unit_id'])) {
@@ -133,33 +129,6 @@ class PortalVehicleController extends Controller
         });
 
         return response()->noContent();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function validatePayload(Request $request, User $user, bool $partial = false): array
-    {
-        $required = $partial ? 'sometimes' : 'required';
-
-        $validated = $request->validate([
-            'unit_id' => [$required, 'string', 'ulid', Rule::exists('units', 'id')],
-            'vehicle_type' => [$required, Rule::enum(VehicleType::class)],
-            'plate' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'make' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'model' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'color' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'notes' => ['sometimes', 'nullable', 'string', 'max:1000'],
-            'status' => ['prohibited'],
-        ]);
-
-        if (isset($validated['unit_id']) && ! in_array($validated['unit_id'], $this->unitIdsFor($user), true)) {
-            throw ValidationException::withMessages([
-                'unit_id' => __('The selected unit is not available for vehicle assignment.'),
-            ]);
-        }
-
-        return $validated;
     }
 
     /**

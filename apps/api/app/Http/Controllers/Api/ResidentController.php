@@ -14,6 +14,7 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
 use App\Models\User;
+use App\Rules\AssignableUnit;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
 use Illuminate\Database\Eloquent\Builder;
@@ -24,7 +25,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class ResidentController extends Controller
 {
@@ -115,14 +115,14 @@ class ResidentController extends Controller
 
     public function show(Request $request, Resident $resident): ResidentResource
     {
-        $this->authorizeResidentAccess($request, $resident);
+        Gate::authorize('view', $resident);
 
         return new ResidentResource($resident->loadSummary());
     }
 
     public function update(Request $request, Resident $resident): ResidentResource
     {
-        $this->authorizeResidentAccess($request, $resident, mutate: true);
+        Gate::authorize('update', $resident);
 
         $validated = $request->validate([
             'first_name' => ['sometimes', 'required', 'string', 'max:255'],
@@ -167,7 +167,7 @@ class ResidentController extends Controller
 
     public function destroy(Request $request, Resident $resident): ResidentResource|Response
     {
-        $this->authorizeResidentAccess($request, $resident, mutate: true);
+        Gate::authorize('delete', $resident);
 
         if (! $resident->unitMemberships()->exists() && $resident->user_id === null) {
             $resident->delete();
@@ -204,7 +204,17 @@ class ResidentController extends Controller
             'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'memberships' => ['sometimes', 'array'],
-            'memberships.*.unit_id' => ['required', 'string', 'ulid', Rule::exists('units', 'id')->where('account_id', $account->id)],
+            'memberships.*.unit_id' => [
+                'required',
+                'string',
+                'ulid',
+                Rule::exists('units', 'id')->where('account_id', $account->id),
+                new AssignableUnit(
+                    fn (Unit $unit): bool => Gate::forUser($request->user())
+                        ->allows('create', [UnitMembership::class, $unit->location]),
+                    __('The selected unit is not available for membership assignment.'),
+                ),
+            ],
             'memberships.*.resident_type' => ['required', Rule::enum(ResidentType::class)],
             'memberships.*.status' => ['sometimes', Rule::enum(RegistryStatus::class)],
             'memberships.*.is_primary_contact' => ['sometimes', 'boolean'],
@@ -212,46 +222,7 @@ class ResidentController extends Controller
             'memberships.*.ended_at' => ['sometimes', 'nullable', 'date', 'after_or_equal:memberships.*.started_at'],
         ]);
 
-        $this->validateMembershipUnitsAreManageable($request, $validated['memberships'] ?? [], 'memberships');
-
         return $validated;
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $memberships
-     */
-    private function validateMembershipUnitsAreManageable(Request $request, array $memberships, string $field): void
-    {
-        $messages = [];
-
-        foreach ($memberships as $index => $membership) {
-            $unit = Unit::query()->find($membership['unit_id'] ?? null);
-
-            if (! $unit || ! Gate::forUser($request->user())->allows('create', [UnitMembership::class, $unit->location])) {
-                $messages["{$field}.{$index}.unit_id"] = __('The selected unit is not available for membership assignment.');
-            }
-        }
-
-        if ($messages !== []) {
-            throw ValidationException::withMessages($messages);
-        }
-    }
-
-    private function authorizeResidentAccess(Request $request, Resident $resident, bool $mutate = false): void
-    {
-        /** @var User $user */
-        $user = $request->user();
-
-        if ($this->access->hasAccountRole($user, $resident->account, AccountRole::AccountAdmin)) {
-            return;
-        }
-
-        $location = $resident->unitMemberships()
-            ->whereIn('location_id', $this->access->accessibleLocationsForAccount($user, $resident->account)->pluck('id'))
-            ->first()
-            ?->location;
-
-        abort_unless($location && Gate::forUser($user)->allows($mutate ? 'updateInLocation' : 'viewInLocation', [$resident, $location]), 403);
     }
 
     /**

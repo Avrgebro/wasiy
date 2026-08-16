@@ -5,19 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Actions\Registry\CreateUnitMembership;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUnitMembershipRequest;
+use App\Http\Requests\UpdateUnitMembershipRequest;
 use App\Http\Resources\UnitMembershipResource;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class UnitMembershipController extends Controller
 {
@@ -25,10 +23,10 @@ class UnitMembershipController extends Controller
         private readonly CreateUnitMembership $createMembership,
     ) {}
 
-    public function store(Request $request, Resident $resident): JsonResponse
+    public function store(StoreUnitMembershipRequest $request, Resident $resident): JsonResponse
     {
-        $validated = $this->validatePayload($request, $resident);
-        $unit = Unit::query()->where('account_id', $resident->account_id)->findOrFail($validated['unit_id']);
+        $validated = $request->validated();
+        $unit = $request->unit();
 
         Gate::authorize('create', [UnitMembership::class, $unit->location]);
 
@@ -40,11 +38,9 @@ class UnitMembershipController extends Controller
         return (new UnitMembershipResource($membership->loadSummary()))->response()->setStatusCode(201);
     }
 
-    public function update(Request $request, UnitMembership $membership): UnitMembershipResource
+    public function update(UpdateUnitMembershipRequest $request, UnitMembership $membership): UnitMembershipResource
     {
-        Gate::authorize('update', $membership);
-
-        $validated = $this->validatePayload($request, $membership->resident, partial: true);
+        $validated = $request->validated();
 
         /** @var User $actor */
         $actor = $request->user();
@@ -138,34 +134,5 @@ class UnitMembershipController extends Controller
         });
 
         return new UnitMembershipResource($membership->loadSummary());
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function validatePayload(Request $request, Resident $resident, bool $partial = false): array
-    {
-        $required = $partial ? 'sometimes' : 'required';
-
-        $validated = $request->validate([
-            'unit_id' => [$required, 'string', 'ulid', Rule::exists('units', 'id')->where('account_id', $resident->account_id)],
-            'resident_type' => [$required, Rule::enum(ResidentType::class)],
-            'status' => ['sometimes', Rule::enum(RegistryStatus::class)],
-            'is_primary_contact' => ['sometimes', 'boolean'],
-            'started_at' => ['sometimes', 'nullable', 'date'],
-            'ended_at' => ['sometimes', 'nullable', 'date', 'after_or_equal:started_at'],
-        ]);
-
-        if (isset($validated['unit_id'])) {
-            $unit = Unit::query()->find($validated['unit_id']);
-
-            if (! $unit || ! Gate::allows('create', [UnitMembership::class, $unit->location])) {
-                throw ValidationException::withMessages([
-                    'unit_id' => __('The selected unit is not available for membership assignment.'),
-                ]);
-            }
-        }
-
-        return $validated;
     }
 }

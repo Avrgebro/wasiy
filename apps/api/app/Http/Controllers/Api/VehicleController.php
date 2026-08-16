@@ -7,6 +7,8 @@ use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
 use App\Enums\VehicleType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreVehicleRequest;
+use App\Http\Requests\UpdateVehicleRequest;
 use App\Http\Resources\VehicleResource;
 use App\Models\Location;
 use App\Models\Unit;
@@ -22,7 +24,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class VehicleController extends Controller
 {
@@ -56,12 +57,10 @@ class VehicleController extends Controller
         );
     }
 
-    public function store(Request $request, Location $location): JsonResponse
+    public function store(StoreVehicleRequest $request, Location $location): JsonResponse
     {
-        Gate::authorize('create', [Vehicle::class, $location]);
-
-        $validated = $this->validateVehiclePayload($request, $location);
-        $unit = $this->managerUnitForPayload($validated['unit_id'], $location);
+        $validated = $request->validated();
+        $unit = $request->unit();
 
         /** @var User $actor */
         $actor = $request->user();
@@ -78,21 +77,18 @@ class VehicleController extends Controller
         return new VehicleResource($vehicle->load('unit'));
     }
 
-    public function update(Request $request, Vehicle $vehicle): VehicleResource
+    public function update(UpdateVehicleRequest $request, Vehicle $vehicle): VehicleResource
     {
-        Gate::authorize('update', $vehicle);
-
-        $validated = $this->validateVehiclePayload($request, $vehicle->location, partial: true);
+        $validated = $request->validated();
 
         /** @var User $actor */
         $actor = $request->user();
 
         DB::transaction(function () use ($validated, $vehicle, $actor): void {
             if (isset($validated['unit_id'])) {
-                // The validator pins the unit to the vehicle's current
+                // The request pins the unit to the vehicle's current
                 // account and location, so only the assignment can change.
-                $unit = $this->managerUnitForPayload($validated['unit_id'], $vehicle->location);
-                $vehicle->unit_id = $unit->id;
+                $vehicle->unit_id = $validated['unit_id'];
             }
 
             $vehicle->fill(collect($validated)->except('unit_id')->all());
@@ -174,40 +170,5 @@ class VehicleController extends Controller
                 $query->whereRaw('LOWER(plate) = ?', [Str::lower(trim($plate))]);
             })
             ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->searchLike(['plate', 'make', 'model', 'color'], $search));
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function validateVehiclePayload(Request $request, Location $location, bool $partial = false): array
-    {
-        $required = $partial ? 'sometimes' : 'required';
-
-        return $request->validate([
-            'unit_id' => [$required, 'string', 'ulid', Rule::exists('units', 'id')->where('account_id', $location->account_id)->where('location_id', $location->id)],
-            'vehicle_type' => [$required, Rule::enum(VehicleType::class)],
-            'plate' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'make' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'model' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'color' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'status' => ['sometimes', Rule::enum(RegistryStatus::class)],
-            'notes' => ['sometimes', 'nullable', 'string', 'max:1000'],
-        ]);
-    }
-
-    private function managerUnitForPayload(string $unitId, Location $location): Unit
-    {
-        $unit = Unit::query()
-            ->where('account_id', $location->account_id)
-            ->where('location_id', $location->id)
-            ->find($unitId);
-
-        if (! $unit || $unit->status !== RegistryStatus::Active) {
-            throw ValidationException::withMessages([
-                'unit_id' => __('The selected unit is not available for vehicle assignment.'),
-            ]);
-        }
-
-        return $unit;
     }
 }
