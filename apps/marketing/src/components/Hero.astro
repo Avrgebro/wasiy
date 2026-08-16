@@ -287,6 +287,9 @@
   }
 
   .approval-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     font: 600 13.5px var(--font-instrument);
     color: var(--bg);
   }
@@ -299,7 +302,7 @@
     background: var(--gold);
     align-items: center;
     justify-content: center;
-    vertical-align: -3px;
+    flex-shrink: 0;
     animation: wa-tick 5s ease infinite;
   }
 

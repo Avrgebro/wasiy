@@ -12,6 +12,7 @@ import LogoMark from './LogoMark.astro';
     <a href="#modulos">Producto</a>
     <a href="#precios">Precios</a>
     <a href="#faq">FAQ</a>
+    <a href="#contacto">Contacto</a>
     <span class="copyright">© 2026 Wasiy</span>
   </div>
 </footer>
@@ -66,6 +67,27 @@ import LogoMark from './LogoMark.astro';
   @media (max-width: 700px) {
     footer {
       padding: 24px 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 18px;
+    }
+
+    .brand {
+      row-gap: 6px;
+    }
+
+    .tagline {
+      margin-left: 0;
+      flex-basis: 100%;
+    }
+
+    .links {
+      flex-wrap: wrap;
+      gap: 14px 22px;
+    }
+
+    .copyright {
+      flex-basis: 100%;
     }
   }
 </style>
