@@ -77,6 +77,10 @@ const faqs = [
   }
 
   summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
     font: 600 17px var(--font-sora);
     cursor: pointer;
     list-style: none;
@@ -84,6 +88,27 @@ const faqs = [
 
   summary::-webkit-details-marker {
     display: none;
+  }
+
+  summary::after {
+    content: '';
+    flex: none;
+    width: 10px;
+    height: 10px;
+    margin-top: -2px;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+
+  details[open] summary::after {
+    transform: rotate(-135deg);
+    margin-top: 2px;
+  }
+
+  summary:hover::after {
+    border-color: var(--ink);
   }
 
   .answer {

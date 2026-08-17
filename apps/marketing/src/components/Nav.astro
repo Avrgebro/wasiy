@@ -28,24 +28,23 @@ import LogoMark from './LogoMark.astro';
     </div>
   </div>
 
-  <div class="overlay" id="nav-menu">
+  <div class="overlay" id="nav-menu" inert>
     <svg
       class="overlay-arches"
-      viewBox="0 0 390 720"
-      preserveAspectRatio="xMidYMax slice"
+      viewBox="0 0 48 48"
       fill="none"
       aria-hidden="true"
     >
       <path
-        d="M-30 440 v130 a90 90 0 0 0 180 0 v-130 M150 440 v130 a90 90 0 0 0 180 0 v-130 M330 556 v42 a18 18 0 0 1 -18 18 h-50"
+        d="M8 12 v16 a8 8 0 0 0 16 0 v-16 M24 12 v16 a8 8 0 0 0 16 0 v-16 M40 28 v6 a2 2 0 0 1 -2 2 h-6"
         stroke="var(--teal-soft)"
-        stroke-width="48"
+        stroke-width="6.5"
         stroke-linecap="round"></path>
-      <circle cx="285" cy="522" r="8" fill="var(--gold)" class="overlay-pulse"></circle>
+      <circle cx="32" cy="19" r="3.5" fill="var(--gold)" class="overlay-pulse"></circle>
     </svg>
     <div class="overlay-bar">
       <div class="brand">
-        <LogoMark size={24} color="var(--bg)" />
+        <LogoMark size={26} color="var(--bg)" />
         <span class="wordmark inverted">wasiy</span>
       </div>
       <button type="button" class="menu-close" aria-label="Cerrar menú">
@@ -79,6 +78,11 @@ import LogoMark from './LogoMark.astro';
     document.body.style.overflow = open ? 'hidden' : '';
     toggle?.setAttribute('aria-expanded', String(open));
     toggle?.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+    if (open) {
+      overlay?.removeAttribute('inert');
+    } else {
+      overlay?.setAttribute('inert', '');
+    }
   };
 
   toggle?.addEventListener('click', () => setOpen(!nav?.classList.contains('open')));
@@ -129,7 +133,6 @@ import LogoMark from './LogoMark.astro';
   }
 
   .wordmark.inverted {
-    font-size: 18px;
     color: var(--bg);
   }
 
@@ -212,20 +215,36 @@ import LogoMark from './LogoMark.astro';
       display: flex;
     }
 
-    nav.open .overlay {
+    .overlay {
       display: flex;
       flex-direction: column;
       position: fixed;
       inset: 0;
       background: var(--teal);
       overflow: hidden;
+      clip-path: circle(0% at top right);
+      visibility: hidden;
+      transition: clip-path 0.5s ease, visibility 0s linear 0.5s;
+    }
+
+    nav.open .overlay {
+      clip-path: circle(150% at top right);
+      visibility: visible;
+      transition: clip-path 0.5s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overlay {
+        transition: none;
+      }
     }
 
     .overlay-arches {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      bottom: -75px;
+      right: -45px;
+      width: 600px;
+      height: 600px;
     }
 
     .overlay-pulse {
