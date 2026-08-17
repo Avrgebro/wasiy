@@ -45,7 +45,17 @@
               stroke-linejoin="round"></path>
           </svg>
         </button>
-        <a class="secondary" href="#dia">Ver un día completo ↓</a>
+        <a class="secondary" href="#dia">
+          Ver un día completo
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+            <path
+              d="M8 3 v9 M4.5 8.5 L8 12 L11.5 8.5"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </a>
       </div>
       <div class="audience">
         Para administradoras, juntas de propietarios y edificios recién entregados.
@@ -185,6 +195,9 @@
   }
 
   .secondary {
+    display: flex;
+    align-items: center;
+    gap: 9px;
     font: 600 15px var(--font-instrument);
     padding: 15px 10px;
   }

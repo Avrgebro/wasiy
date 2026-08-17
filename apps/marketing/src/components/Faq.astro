@@ -91,24 +91,26 @@ const faqs = [
   }
 
   summary::after {
-    content: '';
+    content: '+';
     flex: none;
-    width: 10px;
-    height: 10px;
-    margin-top: -2px;
-    border-right: 2px solid var(--muted);
-    border-bottom: 2px solid var(--muted);
-    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--cream);
+    color: var(--amber-text);
+    font: 600 19px var(--font-instrument);
     transition: transform 0.2s ease;
   }
 
   details[open] summary::after {
-    transform: rotate(-135deg);
-    margin-top: 2px;
+    transform: rotate(45deg);
   }
 
   summary:hover::after {
-    border-color: var(--ink);
+    color: var(--teal);
   }
 
   .answer {
