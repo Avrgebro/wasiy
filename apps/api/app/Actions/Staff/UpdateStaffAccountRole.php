@@ -29,6 +29,14 @@ class UpdateStaffAccountRole
                 ->lockForUpdate()
                 ->get();
 
+            // The route's manageStaff check ran before this transaction
+            // opened; a concurrent request may have removed the actor's admin
+            // role since. Without this re-check two admins demoting each
+            // other could both pass authorization and leave zero admins.
+            if (! $adminAssignments->contains('user_id', $actor->id)) {
+                abort(403);
+            }
+
             $currentAccountRole = AccountUserRole::query()
                 ->where('account_id', $account->id)
                 ->where('user_id', $staff->id)

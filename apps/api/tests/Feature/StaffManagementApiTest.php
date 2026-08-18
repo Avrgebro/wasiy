@@ -624,6 +624,29 @@ test('staff assignment updates prevent removing the only remaining account admin
     ]);
 });
 
+test('an actor demoted after authorization cannot demote the remaining admin', function () {
+    $account = Account::factory()->create();
+    $demotedActor = createAccountAdmin($account);
+    $remainingAdmin = createAccountAdmin($account);
+
+    // Simulate the race: the actor passed the route's manageStaff check, then
+    // a concurrent request removed their admin role before this transaction.
+    AccountUserRole::query()
+        ->where('account_id', $account->id)
+        ->where('user_id', $demotedActor->id)
+        ->delete();
+
+    expect(fn () => app(App\Actions\Staff\UpdateStaffAccountRole::class)
+        ->handle($account, $demotedActor, $remainingAdmin, null))
+        ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+
+    $this->assertDatabaseHas('account_user_roles', [
+        'account_id' => $account->id,
+        'user_id' => $remainingAdmin->id,
+        'role' => AccountRole::AccountAdmin->value,
+    ]);
+});
+
 test('deactivated staff users cannot be granted new roles but can have roles removed', function () {
     $account = Account::factory()->create();
     $firstLocation = Location::factory()->for($account)->create();

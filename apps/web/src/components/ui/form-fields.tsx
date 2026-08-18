@@ -1,11 +1,14 @@
 import { PasswordInput, TextInput } from '@mantine/core'
+import type { PasswordInputProps, TextInputProps } from '@mantine/core'
+import type { ReactNode } from 'react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
 import { fieldErrorMessage } from '../../lib/errors'
 
 type FormFieldProps<T extends FieldValues> = {
   autoComplete?: string
   control: Control<T>
-  label: string
+  label: ReactNode
+  leftSection?: ReactNode
   name: Path<T>
   placeholder?: string
 }
@@ -18,9 +21,11 @@ export function FormTextInput<T extends FieldValues>({
   autoComplete,
   control,
   label,
+  leftSection,
   name,
   placeholder,
-}: FormFieldProps<T>) {
+  styles,
+}: FormFieldProps<T> & { styles?: TextInputProps['styles'] }) {
   return (
     <Controller
       control={control}
@@ -31,7 +36,9 @@ export function FormTextInput<T extends FieldValues>({
           autoComplete={autoComplete}
           error={fieldErrorMessage(fieldState.error)}
           label={label}
+          leftSection={leftSection}
           placeholder={placeholder}
+          styles={styles}
         />
       )}
     />
@@ -42,8 +49,10 @@ export function FormPasswordInput<T extends FieldValues>({
   autoComplete,
   control,
   label,
+  leftSection,
   name,
-}: FormFieldProps<T>) {
+  styles,
+}: FormFieldProps<T> & { styles?: PasswordInputProps['styles'] }) {
   return (
     <Controller
       control={control}
@@ -54,6 +63,8 @@ export function FormPasswordInput<T extends FieldValues>({
           autoComplete={autoComplete}
           error={fieldErrorMessage(fieldState.error)}
           label={label}
+          leftSection={leftSection}
+          styles={styles}
         />
       )}
     />
