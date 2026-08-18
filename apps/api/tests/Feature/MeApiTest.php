@@ -48,6 +48,8 @@ test('it returns the authenticated user location scoped access context', functio
         ->assertJsonPath('resident_memberships', [])
         ->assertJsonCount(1, 'accounts')
         ->assertJsonPath('accounts.0.id', $account->id)
+        ->assertJsonPath('accounts.0.locations_count', $account->locations()->count())
+        ->assertJsonPath('active_account.locations_count', $account->locations()->count())
         ->assertJsonCount(1, 'accessible_locations')
         ->assertJsonPath('accessible_locations.0.id', $location->id)
         ->assertJsonPath('accessible_locations.0.roles.0', LocationRole::LocationManager->value)

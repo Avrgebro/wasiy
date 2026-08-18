@@ -15,6 +15,7 @@ export type AccountSummary = {
   name: string
   slug: string
   timezone: string
+  locations_count: number
 }
 
 export type LocationSummary = {

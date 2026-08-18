@@ -42,10 +42,11 @@
     "welcomeBackSubtitle": "Sign in to continue with today's operation."
   },
   "accountSelection": {
-    "productArea": "Account access",
     "selectFailed": "Account selection failed",
-    "summary": "Choose the account you want to work in for this session.",
-    "title": "Select an account"
+    "summary": "Your user belongs to several organizations.",
+    "title": "Choose an account",
+    "locationCount_one": "{{count}} building",
+    "locationCount_other": "{{count}} buildings"
   },
   "errors": {
     "actionFailed": "Action failed",

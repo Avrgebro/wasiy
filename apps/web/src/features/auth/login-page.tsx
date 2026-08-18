@@ -15,6 +15,10 @@ import {
   Password,
 } from '@solar-icons/react'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
+import '@fontsource/sora/600.css'
+import '@fontsource/instrument-sans/400.css'
+import '@fontsource/instrument-sans/500.css'
+import '@fontsource/instrument-sans/600.css'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { getDefaultAuthenticatedRoute } from './access'
@@ -81,13 +85,13 @@ function BrandPanel() {
 
       <div className="relative flex items-center gap-2.5">
         <WasiyLogo className="shrink-0 text-[#F7F5F0]" size={32} />
-        <span className="text-2xl font-semibold tracking-tight text-[#F7F5F0]">
+        <span className="font-display text-2xl font-semibold tracking-tight text-[#F7F5F0]">
           Wasiy
         </span>
       </div>
 
       <div className="relative flex max-w-[460px] flex-col gap-[22px]">
-        <h2 className="text-pretty text-[2.625rem] font-semibold leading-[1.18] tracking-tight text-[#F7F5F0]">
+        <h2 className="font-display text-pretty text-[2.625rem] font-semibold leading-[1.18] tracking-tight text-[#F7F5F0]">
           {t('auth.brandHeadline')}
         </h2>
         <p className="text-[16.5px] leading-[1.6] text-[var(--mantine-color-dark-2)]">
@@ -106,7 +110,7 @@ function BrandPanel() {
 function BrandStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex-1 rounded-[14px] border border-[var(--mantine-color-dark-4)] bg-[var(--mantine-color-dark-5)]/70 px-5 py-[18px] backdrop-blur-sm">
-      <div className="text-2xl font-semibold text-[var(--mantine-color-amber-3)]">
+      <div className="font-display text-2xl font-semibold text-[var(--mantine-color-amber-3)]">
         {value}
       </div>
       <div className="mt-1 text-[13px] text-[var(--mantine-color-dark-2)]">
@@ -148,7 +152,7 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-[var(--mantine-color-body)] xl:grid-cols-2">
+    <main className="grid min-h-screen bg-[var(--mantine-color-body)] font-brand [--mantine-font-family:var(--font-brand)] xl:grid-cols-2">
       <BrandPanel />
 
       <section className="relative flex flex-col items-center justify-center px-6 py-20 xl:px-24">
@@ -158,13 +162,13 @@ export function LoginPage() {
               className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"
               size={28}
             />
-            <span className="text-xl font-semibold tracking-tight text-[var(--mantine-color-text)]">
+            <span className="font-display text-xl font-semibold tracking-tight text-[var(--mantine-color-text)]">
               Wasiy
             </span>
           </div>
 
           <div>
-            <h1 className="text-[2rem] font-semibold tracking-tight text-[var(--mantine-color-text)]">
+            <h1 className="font-display text-[2rem] font-semibold tracking-tight text-[var(--mantine-color-text)]">
               {t('auth.welcomeBack')}
             </h1>
             <p className="mt-2 text-[15px] text-[var(--mantine-color-dimmed)]">

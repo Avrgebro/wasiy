@@ -129,6 +129,8 @@ Authenticated app screens should not use marketing-style hero layouts.
 
 Use Inter as the primary UI font and JetBrains Mono for code-like values, IDs, and technical metadata. Serif fonts should not be used in the product UI.
 
+Brand surfaces (the marketing site and the auth pages: login, select account) use the brand typography instead: Sora for display text (wordmark, headings, stat values) and Instrument Sans for body and controls. In the web app these are self-hosted via Fontsource and applied with the `font-display` / `font-brand` Tailwind utilities plus a scoped `--mantine-font-family` override — never globally. Everything behind the app shell stays on Inter.
+
 Typography should be practical and restrained. Avoid oversized headings inside authenticated app screens.
 
 Starting scale:

@@ -42,10 +42,11 @@
     "welcomeBackSubtitle": "Ingresa para continuar con la operación de hoy."
   },
   "accountSelection": {
-    "productArea": "Acceso de cuenta",
     "selectFailed": "No se pudo seleccionar la cuenta",
-    "summary": "Elige la cuenta con la que quieres trabajar en esta sesión.",
-    "title": "Selecciona una cuenta"
+    "summary": "Tu usuario pertenece a varias organizaciones.",
+    "title": "Elige una cuenta",
+    "locationCount_one": "{{count}} edificio",
+    "locationCount_other": "{{count}} edificios"
   },
   "errors": {
     "actionFailed": "No se pudo completar la acción",

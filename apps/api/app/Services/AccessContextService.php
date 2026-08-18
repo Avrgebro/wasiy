@@ -50,6 +50,7 @@ class AccessContextService
         ]);
 
         $accounts = $this->access->accessibleAccounts($user)
+            ->withCount('locations')
             ->orderBy('name')
             ->get();
         $activeAccount = $this->resolveActiveAccount($request, $accounts, $persist);
@@ -228,7 +229,7 @@ class AccessContextService
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
     private function accountSummary(Account $account): array
     {
@@ -237,6 +238,9 @@ class AccessContextService
             'name' => $account->name,
             'slug' => $account->slug,
             'timezone' => $account->timezone,
+            // Loaded via withCount() in buildContext; the fallback covers
+            // Account instances that arrive without it.
+            'locations_count' => (int) ($account->locations_count ?? $account->locations()->count()),
         ];
     }
 
