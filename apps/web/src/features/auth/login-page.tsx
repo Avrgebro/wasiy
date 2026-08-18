@@ -76,7 +76,7 @@ function BrandPanel() {
   const { t } = useTranslation('common')
 
   return (
-    <section className="relative hidden flex-col justify-between overflow-hidden bg-[var(--mantine-color-dark-8)] p-14 lg:flex">
+    <section className="relative hidden flex-col justify-between overflow-hidden bg-[var(--mantine-color-dark-8)] p-14 xl:flex">
       <BrandArtwork />
 
       <div className="relative flex items-center gap-2.5">
@@ -148,12 +148,12 @@ export function LoginPage() {
   }
 
   return (
-    <main className="grid min-h-screen bg-[var(--mantine-color-body)] lg:grid-cols-2">
+    <main className="grid min-h-screen bg-[var(--mantine-color-body)] xl:grid-cols-2">
       <BrandPanel />
 
-      <section className="relative flex flex-col items-center justify-center px-6 py-20 lg:px-24">
+      <section className="relative flex flex-col items-center justify-center px-6 py-20 xl:px-24">
         <div className="flex w-full max-w-[420px] flex-col gap-[26px]">
-          <div className="flex items-center gap-2.5 lg:hidden">
+          <div className="flex items-center gap-2.5 xl:hidden">
             <WasiyLogo
               className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"
               size={28}

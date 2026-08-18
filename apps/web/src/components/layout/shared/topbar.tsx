@@ -17,9 +17,12 @@ export function Topbar({
   return (
     <header className="sticky top-0 z-10 flex min-h-16 items-center justify-between bg-[var(--app-canvas)]/85 px-4 backdrop-blur lg:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-3">
+        {/* Tailwind lg, not Mantine hiddenFrom="lg" (75em): the sidebar this
+            toggles is pinned open by Tailwind lg classes in app-shell and
+            sidebar, and the two scales disagree between 1024 and 1200px. */}
         <ActionIcon
           aria-label={t('shell.openNav')}
-          hiddenFrom="lg"
+          className="lg:hidden"
           onClick={onMobileNavOpen}
           size="lg"
           variant="subtle"
