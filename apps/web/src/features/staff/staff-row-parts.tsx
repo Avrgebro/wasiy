@@ -1,8 +1,8 @@
-import { Badge, Text } from '@mantine/core'
+import { Text } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { accountRoles, getRoleLabelKey } from '../auth/access'
 import type { StaffSummary } from './api'
-import { AccessChip } from './staff-badges'
+import { AccessChip, TintChip } from './staff-badges'
 import { staffStatus, type StaffStatus } from './staff-status'
 
 const MAX_VISIBLE_ASSIGNMENTS = 2
@@ -17,11 +17,7 @@ export function StaffStatusBadge({ staff }: { staff: StaffSummary }) {
   const { t } = useTranslation('common')
   const status = staffStatus(staff)
 
-  return (
-    <Badge color={statusColors[status]} radius="xl" size="md" tt="none" variant="light">
-      {t(`staff.statuses.${status}`)}
-    </Badge>
-  )
+  return <TintChip color={statusColors[status]}>{t(`staff.statuses.${status}`)}</TintChip>
 }
 
 export function StaffAccountRoleBadge({ staff }: { staff: StaffSummary }) {
@@ -31,11 +27,7 @@ export function StaffAccountRoleBadge({ staff }: { staff: StaffSummary }) {
     return null
   }
 
-  return (
-    <Badge radius="xl" size="md" tt="none" variant="light">
-      {t(getRoleLabelKey(accountRoles.accountAdmin))}
-    </Badge>
-  )
+  return <TintChip color="teal">{t(getRoleLabelKey(accountRoles.accountAdmin))}</TintChip>
 }
 
 export function StaffLocationChips({ staff }: { staff: StaffSummary }) {

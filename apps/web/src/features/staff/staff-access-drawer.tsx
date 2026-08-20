@@ -3,7 +3,6 @@ import {
   ActionIcon,
   Alert,
   Button,
-  Drawer,
   Group,
   Select,
   Text,
@@ -15,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, type ReactNode } from 'react'
 import { Controller, useFieldArray, useForm, useWatch, type FieldError } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { accountRoles, getRoleLabelKey, locationRoles } from '../auth/access'
 import { createStaffInvitation, updateStaffAccess, type StaffSummary } from './api'
@@ -143,6 +143,23 @@ export function StaffAccessDrawer({
   })
   const assignments = useFieldArray({ control: form.control, name: 'location_assignments' })
   const accessType = useWatch({ control: form.control, name: 'access_type' })
+  const assignmentValues = useWatch({ control: form.control, name: 'location_assignments' }) ?? []
+  // Each location can hold one role at most, so rows can never exceed the
+  // location count, and a location chosen in one row is unavailable in the
+  // others (the schema and the API enforce the same rule as a backstop).
+  const selectedLocationIds = assignmentValues
+    .map((assignment) => assignment?.location_id)
+    .filter(Boolean)
+  const canAddAssignment = assignments.fields.length < locations.length
+
+  function locationOptionsForRow(rowIndex: number) {
+    const ownValue = assignmentValues[rowIndex]?.location_id
+
+    return locations.map((option) => ({
+      ...option,
+      disabled: option.value !== ownValue && selectedLocationIds.includes(option.value),
+    }))
+  }
   const isAdmin = accessType === 'account_admin'
   // Legacy records may hold both access types; saving as admin will clear
   // the assignments, so that consequence must be visible, not silent.
@@ -201,37 +218,17 @@ export function StaffAccessDrawer({
   }
 
   return (
-    <Drawer
+    <AppDrawer
       opened={opened}
-      position="right"
-      size={520}
-      styles={{
-        content: { display: 'flex', flexDirection: 'column', maxWidth: '100vw' },
-        body: { display: 'flex', flex: 1, flexDirection: 'column', minHeight: 0, paddingBottom: 0 },
-      }}
-      title={
-        editing ? (
-          <div>
-            <Text fw={700} size="lg">
-              {editing.name}
-            </Text>
-            <Text c="dimmed" size="xs">
-              {editing.email}
-            </Text>
-          </div>
-        ) : (
-          <Text fw={700} size="lg">
-            {t('staff.invite')}
-          </Text>
-        )
-      }
+      subtitle={editing?.email}
+      title={editing ? editing.name : t('staff.invite')}
       onClose={onClose}
     >
       <form
         className="flex min-h-0 flex-1 flex-col"
         onSubmit={form.handleSubmit(handleSubmit)}
       >
-        <div className="grid min-h-0 flex-1 content-start gap-5 overflow-y-auto pb-5">
+        <AppDrawerBody>
         {form.formState.errors.root?.message ? (
           <Alert color="red" title={t('errors.actionFailed')}>
             {form.formState.errors.root.message}
@@ -299,7 +296,7 @@ export function StaffAccessDrawer({
             title={t('staff.locationStaff')}
             onActivate={() => {
               form.setValue('access_type', 'location_staff', { shouldValidate: true })
-              if (assignments.fields.length === 0) {
+              if (assignments.fields.length === 0 && locations.length > 0) {
                 appendAssignment()
               }
             }}
@@ -316,7 +313,7 @@ export function StaffAccessDrawer({
                           {...field}
                           aria-label={t('staff.location')}
                           className="min-w-0 flex-1"
-                          data={locations}
+                          data={locationOptionsForRow(index)}
                           error={fieldErrorMessage(fieldState.error)}
                           placeholder={t('staff.location')}
                         />
@@ -347,15 +344,17 @@ export function StaffAccessDrawer({
                     </ActionIcon>
                   </Group>
                 ))}
-                <Button
-                  className="justify-self-start"
-                  leftSection={<AddCircle size={14} />}
-                  size="xs"
-                  variant="subtle"
-                  onClick={appendAssignment}
-                >
-                  {t('staff.addLocation')}
-                </Button>
+                {canAddAssignment ? (
+                  <Button
+                    className="justify-self-start"
+                    leftSection={<AddCircle size={14} />}
+                    size="xs"
+                    variant="subtle"
+                    onClick={appendAssignment}
+                  >
+                    {t('staff.addLocation')}
+                  </Button>
+                ) : null}
               </div>
             ) : null}
           </AccessTypeCard>
@@ -380,19 +379,16 @@ export function StaffAccessDrawer({
             </Text>
           </div>
         ) : null}
-        </div>
-        <Group
-          justify="flex-end"
-          className="border-0 border-t border-solid border-[var(--mantine-color-default-border)] py-4"
-        >
+        </AppDrawerBody>
+        <AppDrawerFooter>
           <Button variant="default" onClick={onClose}>
             {t('actions.cancel')}
           </Button>
           <Button color="amber.4" loading={mutation.isPending} type="submit">
             {editing ? t('staff.saveChanges') : t('staff.sendInvitation')}
           </Button>
-        </Group>
+        </AppDrawerFooter>
       </form>
-    </Drawer>
+    </AppDrawer>
   )
 }

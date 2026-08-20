@@ -255,7 +255,7 @@
     }
   },
   "roles": {
-    "accountAdmin": "Administrador de cuenta",
+    "accountAdmin": "Superadmin",
     "frontDesk": "Portería",
     "locationManager": "Administrador"
   },
@@ -373,7 +373,7 @@
     "deactivate": "Desactivar usuario",
     "deactivateHint": "Perderá el acceso de inmediato. Su historial de actividad se conserva.",
     "actions": "Acciones",
-    "adminReplacesLocations": "Al guardar como administrador de cuenta se quitarán las asignaciones de ubicación actuales.",
+    "adminReplacesLocations": "Al guardar como superadmin se quitarán las asignaciones de ubicación actuales.",
     "reactivate": "Reactivar",
     "reactivated": "Acceso reactivado.",
     "deactivated": "Acceso desactivado.",

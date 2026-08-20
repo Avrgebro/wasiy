@@ -12,3 +12,24 @@ export function AccessChip({ children }: { children: ReactNode }) {
     </span>
   )
 }
+
+/**
+ * The tinted sibling of AccessChip for status and role badges. Unlike
+ * Mantine's Badge, the label never truncates to an ellipsis in narrow
+ * cells — chips keep their full text and let the row scroll instead.
+ * Colors come from Mantine's `-light` variant variables, so tints follow
+ * the color scheme.
+ */
+export function TintChip({ color, children }: { color: string; children: ReactNode }) {
+  return (
+    <span
+      className="whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold"
+      style={{
+        backgroundColor: `var(--mantine-color-${color}-light)`,
+        color: `var(--mantine-color-${color}-light-color)`,
+      }}
+    >
+      {children}
+    </span>
+  )
+}

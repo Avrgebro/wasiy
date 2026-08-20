@@ -255,7 +255,7 @@
     }
   },
   "roles": {
-    "accountAdmin": "Account admin",
+    "accountAdmin": "Superadmin",
     "frontDesk": "Front desk",
     "locationManager": "Manager"
   },
@@ -373,7 +373,7 @@
     "deactivate": "Deactivate user",
     "deactivateHint": "They will lose access immediately. Their activity history is kept.",
     "actions": "Actions",
-    "adminReplacesLocations": "Saving as account admin will remove the current location assignments.",
+    "adminReplacesLocations": "Saving as superadmin will remove the current location assignments.",
     "reactivate": "Reactivate",
     "reactivated": "Access reactivated.",
     "deactivated": "Access deactivated.",
