@@ -5,9 +5,7 @@ use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Enums\ResidentType;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -20,12 +18,7 @@ function createRegistryManager(Location $location): User
 {
     $manager = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($location->account, $location, $manager, LocationRole::LocationManager);
 
     return $manager;
 }
@@ -34,11 +27,7 @@ function createRegistryAdmin(Account $account): User
 {
     $admin = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     return $admin;
 }
@@ -230,12 +219,7 @@ test('resident creation is closed to users without registry management rights', 
     $outsider = User::factory()->create();
 
     $frontDesk = User::factory()->create();
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($location->account, $location, $frontDesk, LocationRole::FrontDesk);
 
     $payload = [
         'first_name' => 'Mara',
@@ -331,18 +315,8 @@ test('resident update passes when any accessible membership location grants it',
         ->create();
 
     $user = User::factory()->create();
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $frontDeskLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $managedLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $frontDeskLocation, $user, LocationRole::FrontDesk);
+    grantLocationRole($account, $managedLocation, $user, LocationRole::LocationManager);
 
     $this->actingAs($user)
         ->patchJson("/api/residents/{$resident->id}", ['first_name' => 'Determinista'])

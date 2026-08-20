@@ -7,8 +7,8 @@ use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\UserInvitationStatus;
 use App\Exceptions\InvitationException;
-use App\Models\AccountUserRole;
 use App\Models\Location;
+use App\Models\StaffMembership;
 use App\Models\User;
 use App\Models\UserInvitation;
 use App\Services\ActivityLogger;
@@ -74,6 +74,17 @@ class AcceptStaffInvitation
                 throw InvitationException::userDeactivated();
             }
 
+            // A previously suspended membership must be reactivated by an
+            // admin, not resurrected through an invitation link.
+            $membership = StaffMembership::query()->firstOrNew([
+                'account_id' => $account->id,
+                'user_id' => $user->id,
+            ]);
+
+            if ($membership->exists && $membership->isDeactivated()) {
+                throw InvitationException::userDeactivated();
+            }
+
             [$assignments, $skippedLocationIds] = $this->partitionAssignments($invitation);
             $accountRole = $invitation->invitedAccountRole();
 
@@ -83,17 +94,11 @@ class AcceptStaffInvitation
                 ]);
             }
 
-            if ($accountRole !== null) {
-                AccountUserRole::query()->updateOrCreate(
-                    [
-                        'account_id' => $account->id,
-                        'user_id' => $user->id,
-                    ],
-                    ['role' => AccountRole::from($accountRole)],
-                );
-            }
+            $membership->forceFill([
+                'account_role' => $accountRole !== null ? AccountRole::from($accountRole) : null,
+            ])->save();
 
-            $this->syncLocationAssignments->sync($account, $user, $assignments);
+            $this->syncLocationAssignments->sync($membership, $assignments);
 
             $invitation->forceFill([
                 'user_id' => $user->id,

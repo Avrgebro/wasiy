@@ -7,7 +7,6 @@ use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Models\ActivityLog;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -24,12 +23,7 @@ function createResidentInvitationManager(Location $location): User
 {
     $manager = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($location->account, $location, $manager, LocationRole::LocationManager);
 
     return $manager;
 }

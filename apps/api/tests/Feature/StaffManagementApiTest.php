@@ -6,10 +6,10 @@ use App\Enums\LocationRole;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Models\Account;
-use App\Models\AccountUserRole;
+use App\Models\StaffMembership;
 use App\Models\ActivityLog;
 use App\Models\Location;
-use App\Models\LocationUserRole;
+use App\Models\StaffLocationRole;
 use App\Models\User;
 use App\Models\UserInvitation;
 use App\Notifications\StaffInvitationNotification;
@@ -26,11 +26,7 @@ function createAccountAdmin(Account $account): User
 {
     $admin = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     return $admin;
 }
@@ -66,8 +62,8 @@ test('account admins can invite staff users with location assignments', function
     // Nothing is granted at invite time: no User, no role rows. Access appears
     // only when the invitee accepts.
     expect(User::query()->where('email', 'ana.salas@wasiy.test')->exists())->toBeFalse();
-    $this->assertDatabaseCount('location_user_roles', 0);
-    $this->assertDatabaseCount('account_user_roles', 1); // the inviting admin
+    $this->assertDatabaseCount('staff_location_roles', 0);
+    $this->assertDatabaseCount('staff_memberships', 1); // the inviting admin
 
     $invitation = UserInvitation::query()->where('email', 'ana.salas@wasiy.test')->sole();
 
@@ -121,12 +117,7 @@ test('location managers cannot invite staff users', function () {
     $location = Location::factory()->for($account)->create();
     $manager = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
 
     $this->actingAs($manager)
         ->postJson("/api/accounts/{$account->id}/staff/invitations", [
@@ -144,10 +135,12 @@ test('location managers cannot invite staff users', function () {
         ->assertForbidden();
 });
 
-test('staff invitations require at least one access grant', function () {
+test('staff invitations require exactly one access type', function () {
     $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
     $admin = createAccountAdmin($account);
 
+    // Neither access type provided.
     $this->actingAs($admin)
         ->postJson("/api/accounts/{$account->id}/staff/invitations", [
             'email' => 'staff@wasiy.test',
@@ -155,6 +148,20 @@ test('staff invitations require at least one access grant', function () {
             'last_name' => 'User',
             'account_role' => null,
             'location_assignments' => [],
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('location_assignments');
+
+    // Both access types provided: admin already implies every location.
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/invitations", [
+            'email' => 'staff@wasiy.test',
+            'first_name' => 'Staff',
+            'last_name' => 'User',
+            'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [
+                ['location_id' => $location->id, 'role' => LocationRole::FrontDesk->value],
+            ],
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('location_assignments');
@@ -212,7 +219,7 @@ test('staff invitations reuse existing active users without overwriting identity
     // The existing identity is snapshotted and left untouched, and the invite
     // still grants nothing until it is accepted.
     expect($existingUser->fresh()->name)->toBe('Existing Person');
-    $this->assertDatabaseCount('location_user_roles', 0);
+    $this->assertDatabaseCount('staff_location_roles', 0);
 });
 
 test('staff invitations reject existing deactivated users', function () {
@@ -293,35 +300,49 @@ test('staff invitations reject active duplicate pending invitations and expire s
         ->count())->toBe(1);
 });
 
-test('account admins can assign account roles and location roles independently', function () {
+test('account admin role and location assignments are mutually exclusive', function () {
     $account = Account::factory()->create();
     $firstLocation = Location::factory()->for($account)->create();
     $secondLocation = Location::factory()->for($account)->create();
     $admin = createAccountAdmin($account);
     $staff = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $firstLocation, $staff, LocationRole::FrontDesk);
 
+    // Sending both access types at once is rejected outright.
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
             'account_role' => AccountRole::AccountAdmin->value,
-        ])
-        ->assertOk()
-        ->assertJsonPath('data.account_roles.0', AccountRole::AccountAdmin->value)
-        ->assertJsonPath('data.location_assignments.0.location_id', $firstLocation->id);
-
-    $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
             'location_assignments' => [
                 [
-                    'location_id' => $firstLocation->id,
-                    'role' => LocationRole::LocationManager->value,
+                    'location_id' => $secondLocation->id,
+                    'role' => LocationRole::FrontDesk->value,
                 ],
+            ],
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('location_assignments');
+
+    // Promoting to admin atomically replaces the location assignments.
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [],
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.account_role', AccountRole::AccountAdmin->value)
+        ->assertJsonCount(0, 'data.location_assignments');
+
+    expect(StaffLocationRole::query()
+        ->where('account_id', $account->id)
+        ->whereHas('membership', fn ($query) => $query->where('user_id', $staff->id))
+        ->exists())->toBeFalse();
+
+    // Demoting back to location staff is likewise a single atomic call.
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
+            'location_assignments' => [
                 [
                     'location_id' => $secondLocation->id,
                     'role' => LocationRole::FrontDesk->value,
@@ -329,14 +350,13 @@ test('account admins can assign account roles and location roles independently',
             ],
         ])
         ->assertOk()
-        ->assertJsonPath('data.account_roles.0', AccountRole::AccountAdmin->value)
-        ->assertJsonCount(2, 'data.location_assignments');
+        ->assertJsonPath('data.account_role', null)
+        ->assertJsonCount(1, 'data.location_assignments');
 
-    $this->assertDatabaseHas('location_user_roles', [
+    $this->assertDatabaseHas('staff_memberships', [
         'account_id' => $account->id,
-        'location_id' => $firstLocation->id,
         'user_id' => $staff->id,
-        'role' => LocationRole::LocationManager->value,
+        'account_role' => null,
     ]);
 });
 
@@ -346,22 +366,20 @@ test('account role changes create scoped activity rows and skip no op updates', 
     $admin = createAccountAdmin($account);
     $staff = User::factory()->create(['first_name' => 'Ana', 'last_name' => 'Salas']);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $staff, LocationRole::FrontDesk);
 
+    // Promotion logs the account-role grant and the location removal it
+    // atomically replaced.
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
             'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [],
         ])
         ->assertOk();
 
-    expect(ActivityLog::query()->count())->toBe(1);
+    expect(ActivityLog::query()->count())->toBe(2);
 
-    $assignedLog = ActivityLog::query()->sole();
+    $assignedLog = ActivityLog::query()->whereNull('location_id')->sole();
 
     expect($assignedLog->event_type)->toBe(ActivityEventType::StaffRoleAssigned)
         ->and($assignedLog->account_id)->toBe($account->id)
@@ -383,23 +401,26 @@ test('account role changes create scoped activity rows and skip no op updates', 
         ]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
             'account_role' => AccountRole::AccountAdmin->value,
-        ])
-        ->assertOk();
-
-    expect(ActivityLog::query()->count())->toBe(1);
-
-    $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
-            'account_role' => null,
+            'location_assignments' => [],
         ])
         ->assertOk();
 
     expect(ActivityLog::query()->count())->toBe(2);
 
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
+            'location_assignments' => [],
+        ])
+        ->assertOk();
+
+    expect(ActivityLog::query()->count())->toBe(3);
+
     $removedLog = ActivityLog::query()
         ->where('event_type', ActivityEventType::StaffRoleRemoved->value)
+        ->whereNull('location_id')
         ->sole();
 
     expect($removedLog->location_id)->toBeNull()
@@ -416,15 +437,11 @@ test('location assignment updates create one activity row per changed location a
     $admin = createAccountAdmin($account);
     $staff = User::factory()->create(['first_name' => 'Ana', 'last_name' => 'Salas']);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $firstLocation, $staff, LocationRole::FrontDesk);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [
                 [
                     'location_id' => $firstLocation->id,
@@ -464,7 +481,8 @@ test('location assignment updates create one activity row per changed location a
         ]);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [
                 [
                     'location_id' => $firstLocation->id,
@@ -481,7 +499,8 @@ test('location assignment updates create one activity row per changed location a
     expect(ActivityLog::query()->count())->toBe(1);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [
                 [
                     'location_id' => $firstLocation->id,
@@ -523,15 +542,11 @@ test('location assignment updates reject duplicate and cross account locations',
     $admin = createAccountAdmin($account);
     $staff = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $staff, LocationRole::FrontDesk);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [
                 [
                     'location_id' => $location->id,
@@ -547,7 +562,8 @@ test('location assignment updates reject duplicate and cross account locations',
         ->assertJsonValidationErrors('location_assignments.1.location_id');
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [
                 [
                     'location_id' => $otherLocation->id,
@@ -565,24 +581,22 @@ test('staff assignment updates can remove all account access grants', function (
     $admin = createAccountAdmin($account);
     $staff = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $staff, LocationRole::FrontDesk);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [],
         ])
         ->assertOk()
         ->assertJsonCount(0, 'data.location_assignments');
 
+    // The membership persists: the member stays listed with no access
+    // grants instead of vanishing from the staff list (ADR 0033).
     $this->actingAs($admin)
         ->getJson("/api/accounts/{$account->id}/staff")
         ->assertOk()
-        ->assertJsonMissing(['id' => $staff->id]);
+        ->assertJsonFragment(['id' => $staff->id, 'account_role' => null]);
 });
 
 test('staff assignment updates reject non staff users', function () {
@@ -591,8 +605,9 @@ test('staff assignment updates reject non staff users', function () {
     $outsider = User::factory()->create();
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$outsider->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$outsider->id}/access", [
             'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [],
         ])
         ->assertNotFound();
 });
@@ -602,8 +617,9 @@ test('staff assignment updates prevent removing the only remaining account admin
     $admin = createAccountAdmin($account);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$admin->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$admin->id}/access", [
             'account_role' => null,
+            'location_assignments' => [],
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('account_role');
@@ -611,16 +627,17 @@ test('staff assignment updates prevent removing the only remaining account admin
     $otherAdmin = createAccountAdmin($account);
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$admin->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$admin->id}/access", [
             'account_role' => null,
+            'location_assignments' => [],
         ])
         ->assertOk()
-        ->assertJsonCount(0, 'data.account_roles');
+        ->assertJsonPath('data.account_role', null);
 
-    $this->assertDatabaseHas('account_user_roles', [
+    $this->assertDatabaseHas('staff_memberships', [
         'account_id' => $account->id,
         'user_id' => $otherAdmin->id,
-        'role' => AccountRole::AccountAdmin->value,
+        'account_role' => AccountRole::AccountAdmin->value,
     ]);
 });
 
@@ -631,19 +648,19 @@ test('an actor demoted after authorization cannot demote the remaining admin', f
 
     // Simulate the race: the actor passed the route's manageStaff check, then
     // a concurrent request removed their admin role before this transaction.
-    AccountUserRole::query()
+    StaffMembership::query()
         ->where('account_id', $account->id)
         ->where('user_id', $demotedActor->id)
-        ->delete();
+        ->update(['account_role' => null]);
 
-    expect(fn () => app(App\Actions\Staff\UpdateStaffAccountRole::class)
-        ->handle($account, $demotedActor, $remainingAdmin, null))
+    expect(fn () => app(App\Actions\Staff\UpdateStaffAccess::class)
+        ->handle($account, $demotedActor, $remainingAdmin, null, []))
         ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
 
-    $this->assertDatabaseHas('account_user_roles', [
+    $this->assertDatabaseHas('staff_memberships', [
         'account_id' => $account->id,
         'user_id' => $remainingAdmin->id,
-        'role' => AccountRole::AccountAdmin->value,
+        'account_role' => AccountRole::AccountAdmin->value,
     ]);
 });
 
@@ -654,24 +671,21 @@ test('deactivated staff users cannot be granted new roles but can have roles rem
     $admin = createAccountAdmin($account);
     $staff = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $firstLocation, $staff, LocationRole::FrontDesk);
 
     $staff->deactivate();
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
             'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [],
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('account_role');
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [
                 [
                     'location_id' => $firstLocation->id,
@@ -687,7 +701,8 @@ test('deactivated staff users cannot be granted new roles but can have roles rem
         ->assertJsonValidationErrors('location_assignments');
 
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/locations", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => null,
             'location_assignments' => [],
         ])
         ->assertOk()
@@ -699,22 +714,15 @@ test('staff list is admin only paginated and filters by explicit role and locati
     $firstLocation = Location::factory()->for($account)->create(['name' => 'Alpha']);
     $secondLocation = Location::factory()->for($account)->create(['name' => 'Beta']);
     $admin = createAccountAdmin($account);
+    // Fixed name/email: a random factory name containing "maria" would make
+    // the search assertion below flaky.
+    $admin->forceFill(['first_name' => 'Olga', 'last_name' => 'Admin', 'email' => 'olga.admin@wasiy.test'])->save();
     $manager = User::factory()->create(['first_name' => 'Maria', 'last_name' => 'Manager']);
     $frontDesk = User::factory()->create(['first_name' => 'Felipe', 'last_name' => 'Desk']);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $firstLocation, $manager, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $secondLocation->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $secondLocation, $frontDesk, LocationRole::FrontDesk);
 
     $this->actingAs($manager)
         ->getJson("/api/accounts/{$account->id}/staff")
@@ -770,15 +778,17 @@ function inviteStaffAndCaptureToken(Account $account, User $admin, array $payloa
 test('accepting a staff invitation creates the user and applies every role', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
+    $secondLocation = Location::factory()->for($account)->create();
     $admin = createAccountAdmin($account);
 
     $token = inviteStaffAndCaptureToken($account, $admin, [
         'email' => 'nueva@wasiy.test',
         'first_name' => 'Nueva',
         'last_name' => 'Persona',
-        'account_role' => AccountRole::AccountAdmin->value,
+        'account_role' => null,
         'location_assignments' => [
             ['location_id' => $location->id, 'role' => LocationRole::LocationManager->value],
+            ['location_id' => $secondLocation->id, 'role' => LocationRole::FrontDesk->value],
         ],
     ]);
 
@@ -787,7 +797,7 @@ test('accepting a staff invitation creates the user and applies every role', fun
         ->assertJsonPath('data.email', 'nueva@wasiy.test')
         ->assertJsonPath('data.requires_account_creation', true)
         ->assertJsonPath('data.account.name', $account->name)
-        ->assertJsonPath('data.roles.account_role', AccountRole::AccountAdmin->value)
+        ->assertJsonPath('data.roles.account_role', null)
         ->assertJsonPath('data.roles.locations.0.name', $location->name)
         ->assertJsonMissingPath('data.token_hash');
 
@@ -803,17 +813,13 @@ test('accepting a staff invitation creates the user and applies every role', fun
     $staff = User::query()->where('email', 'nueva@wasiy.test')->sole();
 
     $this->assertAuthenticatedAs($staff);
-    $this->assertDatabaseHas('account_user_roles', [
+    $this->assertDatabaseHas('staff_memberships', [
         'account_id' => $account->id,
         'user_id' => $staff->id,
-        'role' => AccountRole::AccountAdmin->value,
+        'account_role' => null,
     ]);
-    $this->assertDatabaseHas('location_user_roles', [
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $staff->id,
-        'role' => LocationRole::LocationManager->value,
-    ]);
+    expect(userHasLocationRole($account, $location, $staff, LocationRole::LocationManager))->toBeTrue()
+        ->and(userHasLocationRole($account, $secondLocation, $staff, LocationRole::FrontDesk))->toBeTrue();
 
     $invitation = UserInvitation::query()->where('email', 'nueva@wasiy.test')->sole();
 
@@ -882,19 +888,14 @@ test('an existing user must be signed in as themselves to accept', function () {
         ->postJson("/api/staff-invitations/{$token}/accept")
         ->assertStatus(409);
 
-    $this->assertDatabaseCount('location_user_roles', 0);
+    $this->assertDatabaseCount('staff_location_roles', 0);
 
     // Signed in as the invitee.
     $this->actingAs($existing)
         ->postJson("/api/staff-invitations/{$token}/accept")
         ->assertOk();
 
-    $this->assertDatabaseHas('location_user_roles', [
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $existing->id,
-        'role' => LocationRole::FrontDesk->value,
-    ]);
+    expect(userHasLocationRole($account, $location, $existing, LocationRole::FrontDesk))->toBeTrue();
 });
 
 test('a location deleted before acceptance is skipped rather than fatal', function () {
@@ -925,14 +926,8 @@ test('a location deleted before acceptance is skipped rather than fatal', functi
 
     $staff = User::query()->where('email', 'partial@wasiy.test')->sole();
 
-    $this->assertDatabaseHas('location_user_roles', [
-        'location_id' => $liveLocation->id,
-        'user_id' => $staff->id,
-    ]);
-    $this->assertDatabaseMissing('location_user_roles', [
-        'location_id' => $doomedLocation->id,
-        'user_id' => $staff->id,
-    ]);
+    expect(userHasLocationRole($account, $liveLocation, $staff))->toBeTrue()
+        ->and(userHasLocationRole($account, $doomedLocation, $staff))->toBeFalse();
 });
 
 test('an invitation whose only location is gone cannot be accepted', function () {
@@ -1163,4 +1158,130 @@ test('expected invitation outcomes are not reported to the logs', function () {
     $this->postJson("/api/staff-invitations/{$token}/accept")->assertUnauthorized();
 
     Illuminate\Support\Facades\Exceptions::assertNotReported(App\Exceptions\InvitationException::class);
+});
+
+test('staff list filters by membership status', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+    $suspended = User::factory()->create();
+
+    grantLocationRole($account, $location, $suspended, LocationRole::FrontDesk)
+        ->deactivate();
+
+    $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/staff?status=active")
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $admin->id);
+
+    $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/staff?status=deactivated")
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $suspended->id)
+        ->assertJsonPath('data.0.deactivated_at', fn ($value) => $value !== null);
+
+    // No filter: both listed.
+    $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/staff")
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
+});
+
+test('deactivating a membership suspends account access without touching the user or other accounts', function () {
+    $account = Account::factory()->create();
+    $otherAccount = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $otherLocation = Location::factory()->for($otherAccount)->create();
+    $admin = createAccountAdmin($account);
+    $staff = User::factory()->create();
+
+    grantLocationRole($account, $location, $staff, LocationRole::FrontDesk);
+    grantLocationRole($otherAccount, $otherLocation, $staff, LocationRole::FrontDesk);
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/{$staff->id}/deactivate")
+        ->assertOk()
+        ->assertJsonPath('data.deactivated_at', fn ($value) => $value !== null);
+
+    // Per-account: the user is not platform-banned and keeps the other account.
+    expect($staff->fresh()->isDeactivated())->toBeFalse();
+
+    app('auth')->forgetGuards();
+
+    $this->actingAs($staff)
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonMissing(['id' => $account->id])
+        ->assertJsonFragment(['id' => $otherAccount->id]);
+
+    expect(ActivityLog::query()
+        ->where('event_type', ActivityEventType::StaffDeactivated->value)
+        ->count())->toBe(1);
+
+    // Reactivation restores exactly the access they had.
+    app('auth')->forgetGuards();
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/{$staff->id}/reactivate")
+        ->assertOk()
+        ->assertJsonPath('data.deactivated_at', null)
+        ->assertJsonPath('data.location_assignments.0.location_id', $location->id);
+
+    expect(ActivityLog::query()
+        ->where('event_type', ActivityEventType::StaffReactivated->value)
+        ->count())->toBe(1);
+});
+
+test('deactivation guards protect self and the last active admin', function () {
+    $account = Account::factory()->create();
+    $admin = createAccountAdmin($account);
+    $otherAdmin = createAccountAdmin($account);
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/{$admin->id}/deactivate")
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('user');
+
+    // Deactivating the other admin is fine while one active admin remains…
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/{$otherAdmin->id}/deactivate")
+        ->assertOk();
+
+    // …but a reactivated admin cannot then deactivate the last one.
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/{$otherAdmin->id}/reactivate")
+        ->assertOk();
+
+    app('auth')->forgetGuards();
+
+    $this->actingAs($otherAdmin)
+        ->postJson("/api/accounts/{$account->id}/staff/{$admin->id}/deactivate")
+        ->assertOk();
+
+    app('auth')->forgetGuards();
+
+    // The suspended admin can no longer manage staff at all.
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/{$otherAdmin->id}/deactivate")
+        ->assertForbidden();
+});
+
+test('a suspended membership rejects new grants until reactivated', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+    $staff = User::factory()->create();
+
+    grantLocationRole($account, $location, $staff, LocationRole::FrontDesk)
+        ->deactivate();
+
+    $this->actingAs($admin)
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
+            'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [],
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('account_role');
 });

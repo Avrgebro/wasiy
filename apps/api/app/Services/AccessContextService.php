@@ -6,6 +6,7 @@ use App\Data\AccessContext;
 use App\Enums\AccountRole;
 use App\Models\Account;
 use App\Models\Location;
+use App\Models\StaffMembership;
 use App\Models\UnitMembership;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -44,9 +45,10 @@ class AccessContextService
     private function buildContext(User $user, Request $request, bool $persist): AccessContext
     {
         $user->loadMissing([
-            'accountUserRoles.account',
-            'locationUserRoles.account',
-            'locationUserRoles.location',
+            'staffMemberships.account',
+            // Roles pointing at soft-deleted locations don't count.
+            'staffMemberships.locationRoles' => fn ($query) => $query->whereHas('location'),
+            'staffMemberships.locationRoles.location',
         ]);
 
         $accounts = $this->access->accessibleAccounts($user)
@@ -54,19 +56,14 @@ class AccessContextService
             ->orderBy('name')
             ->get();
         $activeAccount = $this->resolveActiveAccount($request, $accounts, $persist);
-        $accountRoles = collect();
-        $locationRoles = collect();
+        $membership = null;
         $locations = collect();
         $activeLocation = null;
 
         if ($activeAccount instanceof Account) {
-            $accountRoles = $user->accountUserRoles
-                ->where('account_id', $activeAccount->id)
-                ->values();
-
-            $locationRoles = $user->locationUserRoles
-                ->where('account_id', $activeAccount->id)
-                ->values();
+            // accessibleAccounts() already excludes deactivated memberships,
+            // so the active account's membership is active by construction.
+            $membership = $user->staffMembershipForAccount($activeAccount);
 
             $locations = $this->access->accessibleLocationsForAccount($user, $activeAccount)
                 ->orderBy('name')
@@ -90,21 +87,25 @@ class AccessContextService
                 ? $this->accountSummary($activeAccount)
                 : null,
             activeLocation: $activeLocation instanceof Location
-                ? $this->locationSummary($activeLocation, $user, $isAccountAdmin)
+                ? $this->locationSummary($activeLocation, $membership, $isAccountAdmin)
                 : null,
             roles: [
-                'account' => $accountRoles->map(fn ($assignment) => [
-                    'account_id' => $assignment->account_id,
-                    'role' => $assignment->role->value,
-                ])->all(),
-                'location' => $locationRoles->map(fn ($assignment) => [
-                    'account_id' => $assignment->account_id,
-                    'location_id' => $assignment->location_id,
-                    'role' => $assignment->role->value,
-                ])->all(),
+                'account' => $membership?->account_role !== null
+                    ? [[
+                        'account_id' => $membership->account_id,
+                        'role' => $membership->account_role->value,
+                    ]]
+                    : [],
+                'location' => $membership !== null
+                    ? $membership->locationRoles->map(fn ($assignment) => [
+                        'account_id' => $membership->account_id,
+                        'location_id' => $assignment->location_id,
+                        'role' => $assignment->role->value,
+                    ])->values()->all()
+                    : [],
             ],
             accessibleLocations: $locations
-                ->map(fn (Location $location) => $this->locationSummary($location, $user, $isAccountAdmin))
+                ->map(fn (Location $location) => $this->locationSummary($location, $membership, $isAccountAdmin))
                 ->all(),
             residentMemberships: $this->residentMemberships($user),
         );
@@ -247,7 +248,7 @@ class AccessContextService
     /**
      * @return array<string, mixed>
      */
-    private function locationSummary(Location $location, User $user, bool $isAccountAdmin): array
+    private function locationSummary(Location $location, ?StaffMembership $membership, bool $isAccountAdmin): array
     {
         $roles = [];
 
@@ -255,7 +256,7 @@ class AccessContextService
             $roles[] = AccountRole::AccountAdmin->value;
         }
 
-        $locationRole = $user->locationUserRoles
+        $locationRole = $membership?->locationRoles
             ->firstWhere('location_id', $location->id);
 
         if ($locationRole) {

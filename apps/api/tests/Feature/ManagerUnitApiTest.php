@@ -5,9 +5,7 @@ use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Enums\ResidentType;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -22,12 +20,7 @@ test('manager can create and edit units in an accessible location', function () 
     $location = Location::factory()->for($account)->create();
     $manager = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
 
     $createResponse = $this->actingAs($manager)
         ->postJson("/api/locations/{$location->id}/units", [
@@ -73,12 +66,7 @@ test('manager cannot create units in an inaccessible location', function () {
     $inaccessibleLocation = Location::factory()->for($account)->create();
     $manager = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $accessibleLocation->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $accessibleLocation, $manager, LocationRole::LocationManager);
 
     $this->actingAs($manager)
         ->postJson("/api/locations/{$inaccessibleLocation->id}/units", [
@@ -92,11 +80,7 @@ test('duplicate unit number and building within a location is rejected', functio
     $location = Location::factory()->for($account)->create();
     $admin = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     Unit::factory()->for($account)->for($location)->create([
         'unit_number' => '501',
@@ -118,11 +102,7 @@ test('same unit number can exist in different locations', function () {
     $secondLocation = Location::factory()->for($account)->create();
     $admin = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     Unit::factory()->for($account)->for($firstLocation)->create([
         'unit_number' => '601',
@@ -173,11 +153,7 @@ test('unit list defaults to active units and supports search filters sort and su
         ]);
     Vehicle::factory()->for($activeUnit)->for($account)->for($location)->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     $this->actingAs($admin)
         ->getJson("/api/locations/{$location->id}/units?search=torre%20a&sort=-resident_count&per_page=5")
@@ -205,11 +181,7 @@ test('delete hard deletes empty units and inactivates units with dependent recor
         ->for($location)
         ->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     $this->actingAs($admin)
         ->deleteJson("/api/units/{$emptyUnit->id}")

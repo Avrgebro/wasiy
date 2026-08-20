@@ -9,8 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['account_id', 'location_id', 'user_id', 'role'])]
-class LocationUserRole extends Model
+/**
+ * A StaffMembership's role at one Location. Composite foreign keys guarantee
+ * the location belongs to the membership's account; account_id is stored so
+ * the database can prove it.
+ */
+#[Fillable(['staff_membership_id', 'account_id', 'location_id', 'role'])]
+class StaffLocationRole extends Model
 {
     use HasFactory, HasUlids;
 
@@ -25,11 +30,11 @@ class LocationUserRole extends Model
     }
 
     /**
-     * @return BelongsTo<Account, $this>
+     * @return BelongsTo<StaffMembership, $this>
      */
-    public function account(): BelongsTo
+    public function membership(): BelongsTo
     {
-        return $this->belongsTo(Account::class);
+        return $this->belongsTo(StaffMembership::class, 'staff_membership_id');
     }
 
     /**
@@ -38,13 +43,5 @@ class LocationUserRole extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }

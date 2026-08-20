@@ -8,9 +8,7 @@ use App\Enums\LocationRole;
 use App\Http\Resources\RegistryImportResource;
 use App\Http\Resources\RegistryImportRowResource;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\RegistryImport;
 use App\Models\RegistryImportRow;
 use App\Models\User;
@@ -136,18 +134,9 @@ test('registry import policy allows admins and managers for manageable locations
     $admin = User::factory()->create();
     $manager = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
 
     $import = RegistryImport::factory()
         ->for($account)
@@ -179,12 +168,7 @@ test('registry import policy denies front desk residents and inaccessible locati
     $frontDesk = User::factory()->create();
     $outsider = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
 
     $import = RegistryImport::factory()
         ->for($account)

@@ -4,9 +4,7 @@ use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -25,11 +23,7 @@ test('account admins can access any non deleted location in their account', func
     $secondLocation = Location::factory()->for($account)->create();
     $otherLocation = Location::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     expect($service->canAccessLocation($admin, $firstLocation))->toBeTrue()
         ->and($service->canAccessLocation($admin, $secondLocation))->toBeTrue()
@@ -45,11 +39,7 @@ test('operational location access excludes soft deleted locations', function () 
     $deletedLocation = Location::factory()->for($account)->create();
     $activeLocation = Location::factory()->for($account)->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     $deletedLocation->delete();
 
@@ -58,23 +48,21 @@ test('operational location access excludes soft deleted locations', function () 
         ->toEqual([$activeLocation->id]);
 });
 
-test('account access through location roles excludes soft deleted locations', function () {
+test('a deleted location revokes its access but the staff membership persists', function () {
     $service = app(AccessAuthorizationService::class);
     $user = User::factory()->create();
     $account = Account::factory()->create();
     $deletedLocation = Location::factory()->for($account)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $deletedLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $deletedLocation, $user, LocationRole::LocationManager);
 
     $deletedLocation->delete();
 
-    expect($service->canAccessAccount($user, $account))->toBeFalse()
-        ->and($service->accessibleAccounts($user)->exists())->toBeFalse();
+    // Membership is stored, not derived: the account stays reachable even
+    // though every location grant is gone (ADR 0033).
+    expect($service->canAccessAccount($user, $account))->toBeTrue()
+        ->and($service->canAccessLocation($user, $deletedLocation))->toBeFalse()
+        ->and($service->accessibleLocationsForAccount($user, $account)->exists())->toBeFalse();
 });
 
 test('location managers and front desk users can access only explicit assigned locations', function () {
@@ -86,19 +74,9 @@ test('location managers and front desk users can access only explicit assigned l
     $frontDeskLocation = Location::factory()->for($account)->create();
     $unassignedLocation = Location::factory()->for($account)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $managerLocation->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $managerLocation, $manager, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $frontDeskLocation->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $frontDeskLocation, $frontDesk, LocationRole::FrontDesk);
 
     expect($service->canAccessLocation($manager, $managerLocation))->toBeTrue()
         ->and($service->canAccessLocation($manager, $unassignedLocation))->toBeFalse()
@@ -112,11 +90,7 @@ test('account admin implicit access is not reported as an explicit location role
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     expect($service->canAccessLocation($admin, $location))->toBeTrue()
         ->and($service->hasLocationRole($admin, $location, LocationRole::LocationManager))->toBeFalse()
@@ -131,18 +105,9 @@ test('staff membership uses the same soft delete semantics as account access', f
     $orphanedStaff = User::factory()->create();
     $outsider = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $orphanedStaff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $orphanedStaff, LocationRole::FrontDesk);
 
     expect($service->isStaffForAccount($admin, $account))->toBeTrue()
         ->and($service->isStaffForAccount($orphanedStaff, $account))->toBeTrue()
@@ -152,9 +117,13 @@ test('staff membership uses the same soft delete semantics as account access', f
 
     $location->delete();
 
-    expect($service->isStaffForAccount($orphanedStaff, $account))->toBeFalse()
+    // Staff-ness is the membership, not the roles: deleting the location
+    // leaves the member listed (with no live assignments) rather than
+    // silently dropping them from the staff list (ADR 0033).
+    expect($service->isStaffForAccount($orphanedStaff, $account))->toBeTrue()
         ->and($service->staffForAccount($account)->pluck('id')->all())
-        ->toEqual([$admin->id]);
+        ->toEqualCanonicalizing([$admin->id, $orphanedStaff->id])
+        ->and($service->canAccessLocation($orphanedStaff, $location))->toBeFalse();
 });
 
 test('staff management requires explicit account admin role', function () {
@@ -165,25 +134,11 @@ test('staff management requires explicit account admin role', function () {
     $manager = User::factory()->create();
     $frontDesk = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
 
     expect($service->canManageStaff($admin, $account))->toBeTrue()
         ->and($service->canManageStaff($manager, $account))->toBeFalse()
@@ -198,25 +153,11 @@ test('account policy separates broad account visibility from staff management', 
     $frontDesk = User::factory()->create();
     $outsider = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
 
     expect($admin->can('view', $account))->toBeTrue()
         ->and($manager->can('view', $account))->toBeTrue()
@@ -234,18 +175,9 @@ test('location policy uses broad location access semantics', function () {
     $frontDesk = User::factory()->create();
     $outsider = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
 
     expect($admin->can('view', $location))->toBeTrue()
         ->and($frontDesk->can('view', $location))->toBeTrue()
@@ -262,11 +194,7 @@ test('account admins can manage registry records in any location in their accoun
     $unit = Unit::factory()->for($account)->for($secondLocation)->create();
     $resident = Resident::factory()->for($account)->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     expect($service->canManageRegistry($admin, $firstLocation))->toBeTrue()
         ->and($service->canManageRegistry($admin, $secondLocation))->toBeTrue()
@@ -293,12 +221,7 @@ test('location managers can manage registry records only in accessible locations
         ->for($accessibleLocation)
         ->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $accessibleLocation->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $accessibleLocation, $manager, LocationRole::LocationManager);
 
     expect($service->canManageRegistry($manager, $accessibleLocation))->toBeTrue()
         ->and($service->canManageRegistry($manager, $inaccessibleLocation))->toBeFalse()
@@ -316,12 +239,7 @@ test('location managers cannot create memberships in inaccessible locations', fu
     $accessibleLocation = Location::factory()->for($account)->create();
     $inaccessibleLocation = Location::factory()->for($account)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $accessibleLocation->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $accessibleLocation, $manager, LocationRole::LocationManager);
 
     expect($manager->can('create', [UnitMembership::class, $accessibleLocation]))->toBeTrue()
         ->and($manager->can('create', [UnitMembership::class, $inaccessibleLocation]))->toBeFalse();
@@ -335,12 +253,7 @@ test('front desk can view registry context but cannot mutate registry records', 
     $unit = Unit::factory()->for($account)->for($location)->create();
     $vehicle = Vehicle::factory()->for($unit)->for($account)->for($location)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
 
     expect($service->canViewRegistry($frontDesk, $location))->toBeTrue()
         ->and($service->canManageRegistry($frontDesk, $location))->toBeFalse()

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\Staff\UpdateStaffAccountRole;
-use App\Actions\Staff\UpdateStaffLocationAssignments;
+use App\Actions\Staff\DeactivateStaffMembership;
+use App\Actions\Staff\ReactivateStaffMembership;
+use App\Actions\Staff\UpdateStaffAccess;
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateStaffAccountRoleRequest;
-use App\Http\Requests\UpdateStaffLocationAssignmentsRequest;
+use App\Http\Requests\UpdateStaffAccessRequest;
 use App\Http\Resources\StaffResource;
 use App\Models\Account;
 use App\Models\User;
@@ -48,6 +48,7 @@ class AccountStaffController extends Controller
                     ->where('account_id', $account->id)
                     ->whereNull('deleted_at'),
             ],
+            'status' => ['sometimes', 'nullable', Rule::in(['active', 'deactivated'])],
         ]);
 
         $staff = $this->access->staffForAccount($account)
@@ -57,21 +58,29 @@ class AccountStaffController extends Controller
             ))
             ->when($validated['role'] ?? null, function (Builder $query, string $role) use ($account): void {
                 if ($role === AccountRole::AccountAdmin->value) {
-                    $query->whereHas('accountUserRoles', fn (Builder $query) => $query
+                    $query->whereHas('staffMemberships', fn (Builder $query) => $query
                         ->where('account_id', $account->id)
-                        ->where('role', $role));
+                        ->where('account_role', $role));
 
                     return;
                 }
 
-                $query->whereHas('locationUserRoles', fn (Builder $query) => $query
+                $query->whereHas('staffMemberships.locationRoles', fn (Builder $query) => $query
                     ->where('account_id', $account->id)
                     ->where('role', $role));
             })
             ->when($validated['location_id'] ?? null, fn (Builder $query, string $locationId) => $query
-                ->whereHas('locationUserRoles', fn (Builder $query) => $query
+                ->whereHas('staffMemberships.locationRoles', fn (Builder $query) => $query
                     ->where('account_id', $account->id)
                     ->where('location_id', $locationId)))
+            ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query
+                ->whereHas('staffMemberships', fn (Builder $query) => $query
+                    ->where('account_id', $account->id)
+                    ->when(
+                        $status === 'active',
+                        fn (Builder $query) => $query->whereNull('deactivated_at'),
+                        fn (Builder $query) => $query->whereNotNull('deactivated_at'),
+                    )))
             ->with(User::staffRelationsForAccount($account))
             ->orderBy('first_name')
             ->orderBy('last_name')
@@ -82,41 +91,51 @@ class AccountStaffController extends Controller
         return StaffResource::collection($staff);
     }
 
-    public function updateRoles(
-        UpdateStaffAccountRoleRequest $request,
+    public function updateAccess(
+        UpdateStaffAccessRequest $request,
         Account $account,
         User $user,
-        UpdateStaffAccountRole $updateStaffAccountRole,
+        UpdateStaffAccess $updateStaffAccess,
     ): JsonResource {
         abort_unless($this->access->isStaffForAccount($user, $account), 404);
 
         /** @var User $actor */
         $actor = $request->user();
 
-        return new StaffResource($updateStaffAccountRole->handle(
+        return new StaffResource($updateStaffAccess->handle(
             $account,
             $actor,
             $user,
             $request->validated('account_role'),
+            $request->validated('location_assignments'),
         ));
     }
 
-    public function updateLocations(
-        UpdateStaffLocationAssignmentsRequest $request,
+    public function deactivate(
+        Request $request,
         Account $account,
         User $user,
-        UpdateStaffLocationAssignments $updateStaffLocationAssignments,
+        DeactivateStaffMembership $deactivateStaffMembership,
     ): JsonResource {
         abort_unless($this->access->isStaffForAccount($user, $account), 404);
 
         /** @var User $actor */
         $actor = $request->user();
 
-        return new StaffResource($updateStaffLocationAssignments->handle(
-            $account,
-            $actor,
-            $user,
-            $request->validated('location_assignments'),
-        ));
+        return new StaffResource($deactivateStaffMembership->handle($account, $actor, $user));
+    }
+
+    public function reactivate(
+        Request $request,
+        Account $account,
+        User $user,
+        ReactivateStaffMembership $reactivateStaffMembership,
+    ): JsonResource {
+        abort_unless($this->access->isStaffForAccount($user, $account), 404);
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        return new StaffResource($reactivateStaffMembership->handle($account, $actor, $user));
     }
 }

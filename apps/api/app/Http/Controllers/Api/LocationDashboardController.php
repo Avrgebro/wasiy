@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Location;
-use App\Models\LocationUserRole;
+use App\Models\StaffLocationRole;
 use Illuminate\Http\JsonResponse;
 
 class LocationDashboardController extends Controller
@@ -20,10 +20,11 @@ class LocationDashboardController extends Controller
                 'timezone' => $location->timezone,
             ],
             'metrics' => [
-                'assigned_staff_count' => LocationUserRole::query()
+                'assigned_staff_count' => StaffLocationRole::query()
                     ->whereBelongsTo($location)
-                    ->distinct('user_id')
-                    ->count('user_id'),
+                    ->whereHas('membership', fn ($query) => $query->whereNull('deactivated_at'))
+                    ->distinct('staff_membership_id')
+                    ->count('staff_membership_id'),
             ],
         ]);
     }

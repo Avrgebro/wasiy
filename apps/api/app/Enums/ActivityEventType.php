@@ -11,6 +11,8 @@ enum ActivityEventType: string
     case StaffRoleAssigned = 'staff.role_assigned';
     case StaffRoleRemoved = 'staff.role_removed';
     case StaffLocationsChanged = 'staff.locations_changed';
+    case StaffDeactivated = 'staff.deactivated';
+    case StaffReactivated = 'staff.reactivated';
     case UnitCreated = 'unit.created';
     case UnitUpdated = 'unit.updated';
     case UnitInactivated = 'unit.inactivated';

@@ -3,9 +3,7 @@
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -22,12 +20,7 @@ test('users can select an accessible account and receive refreshed access contex
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $user, LocationRole::LocationManager);
 
     $this->actingAs($user)
         ->postJson('/api/context/account', [
@@ -68,19 +61,9 @@ test('selecting an account clears the previous active location and auto selects 
     $firstLocation = Location::factory()->for($firstAccount)->create();
     $secondLocation = Location::factory()->for($secondAccount)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $firstAccount->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($firstAccount, $firstLocation, $user, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $secondAccount->id,
-        'location_id' => $secondLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($secondAccount, $secondLocation, $user, LocationRole::FrontDesk);
 
     $this->actingAs($user)
         ->withSession([
@@ -100,12 +83,7 @@ test('selecting a location requires an active account', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $user, LocationRole::LocationManager);
 
     $this->actingAs($user)
         ->postJson('/api/context/location', [
@@ -120,19 +98,9 @@ test('users can select an accessible location inside the active account', functi
     $firstLocation = Location::factory()->for($account)->create();
     $secondLocation = Location::factory()->for($account)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $firstLocation, $user, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $secondLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $secondLocation, $user, LocationRole::FrontDesk);
 
     $this->actingAs($user)
         ->withSession(['wasiy.active_account_id' => $account->id])
@@ -152,19 +120,9 @@ test('location selection rejects locations outside the active account as invalid
     $activeLocation = Location::factory()->for($activeAccount)->create();
     $otherLocation = Location::factory()->for($otherAccount)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $activeAccount->id,
-        'location_id' => $activeLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($activeAccount, $activeLocation, $user, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $otherAccount->id,
-        'location_id' => $otherLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($otherAccount, $otherLocation, $user, LocationRole::FrontDesk);
 
     $this->actingAs($user)
         ->withSession(['wasiy.active_account_id' => $activeAccount->id])
@@ -181,12 +139,7 @@ test('location selection rejects inaccessible locations inside the active accoun
     $accessibleLocation = Location::factory()->for($account)->create();
     $inaccessibleLocation = Location::factory()->for($account)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $accessibleLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $accessibleLocation, $user, LocationRole::LocationManager);
 
     $this->actingAs($user)
         ->withSession(['wasiy.active_account_id' => $account->id])
@@ -201,11 +154,7 @@ test('account admins can select any active location inside their active account'
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $user->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $user, AccountRole::AccountAdmin);
 
     $this->actingAs($user)
         ->withSession(['wasiy.active_account_id' => $account->id])
@@ -224,19 +173,9 @@ test('clearing context clears active account and location for multi account user
     $firstLocation = Location::factory()->for($firstAccount)->create();
     $secondLocation = Location::factory()->for($secondAccount)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $firstAccount->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($firstAccount, $firstLocation, $user, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $secondAccount->id,
-        'location_id' => $secondLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($secondAccount, $secondLocation, $user, LocationRole::FrontDesk);
 
     $this->actingAs($user)
         ->withSession([
@@ -259,11 +198,7 @@ test('an account admin with several locations gets the first one selected', func
     Location::factory()->for($account)->create(['name' => 'Torre Norte']);
     $firstByName = Location::factory()->for($account)->create(['name' => 'Edificio Central']);
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $user->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $user, AccountRole::AccountAdmin);
 
     $this->actingAs($user)
         ->getJson('/api/me')
@@ -276,11 +211,7 @@ test('an account admin with no locations has no active location', function () {
     $user = User::factory()->create();
     $account = Account::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $user->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $user, AccountRole::AccountAdmin);
 
     // A brand new Account has nothing to scope to yet. The null is what tells
     // the admin surface to offer location creation instead of a dashboard.

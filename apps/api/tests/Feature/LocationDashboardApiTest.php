@@ -3,9 +3,8 @@
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
+use App\Models\StaffLocationRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -45,14 +44,11 @@ test('users with deleted location assignments cannot view a location dashboard',
     $location = Location::factory()->create();
     $user = User::factory()->create();
 
-    $assignment = LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($location->account, $location, $user, LocationRole::LocationManager);
 
-    $assignment->delete();
+    StaffLocationRole::query()
+        ->where('location_id', $location->id)
+        ->delete();
 
     $this->actingAs($user)
         ->getJson("/api/locations/{$location->id}/dashboard")
@@ -64,11 +60,7 @@ test('account admins can view dashboards for locations in their account', functi
     $location = Location::factory()->for($account)->create();
     $admin = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     $this->actingAs($admin)
         ->getJson("/api/locations/{$location->id}/dashboard")
@@ -82,11 +74,7 @@ test('users with deleted account admin assignments cannot view account location 
     $location = Location::factory()->for($account)->create();
     $admin = User::factory()->create();
 
-    $assignment = AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    $assignment = createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     $assignment->delete();
 
@@ -100,19 +88,9 @@ test('the assigned staff count counts unique users assigned to the location', fu
     $manager = User::factory()->create();
     $frontDesk = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($location->account, $location, $manager, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($location->account, $location, $frontDesk, LocationRole::FrontDesk);
 
     $this->actingAs($manager)
         ->getJson("/api/locations/{$location->id}/dashboard")
@@ -125,21 +103,11 @@ test('the assigned staff count ignores deleted assignments', function () {
     $manager = User::factory()->create();
     $deletedStaff = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($location->account, $location, $manager, LocationRole::LocationManager);
 
-    $assignment = LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $deletedStaff->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
-
-    $assignment->delete();
+    grantLocationRole($location->account, $location, $deletedStaff, LocationRole::FrontDesk)
+        ->locationRoles()
+        ->delete();
 
     $this->actingAs($manager)
         ->getJson("/api/locations/{$location->id}/dashboard")

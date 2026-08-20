@@ -6,9 +6,7 @@ use App\Enums\ImportStatus;
 use App\Enums\ImportType;
 use App\Enums\LocationRole;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\RegistryImport;
 use App\Models\RegistryImportRow;
 use App\Models\User;
@@ -20,11 +18,7 @@ function createImportReadAdmin(Account $account): User
 {
     $admin = User::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $admin->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
     return $admin;
 }
@@ -33,12 +27,7 @@ function createImportReadLocationUser(Location $location, LocationRole $role): U
 {
     $user = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => $role,
-    ]);
+    grantLocationRole($location->account, $location, $user, $role);
 
     return $user;
 }

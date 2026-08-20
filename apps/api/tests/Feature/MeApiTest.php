@@ -6,10 +6,8 @@ use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Enums\ResidentType;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\ActivityLog;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -63,11 +61,7 @@ test('it includes account access from account scoped roles', function () {
     $user = User::factory()->create();
     $account = Account::factory()->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $user->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $user, AccountRole::AccountAdmin);
 
     $this->actingAs($user)
         ->getJson('/api/me')
@@ -86,18 +80,9 @@ test('it gives account admins implicit access to active account locations', func
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
 
-    AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $user->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    createStaffMembership($account, $user, AccountRole::AccountAdmin);
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $user, LocationRole::LocationManager);
 
     $this->actingAs($user)
         ->getJson('/api/me')
@@ -118,18 +103,9 @@ test('it excludes deleted role assignments from the access context', function ()
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
 
-    $accountRole = AccountUserRole::query()->create([
-        'account_id' => $account->id,
-        'user_id' => $user->id,
-        'role' => AccountRole::AccountAdmin,
-    ]);
+    $accountRole = createStaffMembership($account, $user, AccountRole::AccountAdmin);
 
-    $locationRole = LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    $locationRole = grantLocationRole($account, $location, $user, LocationRole::LocationManager);
 
     $accountRole->delete();
     $locationRole->delete();
@@ -152,19 +128,9 @@ test('users with multiple accounts must select an active account before account 
     $firstLocation = Location::factory()->for($firstAccount)->create();
     $secondLocation = Location::factory()->for($secondAccount)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $firstAccount->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($firstAccount, $firstLocation, $user, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $secondAccount->id,
-        'location_id' => $secondLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($secondAccount, $secondLocation, $user, LocationRole::FrontDesk);
 
     $this->actingAs($user)
         ->getJson('/api/me')
@@ -184,19 +150,9 @@ test('active account scopes roles and accessible locations', function () {
     $firstLocation = Location::factory()->for($firstAccount)->create();
     $secondLocation = Location::factory()->for($secondAccount)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $firstAccount->id,
-        'location_id' => $firstLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($firstAccount, $firstLocation, $user, LocationRole::LocationManager);
 
-    LocationUserRole::query()->create([
-        'account_id' => $secondAccount->id,
-        'location_id' => $secondLocation->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($secondAccount, $secondLocation, $user, LocationRole::FrontDesk);
 
     $this->actingAs($user)
         ->withSession(['wasiy.active_account_id' => $secondAccount->id])
@@ -219,12 +175,7 @@ test('stale active account context is cleared before normal selection rules are 
     $activeAccount = Account::factory()->create();
     $location = Location::factory()->for($activeAccount)->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $activeAccount->id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($activeAccount, $location, $user, LocationRole::LocationManager);
 
     $this->actingAs($user)
         ->withSession(['wasiy.active_account_id' => $staleAccount->id])
@@ -243,12 +194,7 @@ test('stale active location context is cleared and a single accessible location 
 
     $staleLocation->delete();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $location->id,
-        'user_id' => $user->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($account, $location, $user, LocationRole::LocationManager);
 
     $this->actingAs($user)
         ->withSession([

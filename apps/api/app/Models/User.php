@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -59,43 +58,46 @@ class User extends Authenticatable
     }
 
     /**
-     * @return HasMany<AccountUserRole, $this>
+     * @return HasMany<StaffMembership, $this>
      */
-    public function accountUserRoles(): HasMany
+    public function staffMemberships(): HasMany
     {
-        return $this->hasMany(AccountUserRole::class)
+        return $this->hasMany(StaffMembership::class)
             ->whereHas('account');
     }
 
     /**
-     * @return HasMany<LocationUserRole, $this>
-     */
-    public function locationUserRoles(): HasMany
-    {
-        return $this->hasMany(LocationUserRole::class)
-            ->whereHas('account')
-            ->whereHas('location');
-    }
-
-    /**
      * Eager loads shared by staff endpoints and StaffResource. Constrains
-     * role relations to the Account so the resource can render them as-is.
+     * the membership to the Account so the resource can render it as-is.
      *
      * @return array<string, callable>
      */
     public static function staffRelationsForAccount(Account $account): array
     {
         return [
-            'accountUserRoles' => fn ($query) => $query->where('account_id', $account->id),
-            'locationUserRoles' => fn ($query) => $query
+            'staffMemberships' => fn ($query) => $query
                 ->where('account_id', $account->id)
-                ->with('location'),
+                // Roles pointing at soft-deleted locations don't render.
+                ->with(['locationRoles' => fn ($query) => $query
+                    ->whereHas('location')
+                    ->with('location'),
+                ]),
         ];
     }
 
     public function loadStaffRelationsForAccount(Account $account): self
     {
         return $this->load(self::staffRelationsForAccount($account));
+    }
+
+    /**
+     * The loaded membership for one Account. Callers must have eager-loaded
+     * staffMemberships (see staffRelationsForAccount).
+     */
+    public function staffMembershipForAccount(Account $account): ?StaffMembership
+    {
+        return $this->staffMemberships
+            ->firstWhere('account_id', $account->id);
     }
 
     /**
@@ -114,23 +116,4 @@ class User extends Authenticatable
         return $this->hasMany(Resident::class);
     }
 
-    /**
-     * @return BelongsToMany<Account, $this>
-     */
-    public function accounts(): BelongsToMany
-    {
-        return $this->belongsToMany(Account::class, 'account_user_roles')
-            ->withPivot('role')
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<Location, $this>
-     */
-    public function assignedLocations(): BelongsToMany
-    {
-        return $this->belongsToMany(Location::class, 'location_user_roles')
-            ->withPivot(['account_id', 'role'])
-            ->withTimestamps();
-    }
 }

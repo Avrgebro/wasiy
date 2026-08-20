@@ -15,11 +15,11 @@ use App\Enums\VehicleType;
 use App\Jobs\CommitRegistryImport;
 use App\Jobs\ValidateRegistryImport;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\ActivityLog;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\RegistryImport;
+use App\Models\StaffLocationRole;
+use App\Models\StaffMembership;
 use App\Models\RegistryImportRow;
 use App\Models\Resident;
 use App\Models\Unit;
@@ -43,15 +43,14 @@ test('it seeds the m1 demo account location and location manager assignment', fu
     $account = Account::query()->where('slug', 'wasiy-demo')->sole();
     $location = Location::query()->where('slug', 'edificio-central')->sole();
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
-    $assignment = LocationUserRole::query()
+    $membership = StaffMembership::query()
         ->whereBelongsTo($account)
-        ->whereBelongsTo($location)
         ->whereBelongsTo($manager)
         ->sole();
+    $assignment = $membership->locationRoles()->sole();
 
     expect($location->account->is($account))->toBeTrue()
-        ->and($manager->assignedLocations)->toHaveCount(1)
-        ->and($manager->assignedLocations->first()->is($location))->toBeTrue()
+        ->and($assignment->location_id)->toBe($location->id)
         ->and($assignment->role)->toBe(LocationRole::LocationManager);
 });
 
@@ -79,19 +78,44 @@ test('it seeds m2 demo users and role assignments idempotently', function () {
             'multi@wasiy.test',
             'resident@wasiy.test',
         ])->count())->toBe(5)
-        ->and(AccountUserRole::query()->where('account_id', $demoAccount->id)->where('user_id', $admin->id)->sole()->role)
+        ->and(StaffMembership::query()->where('account_id', $demoAccount->id)->where('user_id', $admin->id)->sole()->account_role)
         ->toBe(AccountRole::AccountAdmin)
-        ->and(LocationUserRole::query()->where('account_id', $demoAccount->id)->where('location_id', $centralLocation->id)->where('user_id', $manager->id)->sole()->role)
+        ->and(seededLocationRole($demoAccount, $centralLocation, $manager))
         ->toBe(LocationRole::LocationManager)
-        ->and(LocationUserRole::query()->where('account_id', $demoAccount->id)->where('location_id', $northTower->id)->where('user_id', $frontDesk->id)->sole()->role)
+        ->and(seededLocationRole($demoAccount, $northTower, $frontDesk))
         ->toBe(LocationRole::FrontDesk)
-        ->and(LocationUserRole::query()->where('account_id', $demoAccount->id)->where('location_id', $centralLocation->id)->where('user_id', $multiAccountUser->id)->sole()->role)
+        ->and(seededLocationRole($demoAccount, $centralLocation, $multiAccountUser))
         ->toBe(LocationRole::LocationManager)
-        ->and(LocationUserRole::query()->where('account_id', $playaAccount->id)->where('location_id', $beachLocation->id)->where('user_id', $multiAccountUser->id)->sole()->role)
+        ->and(seededLocationRole($playaAccount, $beachLocation, $multiAccountUser))
         ->toBe(LocationRole::FrontDesk)
-        ->and(AccountUserRole::query()->count())->toBe(1)
-        ->and(LocationUserRole::query()->count())->toBe(4);
+        ->and(StaffMembership::query()->whereNotNull('account_role')->count())->toBe(1)
+        ->and(StaffLocationRole::query()->count())->toBe(5)
+        ->and(StaffMembership::query()->count())->toBe(6);
+
+    // The deactivated demo user is suspended in wasiy-demo only: the
+    // membership is deactivated, the User can still log in, and the role
+    // row stays so the staff list shows them dimmed.
+    $deactivated = User::query()->where('email', 'deactivated@wasiy.test')->sole();
+    $suspendedMembership = StaffMembership::query()
+        ->where('account_id', $demoAccount->id)
+        ->where('user_id', $deactivated->id)
+        ->sole();
+
+    expect($deactivated->isDeactivated())->toBeFalse()
+        ->and($suspendedMembership->isDeactivated())->toBeTrue()
+        ->and(seededLocationRole($demoAccount, $northTower, $deactivated))
+        ->toBe(LocationRole::FrontDesk);
 });
+
+function seededLocationRole(Account $account, Location $location, User $user): LocationRole
+{
+    return StaffLocationRole::query()
+        ->where('account_id', $account->id)
+        ->where('location_id', $location->id)
+        ->whereHas('membership', fn ($query) => $query->where('user_id', $user->id))
+        ->sole()
+        ->role;
+}
 
 test('seeded users expose the final m2 access context scenarios', function () {
     $this->seed();
@@ -210,13 +234,16 @@ test('seeded account admin can complete staff workflow and activity logging acce
 
     $staff = User::query()->where('email', 'slice7.staff@wasiy.test')->sole();
 
+    // Promotion is one atomic access update; it also removes the front-desk
+    // assignment the invitation granted, which logs its own activity row.
     $this->actingAs($admin)
-        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/roles", [
+        ->patchJson("/api/accounts/{$account->id}/staff/{$staff->id}/access", [
             'account_role' => AccountRole::AccountAdmin->value,
+            'location_assignments' => [],
         ])
         ->assertOk();
 
-    expect(ActivityLog::query()->count())->toBe(3)
+    expect(ActivityLog::query()->count())->toBe(4)
         ->and(ActivityLog::query()->where('event_type', ActivityEventType::StaffInvited->value)->sole()->metadata)
         ->toMatchArray([
             'invitation_id' => $invitation->id,

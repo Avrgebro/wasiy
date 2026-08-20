@@ -6,7 +6,6 @@ use App\Enums\ImportType;
 use App\Enums\LocationRole;
 use App\Jobs\ValidateRegistryImport;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\RegistryImport;
 use App\Models\RegistryImportRow;
 use App\Models\Resident;
@@ -24,12 +23,7 @@ function createRegistryImportManager(Location $location): User
 {
     $manager = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $location->account_id,
-        'location_id' => $location->id,
-        'user_id' => $manager->id,
-        'role' => LocationRole::LocationManager,
-    ]);
+    grantLocationRole($location->account, $location, $manager, LocationRole::LocationManager);
 
     return $manager;
 }
@@ -75,12 +69,7 @@ test('manager cannot upload registry csv for inaccessible location and front des
     $manager = createRegistryImportManager($accessibleLocation);
     $frontDesk = User::factory()->create();
 
-    LocationUserRole::query()->create([
-        'account_id' => $account->id,
-        'location_id' => $accessibleLocation->id,
-        'user_id' => $frontDesk->id,
-        'role' => LocationRole::FrontDesk,
-    ]);
+    grantLocationRole($account, $accessibleLocation, $frontDesk, LocationRole::FrontDesk);
 
     $payload = [
         'file' => UploadedFile::fake()->createWithContent('registro.csv', "unidad\n301\n"),

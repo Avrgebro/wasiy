@@ -6,10 +6,10 @@ use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Models\Account;
-use App\Models\AccountUserRole;
 use App\Models\Location;
-use App\Models\LocationUserRole;
 use App\Models\Resident;
+use App\Models\StaffLocationRole;
+use App\Models\StaffMembership;
 use App\Models\Unit;
 use App\Models\UnitMembership;
 use App\Models\User;
@@ -23,17 +23,10 @@ class AccessAuthorizationService
      */
     public function accessibleAccounts(User $user): Builder
     {
+        // Access requires an ACTIVE membership; a deactivated membership
+        // keeps the person listed as staff but grants nothing.
         return Account::query()
-            ->where(function (Builder $query) use ($user): void {
-                $query
-                    ->whereIn('id', AccountUserRole::query()
-                        ->select('account_id')
-                        ->where('user_id', $user->id))
-                    ->orWhereIn('id', LocationUserRole::query()
-                        ->select('account_id')
-                        ->where('user_id', $user->id)
-                        ->whereHas('location'));
-            });
+            ->whereIn('id', $this->activeMemberships($user)->select('account_id'));
     }
 
     public function hasAccountRole(User $user, Account $account, AccountRole $role): bool
@@ -42,10 +35,9 @@ class AccessAuthorizationService
             return false;
         }
 
-        return AccountUserRole::query()
+        return $this->activeMemberships($user)
             ->where('account_id', $account->id)
-            ->where('user_id', $user->id)
-            ->where('role', $role->value)
+            ->where('account_role', $role->value)
             ->exists();
     }
 
@@ -55,11 +47,11 @@ class AccessAuthorizationService
             return false;
         }
 
-        return LocationUserRole::query()
+        return $this->activeMemberships($user)
             ->where('account_id', $location->account_id)
-            ->where('location_id', $location->id)
-            ->where('user_id', $user->id)
-            ->where('role', $role->value)
+            ->whereHas('locationRoles', fn (Builder $query) => $query
+                ->where('location_id', $location->id)
+                ->where('role', $role->value))
             ->exists();
     }
 
@@ -76,16 +68,15 @@ class AccessAuthorizationService
             return false;
         }
 
-        return AccountUserRole::query()
+        return $this->activeMemberships($user)
             ->where('account_id', $location->account_id)
-            ->where('user_id', $user->id)
-            ->where('role', AccountRole::AccountAdmin->value)
-            ->exists()
-            || LocationUserRole::query()
-                ->where('account_id', $location->account_id)
-                ->where('location_id', $location->id)
-                ->where('user_id', $user->id)
-                ->exists();
+            ->where(function (Builder $query) use ($location): void {
+                $query
+                    ->where('account_role', AccountRole::AccountAdmin->value)
+                    ->orWhereHas('locationRoles', fn (Builder $query) => $query
+                        ->where('location_id', $location->id));
+            })
+            ->exists();
     }
 
     public function canManageStaff(User $user, Account $account): bool
@@ -164,11 +155,13 @@ class AccessAuthorizationService
 
         return $memberships
             ->where('status', RegistryStatus::Active)
-            ->whereIn('location_id', LocationUserRole::query()
+            ->whereIn('location_id', StaffLocationRole::query()
                 ->select('location_id')
                 ->where('account_id', $resident->account_id)
-                ->where('user_id', $user->id)
-                ->where('role', LocationRole::LocationManager->value))
+                ->where('role', LocationRole::LocationManager->value)
+                ->whereHas('membership', fn (Builder $query) => $query
+                    ->where('user_id', $user->id)
+                    ->whereNull('deactivated_at')))
             ->first()
             ?->location;
     }
@@ -183,11 +176,11 @@ class AccessAuthorizationService
             return true;
         }
 
-        return LocationUserRole::query()
+        return $this->activeMemberships($user)
             ->where('account_id', $account->id)
-            ->where('user_id', $user->id)
-            ->where('role', LocationRole::LocationManager->value)
-            ->whereHas('location.account')
+            ->whereHas('locationRoles', fn (Builder $query) => $query
+                ->where('role', LocationRole::LocationManager->value)
+                ->whereHas('location.account'))
             ->exists();
     }
 
@@ -249,11 +242,9 @@ class AccessAuthorizationService
     }
 
     /**
-     * Users that hold any Account or Location role in the Account.
-     *
-     * Uses the User role relations, so soft-deleted Accounts, Locations,
-     * and role assignments are excluded with the same semantics as
-     * canAccessAccount.
+     * Users holding a StaffMembership in the Account — ANY status: the
+     * staff list shows deactivated members (dimmed) with history intact.
+     * Access checks are the ones that require an active membership.
      *
      * @return Builder<User>
      */
@@ -263,11 +254,10 @@ class AccessAuthorizationService
             return User::query()->whereKey([]);
         }
 
-        return User::query()->where(function (Builder $query) use ($account): void {
-            $query
-                ->whereHas('accountUserRoles', fn (Builder $query) => $query->where('account_id', $account->id))
-                ->orWhereHas('locationUserRoles', fn (Builder $query) => $query->where('account_id', $account->id));
-        });
+        return User::query()->whereHas(
+            'staffMemberships',
+            fn (Builder $query) => $query->where('account_id', $account->id),
+        );
     }
 
     public function isStaffForAccount(User $user, Account $account): bool
@@ -292,10 +282,27 @@ class AccessAuthorizationService
 
         return Location::query()
             ->where('account_id', $account->id)
-            ->whereIn('id', LocationUserRole::query()
+            ->whereIn('id', StaffLocationRole::query()
                 ->select('location_id')
                 ->where('account_id', $account->id)
-                ->where('user_id', $user->id));
+                ->whereHas('membership', fn (Builder $query) => $query
+                    ->where('user_id', $user->id)
+                    ->whereNull('deactivated_at')));
+    }
+
+    /**
+     * Memberships that currently grant access: not deactivated, and in a
+     * live account (relation guard on User::staffMemberships handles the
+     * account; this queries the table directly, so re-check here).
+     *
+     * @return Builder<StaffMembership>
+     */
+    private function activeMemberships(User $user): Builder
+    {
+        return StaffMembership::query()
+            ->where('user_id', $user->id)
+            ->whereNull('deactivated_at')
+            ->whereHas('account');
     }
 
     /**

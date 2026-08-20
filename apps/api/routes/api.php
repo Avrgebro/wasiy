@@ -37,8 +37,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::post('/accounts/{account}/staff/invitations', [StaffInvitationController::class, 'store']);
         Route::delete('/accounts/{account}/staff/invitations/{invitation}', [StaffInvitationController::class, 'destroy']);
         Route::post('/accounts/{account}/staff/invitations/{invitation}/resend', [StaffInvitationController::class, 'resend']);
-        Route::patch('/accounts/{account}/staff/{user}/roles', [AccountStaffController::class, 'updateRoles']);
-        Route::patch('/accounts/{account}/staff/{user}/locations', [AccountStaffController::class, 'updateLocations']);
+        Route::patch('/accounts/{account}/staff/{user}/access', [AccountStaffController::class, 'updateAccess']);
+        Route::post('/accounts/{account}/staff/{user}/deactivate', [AccountStaffController::class, 'deactivate']);
+        Route::post('/accounts/{account}/staff/{user}/reactivate', [AccountStaffController::class, 'reactivate']);
     });
 
     // Staff registry surface: fine-grained authorization lives in the

@@ -62,6 +62,16 @@ class StoreStaffInvitationRequest extends FormRequest
                     __('A staff invitation must include an account role or at least one location assignment.'),
                 );
             }
+
+            // Access types are mutually exclusive: the account admin role
+            // already implies access to every location, so pairing it with
+            // location assignments would create ambiguous access records.
+            if ($hasAccountRole && $hasLocationAssignments) {
+                $validator->errors()->add(
+                    'location_assignments',
+                    __('A staff invitation cannot combine the account admin role with location assignments.'),
+                );
+            }
         });
     }
 

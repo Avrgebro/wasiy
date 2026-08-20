@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -25,11 +24,11 @@ class Location extends Model
     }
 
     /**
-     * @return HasMany<LocationUserRole, $this>
+     * @return HasMany<StaffLocationRole, $this>
      */
-    public function locationUserRoles(): HasMany
+    public function staffLocationRoles(): HasMany
     {
-        return $this->hasMany(LocationUserRole::class);
+        return $this->hasMany(StaffLocationRole::class);
     }
 
     /**
@@ -56,13 +55,4 @@ class Location extends Model
         return $this->hasMany(Vehicle::class);
     }
 
-    /**
-     * @return BelongsToMany<User, $this>
-     */
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'location_user_roles')
-            ->withPivot(['account_id', 'role'])
-            ->withTimestamps();
-    }
 }

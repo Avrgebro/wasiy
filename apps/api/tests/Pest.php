@@ -48,3 +48,68 @@ function something()
 {
     // ..
 }
+
+/**
+ * The membership for (account, user), created if missing. Passing a role
+ * sets it; omitting it leaves an existing role untouched.
+ */
+function createStaffMembership(
+    App\Models\Account $account,
+    App\Models\User $user,
+    App\Enums\AccountRole|string|null $accountRole = null,
+): App\Models\StaffMembership {
+    $membership = App\Models\StaffMembership::query()->firstOrCreate([
+        'account_id' => $account->id,
+        'user_id' => $user->id,
+    ]);
+
+    if ($accountRole !== null) {
+        $membership->forceFill([
+            'account_role' => $accountRole instanceof App\Enums\AccountRole
+                ? $accountRole
+                : App\Enums\AccountRole::from($accountRole),
+        ])->save();
+    }
+
+    return $membership;
+}
+
+function grantLocationRole(
+    App\Models\Account $account,
+    App\Models\Location $location,
+    App\Models\User $user,
+    App\Enums\LocationRole|string $role,
+): App\Models\StaffMembership {
+    $membership = createStaffMembership($account, $user);
+
+    App\Models\StaffLocationRole::query()->updateOrCreate(
+        [
+            'staff_membership_id' => $membership->id,
+            'location_id' => $location->id,
+        ],
+        [
+            'account_id' => $account->id,
+            'role' => $role instanceof App\Enums\LocationRole
+                ? $role
+                : App\Enums\LocationRole::from($role),
+        ],
+    );
+
+    return $membership;
+}
+
+function userHasLocationRole(
+    App\Models\Account $account,
+    App\Models\Location $location,
+    App\Models\User $user,
+    App\Enums\LocationRole|string|null $role = null,
+): bool {
+    $roleValue = $role instanceof App\Enums\LocationRole ? $role->value : $role;
+
+    return App\Models\StaffLocationRole::query()
+        ->where('account_id', $account->id)
+        ->where('location_id', $location->id)
+        ->when($roleValue !== null, fn ($query) => $query->where('role', $roleValue))
+        ->whereHas('membership', fn ($query) => $query->where('user_id', $user->id))
+        ->exists();
+}
