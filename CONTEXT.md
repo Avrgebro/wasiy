@@ -22,6 +22,10 @@ A person who can access the system under an Account. Users may have operational 
 
 The highest-privilege role in an Account. The Account Admin manages account settings, Locations, Users, role assignments, records, and cross-location reporting. In the initial product, only the Account Admin can create staff Users or change staff roles.
 
+### Staff Membership
+
+The stored relationship between a User and an Account as staff (one row per Account and User). The membership owns the optional Account-level role and per-account deactivation; Location roles belong to the membership. Account role and Location roles are mutually exclusive: an Account Admin already reaches every Location. A deactivated Staff Membership keeps the member listed with history but grants no access in that Account, without affecting the User's login or other Accounts.
+
 ### Staff Invitation
 
 An invitation for a User to join an Account in an operational staff role. A Staff Invitation may include Account-level authority or Location assignments, but the staff relationship belongs to the Account even when the invitation is started from a Location screen.
