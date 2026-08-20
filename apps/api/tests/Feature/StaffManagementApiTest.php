@@ -1,20 +1,24 @@
 <?php
 
+use App\Actions\Staff\UpdateStaffAccess;
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
+use App\Exceptions\InvitationException;
 use App\Models\Account;
-use App\Models\StaffMembership;
 use App\Models\ActivityLog;
 use App\Models\Location;
 use App\Models\StaffLocationRole;
+use App\Models\StaffMembership;
 use App\Models\User;
 use App\Models\UserInvitation;
 use App\Notifications\StaffInvitationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Notification;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 uses(RefreshDatabase::class);
 
@@ -653,9 +657,9 @@ test('an actor demoted after authorization cannot demote the remaining admin', f
         ->where('user_id', $demotedActor->id)
         ->update(['account_role' => null]);
 
-    expect(fn () => app(App\Actions\Staff\UpdateStaffAccess::class)
+    expect(fn () => app(UpdateStaffAccess::class)
         ->handle($account, $demotedActor, $remainingAdmin, null, []))
-        ->toThrow(Symfony\Component\HttpKernel\Exception\HttpException::class);
+        ->toThrow(HttpException::class);
 
     $this->assertDatabaseHas('staff_memberships', [
         'account_id' => $account->id,
@@ -1136,7 +1140,7 @@ test('an already cancelled invitation cannot be cancelled or resent again', func
 });
 
 test('expected invitation outcomes are not reported to the logs', function () {
-    Illuminate\Support\Facades\Exceptions::fake();
+    Exceptions::fake();
 
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
@@ -1157,7 +1161,7 @@ test('expected invitation outcomes are not reported to the logs', function () {
 
     $this->postJson("/api/staff-invitations/{$token}/accept")->assertUnauthorized();
 
-    Illuminate\Support\Facades\Exceptions::assertNotReported(App\Exceptions\InvitationException::class);
+    Exceptions::assertNotReported(InvitationException::class);
 });
 
 test('staff list filters by membership status', function () {

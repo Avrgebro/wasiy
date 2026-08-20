@@ -61,5 +61,4 @@ class Account extends Model
     {
         return $this->hasMany(Vehicle::class);
     }
-
 }

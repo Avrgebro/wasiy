@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Residents\ClaimResidentInvitation;
 use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
 use App\Enums\ResidentType;
@@ -16,6 +17,7 @@ use App\Notifications\ResidentInvitationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
@@ -401,9 +403,9 @@ test('claim rejects an invitation that lost pending status after token resolutio
     UserInvitation::query()->whereKey($invitation->id)
         ->update(['status' => UserInvitationStatus::Cancelled->value]);
 
-    expect(fn () => app(App\Actions\Residents\ClaimResidentInvitation::class)
+    expect(fn () => app(ClaimResidentInvitation::class)
         ->handle($staleInvitation, 'new-secure-password'))
-        ->toThrow(Illuminate\Validation\ValidationException::class);
+        ->toThrow(ValidationException::class);
 
     expect($invitation->fresh()->status)->toBe(UserInvitationStatus::Cancelled)
         ->and($user->fresh()->password)->toBe($originalPasswordHash)

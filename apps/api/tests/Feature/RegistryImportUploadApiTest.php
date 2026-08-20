@@ -303,7 +303,7 @@ test('a storage failure during upload leaves no import record behind', function 
 
     $this->actingAs($manager)
         ->postJson("/api/locations/{$location->id}/registry-imports", [
-            'file' => Illuminate\Http\UploadedFile::fake()->createWithContent('registro.csv', "unidad\n101"),
+            'file' => UploadedFile::fake()->createWithContent('registro.csv', "unidad\n101"),
             'import_type' => ImportType::RegistryUnitsResidents->value,
         ])
         ->assertServerError();

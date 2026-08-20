@@ -10,6 +10,7 @@ use App\Models\UnitMembership;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 
 uses(RefreshDatabase::class);
 
@@ -218,6 +219,6 @@ test('createAsResident gate requires an active membership in the target unit', f
     $otherUnit = Unit::factory()->for($unit->account)->for($unit->location)->create();
     $residentUser = createResidentUserForUnit($unit);
 
-    expect(Illuminate\Support\Facades\Gate::forUser($residentUser)->allows('createAsResident', [Vehicle::class, $unit]))->toBeTrue()
-        ->and(Illuminate\Support\Facades\Gate::forUser($residentUser)->denies('createAsResident', [Vehicle::class, $otherUnit]))->toBeTrue();
+    expect(Gate::forUser($residentUser)->allows('createAsResident', [Vehicle::class, $unit]))->toBeTrue()
+        ->and(Gate::forUser($residentUser)->denies('createAsResident', [Vehicle::class, $otherUnit]))->toBeTrue();
 });

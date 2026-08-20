@@ -115,5 +115,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Resident::class);
     }
-
 }

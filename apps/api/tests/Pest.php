@@ -1,5 +1,12 @@
 <?php
 
+use App\Enums\AccountRole;
+use App\Enums\LocationRole;
+use App\Models\Account;
+use App\Models\Location;
+use App\Models\StaffLocationRole;
+use App\Models\StaffMembership;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -54,20 +61,20 @@ function something()
  * sets it; omitting it leaves an existing role untouched.
  */
 function createStaffMembership(
-    App\Models\Account $account,
-    App\Models\User $user,
-    App\Enums\AccountRole|string|null $accountRole = null,
-): App\Models\StaffMembership {
-    $membership = App\Models\StaffMembership::query()->firstOrCreate([
+    Account $account,
+    User $user,
+    AccountRole|string|null $accountRole = null,
+): StaffMembership {
+    $membership = StaffMembership::query()->firstOrCreate([
         'account_id' => $account->id,
         'user_id' => $user->id,
     ]);
 
     if ($accountRole !== null) {
         $membership->forceFill([
-            'account_role' => $accountRole instanceof App\Enums\AccountRole
+            'account_role' => $accountRole instanceof AccountRole
                 ? $accountRole
-                : App\Enums\AccountRole::from($accountRole),
+                : AccountRole::from($accountRole),
         ])->save();
     }
 
@@ -75,23 +82,23 @@ function createStaffMembership(
 }
 
 function grantLocationRole(
-    App\Models\Account $account,
-    App\Models\Location $location,
-    App\Models\User $user,
-    App\Enums\LocationRole|string $role,
-): App\Models\StaffMembership {
+    Account $account,
+    Location $location,
+    User $user,
+    LocationRole|string $role,
+): StaffMembership {
     $membership = createStaffMembership($account, $user);
 
-    App\Models\StaffLocationRole::query()->updateOrCreate(
+    StaffLocationRole::query()->updateOrCreate(
         [
             'staff_membership_id' => $membership->id,
             'location_id' => $location->id,
         ],
         [
             'account_id' => $account->id,
-            'role' => $role instanceof App\Enums\LocationRole
+            'role' => $role instanceof LocationRole
                 ? $role
-                : App\Enums\LocationRole::from($role),
+                : LocationRole::from($role),
         ],
     );
 
@@ -99,14 +106,14 @@ function grantLocationRole(
 }
 
 function userHasLocationRole(
-    App\Models\Account $account,
-    App\Models\Location $location,
-    App\Models\User $user,
-    App\Enums\LocationRole|string|null $role = null,
+    Account $account,
+    Location $location,
+    User $user,
+    LocationRole|string|null $role = null,
 ): bool {
-    $roleValue = $role instanceof App\Enums\LocationRole ? $role->value : $role;
+    $roleValue = $role instanceof LocationRole ? $role->value : $role;
 
-    return App\Models\StaffLocationRole::query()
+    return StaffLocationRole::query()
         ->where('account_id', $account->id)
         ->where('location_id', $location->id)
         ->when($roleValue !== null, fn ($query) => $query->where('role', $roleValue))
