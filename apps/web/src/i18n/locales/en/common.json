@@ -291,7 +291,7 @@
     "passwordMismatch": "Passwords do not match.",
     "locationRequired": "Select a location.",
     "locationDuplicated": "This location is already assigned.",
-    "staffAccessRequired": "Assign the account admin role or at least one location."
+    "locationAssignmentsRequired": "Add at least one location."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -372,12 +372,20 @@
     "saveChanges": "Save changes",
     "deactivate": "Deactivate user",
     "deactivateHint": "They will lose access immediately. Their activity history is kept.",
-    "deactivateUnavailable": "Coming soon.",
-    "actions": "Actions"
+    "actions": "Actions",
+    "adminReplacesLocations": "Saving as account admin will remove the current location assignments.",
+    "reactivate": "Reactivate",
+    "reactivated": "Access reactivated.",
+    "deactivated": "Access deactivated.",
+    "deactivateConfirmTitle": "Deactivate {{name}}?",
+    "allStatuses": "All statuses"
   },
   "table": {
     "showing": "Showing {{from}}–{{to}} of {{total}}",
     "previousPage": "Previous page",
-    "nextPage": "Next page"
+    "nextPage": "Next page",
+    "filters": "Filters",
+    "clearFilters": "Clear filters",
+    "removeFilter": "Remove filter {{filter}}"
   }
 }

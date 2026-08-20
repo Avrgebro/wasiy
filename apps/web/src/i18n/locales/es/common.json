@@ -291,7 +291,7 @@
     "passwordMismatch": "Las contraseñas no coinciden.",
     "locationRequired": "Selecciona una ubicación.",
     "locationDuplicated": "Esta ubicación ya está asignada.",
-    "staffAccessRequired": "Asigna el rol de administrador de cuenta o al menos una ubicación."
+    "locationAssignmentsRequired": "Agrega al menos una ubicación."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",
@@ -372,12 +372,20 @@
     "saveChanges": "Guardar cambios",
     "deactivate": "Desactivar usuario",
     "deactivateHint": "Perderá el acceso de inmediato. Su historial de actividad se conserva.",
-    "deactivateUnavailable": "Disponible próximamente.",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "adminReplacesLocations": "Al guardar como administrador de cuenta se quitarán las asignaciones de ubicación actuales.",
+    "reactivate": "Reactivar",
+    "reactivated": "Acceso reactivado.",
+    "deactivated": "Acceso desactivado.",
+    "deactivateConfirmTitle": "¿Desactivar a {{name}}?",
+    "allStatuses": "Todos los estados"
   },
   "table": {
     "showing": "Mostrando {{from}}–{{to}} de {{total}}",
     "previousPage": "Página anterior",
-    "nextPage": "Página siguiente"
+    "nextPage": "Página siguiente",
+    "filters": "Filtros",
+    "clearFilters": "Limpiar filtros",
+    "removeFilter": "Quitar filtro {{filter}}"
   }
 }

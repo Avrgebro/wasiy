@@ -7,7 +7,7 @@ export function staffStatus(staff: StaffSummary): StaffStatus {
     return 'deactivated'
   }
 
-  if (staff.account_roles.length === 0 && staff.location_assignments.length === 0) {
+  if (staff.account_role === null && staff.location_assignments.length === 0) {
     return 'unassigned'
   }
 

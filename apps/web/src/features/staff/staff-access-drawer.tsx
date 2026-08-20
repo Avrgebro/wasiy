@@ -8,7 +8,6 @@ import {
   Select,
   Text,
   TextInput,
-  Tooltip,
 } from '@mantine/core'
 import { showNotification } from '@mantine/notifications'
 import { AddCircle, CloseCircle } from '@solar-icons/react'
@@ -18,27 +17,29 @@ import { Controller, useFieldArray, useForm, useWatch, type FieldError } from 'r
 import { useTranslation } from 'react-i18next'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { accountRoles, getRoleLabelKey, locationRoles } from '../auth/access'
-import {
-  createStaffInvitation,
-  updateStaffAccountRole,
-  updateStaffLocationAssignments,
-  type StaffSummary,
-} from './api'
+import { createStaffInvitation, updateStaffAccess, type StaffSummary } from './api'
 import { staffInviteSchema, type StaffInviteFormValues } from './schemas'
 
 type LocationOption = { value: string; label: string }
 
 function staffDefaults(staff?: StaffSummary | null): StaffInviteFormValues {
+  // When a legacy record somehow holds both access types, admin wins the
+  // radio; the visible warning in the drawer covers what saving will do.
+  const isAdmin = staff?.account_role === accountRoles.accountAdmin
+
   return {
     email: staff?.email ?? '',
     first_name: staff?.first_name ?? '',
     last_name: staff?.last_name ?? '',
-    is_account_admin: staff?.account_roles.includes(accountRoles.accountAdmin) ?? false,
-    location_assignments:
-      staff?.location_assignments.map((assignment) => ({
-        location_id: assignment.location_id,
-        role: assignment.role,
-      })) ?? [],
+    access_type: isAdmin ? 'account_admin' : 'location_staff',
+    // Invites start with one empty row so the default choice is ready to
+    // fill in; edits mirror the record as-is.
+    location_assignments: staff
+      ? staff.location_assignments.map((assignment) => ({
+          location_id: assignment.location_id,
+          role: assignment.role,
+        }))
+      : [{ location_id: '', role: locationRoles.locationManager }],
   }
 }
 
@@ -66,9 +67,9 @@ function AccessIndicator({ active }: { active: boolean }) {
 }
 
 /**
- * The design's "Tipo de acceso" selector card. Unlike a strict radio group,
- * both cards can be active at once — the data model allows account admins to
- * also hold location roles, and existing staff already do.
+ * The design's "Tipo de acceso" selector card: a radio choice — account
+ * admin already implies every location, so the two access types are
+ * mutually exclusive, and the API enforces the same rule.
  */
 function AccessTypeCard({
   active,
@@ -123,12 +124,15 @@ export function StaffAccessDrawer({
   editing,
   locations,
   onClose,
+  onDeactivate,
   opened,
 }: {
   accountId: string
   editing: StaffSummary | null
   locations: LocationOption[]
   onClose: () => void
+  /** Opens the deactivation confirmation; absent for self-edits. */
+  onDeactivate?: () => void
   opened: boolean
 }) {
   const { t } = useTranslation('common')
@@ -138,8 +142,12 @@ export function StaffAccessDrawer({
     resolver: zodResolver(staffInviteSchema),
   })
   const assignments = useFieldArray({ control: form.control, name: 'location_assignments' })
-  const isAdmin = useWatch({ control: form.control, name: 'is_account_admin' })
-  const hasAssignments = assignments.fields.length > 0
+  const accessType = useWatch({ control: form.control, name: 'access_type' })
+  const isAdmin = accessType === 'account_admin'
+  // Legacy records may hold both access types; saving as admin will clear
+  // the assignments, so that consequence must be visible, not silent.
+  const adminSaveDropsAssignments =
+    isAdmin && (editing?.location_assignments.length ?? 0) > 0
 
   useEffect(() => {
     if (opened) {
@@ -150,23 +158,23 @@ export function StaffAccessDrawer({
 
   const mutation = useMutation({
     mutationFn: async (values: StaffInviteFormValues) => {
-      const accountRole = values.is_account_admin ? accountRoles.accountAdmin : null
+      // The radio makes access exclusive: admin sends no assignments, and
+      // location staff sends no account role — matching the API's XOR rule.
+      const access =
+        values.access_type === 'account_admin'
+          ? { account_role: accountRoles.accountAdmin, location_assignments: [] }
+          : { account_role: null, location_assignments: values.location_assignments }
 
       if (!editing) {
         return createStaffInvitation(accountId, {
           email: values.email,
           first_name: values.first_name,
           last_name: values.last_name,
-          account_role: accountRole,
-          location_assignments: values.location_assignments,
+          ...access,
         })
       }
 
-      // Two endpoints own the two access dimensions; both requests are
-      // idempotent, so saving always sends both rather than diffing.
-      await updateStaffAccountRole(accountId, editing.id, accountRole)
-
-      return updateStaffLocationAssignments(accountId, editing.id, values.location_assignments)
+      return updateStaffAccess(accountId, editing.id, access)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
@@ -269,7 +277,7 @@ export function StaffAccessDrawer({
             />
           </>
         )}
-        <div className="grid gap-2.5">
+        <div className="grid gap-2.5" role="radiogroup" aria-label={t('staff.accessType')}>
           <Text c="dimmed" fw={500} size="xs">
             {t('staff.accessType')}
           </Text>
@@ -278,19 +286,25 @@ export function StaffAccessDrawer({
             description={t('staff.accountAdminHint')}
             title={t(getRoleLabelKey(accountRoles.accountAdmin))}
             onActivate={() =>
-              form.setValue('is_account_admin', !isAdmin, { shouldValidate: true })
+              form.setValue('access_type', 'account_admin', { shouldValidate: true })
             }
           />
+          {adminSaveDropsAssignments ? (
+            <Alert color="yellow" p="xs">
+              {t('staff.adminReplacesLocations')}
+            </Alert>
+          ) : null}
           <AccessTypeCard
-            active={hasAssignments}
+            active={!isAdmin}
             title={t('staff.locationStaff')}
             onActivate={() => {
-              if (!hasAssignments) {
+              form.setValue('access_type', 'location_staff', { shouldValidate: true })
+              if (assignments.fields.length === 0) {
                 appendAssignment()
               }
             }}
           >
-            {hasAssignments ? (
+            {!isAdmin ? (
               <div className="grid gap-2.5">
                 {assignments.fields.map((assignmentField, index) => (
                   <Group key={assignmentField.id} align="flex-start" gap="xs" wrap="nowrap">
@@ -351,19 +365,16 @@ export function StaffAccessDrawer({
             </Text>
           ) : null}
         </div>
-        {editing ? (
+        {editing && onDeactivate && !editing.deactivated_at ? (
           <div className="grid gap-2 border-0 border-t border-solid border-[var(--mantine-color-default-border)] pt-5">
-            <Tooltip label={t('staff.deactivateUnavailable')}>
-              <Button
-                className="justify-self-start"
-                color="red"
-                data-disabled
-                variant="outline"
-                onClick={(event) => event.preventDefault()}
-              >
-                {t('staff.deactivate')}
-              </Button>
-            </Tooltip>
+            <Button
+              className="justify-self-start"
+              color="red"
+              variant="outline"
+              onClick={onDeactivate}
+            >
+              {t('staff.deactivate')}
+            </Button>
             <Text c="dimmed" size="xs">
               {t('staff.deactivateHint')}
             </Text>

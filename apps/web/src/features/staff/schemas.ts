@@ -10,6 +10,7 @@ export const staffSearchSchema = z.object({
   search: z.string().catch(''),
   role: z.string().catch(''),
   location_id: z.string().catch(''),
+  status: z.string().catch(''),
 })
 
 export type StaffSearchValues = z.infer<typeof staffSearchSchema>
@@ -20,21 +21,21 @@ const locationAssignmentSchema = z.object({
 })
 
 /**
- * Access is two-dimensional: account admin and per-location roles can
- * coexist on the same person, so admin is a flag rather than a branch of an
- * exclusive choice. The refinements mirror the API's rules — at least one
- * grant overall, and no location assigned twice.
+ * Access types are mutually exclusive — account admin already implies every
+ * location — so the form models them as a radio choice. The API enforces
+ * the same rule. Location staff needs at least one assignment, and no
+ * location can be assigned twice.
  */
 export const staffAccessSchema = z
   .object({
-    is_account_admin: z.boolean(),
+    access_type: z.enum(['account_admin', 'location_staff']),
     location_assignments: z.array(locationAssignmentSchema),
   })
   .superRefine((values, ctx) => {
-    if (!values.is_account_admin && values.location_assignments.length === 0) {
+    if (values.access_type === 'location_staff' && values.location_assignments.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'validation.staffAccessRequired',
+        message: 'validation.locationAssignmentsRequired',
         path: ['location_assignments'],
       })
     }

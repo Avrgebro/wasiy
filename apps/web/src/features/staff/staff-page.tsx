@@ -1,16 +1,18 @@
 import { Alert, Button, Text } from '@mantine/core'
 import { AddCircle } from '@solar-icons/react'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
+import { showNotification } from '@mantine/notifications'
 import { useMe } from '../auth/hooks'
 import type { MeResponse } from '../auth/types'
 import { DataTable } from '../../components/table/data-table'
-import { getPendingStaffInvitations, getStaff, type StaffSummary } from './api'
+import { getPendingStaffInvitations, getStaff, reactivateStaff, type StaffSummary } from './api'
 import { PendingInvitations } from './pending-invitations'
 import { StaffAccessDrawer } from './staff-access-drawer'
+import { StaffDeactivateModal } from './staff-deactivate-modal'
 import { useStaffColumns } from './staff-columns'
 import { StaffEmptyState } from './staff-empty-state'
 import { StaffFilters } from './staff-filters'
@@ -39,8 +41,10 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
+  const queryClient = useQueryClient()
   const [drawerOpened, setDrawerOpened] = useState(false)
   const [editing, setEditing] = useState<StaffSummary | null>(null)
+  const [deactivating, setDeactivating] = useState<StaffSummary | null>(null)
 
   const locationOptions = me.accessible_locations.map((location) => ({
     label: location.name,
@@ -83,10 +87,26 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
     setDrawerOpened(true)
   }
 
-  const columns = useStaffColumns({ meUserId: me.user.id, onEdit: openEdit })
+  const reactivateMutation = useMutation({
+    mutationFn: (staff: StaffSummary) => reactivateStaff(accountId, staff.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['staff'] })
+      showNotification({ color: 'green', message: t('staff.reactivated') })
+    },
+    onError: (error) => {
+      showNotification({ color: 'red', message: getErrorMessage(error) })
+    },
+  })
+
+  const columns = useStaffColumns({
+    meUserId: me.user.id,
+    onDeactivate: setDeactivating,
+    onEdit: openEdit,
+    onReactivate: (staff) => reactivateMutation.mutate(staff),
+  })
 
   const rows = listQuery.data?.data ?? []
-  const isFiltered = Boolean(search.search || search.role || search.location_id)
+  const isFiltered = Boolean(search.search || search.role || search.location_id || search.status)
 
   return (
     <div className="flex flex-col gap-6">
@@ -136,6 +156,19 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
         locations={locationOptions}
         opened={drawerOpened}
         onClose={() => setDrawerOpened(false)}
+        onDeactivate={
+          editing && editing.id !== me.user.id
+            ? () => {
+                setDrawerOpened(false)
+                setDeactivating(editing)
+              }
+            : undefined
+        }
+      />
+      <StaffDeactivateModal
+        accountId={accountId}
+        staff={deactivating}
+        onClose={() => setDeactivating(null)}
       />
     </div>
   )

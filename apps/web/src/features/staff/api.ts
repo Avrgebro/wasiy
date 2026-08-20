@@ -16,7 +16,7 @@ export type StaffSummary = {
   name: string
   email: string
   deactivated_at: string | null
-  account_roles: AccountRole[]
+  account_role: AccountRole | null
   location_assignments: StaffLocationAssignment[]
 }
 
@@ -42,6 +42,7 @@ export type StaffSearch = {
   search?: string
   role?: string
   location_id?: string
+  status?: string
 }
 
 export type LocationAssignmentInput = {
@@ -62,6 +63,20 @@ export function getStaff(accountId: string, search: StaffSearch) {
 
   return apiRequest<StaffListResponse>(
     `/api/accounts/${accountId}/staff?${params.toString()}`,
+  )
+}
+
+export function deactivateStaff(accountId: string, userId: string) {
+  return apiRequest<{ data: StaffSummary }>(
+    `/api/accounts/${accountId}/staff/${userId}/deactivate`,
+    { method: 'POST' },
+  )
+}
+
+export function reactivateStaff(accountId: string, userId: string) {
+  return apiRequest<{ data: StaffSummary }>(
+    `/api/accounts/${accountId}/staff/${userId}/reactivate`,
+    { method: 'POST' },
   )
 }
 
@@ -96,29 +111,18 @@ export function resendStaffInvitation(accountId: string, invitationId: string) {
   })
 }
 
-export function updateStaffAccountRole(
+export function updateStaffAccess(
   accountId: string,
   userId: string,
-  accountRole: AccountRole | null,
+  access: {
+    account_role: AccountRole | null
+    location_assignments: LocationAssignmentInput[]
+  },
 ) {
   return apiRequest<{ data: StaffSummary }>(
-    `/api/accounts/${accountId}/staff/${userId}/roles`,
+    `/api/accounts/${accountId}/staff/${userId}/access`,
     {
-      data: { account_role: accountRole },
-      method: 'PATCH',
-    },
-  )
-}
-
-export function updateStaffLocationAssignments(
-  accountId: string,
-  userId: string,
-  assignments: LocationAssignmentInput[],
-) {
-  return apiRequest<{ data: StaffSummary }>(
-    `/api/accounts/${accountId}/staff/${userId}/locations`,
-    {
-      data: { location_assignments: assignments },
+      data: access,
       method: 'PATCH',
     },
   )

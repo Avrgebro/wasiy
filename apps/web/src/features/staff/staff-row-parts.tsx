@@ -27,7 +27,7 @@ export function StaffStatusBadge({ staff }: { staff: StaffSummary }) {
 export function StaffAccountRoleBadge({ staff }: { staff: StaffSummary }) {
   const { t } = useTranslation('common')
 
-  if (!staff.account_roles.includes(accountRoles.accountAdmin)) {
+  if (staff.account_role !== accountRoles.accountAdmin) {
     return null
   }
 
