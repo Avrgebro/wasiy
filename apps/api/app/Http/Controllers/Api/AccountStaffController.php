@@ -6,15 +6,12 @@ use App\Actions\Staff\UpdateStaffAccountRole;
 use App\Actions\Staff\UpdateStaffLocationAssignments;
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
-use App\Enums\UserInvitationPurpose;
-use App\Enums\UserInvitationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateStaffAccountRoleRequest;
 use App\Http\Requests\UpdateStaffLocationAssignmentsRequest;
 use App\Http\Resources\StaffResource;
 use App\Models\Account;
 use App\Models\User;
-use App\Models\UserInvitation;
 use App\Services\AccessAuthorizationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -82,37 +79,7 @@ class AccountStaffController extends Controller
             ->paginate($this->perPage($validated))
             ->withQueryString();
 
-        return StaffResource::collection($staff)
-            ->additional(['pending_invitations' => $this->pendingInvitations($account)]);
-    }
-
-    /**
-     * People who have been invited but hold no roles yet, so they cannot appear
-     * in the staff list itself. Returned whole and unfiltered: this is a small
-     * bounded set rendered as its own section, not part of the filtered table.
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function pendingInvitations(Account $account): array
-    {
-        return UserInvitation::query()
-            ->where('account_id', $account->id)
-            ->where('purpose', UserInvitationPurpose::Staff->value)
-            ->where('status', UserInvitationStatus::Pending->value)
-            ->with('invitedBy')
-            ->orderBy('created_at')
-            ->get()
-            ->map(fn (UserInvitation $invitation): array => [
-                'id' => $invitation->id,
-                'email' => $invitation->email,
-                'first_name' => $invitation->first_name,
-                'last_name' => $invitation->last_name,
-                'expires_at' => $invitation->expires_at?->toJSON(),
-                'invited_by' => ['name' => $invitation->invitedBy?->name],
-                'invited_account_role' => $invitation->invitedAccountRole(),
-                'invited_location_assignments' => $invitation->invitedLocationAssignments(),
-            ])
-            ->all();
+        return StaffResource::collection($staff);
     }
 
     public function updateRoles(

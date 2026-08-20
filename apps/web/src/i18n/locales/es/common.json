@@ -5,7 +5,8 @@
     "newVisitor": "Registrar visitante",
     "save": "Guardar",
     "search": "Buscar",
-    "import": "Importar"
+    "import": "Importar",
+    "cancel": "Cancelar"
   },
   "common": {
     "loading": "Cargando",
@@ -287,7 +288,10 @@
     "unitRequired": "Selecciona una unidad.",
     "passwordTooShort": "Usa al menos 8 caracteres.",
     "passwordConfirmRequired": "Confirma tu contraseña.",
-    "passwordMismatch": "Las contraseñas no coinciden."
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "locationRequired": "Selecciona una ubicación.",
+    "locationDuplicated": "Esta ubicación ya está asignada.",
+    "staffAccessRequired": "Asigna el rol de administrador de cuenta o al menos una ubicación."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",
@@ -314,5 +318,66 @@
   "placeholder": {
     "title": "Aún no implementado",
     "body": "Esta página ya tiene un lugar en el menú pero todavía no está construida. Nada de lo que ves aquí son datos reales."
+  },
+  "staff": {
+    "title": "Personal",
+    "invite": "Invitar personal",
+    "invited": "Invitación enviada.",
+    "sendInvitation": "Enviar invitación",
+    "editTitle": "Acceso de {{name}}",
+    "editAccess": "Editar acceso",
+    "name": "Nombre",
+    "accountRole": "Rol de cuenta",
+    "accountAdminHint": "Acceso total a todas las ubicaciones",
+    "locationAccess": "Acceso por ubicación",
+    "locations": "Ubicaciones",
+    "location": "Ubicación",
+    "role": "Rol",
+    "addLocation": "Agregar ubicación",
+    "removeLocation": "Quitar ubicación",
+    "moreLocations": "+{{n}} más",
+    "you": "(tú)",
+    "statuses": {
+      "active": "Activo",
+      "deactivated": "Desactivado",
+      "unassigned": "Sin asignaciones"
+    },
+    "empty": {
+      "title": "Aún no hay personal en tu cuenta",
+      "body": "Invita a tu equipo para que administren ubicaciones y portería.",
+      "filteredTitle": "Sin resultados",
+      "filteredBody": "Ajusta la búsqueda o los filtros para encontrar a alguien."
+    },
+    "pending": {
+      "title": "Invitaciones pendientes",
+      "invitedBy": "Invitado por {{name}}",
+      "expired": "Vencida",
+      "resend": "Reenviar",
+      "resent": "Invitación reenviada.",
+      "revoke": "Revocar",
+      "revoked": "Invitación revocada.",
+      "revokeTitle": "¿Revocar la invitación de {{email}}?",
+      "revokeBody": "El enlace de invitación dejará de funcionar. Podrás invitar a la persona de nuevo cuando quieras.",
+      "revokeConfirm": "Revocar invitación",
+      "expiresToday": "Vence hoy",
+      "expiresInOneDay": "Vence en 1 día",
+      "expiresInDays": "Vence en {{n}} días"
+    },
+    "subtitle": "Administra el equipo y sus accesos por ubicación.",
+    "searchPlaceholder": "Buscar por nombre o correo…",
+    "allRoles": "Todos los roles",
+    "allLocations": "Todas las ubicaciones",
+    "accessType": "Tipo de acceso",
+    "locationStaff": "Personal de ubicación",
+    "saveChanges": "Guardar cambios",
+    "deactivate": "Desactivar usuario",
+    "deactivateHint": "Perderá el acceso de inmediato. Su historial de actividad se conserva.",
+    "deactivateUnavailable": "Disponible próximamente.",
+    "actions": "Acciones"
+  },
+  "table": {
+    "showing": "Mostrando {{from}}–{{to}} de {{total}}",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente"
   }
 }

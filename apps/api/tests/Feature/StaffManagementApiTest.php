@@ -977,17 +977,20 @@ test('the staff list surfaces pending invitations separately from active staff',
         ],
     ]);
 
-    $response = $this->actingAs($admin)
-        ->getJson("/api/accounts/{$account->id}/staff")
+    $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/staff/invitations")
         ->assertOk()
-        ->assertJsonPath('pending_invitations.0.email', 'waiting@wasiy.test')
-        ->assertJsonPath('pending_invitations.0.invited_by.name', $admin->name)
+        ->assertJsonPath('data.0.email', 'waiting@wasiy.test')
+        ->assertJsonPath('data.0.invited_by.name', $admin->name)
         ->assertJsonPath(
-            'pending_invitations.0.invited_location_assignments.0.role',
+            'data.0.invited_location_assignments.0.role',
             LocationRole::FrontDesk->value,
         );
 
     // The invitee holds no roles, so they are absent from the staff list itself.
+    $response = $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/staff")
+        ->assertOk();
     $staffEmails = collect($response->json('data'))->pluck('email');
 
     expect($staffEmails)->not->toContain('waiting@wasiy.test')

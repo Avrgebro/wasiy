@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     // Staff management: Account Admins only, enforced once on the group.
     Route::middleware('can:manageStaff,account')->group(function () {
         Route::get('/accounts/{account}/staff', [AccountStaffController::class, 'index']);
+        Route::get('/accounts/{account}/staff/invitations', [StaffInvitationController::class, 'index']);
         Route::post('/accounts/{account}/staff/invitations', [StaffInvitationController::class, 'store']);
         Route::delete('/accounts/{account}/staff/invitations/{invitation}', [StaffInvitationController::class, 'destroy']);
         Route::post('/accounts/{account}/staff/invitations/{invitation}/resend', [StaffInvitationController::class, 'resend']);

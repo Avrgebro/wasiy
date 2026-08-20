@@ -5,7 +5,8 @@
     "newVisitor": "Register visitor",
     "save": "Save",
     "search": "Search",
-    "import": "Import"
+    "import": "Import",
+    "cancel": "Cancel"
   },
   "common": {
     "loading": "Loading",
@@ -287,7 +288,10 @@
     "unitRequired": "Select a unit.",
     "passwordTooShort": "Use at least 8 characters.",
     "passwordConfirmRequired": "Confirm your password.",
-    "passwordMismatch": "Passwords do not match."
+    "passwordMismatch": "Passwords do not match.",
+    "locationRequired": "Select a location.",
+    "locationDuplicated": "This location is already assigned.",
+    "staffAccessRequired": "Assign the account admin role or at least one location."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -314,5 +318,66 @@
   "placeholder": {
     "title": "Not built yet",
     "body": "This page has a place in the navigation but no implementation. Nothing here is real data."
+  },
+  "staff": {
+    "title": "Staff",
+    "invite": "Invite staff",
+    "invited": "Invitation sent.",
+    "sendInvitation": "Send invitation",
+    "editTitle": "{{name}}'s access",
+    "editAccess": "Edit access",
+    "name": "Name",
+    "accountRole": "Account role",
+    "accountAdminHint": "Full access to every location",
+    "locationAccess": "Location access",
+    "locations": "Locations",
+    "location": "Location",
+    "role": "Role",
+    "addLocation": "Add location",
+    "removeLocation": "Remove location",
+    "moreLocations": "+{{n}} more",
+    "you": "(you)",
+    "statuses": {
+      "active": "Active",
+      "deactivated": "Deactivated",
+      "unassigned": "No assignments"
+    },
+    "empty": {
+      "title": "No staff in your account yet",
+      "body": "Invite your team to manage locations and the front desk.",
+      "filteredTitle": "No results",
+      "filteredBody": "Adjust the search or filters to find someone."
+    },
+    "pending": {
+      "title": "Pending invitations",
+      "invitedBy": "Invited by {{name}}",
+      "expired": "Expired",
+      "resend": "Resend",
+      "resent": "Invitation resent.",
+      "revoke": "Revoke",
+      "revoked": "Invitation revoked.",
+      "revokeTitle": "Revoke the invitation for {{email}}?",
+      "revokeBody": "The invitation link will stop working. You can invite them again at any time.",
+      "revokeConfirm": "Revoke invitation",
+      "expiresToday": "Expires today",
+      "expiresInOneDay": "Expires in 1 day",
+      "expiresInDays": "Expires in {{n}} days"
+    },
+    "subtitle": "Manage your team and their access per location.",
+    "searchPlaceholder": "Search by name or email…",
+    "allRoles": "All roles",
+    "allLocations": "All locations",
+    "accessType": "Access type",
+    "locationStaff": "Location staff",
+    "saveChanges": "Save changes",
+    "deactivate": "Deactivate user",
+    "deactivateHint": "They will lose access immediately. Their activity history is kept.",
+    "deactivateUnavailable": "Coming soon.",
+    "actions": "Actions"
+  },
+  "table": {
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
   }
 }

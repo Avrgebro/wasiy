@@ -19,7 +19,7 @@ import type { PaginatedApiResponse } from './types'
 
 export type { RegistrySearchValues }
 
-type RegistryCrudPageProps<TRow, TForm extends FieldValues> = {
+type RegistryCrudPageProps<TRow extends { id: string }, TForm extends FieldValues> = {
   columns: (openEdit: (row: TRow) => void) => ColumnDef<TRow>[]
   title: string
   newLabel: string
@@ -44,7 +44,7 @@ type RegistryCrudPageProps<TRow, TForm extends FieldValues> = {
  * search/status filters and a create-or-edit drawer form. Pages provide the
  * entity-specific columns, form fields, and API calls.
  */
-export function RegistryCrudPage<TRow, TForm extends FieldValues>({
+export function RegistryCrudPage<TRow extends { id: string }, TForm extends FieldValues>({
   columns,
   title,
   newLabel,
@@ -129,7 +129,9 @@ export function RegistryCrudPage<TRow, TForm extends FieldValues>({
             <Loader aria-label={t('common.loading')} />
           </div>
         ) : (
-          <RegistryTable table={table} />
+          <div className="overflow-x-auto">
+            <RegistryTable table={table} />
+          </div>
         )}
         <Pagination
           onChange={(page) => onSearchChange({ page })}

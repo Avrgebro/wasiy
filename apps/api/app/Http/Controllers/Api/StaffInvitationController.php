@@ -8,6 +8,7 @@ use App\Actions\Staff\AcceptStaffInvitation;
 use App\Actions\Staff\InviteStaffUser;
 use App\Data\AccessContext;
 use App\Enums\UserInvitationPurpose;
+use App\Enums\UserInvitationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffInvitationRequest;
 use App\Http\Resources\StaffInvitationResource;
@@ -28,6 +29,35 @@ class StaffInvitationController extends Controller
         private readonly UserInvitationTokenResolver $tokenResolver,
         private readonly AccessContextService $accessContext,
     ) {}
+
+    /**
+     * People who have been invited but hold no roles yet, so they cannot
+     * appear in the staff list. Returned whole and unfiltered: this is a
+     * small bounded set rendered as its own section, not a filtered table.
+     */
+    public function index(Account $account): JsonResponse
+    {
+        $invitations = UserInvitation::query()
+            ->where('account_id', $account->id)
+            ->where('purpose', UserInvitationPurpose::Staff->value)
+            ->where('status', UserInvitationStatus::Pending->value)
+            ->with('invitedBy')
+            ->orderBy('created_at')
+            ->get()
+            ->map(fn (UserInvitation $invitation): array => [
+                'id' => $invitation->id,
+                'email' => $invitation->email,
+                'first_name' => $invitation->first_name,
+                'last_name' => $invitation->last_name,
+                'expires_at' => $invitation->expires_at?->toJSON(),
+                'invited_by' => ['name' => $invitation->invitedBy?->name],
+                'invited_account_role' => $invitation->invitedAccountRole(),
+                'invited_location_assignments' => $invitation->invitedLocationAssignments(),
+            ])
+            ->all();
+
+        return $this->dataResponse($invitations);
+    }
 
     public function store(
         StoreStaffInvitationRequest $request,
