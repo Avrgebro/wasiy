@@ -208,8 +208,14 @@ export function Sidebar({
         <Drawer
           classNames={{ content: '!border-0 !p-0' }}
           styles={{
-            body: { height: '100%', padding: 0 },
-            content: { background: 'var(--sidebar)' },
+            body: {
+              backgroundColor: 'var(--sidebar)',
+              height: '100%',
+              padding: 0,
+            },
+            content: { backgroundColor: 'var(--sidebar)' },
+            inner: { backgroundColor: 'var(--sidebar)' },
+            root: { backgroundColor: 'var(--sidebar)' },
           }}
           onClose={onMobileClose}
           opened={mobileOpened}
