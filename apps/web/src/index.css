@@ -43,14 +43,24 @@
   /* App shell ("Soft workspace" layout). Light: white sidebar/surfaces float
      on warm paper; dark: sunken sidebar per the elevation hierarchy. */
   --app-canvas: var(--mantine-color-body);
-  --sidebar: light-dark(var(--wa-surface), var(--mantine-color-dark-8));
+  /* No light-dark() here: it needs Chrome 123+/Safari 17.5+, and older phone
+     browsers treat it as invalid, collapsing the background to transparent.
+     Dark values are swapped via the data-mantine-color-scheme block below. */
+  --sidebar: var(--wa-surface);
   --sidebar-foreground: var(--mantine-color-text);
-  --sidebar-hover: light-dark(
-    var(--mantine-color-teal-0),
-    var(--mantine-color-dark-5)
-  );
+  --sidebar-hover: var(--wa-tint);
   --sidebar-accent: var(--mantine-primary-color-filled);
   --sidebar-accent-foreground: var(--mantine-primary-color-contrast);
+
+  /* Cross-scheme tokens used in component classNames (dark values in the
+     data-mantine-color-scheme block below). */
+  --wa-brand-mark: var(--wa-primary);
+  --wa-watermark: #ece9e0;
+  --wa-tint: var(--mantine-color-teal-0);
+  --wa-tint-hover: var(--mantine-color-teal-1);
+  --wa-tint-selected: var(--mantine-color-teal-0);
+  --wa-tint-foreground: var(--mantine-color-teal-7);
+  --wa-teal-text: var(--mantine-color-teal-6);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -79,6 +89,14 @@
   /* Petroleum stops being the interactive text color in dark (insufficient
      contrast); links use teal.3 instead. */
   --mantine-color-anchor: var(--mantine-color-teal-3);
+
+  --wa-brand-mark: #f7f5f0;
+  --wa-watermark: #112325;
+  --wa-tint: var(--mantine-color-dark-5);
+  --wa-tint-hover: var(--mantine-color-dark-5);
+  --wa-tint-selected: var(--mantine-color-teal-6);
+  --wa-tint-foreground: var(--mantine-color-dark-2);
+  --wa-teal-text: var(--mantine-color-teal-3);
 }
 
 /* Papel, no blanco: the light body (#F7F5F0) is set via cssVariablesResolver

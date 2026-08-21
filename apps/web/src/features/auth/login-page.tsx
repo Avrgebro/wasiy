@@ -159,7 +159,7 @@ export function LoginPage() {
         <div className="flex w-full max-w-[420px] flex-col gap-[26px]">
           <div className="flex items-center gap-2.5 xl:hidden">
             <WasiyLogo
-              className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"
+              className="shrink-0 text-[var(--wa-brand-mark)]"
               size={28}
             />
             <span className="font-display text-xl font-semibold tracking-tight text-[var(--mantine-color-text)]">

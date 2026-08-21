@@ -52,7 +52,7 @@ function LocationAvatar({
       } flex shrink-0 items-center justify-center border font-display font-semibold ${
         active
           ? 'border-transparent bg-[var(--mantine-color-teal-4)] text-white'
-          : 'border-[var(--mantine-color-default-border)] bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] text-[light-dark(var(--mantine-color-teal-7),var(--mantine-color-dark-2))]'
+          : 'border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] text-[var(--wa-tint-foreground)]'
       }`}
     >
       {getLocationInitials(location.name)}
@@ -116,7 +116,7 @@ function CurrentLocation({
 
   if (!interactive) {
     return (
-      <div className="flex w-full items-center gap-2.5 rounded-xl border border-[var(--mantine-color-default-border)] bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] px-2.5 py-[9px]">
+      <div className="flex w-full items-center gap-2.5 rounded-xl border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] px-2.5 py-[9px]">
         {content}
       </div>
     )
@@ -128,7 +128,7 @@ function CurrentLocation({
       aria-expanded={opened}
       aria-haspopup="dialog"
       aria-label={t('shell.selectLocation')}
-      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-[var(--mantine-color-default-border)] bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] px-2.5 py-[9px] text-left transition-colors hover:border-[var(--mantine-color-teal-4)] hover:bg-[light-dark(var(--mantine-color-teal-1),var(--mantine-color-dark-5))] disabled:cursor-wait disabled:opacity-70 data-[opened=true]:border-[var(--mantine-color-teal-4)]"
+      className="group flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] px-2.5 py-[9px] text-left transition-colors hover:border-[var(--mantine-color-teal-4)] hover:bg-[var(--wa-tint-hover)] disabled:cursor-wait disabled:opacity-70 data-[opened=true]:border-[var(--mantine-color-teal-4)]"
       data-opened={opened}
       disabled={pending}
       ref={ref}
@@ -162,11 +162,11 @@ function LocationOption({
       // The sheet's focus trap lands on the active row (never the search
       // input, which would open the mobile keyboard over the sheet).
       data-autofocus={mobile && active ? true : undefined}
-      className={`flex w-full cursor-pointer items-center rounded-xl text-left transition-colors hover:bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] disabled:cursor-wait disabled:opacity-70 ${
+      className={`flex w-full cursor-pointer items-center rounded-xl text-left transition-colors hover:bg-[var(--wa-tint)] disabled:cursor-wait disabled:opacity-70 ${
         mobile ? 'gap-3 px-3 py-[11px]' : 'gap-2.5 px-2.5 py-2'
       } ${
         active
-          ? 'bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-teal-6))]'
+          ? 'bg-[var(--wa-tint-selected)]'
           : ''
       }`}
       disabled={disabled}
@@ -361,11 +361,11 @@ function LocationPickerFooter({ picker }: { picker: LocationPicker }) {
   return (
     <div className="border-t border-[var(--mantine-color-default-border)] p-2">
       <Link
-        className="flex min-h-11 items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-[var(--mantine-color-text)] no-underline transition-colors hover:bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))]"
+        className="flex min-h-11 items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-[var(--mantine-color-text)] no-underline transition-colors hover:bg-[var(--wa-tint)]"
         onClick={picker.close}
         to="/admin/locations"
       >
-        <span className="flex size-[30px] shrink-0 items-center justify-center rounded-lg bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))]">
+        <span className="flex size-[30px] shrink-0 items-center justify-center rounded-lg bg-[var(--wa-tint)] text-[var(--wa-teal-text)]">
           <Buildings2 aria-hidden="true" size={15} />
         </span>
         {t('shell.viewAllLocations')}
@@ -430,7 +430,7 @@ export function LocationSwitcher() {
             </p>
             {picker.hasMultipleAccounts ? (
               <Link
-                className="shrink-0 text-[11.5px] font-semibold text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))] no-underline hover:text-[var(--mantine-color-teal-4)]"
+                className="shrink-0 text-[11.5px] font-semibold text-[var(--wa-teal-text)] no-underline hover:text-[var(--mantine-color-teal-4)]"
                 onClick={picker.close}
                 to="/select-account"
               >
@@ -461,7 +461,7 @@ export function MobileLocationButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       aria-label={interactive ? t('shell.selectLocation') : undefined}
-      className="flex w-full items-center gap-3 rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] px-3.5 py-3 text-left disabled:cursor-default"
+      className="flex w-full items-center gap-3 rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] px-3.5 py-3 text-left disabled:cursor-default"
       disabled={!interactive}
       onClick={onClick}
       type="button"
@@ -476,7 +476,7 @@ export function MobileLocationButton({ onClick }: { onClick: () => void }) {
         </span>
       </span>
       {interactive ? (
-        <span className="shrink-0 text-[12.5px] font-semibold text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))]">
+        <span className="shrink-0 text-[12.5px] font-semibold text-[var(--wa-teal-text)]">
           {t('shell.changeLocationShort')}
         </span>
       ) : null}
@@ -506,7 +506,7 @@ export function MobileLocationSheet({
         </span>
         {picker.hasMultipleAccounts ? (
           <Link
-            className="text-[12.5px] font-semibold text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))] no-underline"
+            className="text-[12.5px] font-semibold text-[var(--wa-teal-text)] no-underline"
             onClick={picker.close}
             to="/select-account"
           >

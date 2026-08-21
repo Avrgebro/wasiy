@@ -29,7 +29,7 @@ function Watermark() {
   return (
     <svg
       aria-hidden="true"
-      className="absolute -bottom-28 -right-28 size-[min(70vh,50vw)] max-w-none text-[light-dark(#ECE9E0,#112325)]"
+      className="absolute -bottom-28 -right-28 size-[min(70vh,50vw)] max-w-none text-[var(--wa-watermark)]"
       fill="none"
       viewBox="0 0 48 48"
     >
@@ -75,7 +75,7 @@ export function SelectAccountPage() {
       <section className="relative flex w-full max-w-[440px] flex-col gap-7">
         <div className="flex items-center justify-center gap-2.5">
           <WasiyLogo
-            className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"
+            className="shrink-0 text-[var(--wa-brand-mark)]"
             size={30}
           />
           <span className="font-display text-[22px] font-semibold tracking-tight text-[var(--mantine-color-text)]">
@@ -112,13 +112,13 @@ export function SelectAccountPage() {
 
             return (
               <button
-                className="group flex cursor-pointer items-center gap-3.5 rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-[18px] py-4 text-left transition-colors hover:border-[var(--mantine-color-teal-4)] hover:bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] disabled:cursor-not-allowed disabled:opacity-60"
+                className="group flex cursor-pointer items-center gap-3.5 rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-[18px] py-4 text-left transition-colors hover:border-[var(--mantine-color-teal-4)] hover:bg-[var(--wa-tint)] disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={selectAccountMutation.isPending}
                 key={account.id}
                 onClick={() => handleSelectAccount(account.id)}
                 type="button"
               >
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-[11px] border border-[var(--mantine-color-default-border)] bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] font-display text-[17px] font-semibold text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))] transition-colors group-hover:border-transparent group-hover:bg-[var(--mantine-color-amber-4)] group-hover:text-[#1C2B2C]">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-[11px] border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] font-display text-[17px] font-semibold text-[var(--wa-teal-text)] transition-colors group-hover:border-transparent group-hover:bg-[var(--mantine-color-amber-4)] group-hover:text-[#1C2B2C]">
                   {accountInitials(account.name)}
                 </span>
                 <span className="min-w-0 flex-1">
@@ -136,7 +136,7 @@ export function SelectAccountPage() {
                 ) : (
                   <AltArrowRight
                     aria-hidden="true"
-                    className="shrink-0 text-[var(--mantine-color-placeholder)] transition-colors group-hover:text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))]"
+                    className="shrink-0 text-[var(--mantine-color-placeholder)] transition-colors group-hover:text-[var(--wa-teal-text)]"
                     size={16}
                   />
                 )}

@@ -17,7 +17,7 @@ export function Brand({ className, productAreaKey }: BrandProps) {
     >
       {/* Rule 7: petróleo mark on light, inverted paper on dark. */}
       <WasiyLogo
-        className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"
+        className="shrink-0 text-[var(--wa-brand-mark)]"
         size={32}
       />
       <div className="min-w-0">

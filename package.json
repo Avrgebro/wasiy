@@ -5,6 +5,7 @@
     "build": "pnpm -r --if-present build",
     "build:marketing": "pnpm --filter @wasiy/marketing build",
     "build:web": "pnpm --filter @wasiy/web build",
+    "dev": "pnpm sail:up && pnpm --filter @wasiy/web dev",
     "dev:marketing": "pnpm --filter @wasiy/marketing exec astro dev --background",
     "dev:marketing:logs": "pnpm --filter @wasiy/marketing exec astro dev logs",
     "dev:marketing:status": "pnpm --filter @wasiy/marketing exec astro dev status",
