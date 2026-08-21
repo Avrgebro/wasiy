@@ -1,21 +1,34 @@
 import { ActionIcon, Tooltip } from '@mantine/core'
 import { Bell, HamburgerMenu, Magnifer } from '@solar-icons/react'
+import { useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { getDefaultLocation } from '../../../features/auth/access'
+import { useMe } from '../../../features/auth/hooks'
+import { findActiveNavItem } from './navigation-state'
+import type { LayoutNavEntry } from './types'
 import { UserMenu } from './user-menu'
 
 type TopbarProps = {
+  navItems: LayoutNavEntry[]
   onMobileNavOpen: () => void
   showNotifications?: boolean
 }
 
 export function Topbar({
+  navItems,
   onMobileNavOpen,
   showNotifications = true,
 }: TopbarProps) {
   const { t } = useTranslation('common')
+  const meQuery = useMe()
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const location = meQuery.data ? getDefaultLocation(meQuery.data) : null
+  const activeNavItem = findActiveNavItem(navItems, pathname)
 
   return (
-    <header className="sticky top-0 z-10 flex min-h-16 items-center justify-between bg-[var(--app-canvas)]/85 px-4 backdrop-blur lg:px-8">
+    <header className="sticky top-0 z-10 flex min-h-[68px] items-center justify-between border-b border-[var(--mantine-color-default-border)] bg-[var(--sidebar)]/95 px-4 backdrop-blur sm:min-h-16 sm:border-b-0 sm:bg-[var(--app-canvas)]/85 lg:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {/* Tailwind lg, not Mantine hiddenFrom="lg" (75em): the sidebar this
             toggles is pinned open by Tailwind lg classes in app-shell and
@@ -24,11 +37,23 @@ export function Topbar({
           aria-label={t('shell.openNav')}
           className="lg:hidden"
           onClick={onMobileNavOpen}
-          size="lg"
-          variant="subtle"
+          radius={10}
+          size={40}
+          variant="default"
         >
           <HamburgerMenu size={18} />
         </ActionIcon>
+
+        <div className="min-w-0 flex-1 md:hidden">
+          <p className="truncate text-[14px] font-semibold leading-tight text-[var(--mantine-color-text)]">
+            {location?.name ?? t('shell.location')}
+          </p>
+          <p className="mt-1 truncate text-[11.5px] leading-tight text-[var(--mantine-color-dimmed)]">
+            {activeNavItem
+              ? t(activeNavItem.labelKey)
+              : t('shell.productArea')}
+          </p>
+        </div>
 
         {/* TEMPORARY: visual placeholder only — global search is not built yet.
             Remove or wire up when the search feature lands. */}
@@ -45,8 +70,9 @@ export function Topbar({
           <Tooltip label={t('notifications.label')}>
             <ActionIcon
               aria-label={t('notifications.label')}
-              size="lg"
-              variant="subtle"
+              radius={10}
+              size={40}
+              variant="default"
             >
               <Bell size={18} />
             </ActionIcon>

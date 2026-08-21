@@ -42,6 +42,36 @@ class DemoAccountsSeeder extends Seeder
             'address' => 'Av. Javier Prado Este 125, Lima',
         ]);
 
+        $this->location($account, 'torre-sur', [
+            'name' => 'Torre Sur',
+            'timezone' => 'America/Lima',
+            'address' => 'Av. Javier Prado Este 127, Lima',
+        ]);
+
+        $this->location($account, 'residencial-pacifico', [
+            'name' => 'Residencial Pacífico',
+            'timezone' => 'America/Lima',
+            'address' => 'Av. La Marina 980, Callao',
+        ]);
+
+        $this->location($account, 'condominio-valle', [
+            'name' => 'Condominio Valle',
+            'timezone' => 'America/Lima',
+            'address' => 'Av. El Sol 410, La Molina, Lima',
+        ]);
+
+        $this->location($account, 'parque-del-sol', [
+            'name' => 'Parque del Sol',
+            'timezone' => 'America/Lima',
+            'address' => 'Calle Los Parques 245, San Isidro, Lima',
+        ]);
+
+        $this->location($account, 'jardines-de-miraflores', [
+            'name' => 'Jardines de Miraflores',
+            'timezone' => 'America/Lima',
+            'address' => 'Av. Armendáriz 620, Miraflores, Lima',
+        ]);
+
         $secondAccount = Account::query()->updateOrCreate(
             ['slug' => 'wasiy-playa'],
             [

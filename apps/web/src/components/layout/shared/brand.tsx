@@ -2,14 +2,19 @@ import { useTranslation } from 'react-i18next'
 import { WasiyLogo } from './wasiy-logo'
 
 type BrandProps = {
+  className?: string
   productAreaKey?: string
 }
 
-export function Brand({ productAreaKey }: BrandProps) {
+export function Brand({ className, productAreaKey }: BrandProps) {
   const { t } = useTranslation('common')
 
   return (
-    <div className="flex items-center gap-2.5 px-3 pb-5">
+    <div
+      className={
+        className ?? 'flex items-center gap-2.5 px-3 pb-5'
+      }
+    >
       {/* Rule 7: petróleo mark on light, inverted paper on dark. */}
       <WasiyLogo
         className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"

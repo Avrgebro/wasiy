@@ -1,29 +1,25 @@
-import { useRouterState } from '@tanstack/react-router'
+import { ActionIcon, Avatar, Drawer } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
+import { CloseCircle, Logout } from '@solar-icons/react'
+import { useRouter, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { getDefaultLocation, getRoleLabelKey } from '../../../features/auth/access'
+import { useLogout, useMe } from '../../../features/auth/hooks'
 import { Brand } from './brand'
-import { LocationSwitcher } from './location-switcher'
+import {
+  LocationSwitcher,
+  MobileLocationButton,
+} from './location-switcher'
+import { isActivePath } from './navigation-state'
 import { SidebarItemGroup } from './sidebar-item-group'
 import { SidebarItem } from './sidebar-item'
-import type { LayoutNavEntry, LayoutNavItem, LayoutNavLeaf } from './types'
+import type { LayoutNavEntry, LayoutNavItem } from './types'
 
 type SidebarProps = {
   mobileOpened: boolean
   navItems: LayoutNavEntry[]
   onMobileClose: () => void
-}
-
-function isActivePath(pathname: string, item: LayoutNavLeaf) {
-  const { activeMatch = 'exact', to } = item
-
-  if (to === '/') {
-    return pathname === '/'
-  }
-
-  if (activeMatch === 'prefix') {
-    return pathname === to || pathname.startsWith(`${to}/`)
-  }
-
-  return pathname === to
+  onMobileLocationOpen: () => void
 }
 
 function isGroup(entry: LayoutNavEntry) {
@@ -115,26 +111,133 @@ function SidebarContent({
   )
 }
 
+function MobileAccountFooter() {
+  const { t } = useTranslation('common')
+  const router = useRouter()
+  const meQuery = useMe()
+  const logoutMutation = useLogout()
+  const me = meQuery.data
+  const currentLocation = me ? getDefaultLocation(me) : null
+  const role =
+    me?.roles.account[0]?.role ??
+    me?.roles.location.find(
+      (assignment) => assignment.location_id === currentLocation?.id,
+    )?.role
+
+  function handleLogout() {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => void router.navigate({ to: '/login' }),
+    })
+  }
+
+  return (
+    <div className="flex items-center gap-3 border-t border-[var(--mantine-color-default-border)] px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+      <Avatar color="initials" name={me?.user.name} radius="xl" size={38} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-[var(--mantine-color-text)]">
+          {me?.user.name}
+        </p>
+        <p className="mt-px truncate text-[11.5px] text-[var(--mantine-color-dimmed)]">
+          {role ? t(getRoleLabelKey(role)) : me?.user.email}
+        </p>
+      </div>
+      <button
+        className="flex min-h-10 items-center gap-1.5 rounded-lg px-2 text-[12.5px] font-semibold text-[var(--mantine-color-dimmed)] transition-colors hover:bg-[var(--sidebar-hover)] hover:text-[var(--mantine-color-text)] disabled:opacity-60"
+        disabled={logoutMutation.isPending}
+        onClick={handleLogout}
+        type="button"
+      >
+        <Logout aria-hidden="true" size={15} />
+        {t('auth.logout')}
+      </button>
+    </div>
+  )
+}
+
+function MobileSidebarContent({
+  navItems,
+  onClose,
+  onLocationOpen,
+}: {
+  navItems: LayoutNavEntry[]
+  onClose: () => void
+  onLocationOpen: () => void
+}) {
+  const { t } = useTranslation('common')
+
+  return (
+    <div className="flex h-[100dvh] min-h-0 flex-col bg-[var(--sidebar)]">
+      <div className="flex items-center justify-between px-4 py-3.5">
+        <Brand className="flex items-center gap-2.5" />
+        <ActionIcon
+          aria-label={t('shell.closeNav')}
+          onClick={onClose}
+          radius={10}
+          size={40}
+          variant="default"
+        >
+          <CloseCircle aria-hidden="true" size={18} />
+        </ActionIcon>
+      </div>
+
+      <div className="px-4 pb-4 pt-0.5">
+        <MobileLocationButton onClick={onLocationOpen} />
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+        <SidebarNav navItems={navItems} onNavigate={onClose} />
+      </div>
+
+      <MobileAccountFooter />
+    </div>
+  )
+}
+
 export function Sidebar({
   mobileOpened,
   navItems,
   onMobileClose,
+  onMobileLocationOpen,
 }: SidebarProps) {
   const { t } = useTranslation('common')
+  const isMobile = useMediaQuery('(max-width: 39.999em)')
 
   return (
     <>
-      {mobileOpened ? (
+      {isMobile ? (
+        <Drawer
+          classNames={{ content: '!border-0 !p-0' }}
+          styles={{
+            body: { height: '100%', padding: 0 },
+            content: { background: 'var(--sidebar)' },
+          }}
+          onClose={onMobileClose}
+          opened={mobileOpened}
+          padding={0}
+          position="left"
+          size="100%"
+          withCloseButton={false}
+          withOverlay={false}
+        >
+          <MobileSidebarContent
+            navItems={navItems}
+            onClose={onMobileClose}
+            onLocationOpen={onMobileLocationOpen}
+          />
+        </Drawer>
+      ) : null}
+
+      {mobileOpened && !isMobile ? (
         <button
           aria-label={t('shell.closeNav')}
-          className="fixed inset-0 z-30 border-0 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-30 hidden border-0 bg-black/40 sm:block lg:hidden"
           onClick={onMobileClose}
           type="button"
         />
       ) : null}
 
       <aside
-        className="fixed inset-y-0 left-0 z-40 w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0"
+        className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 sm:block lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0"
         data-opened={mobileOpened}
       >
         <SidebarContent navItems={navItems} onNavigate={onMobileClose} />

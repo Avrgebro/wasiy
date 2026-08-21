@@ -12,7 +12,7 @@ type SidebarItemProps = {
 }
 
 const sidebarItemBaseClassName =
-  'flex w-full transform-gpu appearance-none items-center gap-3 rounded-md border-0 px-3 text-left font-sans text-sm font-semibold leading-5 tracking-normal transition-all duration-150 ease-out hover:translate-x-1 motion-reduce:transition-none motion-reduce:hover:translate-x-0'
+  'flex min-h-12 w-full transform-gpu appearance-none items-center gap-3 rounded-[10px] border-0 px-3.5 text-left font-sans text-[15px] font-semibold leading-5 tracking-normal transition-all duration-150 ease-out motion-reduce:transition-none sm:min-h-10 sm:rounded-md sm:px-3 sm:text-sm sm:hover:translate-x-1 sm:motion-reduce:hover:translate-x-0'
 
 // Class lists are computed from state instead of stacked data-attribute
 // variants: with data-[nested]/data-[active] overrides the winner depends on
@@ -26,7 +26,7 @@ function sidebarItemClassName({
 }) {
   return [
     sidebarItemBaseClassName,
-    nested ? 'min-h-9 pl-10' : 'min-h-10',
+    nested ? 'pl-5 sm:min-h-9 sm:pl-10' : '',
     active
       ? 'bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)] hover:bg-[var(--sidebar-accent)]'
       : 'bg-transparent text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-hover)]',
@@ -57,7 +57,9 @@ function SidebarLink({
       to={item.to}
       onClick={onNavigate}
     >
-      {nested ? null : <Icon aria-hidden="true" size={20} />}
+      {nested ? null : (
+        <Icon aria-hidden="true" className="hidden sm:block" size={20} />
+      )}
       <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
     </Link>
   )
@@ -105,7 +107,7 @@ function SidebarCollapsibleItem({
         onClick={() => setOpened((current) => !current)}
         type="button"
       >
-        <Icon aria-hidden="true" size={20} />
+        <Icon aria-hidden="true" className="hidden sm:block" size={20} />
         <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
         <AltArrowDown
           aria-hidden="true"
