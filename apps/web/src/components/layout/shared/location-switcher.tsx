@@ -386,7 +386,7 @@ export function LocationSwitcher() {
   }
 
   return (
-    <div className="relative">
+    <div>
       <Popover
         offset={10}
         onChange={(nextOpened) => {
@@ -438,14 +438,6 @@ export function LocationSwitcher() {
         </Popover.Dropdown>
       </Popover>
 
-      {opened ? (
-        <button
-          aria-label={t('shell.closeLocationSwitcher')}
-          className="absolute left-0 top-[calc(100%+0.5rem)] z-10 h-screen w-full cursor-default border-0 bg-[light-dark(rgba(247,245,240,0.68),rgba(8,19,20,0.62))]"
-          onClick={picker.close}
-          type="button"
-        />
-      ) : null}
     </div>
   )
 }
