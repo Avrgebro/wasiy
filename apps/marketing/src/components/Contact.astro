@@ -1,5 +1,6 @@
 ---
 import LogoMark from './LogoMark.astro';
+import { SITE } from '../site';
 ---
 
 <section id="contacto">
@@ -18,7 +19,7 @@ import LogoMark from './LogoMark.astro';
             </svg>
           </div>
           <div>
-            <div class="channel-value">hola@wasiy.pe</div>
+            <a class="channel-value" href={`mailto:${SITE.email}`}>{SITE.email}</a>
             <div class="channel-note">Para demos, precios y dudas</div>
           </div>
         </div>
@@ -29,7 +30,7 @@ import LogoMark from './LogoMark.astro';
             </svg>
           </div>
           <div>
-            <div class="channel-value">+51 1 640 2210</div>
+            <a class="channel-value" href={`tel:${SITE.phone.replace(/\s/g, '')}`}>{SITE.phone}</a>
             <div class="channel-note">Lun–Vie, 9:00–18:00 (GMT−5)</div>
           </div>
         </div>
@@ -171,7 +172,13 @@ import LogoMark from './LogoMark.astro';
   }
 
   .channel-value {
+    display: block;
     font: 600 14.5px var(--font-instrument);
+    color: var(--ink);
+  }
+
+  a.channel-value:hover {
+    color: var(--teal);
   }
 
   .channel-note {
@@ -292,6 +299,10 @@ import LogoMark from './LogoMark.astro';
   }
 
   @media (max-width: 1024px) {
+    section {
+      padding: 72px 32px;
+    }
+
     .inner {
       grid-template-columns: 1fr;
       gap: 40px;

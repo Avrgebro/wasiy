@@ -34,7 +34,7 @@
         de contabilidad.
       </p>
       <div class="actions">
-        <button type="button" class="cta">
+        <a class="cta" href="#contacto">
           Solicitar demo
           <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
             <path
@@ -44,7 +44,7 @@
               stroke-linecap="round"
               stroke-linejoin="round"></path>
           </svg>
-        </button>
+        </a>
         <a class="secondary" href="#dia">
           Ver un día completo
           <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
@@ -177,12 +177,16 @@
     flex-wrap: wrap;
   }
 
+  .cta,
+  .cta:hover {
+    color: var(--ink);
+  }
+
   .cta {
     display: flex;
     align-items: center;
     gap: 9px;
     background: var(--gold);
-    color: var(--ink);
     border: none;
     border-radius: 12px;
     padding: 15px 26px;
@@ -372,7 +376,7 @@
 
   @media (max-width: 860px) {
     header {
-      padding: 56px 20px 72px;
+      padding: 64px 32px 80px;
     }
 
     .inner {
@@ -381,6 +385,31 @@
 
     h1 {
       font-size: 40px;
+    }
+
+    .product {
+      height: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .visitors,
+    .approval,
+    .adoption {
+      position: static;
+      width: auto;
+    }
+
+    .adoption {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    header {
+      padding: 56px 20px 72px;
     }
 
     .actions {
@@ -394,18 +423,11 @@
     }
 
     .product {
-      height: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 420px;
+      grid-template-columns: 1fr;
     }
 
-    .visitors,
-    .approval,
     .adoption {
-      position: static;
-      width: auto;
+      grid-column: auto;
     }
   }
 </style>

@@ -1,5 +1,5 @@
 ---
-
+import { plans } from '../data/plans';
 ---
 
 <section id="precios">
@@ -14,48 +14,27 @@
     </div>
 
     <div class="grid">
-      <div class="plan">
-        <div class="plan-name">Esencial</div>
-        <div class="price"><span class="amount">S/ 2.50</span><span class="per"> / unidad / mes</span></div>
-        <div class="pitch">Para un solo edificio que quiere dejar el cuaderno.</div>
-        <div class="features">
-          <span>✓ Registro de visitantes</span>
-          <span>✓ Unidades y residentes</span>
-          <span>✓ Anuncios</span>
-          <span>✓ Portal del residente</span>
-        </div>
-        <button type="button" class="action outline">Empezar</button>
-      </div>
-
-      <div class="plan featured">
-        <span class="badge">El favorito</span>
-        <div class="plan-name">Operativo</div>
-        <div class="price"><span class="amount">S/ 4.00</span><span class="per"> / unidad / mes</span></div>
-        <div class="pitch">La operación completa: recepción, reservas y auditoría.</div>
-        <div class="features">
-          <span>✓ Todo lo de Esencial</span>
-          <span>✓ Reservas con aprobación y cuotas</span>
-          <span>✓ Vehículos</span>
-          <span>✓ Registro de actividad</span>
-          <span>✓ Exportaciones CSV</span>
-        </div>
-        <button type="button" class="action solid">Solicitar demo</button>
-      </div>
-
-      <div class="plan">
-        <div class="plan-name">Portafolio</div>
-        <div class="price"><span class="amount">Hablemos</span></div>
-        <div class="pitch">
-          Para administradoras con varios edificios y desarrolladoras que entregan proyectos.
-        </div>
-        <div class="features">
-          <span>✓ Todo lo de Operativo</span>
-          <span>✓ Múltiples ubicaciones</span>
-          <span>✓ Vista consolidada de cuenta</span>
-          <span>✓ Onboarding asistido con CSV</span>
-        </div>
-        <button type="button" class="action outline">Contactar</button>
-      </div>
+      {
+        plans.map((plan) => (
+          <div class:list={['plan', { featured: plan.featured }]}>
+            {plan.badge && <span class="badge">{plan.badge}</span>}
+            <h3 class="plan-name">{plan.name}</h3>
+            <div class="price">
+              <span class="amount">{plan.amount}</span>
+              {plan.per && <span class="per">{plan.per}</span>}
+            </div>
+            <div class="pitch">{plan.pitch}</div>
+            <div class="features">
+              {plan.features.map((feature) => (
+                <span>✓ {feature}</span>
+              ))}
+            </div>
+            <a class:list={['action', plan.ctaStyle]} href="#contacto">
+              {plan.cta}
+            </a>
+          </div>
+        ))
+      }
     </div>
   </div>
 </section>
@@ -135,6 +114,7 @@
   }
 
   .plan-name {
+    margin: 0;
     font: 600 16px var(--font-sora);
   }
 
@@ -173,6 +153,7 @@
   }
 
   .action {
+    display: block;
     margin-top: auto;
     text-align: center;
     font: 600 14px var(--font-instrument);
@@ -181,23 +162,59 @@
     cursor: pointer;
   }
 
-  .action.outline {
+  .action.outline,
+  .action.outline:hover {
     color: var(--teal);
     border: 1.5px solid var(--teal);
     background: transparent;
   }
 
-  .action.solid {
+  .featured .action.outline,
+  .featured .action.outline:hover {
+    color: var(--bg);
+    border-color: var(--teal-mid);
+  }
+
+  .action.solid,
+  .action.solid:hover {
     color: var(--ink);
-    background: var(--gold);
     border: none;
+  }
+
+  .action.solid {
+    background: var(--gold);
   }
 
   .action.solid:hover {
     background: var(--gold-light);
   }
 
+  @media (max-width: 1024px) {
+    section {
+      padding: 72px 32px;
+    }
+  }
+
   @media (max-width: 900px) {
+    h2 {
+      font-size: 34px;
+    }
+
+    .grid {
+      grid-template-columns: 1fr 1fr;
+      row-gap: 28px;
+    }
+
+    .plan:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .plan.featured {
+      margin-top: 8px;
+    }
+  }
+
+  @media (max-width: 640px) {
     section {
       padding: 56px 20px;
     }
@@ -208,10 +225,11 @@
 
     .grid {
       grid-template-columns: 1fr;
+      row-gap: 20px;
     }
 
-    .plan.featured {
-      margin-top: 8px;
+    .plan:last-child {
+      grid-column: auto;
     }
   }
 </style>

@@ -1,0 +1,157 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Página no encontrada — Wasiy"
+  description="La página que buscas no existe. Vuelve al inicio de Wasiy o escríbenos."
+  noindex
+>
+  <Nav />
+  <main>
+    <svg
+      class="arches"
+      viewBox="0 0 1400 700"
+      preserveAspectRatio="xMidYMax slice"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M1060 320 v190 a120 120 0 0 0 240 0 v-190"
+        stroke="var(--hero-arch)"
+        stroke-width="64"
+        stroke-linecap="round"></path>
+      <path
+        d="M-40 420 v130 a100 100 0 0 0 200 0 v-130"
+        stroke="var(--hero-arch)"
+        stroke-width="56"
+        stroke-linecap="round"></path>
+    </svg>
+
+    <div class="inner">
+      <div class="code">404</div>
+      <h1>Esta puerta no existe en el edificio.</h1>
+      <p>
+        Revisamos el registro y nadie anunció esta visita. La página que buscas no está — quizá
+        se mudó sin avisar a recepción.
+      </p>
+      <div class="actions">
+        <a class="cta" href="/">
+          Volver al inicio
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+            <path
+              d="M3 8 h9 M8.5 4.5 L12 8 L8.5 11.5"
+              stroke="var(--ink)"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"></path>
+          </svg>
+        </a>
+        <a class="secondary" href="/#contacto">Escribir a contacto</a>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    position: relative;
+    overflow: hidden;
+    padding: 120px 48px 140px;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .arches {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+  }
+
+  .inner {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .code {
+    font: 700 15px var(--font-instrument);
+    letter-spacing: 0.12em;
+    color: var(--amber-text);
+    background: var(--amber-bg);
+    border-radius: 99px;
+    padding: 6px 16px;
+  }
+
+  h1 {
+    margin: 0;
+    font: 700 48px/1.1 var(--font-sora);
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  p {
+    margin: 0;
+    font: 400 17px/1.6 var(--font-instrument);
+    color: var(--muted);
+    max-width: 460px;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--gold);
+    color: var(--ink);
+    border-radius: 12px;
+    padding: 15px 26px;
+    font: 600 16px var(--font-instrument);
+  }
+
+  .cta:hover {
+    background: var(--gold-light);
+    color: var(--ink);
+  }
+
+  .secondary {
+    font: 600 15px var(--font-instrument);
+    padding: 15px 10px;
+  }
+
+  @media (max-width: 1024px) {
+    main {
+      padding: 96px 32px 110px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    main {
+      padding: 72px 20px 88px;
+    }
+
+    h1 {
+      font-size: 34px;
+    }
+  }
+</style>

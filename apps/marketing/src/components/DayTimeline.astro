@@ -23,7 +23,7 @@
         </div>
         <div class="content">
           <div class="text">
-            <div class="entry-title">Rosa termina el turno noche sin escribir un cuaderno</div>
+            <h3 class="entry-title">Rosa termina el turno noche sin escribir un cuaderno</h3>
             <div class="entry-body">
               Todo lo que pasó — la visita de las 23:40, el técnico del ascensor — quedó
               registrado con hora y responsable. El turno día abre el panel y ya sabe todo.
@@ -46,7 +46,7 @@
         </div>
         <div class="content">
           <div class="text">
-            <div class="entry-title">María aprueba el salón de eventos desde el micro</div>
+            <h3 class="entry-title">María aprueba el salón de eventos desde el micro</h3>
             <div class="entry-body">
               La reserva del Depto. 501 llegó anoche. Un toque para aprobar, y el depósito queda
               marcado como pendiente — sin llamadas, sin papelitos bajo la puerta.
@@ -72,7 +72,7 @@
         </div>
         <div class="content">
           <div class="text">
-            <div class="entry-title">Llega una visita que ya estaba anunciada</div>
+            <h3 class="entry-title">Llega una visita que ya estaba anunciada</h3>
             <div class="entry-body">
               El residente la pre-registró desde su portal. Jorge, en recepción, la encuentra por
               nombre y registra el ingreso en segundos. Nadie toca el intercom dos veces.
@@ -100,7 +100,7 @@
         </div>
         <div class="content">
           <div class="text">
-            <div class="entry-title">El anuncio del corte de agua llega a todos (de verdad)</div>
+            <h3 class="entry-title">El anuncio del corte de agua llega a todos (de verdad)</h3>
             <div class="entry-body">
               Un solo anuncio en Wasiy y cada residente lo ve en su portal — adiós al papel en el
               ascensor que alguien arranca a las dos horas.
@@ -131,7 +131,7 @@
         </div>
         <div class="content">
           <div class="text">
-            <div class="entry-title">La administradora revisa sus 4 edificios desde el sofá</div>
+            <h3 class="entry-title">La administradora revisa sus 4 edificios desde el sofá</h3>
             <div class="entry-body">
               Cambia de ubicación en un clic: visitas del día, reservas pendientes, invitaciones
               sin reclamar. Mañana no habrá sorpresas — y eso, en este rubro, es un lujo.
@@ -240,6 +240,7 @@
   }
 
   .entry-title {
+    margin: 0;
     font: 600 19px var(--font-sora);
   }
 
@@ -405,6 +406,10 @@
   }
 
   @media (max-width: 1024px) {
+    section {
+      padding: 72px 32px;
+    }
+
     .content {
       grid-template-columns: 1fr;
       gap: 16px;
