@@ -27,7 +27,7 @@
       <div class="kicker">
         <span class="kicker-dash"></span>Software de operación para edificios residenciales
       </div>
-      <h1>Tu edificio tiene una vida secreta. Wasiy la pone en orden.</h1>
+      <h1>Tu edificio tiene una vida secreta.</h1>
       <p class="lead">
         Visitas que llegan, parrillas que se reservan, mudanzas a deshora y un cuaderno en
         recepción que ya no aguanta más. Todo queda registrado con hora y responsable, y a la
@@ -381,35 +381,52 @@
 
     .inner {
       grid-template-columns: 1fr;
+      gap: 48px;
+      justify-items: center;
     }
 
     h1 {
       font-size: 40px;
     }
 
+    .copy {
+      align-items: center;
+      text-align: center;
+      max-width: 620px;
+    }
+
+    .actions {
+      justify-content: center;
+    }
+
     .product {
-      height: auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      align-items: start;
+      width: 100%;
+      max-width: 620px;
+      height: 330px;
     }
 
-    .visitors,
-    .approval,
-    .adoption {
-      position: static;
-      width: auto;
+    .visitors {
+      right: 150px;
+    }
+
+    .approval {
+      top: 128px;
     }
 
     .adoption {
-      grid-column: 1 / -1;
+      top: 226px;
+      left: 48px;
     }
   }
 
   @media (max-width: 600px) {
     header {
       padding: 56px 20px 72px;
+    }
+
+    .copy {
+      align-items: stretch;
+      text-align: left;
     }
 
     .actions {
@@ -423,11 +440,17 @@
     }
 
     .product {
+      height: auto;
+      display: grid;
       grid-template-columns: 1fr;
+      gap: 16px;
     }
 
+    .visitors,
+    .approval,
     .adoption {
-      grid-column: auto;
+      position: static;
+      width: auto;
     }
   }
 </style>

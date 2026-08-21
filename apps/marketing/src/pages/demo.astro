@@ -1,0 +1,721 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../site';
+---
+
+<Layout
+  title="Agendar demo | Wasiy"
+  description="Agenda una demo de 30 minutos de Wasiy con los datos de tu edificio: visitas, reservas y portal configurados para una ubicación real."
+>
+  <Nav />
+
+  <main>
+    <div class="inner">
+      <div class="pitch">
+        <div class="intro">
+          <div class="kicker">
+            <span class="kicker-dash"></span>30 minutos, con tu edificio en pantalla
+          </div>
+          <h1>Te mostramos Wasiy con los datos de tu edificio.</h1>
+          <p class="lead">
+            Sin presentación genérica. Traes una lista de unidades y salimos de la llamada con
+            visitas, reservas y portal configurados para una ubicación real.
+          </p>
+        </div>
+
+        <div class="points">
+          <div class="point">
+            <span class="point-icon">
+              <svg viewBox="0 0 12 12" width="11" height="11" fill="none" aria-hidden="true">
+                <path
+                  d="M2.5 6.3 L4.8 8.5 L9.5 3.5"
+                  stroke="var(--green)"
+                  stroke-width="1.9"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </span>
+            <div>
+              <div class="point-title">Recorrido por el turno de recepción</div>
+              <div class="point-detail">
+                Check-in de visitas, walk-ins y bitácora de turno tal como los verá tu personal.
+              </div>
+            </div>
+          </div>
+          <div class="point">
+            <span class="point-icon">
+              <svg viewBox="0 0 12 12" width="11" height="11" fill="none" aria-hidden="true">
+                <path
+                  d="M2.5 6.3 L4.8 8.5 L9.5 3.5"
+                  stroke="var(--green)"
+                  stroke-width="1.9"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </span>
+            <div>
+              <div class="point-title">Importación de tu padrón en vivo</div>
+              <div class="point-detail">
+                Trae un CSV o un Excel desordenado; lo cargamos durante la llamada.
+              </div>
+            </div>
+          </div>
+          <div class="point">
+            <span class="point-icon">
+              <svg viewBox="0 0 12 12" width="11" height="11" fill="none" aria-hidden="true">
+                <path
+                  d="M2.5 6.3 L4.8 8.5 L9.5 3.5"
+                  stroke="var(--green)"
+                  stroke-width="1.9"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"></path>
+              </svg>
+            </span>
+            <div>
+              <div class="point-title">Precio cerrado, sin sorpresas</div>
+              <div class="point-detail">
+                Salís con una cotización por unidades y el plan de puesta en marcha.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <figure class="quote">
+          <blockquote>
+            «La demo fue un martes. El jueves ya teníamos las 142 unidades cargadas y recepción
+            registrando visitas sin cuaderno.»
+          </blockquote>
+          <figcaption>
+            <span class="avatar">MD</span>
+            <div>
+              <div class="quote-name">Marco Delgado</div>
+              <div class="quote-role">Administradora Horizonte · Lima</div>
+            </div>
+          </figcaption>
+        </figure>
+
+        <div class="contact-line">
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          <span class="dot"></span>
+          <a href={`tel:${SITE.phone.replace(/\s/g, '')}`}>{SITE.phone}</a>
+          <span class="dot"></span>
+          <span>Lun a vie, 9:00 a 18:00 (GMT-5)</span>
+        </div>
+      </div>
+
+      <form class="panel" novalidate>
+        <div class="form-body">
+          <div>
+            <div class="panel-title">Agenda tu demo</div>
+            <div class="panel-sub">Respondemos el mismo día hábil.</div>
+          </div>
+
+          <div class="row">
+            <label>
+              <span class="field-label">Nombre</span>
+              <input type="text" name="nombre" placeholder="Marco Delgado" autocomplete="name" />
+            </label>
+            <label>
+              <span class="field-label">Teléfono</span>
+              <input type="tel" name="telefono" placeholder="+51 9__ ___ ___" autocomplete="tel" />
+            </label>
+          </div>
+          <label>
+            <span class="field-label">Correo de trabajo</span>
+            <input
+              type="email"
+              name="correo"
+              placeholder="marco@horizonte.pe"
+              autocomplete="email"
+              required
+            />
+          </label>
+          <label>
+            <span class="field-label">Administradora o edificio</span>
+            <input type="text" name="organizacion" placeholder="Administradora Horizonte" autocomplete="organization" />
+          </label>
+
+          <fieldset class="chips" data-mode="single">
+            <legend class="field-label">¿Cuántas unidades administras?</legend>
+            <div class="chip-row">
+              <button type="button" class="chip">1–50</button>
+              <button type="button" class="chip">51–200</button>
+              <button type="button" class="chip">201–600</button>
+              <button type="button" class="chip">600+</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="chips" data-mode="multi">
+            <legend class="field-label">¿Qué te urge resolver?</legend>
+            <div class="chip-row">
+              <button type="button" class="chip">Visitas</button>
+              <button type="button" class="chip">Reservas</button>
+              <button type="button" class="chip">Padrón al día</button>
+              <button type="button" class="chip">Anuncios</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="chips" data-mode="single">
+            <legend class="field-label">Franja preferida</legend>
+            <div class="chip-row slots">
+              <button type="button" class="chip slot" data-franja="manana">Mañana</button>
+              <button type="button" class="chip slot" data-franja="tarde">Tarde</button>
+              <button type="button" class="chip slot" data-franja="cualquiera">Cualquiera</button>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="submit">
+            Agendar mi demo
+            <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+              <path
+                d="M3 8 h9 M8.5 4.5 L12 8 L8.5 11.5"
+                stroke="var(--ink)"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </button>
+          <div class="disclaimer">
+            Sin tarjeta, sin compromiso. Usamos tus datos solo para coordinar la demo.
+          </div>
+        </div>
+
+        <div class="success" hidden>
+          <span class="success-icon">
+            <svg viewBox="0 0 12 12" width="18" height="18" fill="none" aria-hidden="true">
+              <path
+                d="M2.5 6.3 L4.8 8.5 L9.5 3.5"
+                stroke="var(--ink)"
+                stroke-width="1.9"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </span>
+          <div class="panel-title">Demo solicitada</div>
+          <p class="success-detail">
+            Te proponemos <strong class="success-slot"></strong>. Te escribimos hoy mismo para
+            confirmar la hora.
+          </p>
+          <button type="button" class="calendar">
+            Agregar al calendario
+            <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+              <path
+                d="M8 3 v9 M4.5 8.5 L8 12 L11.5 8.5"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </button>
+          <div class="success-contact">
+            ¿Cambió algo? Escríbenos a <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('form.panel');
+
+  // Chip groups: single-select behaves like radios, multi-select like checkboxes.
+  form?.querySelectorAll<HTMLFieldSetElement>('.chips').forEach((group) => {
+    const single = group.dataset.mode === 'single';
+    group.querySelectorAll<HTMLButtonElement>('.chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const on = chip.classList.contains('on');
+        if (single) group.querySelectorAll('.chip').forEach((c) => c.classList.remove('on'));
+        chip.classList.toggle('on', single || !on);
+      });
+    });
+  });
+
+  // Next business day at 10:00 (mañana/cualquiera) or 15:00 (tarde).
+  const proposedSlot = () => {
+    const tarde = form?.querySelector('.slot[data-franja="tarde"]')?.classList.contains('on');
+    const d = new Date();
+    do {
+      d.setDate(d.getDate() + 1);
+    } while (d.getDay() === 0 || d.getDay() === 6);
+    d.setHours(tarde ? 15 : 10, 0, 0, 0);
+    return d;
+  };
+
+  let slot = new Date();
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = form.querySelector<HTMLInputElement>('input[name="correo"]');
+    if (!email?.value || !email.checkValidity()) {
+      email?.reportValidity();
+      return;
+    }
+    slot = proposedSlot();
+    const label = new Intl.DateTimeFormat('es-PE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(slot);
+    const slotEl = form.querySelector('.success-slot');
+    if (slotEl) slotEl.textContent = `el ${label}`;
+    form.querySelector<HTMLElement>('.form-body')?.setAttribute('hidden', '');
+    form.querySelector<HTMLElement>('.success')?.removeAttribute('hidden');
+  });
+
+  form?.querySelector('.calendar')?.addEventListener('click', () => {
+    const toStamp = (d: Date) =>
+      d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const end = new Date(slot.getTime() + 30 * 60 * 1000);
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Wasiy//Demo//ES',
+      'BEGIN:VEVENT',
+      `UID:${Date.now()}@wasiy.co`,
+      `DTSTAMP:${toStamp(new Date())}`,
+      `DTSTART:${toStamp(slot)}`,
+      `DTEND:${toStamp(end)}`,
+      'SUMMARY:Demo de Wasiy',
+      'DESCRIPTION:Demo de 30 minutos de Wasiy. Hora por confirmar por correo.',
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+    const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+    const a = Object.assign(document.createElement('a'), { href: url, download: 'demo-wasiy.ics' });
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+</script>
+
+<style>
+  :global(body) {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    /* Split at the pitch/panel column boundary of the centered 1160px grid
+       (520px right column), so each background runs edge to edge. */
+    --split: min(calc(50% + 60px), calc(100% - 520px));
+    background: linear-gradient(
+      to right,
+      var(--bg) var(--split),
+      var(--white) var(--split)
+    );
+  }
+
+  .inner {
+    flex: 1;
+    max-width: 1160px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 520px;
+    align-items: start;
+  }
+
+  .pitch {
+    padding: 64px 56px 64px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 12.5px var(--font-instrument);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--teal-mid);
+  }
+
+  .kicker-dash {
+    width: 22px;
+    height: 2px;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  h1 {
+    margin: 0;
+    font: 700 44px/1.08 var(--font-sora);
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .lead {
+    margin: 0;
+    font: 400 17px/1.6 var(--font-instrument);
+    color: var(--muted);
+    max-width: 480px;
+  }
+
+  .points {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .point {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .point-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 99px;
+    background: var(--green-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .point-title {
+    font: 600 15.5px var(--font-instrument);
+    color: var(--ink);
+  }
+
+  .point-detail {
+    font: 400 14px/1.6 var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .quote {
+    margin: 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  blockquote {
+    margin: 0;
+    font: 400 17px/1.55 var(--font-instrument);
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  figcaption {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 99px;
+    background: var(--teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 600 13px var(--font-sora);
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+
+  .quote-name {
+    font: 600 13.5px var(--font-instrument);
+    color: var(--ink);
+  }
+
+  .quote-role {
+    font: 400 12.5px var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .contact-line {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font: 400 13px var(--font-instrument);
+    color: var(--faint);
+    flex-wrap: wrap;
+  }
+
+  .contact-line a {
+    color: var(--faint);
+  }
+
+  .contact-line a:hover {
+    color: var(--teal);
+  }
+
+  .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 99px;
+    background: var(--card-border);
+    flex-shrink: 0;
+  }
+
+  .panel {
+    background: var(--white);
+    border-left: 1px solid var(--border);
+    padding: 48px 44px;
+    min-height: 100%;
+  }
+
+  .form-body,
+  .success {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-body[hidden],
+  .success[hidden] {
+    display: none;
+  }
+
+  .panel-title {
+    font: 600 22px var(--font-sora);
+    color: var(--ink);
+  }
+
+  .panel-sub {
+    font: 400 14px var(--font-instrument);
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .field-label {
+    font: 600 12.5px var(--font-instrument);
+    color: var(--ink);
+  }
+
+  input {
+    font: 400 14.5px var(--font-instrument);
+    color: var(--ink);
+    border: 1.5px solid var(--card-border);
+    border-radius: 11px;
+    background: var(--white);
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+  }
+
+  input::placeholder {
+    color: var(--faint);
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(18, 78, 82, 0.12);
+    caret-color: var(--gold);
+  }
+
+  .chips {
+    margin: 0;
+    padding: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  /* A legend is not laid out as a flex item, so the fieldset's gap skips it;
+     the margin supplies the 9px the mockup specifies. */
+  legend {
+    padding: 0;
+    margin: 0 0 9px;
+  }
+
+  .chip-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    font: 600 13px var(--font-instrument);
+    color: var(--muted);
+    border: 1.5px solid var(--card-border);
+    border-radius: 99px;
+    padding: 9px 15px;
+    background: var(--white);
+    cursor: pointer;
+  }
+
+  .chip:hover {
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  .chip.on {
+    color: var(--ink);
+    border-color: var(--teal);
+    background: #eaf1f0;
+  }
+
+  .chip-row.slots {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .chip.slot {
+    border-radius: 11px;
+    padding: 11px 0;
+    text-align: center;
+  }
+
+  .submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    border-radius: 12px;
+    padding: 16px 0;
+    font: 600 16px var(--font-instrument);
+    cursor: pointer;
+  }
+
+  .submit:hover {
+    background: var(--gold-light);
+  }
+
+  .disclaimer {
+    font: 400 12.5px/1.55 var(--font-instrument);
+    color: var(--faint);
+    text-align: center;
+  }
+
+  .success {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .success-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 99px;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .success-detail {
+    margin: 0;
+    font: 400 15px/1.6 var(--font-instrument);
+    color: var(--muted);
+  }
+
+  .calendar {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font: 600 15px var(--font-instrument);
+    color: var(--teal);
+    border: 1.5px solid var(--teal-mid);
+    background: var(--white);
+    border-radius: 12px;
+    padding: 13px 20px;
+    cursor: pointer;
+  }
+
+  .calendar:hover {
+    background: var(--bg);
+  }
+
+  .success-contact {
+    font: 400 13px var(--font-instrument);
+    color: var(--faint);
+  }
+
+  @media (max-width: 1080px) {
+    main {
+      background: var(--bg);
+    }
+
+    .inner {
+      grid-template-columns: 1fr;
+    }
+
+    /* El formulario sube primero: en móvil nadie hace scroll para llegar al campo. */
+    .panel {
+      order: -1;
+      border-left: none;
+      border-bottom: 1px solid var(--border);
+      padding: 48px 32px;
+    }
+
+    .pitch {
+      padding: 48px 32px 64px;
+    }
+
+    h1 {
+      font-size: 36px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .panel {
+      padding: 36px 20px;
+    }
+
+    .pitch {
+      padding: 40px 20px 56px;
+    }
+
+    h1 {
+      font-size: 31px;
+    }
+
+    .row {
+      grid-template-columns: 1fr;
+    }
+
+    /* Stacked lines don't need the dot separators; they dangle at wrap points. */
+    .contact-line {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .contact-line .dot {
+      display: none;
+    }
+  }
+</style>

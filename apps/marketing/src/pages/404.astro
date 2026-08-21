@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Nav from '../components/Nav.astro';
-import Footer from '../components/Footer.astro';
+import LogoMark from '../components/LogoMark.astro';
+import { SITE, APP_URL } from '../site';
 ---
 
 <Layout
@@ -9,103 +9,194 @@ import Footer from '../components/Footer.astro';
   description="La página que buscas no existe. Vuelve al inicio de Wasiy o escríbenos."
   noindex
 >
-  <Nav />
   <main>
-    <svg
-      class="arches"
-      viewBox="0 0 1400 700"
-      preserveAspectRatio="xMidYMax slice"
-      fill="none"
-      aria-hidden="true"
-    >
+    <svg class="arches" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <path
-        d="M1060 320 v190 a120 120 0 0 0 240 0 v-190"
-        stroke="var(--hero-arch)"
-        stroke-width="64"
+        d="M8 12 v16 a8 8 0 0 0 16 0 v-16 M24 12 v16 a8 8 0 0 0 16 0 v-16 M40 28 v6 a2 2 0 0 1 -2 2 h-6"
+        stroke="var(--teal-soft)"
+        stroke-width="6.5"
         stroke-linecap="round"></path>
-      <path
-        d="M-40 420 v130 a100 100 0 0 0 200 0 v-130"
-        stroke="var(--hero-arch)"
-        stroke-width="56"
-        stroke-linecap="round"></path>
+      <circle class="arch-dot" cx="32" cy="19" r="3.5" fill="var(--gold)"></circle>
     </svg>
 
+    <div class="bar">
+      <a class="brand" href="/">
+        <LogoMark size={25} color="var(--bg)" />
+        <span class="wordmark">wasiy</span>
+      </a>
+      <a class="login" href={APP_URL}>Acceder</a>
+    </div>
+
     <div class="inner">
-      <div class="code">404</div>
-      <h1>Esta puerta no existe en el edificio.</h1>
-      <p>
-        Revisamos el registro y nadie anunció esta visita. La página que buscas no está. Quizá
-        se mudó sin avisar a recepción.
-      </p>
-      <div class="actions">
-        <a class="cta" href="/">
-          Volver al inicio
-          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
-            <path
-              d="M3 8 h9 M8.5 4.5 L12 8 L8.5 11.5"
-              stroke="var(--ink)"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"></path>
-          </svg>
-        </a>
-        <a class="secondary" href="/#contacto">Escribir a contacto</a>
+      <div class="copy">
+        <div class="code-line">
+          <span class="code">404</span>
+          <span class="code-label">Página no encontrada</span>
+        </div>
+        <h1>Esta puerta no está en el edificio.</h1>
+        <p class="lead">
+          El enlace se mudó, se escribió mal o nunca existió. Nadie firmó el ingreso, pero te
+          acompañamos a donde ibas.
+        </p>
+        <div class="actions">
+          <a class="cta" href="/">
+            Volver al inicio
+            <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+              <path
+                d="M3 8 h9 M8.5 4.5 L12 8 L8.5 11.5"
+                stroke="var(--ink)"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </a>
+          <a class="secondary" href={`mailto:${SITE.email}`}>Escribir a soporte</a>
+        </div>
+        <div class="note">Si llegaste desde un correo nuestro, avísanos: arreglamos el enlace.</div>
       </div>
+
+      <aside class="suggestions">
+        <div class="suggestions-title">Quizá buscabas</div>
+        <a href="/#modulos">Producto<span class="arrow" aria-hidden="true"></span></a>
+        <a href="/#precios">Precios<span class="arrow" aria-hidden="true"></span></a>
+        <a href="/#faq">Preguntas frecuentes<span class="arrow" aria-hidden="true"></span></a>
+        <a href={APP_URL}>Entrar al panel<span class="arrow" aria-hidden="true"></span></a>
+        <form class="search" action="https://www.google.com/search" method="get" role="search">
+          <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.6" stroke="var(--teal-faded)" stroke-width="1.5"></circle>
+            <path
+              d="M10.5 10.5 L14 14"
+              stroke="var(--teal-faded)"
+              stroke-width="1.5"
+              stroke-linecap="round"></path>
+          </svg>
+          <input type="search" name="q" placeholder="Buscar en el sitio" aria-label="Buscar en el sitio" />
+        </form>
+      </aside>
     </div>
   </main>
-  <Footer />
 </Layout>
+
+<script>
+  // Scope the Google search to this site without exposing the operator in the input.
+  const form = document.querySelector<HTMLFormElement>('.search');
+  form?.addEventListener('submit', () => {
+    const input = form.querySelector<HTMLInputElement>('input[name="q"]');
+    if (input && input.value.trim()) {
+      input.value = `site:${location.host} ${input.value.trim()}`;
+    }
+  });
+</script>
 
 <style>
   main {
     position: relative;
     overflow: hidden;
-    padding: 120px 48px 140px;
-    min-height: 60vh;
+    min-height: 100svh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    background: var(--teal);
   }
 
   .arches {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.5;
+    bottom: -90px;
+    right: -55px;
+    width: 640px;
+    height: 640px;
+  }
+
+  .arch-dot {
+    animation: wa-pulse 3s ease-in-out infinite;
+  }
+
+  .bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .wordmark {
+    font: 600 20px var(--font-sora);
+    letter-spacing: -0.02em;
+    color: var(--bg);
+  }
+
+  .login,
+  .login:hover {
+    color: var(--bg);
+  }
+
+  .login {
+    font: 600 14px var(--font-instrument);
+    border: 1.5px solid var(--teal-mid);
+    border-radius: 10px;
+    padding: 9px 16px;
+  }
+
+  .login:hover {
+    background: var(--teal-soft);
   }
 
   .inner {
     position: relative;
-    max-width: 640px;
+    flex: 1;
+    width: 100%;
+    max-width: 1160px;
     margin: 0 auto;
-    text-align: center;
+    display: grid;
+    grid-template-columns: 1.1fr 400px;
+    gap: 56px;
+    align-items: center;
+    padding: 32px 56px 64px;
+  }
+
+  .copy {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 20px;
+    gap: 26px;
+  }
+
+  .code-line {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
   }
 
   .code {
-    font: 700 15px var(--font-instrument);
-    letter-spacing: 0.12em;
-    color: var(--amber-text);
-    background: var(--amber-bg);
-    border-radius: 99px;
-    padding: 6px 16px;
+    font: 800 132px/0.86 var(--font-sora);
+    letter-spacing: -0.05em;
+    color: var(--bg);
+  }
+
+  .code-label {
+    font: 600 12.5px var(--font-instrument);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
   }
 
   h1 {
     margin: 0;
-    font: 700 48px/1.1 var(--font-sora);
+    font: 700 40px/1.1 var(--font-sora);
     letter-spacing: -0.03em;
-    color: var(--ink);
+    color: var(--bg);
     text-wrap: pretty;
   }
 
-  p {
+  .lead {
     margin: 0;
     font: 400 17px/1.6 var(--font-instrument);
-    color: var(--muted);
+    color: var(--teal-pale);
     max-width: 460px;
   }
 
@@ -114,8 +205,11 @@ import Footer from '../components/Footer.astro';
     align-items: center;
     gap: 14px;
     flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 8px;
+  }
+
+  .cta,
+  .cta:hover {
+    color: var(--ink);
   }
 
   .cta {
@@ -123,7 +217,6 @@ import Footer from '../components/Footer.astro';
     align-items: center;
     gap: 9px;
     background: var(--gold);
-    color: var(--ink);
     border-radius: 12px;
     padding: 15px 26px;
     font: 600 16px var(--font-instrument);
@@ -131,27 +224,141 @@ import Footer from '../components/Footer.astro';
 
   .cta:hover {
     background: var(--gold-light);
-    color: var(--ink);
+  }
+
+  .secondary,
+  .secondary:hover {
+    color: var(--bg);
   }
 
   .secondary {
-    font: 600 15px var(--font-instrument);
-    padding: 15px 10px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font: 600 16px var(--font-instrument);
+    border: 1.5px solid var(--teal-mid);
+    border-radius: 12px;
+    padding: 14px 22px;
   }
 
-  @media (max-width: 1024px) {
-    main {
-      padding: 96px 32px 110px;
+  .secondary:hover {
+    background: var(--teal-soft);
+  }
+
+  .note {
+    font: 400 13px var(--font-instrument);
+    color: var(--teal-faded);
+  }
+
+  .suggestions {
+    background: rgba(10, 53, 56, 0.55);
+    border: 1px solid var(--teal-soft);
+    border-radius: 18px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .suggestions-title {
+    font: 600 12.5px var(--font-instrument);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal-faded);
+    margin-bottom: 8px;
+  }
+
+  .suggestions a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font: 600 16px var(--font-instrument);
+    color: var(--bg);
+    padding: 14px 4px;
+    border-bottom: 1px solid var(--teal-soft);
+  }
+
+  .suggestions a:last-of-type {
+    border-bottom: none;
+  }
+
+  .arrow {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    background: no-repeat center / contain
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Cpath d='M3 8 h9 M8.5 4.5 L12 8 L8.5 11.5' stroke='%23E0A438' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  .search {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--teal-dark);
+    border: 1px solid var(--teal-soft);
+    border-radius: 11px;
+    padding: 12px 13px;
+  }
+
+  .search svg {
+    flex-shrink: 0;
+  }
+
+  .search input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    font: 400 14px var(--font-instrument);
+    color: var(--bg);
+    outline: none;
+  }
+
+  .search input::placeholder {
+    color: var(--teal-faded);
+  }
+
+  @media (max-width: 960px) {
+    .inner {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      align-items: start;
+      align-content: start;
+      padding: 24px 32px 64px;
+    }
+
+    .arches {
+      display: none;
     }
   }
 
   @media (max-width: 600px) {
-    main {
-      padding: 72px 20px 88px;
+    .bar {
+      padding: 14px 18px;
+    }
+
+    .inner {
+      padding: 20px 20px 56px;
+    }
+
+    .code {
+      font-size: 84px;
     }
 
     h1 {
-      font-size: 34px;
+      font-size: 32px;
+    }
+
+    .actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .cta,
+    .secondary {
+      justify-content: center;
     }
   }
 </style>
