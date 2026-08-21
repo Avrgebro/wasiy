@@ -251,7 +251,7 @@ export function Sidebar({
       ) : null}
 
       <aside
-        className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 sm:block lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:translate-x-0"
+        className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 sm:block lg:static lg:z-auto lg:h-full lg:translate-x-0"
         data-opened={mobileOpened}
       >
         <SidebarContent navItems={navItems} onNavigate={onMobileClose} />

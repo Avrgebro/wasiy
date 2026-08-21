@@ -122,6 +122,13 @@
   box-shadow: 0 0 0 3px var(--wa-focus-halo);
 }
 
+/* Full-viewport height with a vh fallback for browsers without dvh
+   (pre-2022 phones) — same compatibility posture as the light-dark() ban. */
+.h-dvh-safe {
+  height: 100vh;
+  height: 100dvh;
+}
+
 html {
   font-family: Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0;
