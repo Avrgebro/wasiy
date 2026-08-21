@@ -3,8 +3,12 @@ import { useMediaQuery } from '@mantine/hooks'
 import { CloseCircle, Logout } from '@solar-icons/react'
 import { useRouter, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { getDefaultLocation, getRoleLabelKey } from '../../../features/auth/access'
-import { useLogout, useMe } from '../../../features/auth/hooks'
+import { getRoleLabelKey } from '../../../features/auth/access'
+import {
+  useLocationContext,
+  useLogout,
+  useMe,
+} from '../../../features/auth/hooks'
 import { Brand } from './brand'
 import {
   LocationSwitcher,
@@ -21,6 +25,12 @@ type SidebarProps = {
   onMobileClose: () => void
   onMobileLocationOpen: () => void
 }
+
+// Must match Tailwind v4's `sm` breakpoint (40em/40rem): below it the Drawer
+// nav renders, from it up the `hidden sm:block` aside takes over. If `sm` is
+// ever customized, update this literal with it or both navs disagree at the
+// seam.
+const BELOW_SM_MEDIA_QUERY = '(max-width: 39.999em)'
 
 function isGroup(entry: LayoutNavEntry) {
   return entry.type === 'group'
@@ -117,7 +127,7 @@ function MobileAccountFooter() {
   const meQuery = useMe()
   const logoutMutation = useLogout()
   const me = meQuery.data
-  const currentLocation = me ? getDefaultLocation(me) : null
+  const { currentLocation } = useLocationContext()
   const role =
     me?.roles.account[0]?.role ??
     me?.roles.location.find(
@@ -200,7 +210,7 @@ export function Sidebar({
   onMobileLocationOpen,
 }: SidebarProps) {
   const { t } = useTranslation('common')
-  const isMobile = useMediaQuery('(max-width: 39.999em)')
+  const isMobile = useMediaQuery(BELOW_SM_MEDIA_QUERY)
 
   return (
     <>
@@ -214,8 +224,6 @@ export function Sidebar({
               padding: 0,
             },
             content: { backgroundColor: 'var(--sidebar)' },
-            inner: { backgroundColor: 'var(--sidebar)' },
-            root: { backgroundColor: 'var(--sidebar)' },
           }}
           onClose={onMobileClose}
           opened={mobileOpened}

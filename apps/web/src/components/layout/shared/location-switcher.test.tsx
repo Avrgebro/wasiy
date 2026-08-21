@@ -132,6 +132,11 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('../../../features/auth/hooks', () => ({
+  useLocationContext: () => ({
+    accessibleLocations: mocks.me.accessible_locations,
+    currentLocation: mocks.me.active_location,
+    hasMultipleLocations: mocks.me.accessible_locations.length > 1,
+  }),
   useMe: () => ({ data: mocks.me }),
   useSelectLocation: () => ({
     isPending: false,

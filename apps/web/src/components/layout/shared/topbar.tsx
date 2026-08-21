@@ -2,8 +2,7 @@ import { ActionIcon, Tooltip } from '@mantine/core'
 import { Bell, HamburgerMenu, Magnifer } from '@solar-icons/react'
 import { useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { getDefaultLocation } from '../../../features/auth/access'
-import { useMe } from '../../../features/auth/hooks'
+import { useLocationContext } from '../../../features/auth/hooks'
 import { findActiveNavItem } from './navigation-state'
 import type { LayoutNavEntry } from './types'
 import { UserMenu } from './user-menu'
@@ -20,11 +19,10 @@ export function Topbar({
   showNotifications = true,
 }: TopbarProps) {
   const { t } = useTranslation('common')
-  const meQuery = useMe()
+  const { currentLocation } = useLocationContext()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
-  const location = meQuery.data ? getDefaultLocation(meQuery.data) : null
   const activeNavItem = findActiveNavItem(navItems, pathname)
 
   return (
@@ -44,16 +42,22 @@ export function Topbar({
           <HamburgerMenu size={18} />
         </ActionIcon>
 
-        <div className="min-w-0 flex-1 md:hidden">
-          <p className="truncate text-[14px] font-semibold leading-tight text-[var(--mantine-color-text)]">
-            {location?.name ?? t('shell.location')}
-          </p>
-          <p className="mt-1 truncate text-[11.5px] leading-tight text-[var(--mantine-color-dimmed)]">
-            {activeNavItem
-              ? t(activeNavItem.labelKey)
-              : t('shell.productArea')}
-          </p>
-        </div>
+        {/* No fallback copy: an account can have zero locations and a route
+            can be absent from the nav tree — render only real data. */}
+        {currentLocation || activeNavItem ? (
+          <div className="min-w-0 flex-1 md:hidden">
+            {currentLocation ? (
+              <p className="truncate text-[14px] font-semibold leading-tight text-[var(--mantine-color-text)]">
+                {currentLocation.name}
+              </p>
+            ) : null}
+            {activeNavItem ? (
+              <p className="mt-1 truncate text-[11.5px] leading-tight text-[var(--mantine-color-dimmed)]">
+                {t(activeNavItem.labelKey)}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {/* TEMPORARY: visual placeholder only — global search is not built yet.
             Remove or wire up when the search feature lands. */}

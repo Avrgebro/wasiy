@@ -8,15 +8,15 @@ import { Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import type { ComponentPropsWithoutRef, Ref } from 'react'
 import { useTranslation } from 'react-i18next'
+import { isAccountAdmin } from '../../../features/auth/access'
 import {
-  getDefaultLocation,
-  isAccountAdmin,
-} from '../../../features/auth/access'
-import { useMe, useSelectLocation } from '../../../features/auth/hooks'
+  useLocationContext,
+  useMe,
+  useSelectLocation,
+} from '../../../features/auth/hooks'
 import type { LocationSummary } from '../../../features/auth/types'
 
 const LOCATION_SEARCH_THRESHOLD = 5
-const NO_LOCATIONS: LocationSummary[] = []
 
 function getLocationInitials(name: string) {
   return name
@@ -159,6 +159,9 @@ function LocationOption({
   return (
     <button
       aria-current={active ? 'true' : undefined}
+      // The sheet's focus trap lands on the active row (never the search
+      // input, which would open the mobile keyboard over the sheet).
+      data-autofocus={mobile && active ? true : undefined}
       className={`flex w-full cursor-pointer items-center rounded-xl text-left transition-colors hover:bg-[light-dark(var(--mantine-color-teal-0),var(--mantine-color-dark-5))] disabled:cursor-wait disabled:opacity-70 ${
         mobile ? 'gap-3 px-3 py-[11px]' : 'gap-2.5 px-2.5 py-2'
       } ${
@@ -206,13 +209,11 @@ function LocationOption({
 
 function useLocationPicker(onClose: () => void) {
   const { t } = useTranslation('common')
-  const meQuery = useMe()
+  const me = useMe().data
+  const { accessibleLocations, currentLocation, hasMultipleLocations } =
+    useLocationContext()
   const selectLocationMutation = useSelectLocation()
   const [search, setSearch] = useState('')
-  const me = meQuery.data
-  const location = me ? getDefaultLocation(me) : null
-  const accessibleLocations = me?.accessible_locations ?? NO_LOCATIONS
-  const currentLocation = location ?? accessibleLocations[0] ?? null
 
   const filteredLocations = useMemo(() => {
     const normalizedSearch = search.trim().toLocaleLowerCase()
@@ -236,7 +237,7 @@ function useLocationPicker(onClose: () => void) {
   }
 
   function select(locationId: string) {
-    if (locationId === location?.id) {
+    if (locationId === currentLocation?.id) {
       close()
       return
     }
@@ -259,7 +260,7 @@ function useLocationPicker(onClose: () => void) {
     currentLocation,
     filteredLocations,
     hasMultipleAccounts: (me?.accounts.length ?? 0) > 1,
-    hasMultipleLocations: accessibleLocations.length > 1,
+    hasMultipleLocations,
     pendingLocationId: selectLocationMutation.isPending
       ? selectLocationMutation.variables
       : undefined,
@@ -274,10 +275,10 @@ function useLocationPicker(onClose: () => void) {
 type LocationPicker = ReturnType<typeof useLocationPicker>
 
 function LocationSearch({
-  autoFocus = false,
+  mobile = false,
   picker,
 }: {
-  autoFocus?: boolean
+  mobile?: boolean
   picker: LocationPicker
 }) {
   const { t } = useTranslation('common')
@@ -286,16 +287,19 @@ function LocationSearch({
     return null
   }
 
+  // Never autofocused: search is secondary to tapping a row, and focusing on
+  // mount opens the mobile keyboard over the sheet. The scroll margin keeps
+  // the input clear of the sheet edge when the browser scrolls it into view.
   return (
     <TextInput
       aria-label={t('shell.locationSearchPlaceholder')}
-      autoFocus={autoFocus}
-      data-autofocus={autoFocus || undefined}
+      classNames={{ input: 'scroll-m-6' }}
+      enterKeyHint="search"
       leftSection={<MinimalisticMagnifier aria-hidden="true" size={15} />}
       onChange={(event) => picker.setSearch(event.currentTarget.value)}
       placeholder={t('shell.locationSearchPlaceholder')}
       radius={9}
-      size={autoFocus ? 'sm' : 'xs'}
+      size={mobile ? 'sm' : 'xs'}
       value={picker.search}
     />
   )
@@ -386,75 +390,73 @@ export function LocationSwitcher() {
   }
 
   return (
-    <div>
-      <Popover
-        offset={10}
-        onChange={(nextOpened) => {
-          setOpened(nextOpened)
-          if (!nextOpened) picker.setSearch('')
-        }}
-        opened={opened}
-        position="bottom-start"
-        shadow="xl"
-        trapFocus
-        width={340}
-        withinPortal
+    <Popover
+      offset={10}
+      onChange={(nextOpened) => {
+        // picker.close resets the search besides closing, so every close
+        // path (outside click, escape, trigger toggle, selection) shares it.
+        if (nextOpened) {
+          setOpened(true)
+        } else {
+          picker.close()
+        }
+      }}
+      opened={opened}
+      position="bottom-start"
+      shadow="xl"
+      trapFocus
+      width={340}
+      withinPortal
+    >
+      <Popover.Target>
+        <CurrentLocation
+          interactive
+          location={picker.currentLocation}
+          onClick={() => (opened ? picker.close() : setOpened(true))}
+          opened={opened}
+          pending={picker.selectionPending}
+        />
+      </Popover.Target>
+
+      <Popover.Dropdown
+        aria-label={t('shell.selectLocation')}
+        className="max-w-[calc(100vw-2rem)] overflow-hidden rounded-[14px] border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-0"
+        role="dialog"
       >
-        <Popover.Target>
-          <CurrentLocation
-            interactive
-            location={picker.currentLocation}
-            onClick={() => setOpened((isOpened) => !isOpened)}
-            opened={opened}
-            pending={picker.selectionPending}
-          />
-        </Popover.Target>
-
-        <Popover.Dropdown
-          aria-label={t('shell.selectLocation')}
-          className="max-w-[calc(100vw-2rem)] overflow-hidden rounded-[14px] border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-0"
-          role="dialog"
-        >
-          <div className="flex flex-col gap-2.5 border-b border-[var(--mantine-color-default-border)] px-3.5 py-3">
-            <div className="flex items-center justify-between gap-4">
-              <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mantine-color-placeholder)]">
-                {picker.accountName}
-              </p>
-              {picker.hasMultipleAccounts ? (
-                <Link
-                  className="shrink-0 text-[11.5px] font-semibold text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))] no-underline hover:text-[var(--mantine-color-teal-4)]"
-                  onClick={picker.close}
-                  to="/select-account"
-                >
-                  {t('shell.changeAccount')}
-                </Link>
-              ) : null}
-            </div>
-            <LocationSearch picker={picker} />
+        <div className="flex flex-col gap-2.5 border-b border-[var(--mantine-color-default-border)] px-3.5 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <p className="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mantine-color-placeholder)]">
+              {picker.accountName}
+            </p>
+            {picker.hasMultipleAccounts ? (
+              <Link
+                className="shrink-0 text-[11.5px] font-semibold text-[light-dark(var(--mantine-color-teal-6),var(--mantine-color-teal-3))] no-underline hover:text-[var(--mantine-color-teal-4)]"
+                onClick={picker.close}
+                to="/select-account"
+              >
+                {t('shell.changeAccount')}
+              </Link>
+            ) : null}
           </div>
+          <LocationSearch picker={picker} />
+        </div>
 
-          <LocationOptions picker={picker} />
-          <LocationPickerFooter picker={picker} />
-        </Popover.Dropdown>
-      </Popover>
-
-    </div>
+        <LocationOptions picker={picker} />
+        <LocationPickerFooter picker={picker} />
+      </Popover.Dropdown>
+    </Popover>
   )
 }
 
 export function MobileLocationButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation('common')
-  const meQuery = useMe()
-  const locations = meQuery.data?.accessible_locations ?? NO_LOCATIONS
-  const currentLocation = meQuery.data
-    ? (getDefaultLocation(meQuery.data) ?? locations[0] ?? null)
-    : null
+  const { currentLocation, hasMultipleLocations } = useLocationContext()
 
   if (!currentLocation) {
     return null
   }
 
-  const interactive = locations.length > 1
+  const interactive = hasMultipleLocations
 
   return (
     <button
@@ -536,10 +538,12 @@ export function MobileLocationSheet({
         },
         title: { width: '100%' },
       }}
-      closeButtonProps={{ 'aria-label': t('shell.closeLocationSwitcher') }}
       onClose={picker.close}
       opened={opened && picker.hasMultipleLocations}
-      overlayProps={{ backgroundOpacity: 0.72, color: '#0A1516' }}
+      overlayProps={{
+        backgroundOpacity: 0.72,
+        color: 'var(--mantine-color-dark-9)',
+      }}
       padding={0}
       position="bottom"
       radius="20px 20px 0 0"
@@ -549,7 +553,7 @@ export function MobileLocationSheet({
     >
       <div className="flex flex-col gap-3">
         <div className="px-4">
-          <LocationSearch autoFocus picker={picker} />
+          <LocationSearch mobile picker={picker} />
         </div>
         <LocationOptions mobile picker={picker} />
         <div className="px-2">

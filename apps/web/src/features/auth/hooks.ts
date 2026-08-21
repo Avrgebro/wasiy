@@ -4,9 +4,15 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
+import { getDefaultLocation } from './access'
 import { login, logout, selectAccount, selectLocation } from './api'
 import { sessionQueryKey, sessionQueryOptions } from './query-options'
-import type { LoginCredentials, MeResponse, Session } from './types'
+import type {
+  LocationSummary,
+  LoginCredentials,
+  MeResponse,
+  Session,
+} from './types'
 
 export function useSession() {
   return useQuery(sessionQueryOptions())
@@ -18,6 +24,24 @@ export function useMe() {
     select: (session: Session) =>
       session.status === 'authenticated' ? session.me : null,
   })
+}
+
+const NO_LOCATIONS: LocationSummary[] = []
+
+/**
+ * The single source for "which location am I in / can I switch". The API
+ * guarantees active_location is non-null whenever accessible_locations is
+ * non-empty, so no client-side fallback is needed.
+ */
+export function useLocationContext() {
+  const me = useMe().data
+  const accessibleLocations = me?.accessible_locations ?? NO_LOCATIONS
+
+  return {
+    accessibleLocations,
+    currentLocation: me ? getDefaultLocation(me) : null,
+    hasMultipleLocations: accessibleLocations.length > 1,
+  }
 }
 
 export function useLogin() {

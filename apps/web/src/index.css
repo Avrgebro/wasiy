@@ -43,7 +43,7 @@
   /* App shell ("Soft workspace" layout). Light: white sidebar/surfaces float
      on warm paper; dark: sunken sidebar per the elevation hierarchy. */
   --app-canvas: var(--mantine-color-body);
-  --sidebar: var(--wa-surface);
+  --sidebar: light-dark(var(--wa-surface), var(--mantine-color-dark-8));
   --sidebar-foreground: var(--mantine-color-text);
   --sidebar-hover: light-dark(
     var(--mantine-color-teal-0),
@@ -75,7 +75,6 @@
 
   --wa-focus: var(--wa-interactive);
   --wa-focus-halo: rgba(127, 181, 176, 0.18);
-  --sidebar: var(--mantine-color-dark-8);
 
   /* Petroleum stops being the interactive text color in dark (insufficient
      contrast); links use teal.3 instead. */

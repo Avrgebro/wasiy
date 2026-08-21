@@ -125,6 +125,8 @@ test('seeded users expose the final m2 access context scenarios', function () {
     $centralLocation = Location::query()->where('slug', 'edificio-central')->sole();
     $northTower = Location::query()->where('slug', 'torre-norte')->sole();
     $beachLocation = Location::query()->where('slug', 'edificio-playa')->sole();
+    $valleLocation = Location::query()->where('slug', 'condominio-valle')->sole();
+    $demoLocationCount = Location::query()->where('account_id', $demoAccount->id)->count();
 
     $admin = User::query()->where('email', 'admin@wasiy.test')->sole();
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
@@ -137,9 +139,9 @@ test('seeded users expose the final m2 access context scenarios', function () {
         ->getJson('/api/me')
         ->assertOk()
         ->assertJsonPath('active_account.id', $demoAccount->id)
-        ->assertJsonPath('active_location.id', $centralLocation->id)
+        ->assertJsonPath('active_location.id', $valleLocation->id)
         ->assertJsonPath('roles.account.0.role', AccountRole::AccountAdmin->value)
-        ->assertJsonCount(2, 'accessible_locations');
+        ->assertJsonCount($demoLocationCount, 'accessible_locations');
 
     $this->flushSession();
 
