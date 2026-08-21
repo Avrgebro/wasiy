@@ -8,7 +8,7 @@ export const SITE = {
   name: 'Wasiy',
   /** TODO: replace with the registered legal entity + RUC before launch. */
   legalName: 'Wasiy',
-  title: 'Wasiy — Software de operación residencial, en español',
+  title: 'Wasiy | Software de operación para edificios residenciales',
   description:
     'Visitas, reservas de amenidades y registro del edificio, en orden. El centro de operación para administradoras y juntas de propietarios en Perú.',
   locale: 'es_PE',

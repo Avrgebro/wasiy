@@ -31,7 +31,7 @@ export const plans: Plan[] = [
       'Anuncios',
       'Portal del residente',
     ],
-    cta: 'Empezar',
+    cta: 'Agendar demo',
     ctaStyle: 'outline',
   },
   {
@@ -47,10 +47,10 @@ export const plans: Plan[] = [
       'Registro de actividad',
       'Exportaciones CSV',
     ],
-    cta: 'Solicitar demo',
+    cta: 'Agendar demo',
     ctaStyle: 'solid',
     featured: true,
-    badge: 'El favorito',
+    badge: 'Recomendado',
   },
   {
     name: 'Portafolio',
@@ -64,7 +64,7 @@ export const plans: Plan[] = [
       'Vista consolidada de cuenta',
       'Onboarding asistido con CSV',
     ],
-    cta: 'Contactar',
+    cta: 'Pedir cotización',
     ctaStyle: 'outline',
   },
 ];
