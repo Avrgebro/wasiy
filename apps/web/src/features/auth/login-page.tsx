@@ -15,7 +15,6 @@ import {
   Password,
 } from '@solar-icons/react'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
-import '@fontsource/sora/600.css'
 import '@fontsource/instrument-sans/400.css'
 import '@fontsource/instrument-sans/500.css'
 import '@fontsource/instrument-sans/600.css'
@@ -110,7 +109,8 @@ function BrandPanel() {
 function BrandStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex-1 rounded-[14px] border border-[var(--mantine-color-dark-4)] bg-[var(--mantine-color-dark-5)]/70 px-5 py-[18px] backdrop-blur-sm">
-      <div className="font-display text-2xl font-semibold text-[var(--mantine-color-amber-3)]">
+      {/* Constant petroleum panel: the accent stays at its dark value. */}
+      <div className="font-display text-2xl font-semibold text-[var(--mantine-color-accent-5)]">
         {value}
       </div>
       <div className="mt-1 text-[13px] text-[var(--mantine-color-dark-2)]">
@@ -203,7 +203,7 @@ export function LoginPage() {
           >
             <div className="flex flex-col gap-4">
               {rootError ? (
-                <Alert color="red" title={t('auth.loginFailed')}>
+                <Alert color="error" title={t('auth.loginFailed')}>
                   {rootError}
                 </Alert>
               ) : null}
@@ -232,7 +232,7 @@ export function LoginPage() {
                 styles={fieldStyles}
               />
               <Checkbox
-                color="amber.4"
+                color="accent"
                 defaultChecked
                 label={t('auth.rememberMe')}
                 radius={5}
@@ -248,7 +248,7 @@ export function LoginPage() {
 
             <div className="flex flex-col gap-3.5">
               <Button
-                color="amber.4"
+                color="accent"
                 fullWidth
                 h={48}
                 loading={loginMutation.isPending}

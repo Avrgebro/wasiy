@@ -45,7 +45,7 @@ export function ResidentsRegistryPage() {
 
   if (!account) {
     return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+      <Alert color="warning" title={t('auth.noAccessTitle')}>
         {t('accountSelection.title')}
       </Alert>
     )

@@ -48,7 +48,7 @@ export function StaffDeactivateModal({
             {t('actions.cancel')}
           </Button>
           <Button
-            color="red"
+            color="error"
             loading={mutation.isPending}
             onClick={() => staff && mutation.mutate(staff.id)}
           >

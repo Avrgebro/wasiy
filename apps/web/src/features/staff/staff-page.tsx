@@ -28,7 +28,7 @@ export function StaffPage() {
 
   if (!me || !account) {
     return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+      <Alert color="warning" title={t('auth.noAccessTitle')}>
         {t('accountSelection.title')}
       </Alert>
     )
@@ -119,7 +119,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
             {t('staff.subtitle')}
           </Text>
         </div>
-        <Button color="amber.4" leftSection={<AddCircle size={20} />} onClick={openInvite}>
+        <Button color="accent" leftSection={<AddCircle size={20} />} onClick={openInvite}>
           {t('staff.invite')}
         </Button>
       </div>
@@ -133,7 +133,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
       ) : null}
 
       {listQuery.isError ? (
-        <Alert color="red" title={t('errors.loadFailed')}>
+        <Alert color="error" title={t('errors.loadFailed')}>
           {getErrorMessage(listQuery.error)}
         </Alert>
       ) : null}

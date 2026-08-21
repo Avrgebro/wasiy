@@ -68,7 +68,7 @@ export function ResidentInvitationPage({ token }: { token: string }) {
         </p>
         <div className="mt-5 grid gap-4">
           {rootError ? (
-            <Alert color="red" title={t('invitations.claimFailed')}>
+            <Alert color="error" title={t('invitations.claimFailed')}>
               {rootError}
             </Alert>
           ) : null}

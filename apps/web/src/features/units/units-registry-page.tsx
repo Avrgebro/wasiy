@@ -34,7 +34,7 @@ export function UnitsRegistryPage() {
 
   if (!location) {
     return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+      <Alert color="warning" title={t('auth.noAccessTitle')}>
         {t('auth.selectLocationRequired')}
       </Alert>
     )

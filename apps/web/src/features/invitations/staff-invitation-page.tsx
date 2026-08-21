@@ -85,7 +85,7 @@ function CreateAccountMode({
         <InvitationHeading invitation={invitation} />
         <div className="mt-5 grid gap-4">
           {rootError ? (
-            <Alert color="red" title={t('invitations.acceptFailed')}>
+            <Alert color="error" title={t('invitations.acceptFailed')}>
               {rootError}
             </Alert>
           ) : null}
@@ -166,17 +166,17 @@ function ConfirmJoinMode({
       <InvitationHeading invitation={invitation} />
       <div className="mt-5 grid gap-4">
         {status === 401 ? (
-          <Alert color="blue" title={t('invitations.signInRequiredTitle')}>
+          <Alert color="info" title={t('invitations.signInRequiredTitle')}>
             {t('invitations.signInRequiredBody', { email: invitation.email })}
           </Alert>
         ) : null}
         {status === 409 ? (
-          <Alert color="orange" title={t('invitations.wrongAccountTitle')}>
+          <Alert color="warning" title={t('invitations.wrongAccountTitle')}>
             {t('invitations.wrongAccountBody', { email: invitation.email })}
           </Alert>
         ) : null}
         {error !== null && !needsRelogin ? (
-          <Alert color="red" title={t('invitations.acceptFailed')}>
+          <Alert color="error" title={t('invitations.acceptFailed')}>
             {getErrorMessage(error)}
           </Alert>
         ) : null}

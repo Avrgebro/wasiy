@@ -68,7 +68,7 @@ export function UploadDrawer({
           <Badge variant="light">{selectedFile.name}</Badge>
         ) : null}
         {uploadMutation.isError ? (
-          <Alert color="red" title={t('errors.actionFailed')}>
+          <Alert color="error" title={t('errors.actionFailed')}>
             {getErrorMessage(uploadMutation.error)}
           </Alert>
         ) : null}

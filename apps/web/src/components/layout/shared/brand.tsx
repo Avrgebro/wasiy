@@ -21,7 +21,7 @@ export function Brand({ className, productAreaKey }: BrandProps) {
         size={32}
       />
       <div className="min-w-0">
-        <p className="text-base font-bold leading-tight tracking-tight text-[var(--mantine-color-text)]">
+        <p className="font-display text-base font-semibold leading-tight tracking-tight text-[var(--mantine-color-text)]">
           Wasiy
         </p>
         {productAreaKey ? (

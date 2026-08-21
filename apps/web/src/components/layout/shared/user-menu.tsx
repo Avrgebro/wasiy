@@ -91,7 +91,7 @@ export function UserMenu() {
         </div>
         <Menu.Divider />
         <Menu.Item
-          color="red"
+          color="error"
           disabled={logoutMutation.isPending}
           leftSection={<Logout size={16} />}
           onClick={handleLogout}

@@ -97,7 +97,7 @@ export function PortalDashboardPage() {
               : t('portal.summary')}
           </p>
         </div>
-        <Badge color="green" variant="light">
+        <Badge color="success" variant="light">
           {t('portal.accessEnabled')}
         </Badge>
       </section>
@@ -143,7 +143,7 @@ export function PortalDashboardPage() {
           </p>
           <div className="mt-4 grid gap-4">
             {rootError ? (
-              <Alert color="red" title={t('errors.actionFailed')}>
+              <Alert color="error" title={t('errors.actionFailed')}>
                 {rootError}
               </Alert>
             ) : null}

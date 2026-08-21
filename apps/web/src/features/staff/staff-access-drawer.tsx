@@ -230,7 +230,7 @@ export function StaffAccessDrawer({
       >
         <AppDrawerBody>
         {form.formState.errors.root?.message ? (
-          <Alert color="red" title={t('errors.actionFailed')}>
+          <Alert color="error" title={t('errors.actionFailed')}>
             {form.formState.errors.root.message}
           </Alert>
         ) : null}
@@ -287,7 +287,7 @@ export function StaffAccessDrawer({
             }
           />
           {adminSaveDropsAssignments ? (
-            <Alert color="yellow" p="xs">
+            <Alert color="warning" p="xs">
               {t('staff.adminReplacesLocations')}
             </Alert>
           ) : null}
@@ -359,7 +359,7 @@ export function StaffAccessDrawer({
             ) : null}
           </AccessTypeCard>
           {assignmentsError ? (
-            <Text c="red" size="xs">
+            <Text c="error" size="xs">
               {assignmentsError}
             </Text>
           ) : null}
@@ -368,7 +368,7 @@ export function StaffAccessDrawer({
           <div className="grid gap-2 border-0 border-t border-solid border-[var(--mantine-color-default-border)] pt-5">
             <Button
               className="justify-self-start"
-              color="red"
+              color="error"
               variant="outline"
               onClick={onDeactivate}
             >
@@ -384,7 +384,7 @@ export function StaffAccessDrawer({
           <Button variant="default" onClick={onClose}>
             {t('actions.cancel')}
           </Button>
-          <Button color="amber.4" loading={mutation.isPending} type="submit">
+          <Button color="accent" loading={mutation.isPending} type="submit">
             {editing ? t('staff.saveChanges') : t('staff.sendInvitation')}
           </Button>
         </AppDrawerFooter>

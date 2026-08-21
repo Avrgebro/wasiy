@@ -5,7 +5,7 @@ type WasiyLogoProps = {
 
 /**
  * The Wasiy mark. Strokes follow `currentColor` so callers set the color per
- * colorschema.md rule 7 (petróleo on light, inverted paper on dark, monochrome
+ * docs/colorschema.md rule 7 (petróleo on light, inverted paper on dark, monochrome
  * text color as fallback); the amber dot is constant across modes.
  */
 export function WasiyLogo({ size = 32, className }: WasiyLogoProps) {

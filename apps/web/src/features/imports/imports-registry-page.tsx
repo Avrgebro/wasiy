@@ -22,7 +22,7 @@ export function ImportsRegistryPage() {
 
   if (!account || !location) {
     return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+      <Alert color="warning" title={t('auth.noAccessTitle')}>
         {t('auth.selectLocationRequired')}
       </Alert>
     )
@@ -78,7 +78,7 @@ function ImportsRegistryContent({
       </Group>
 
       {importsQuery.isError ? (
-        <Alert color="red" title={t('errors.loadFailed')}>
+        <Alert color="error" title={t('errors.loadFailed')}>
           {getErrorMessage(importsQuery.error)}
         </Alert>
       ) : null}

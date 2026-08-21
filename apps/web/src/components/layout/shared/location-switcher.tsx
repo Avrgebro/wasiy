@@ -199,7 +199,7 @@ function LocationOption({
       ) : active ? (
         <CheckIcon
           aria-label={t('shell.currentLocation')}
-          className="shrink-0 text-[var(--mantine-color-amber-4)]"
+          className="shrink-0 text-[var(--wa-accent)]"
           size={15}
         />
       ) : null}

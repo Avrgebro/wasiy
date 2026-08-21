@@ -67,7 +67,7 @@ export function ImportDetailPanel({
           <ImportCounters registryImport={selectedImport} />
 
           {selectedImport.failure_reason ? (
-            <Alert color="red" title={t('registry.imports.failureReason')}>
+            <Alert color="error" title={t('registry.imports.failureReason')}>
               {selectedImport.failure_reason}
             </Alert>
           ) : null}
@@ -94,12 +94,12 @@ export function ImportDetailPanel({
           </Group>
 
           {confirmMutation.isError ? (
-            <Alert color="red" title={t('errors.actionFailed')}>
+            <Alert color="error" title={t('errors.actionFailed')}>
               {getErrorMessage(confirmMutation.error)}
             </Alert>
           ) : null}
           {retryMutation.isError ? (
-            <Alert color="red" title={t('errors.actionFailed')}>
+            <Alert color="error" title={t('errors.actionFailed')}>
               {getErrorMessage(retryMutation.error)}
             </Alert>
           ) : null}

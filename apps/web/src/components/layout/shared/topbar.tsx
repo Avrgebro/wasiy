@@ -26,7 +26,7 @@ export function Topbar({
   const activeNavItem = findActiveNavItem(navItems, pathname)
 
   return (
-    <header className="sticky top-0 z-10 flex min-h-[68px] items-center justify-between border-b border-[var(--mantine-color-default-border)] bg-[var(--sidebar)]/95 px-4 backdrop-blur sm:min-h-16 sm:border-b-0 sm:bg-[var(--app-canvas)]/85 lg:px-8">
+    <header className="sticky top-0 z-10 flex min-h-[68px] items-center justify-between border-b border-[var(--mantine-color-default-border)] bg-[var(--topbar)]/95 px-4 backdrop-blur sm:min-h-16 sm:border-b-0 sm:bg-[var(--app-canvas)]/85 lg:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {/* Tailwind lg, not Mantine hiddenFrom="lg" (75em): the sidebar this
             toggles is pinned open by Tailwind lg classes in app-shell and

@@ -8,9 +8,9 @@ import { staffStatus, type StaffStatus } from './staff-status'
 const MAX_VISIBLE_ASSIGNMENTS = 2
 
 const statusColors: Record<StaffStatus, string> = {
-  active: 'green',
+  active: 'success',
   deactivated: 'gray',
-  unassigned: 'yellow',
+  unassigned: 'warning',
 }
 
 export function StaffStatusBadge({ staff }: { staff: StaffSummary }) {

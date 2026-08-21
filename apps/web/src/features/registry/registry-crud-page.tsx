@@ -120,7 +120,7 @@ export function RegistryCrudPage<TRow extends { id: string }, TForm extends Fiel
           status={search.status}
         />
         {listQuery.isError ? (
-          <Alert color="red" title={t('errors.loadFailed')}>
+          <Alert color="error" title={t('errors.loadFailed')}>
             {getErrorMessage(listQuery.error)}
           </Alert>
         ) : null}
@@ -146,7 +146,7 @@ export function RegistryCrudPage<TRow extends { id: string }, TForm extends Fiel
         >
           <form className="grid gap-4" onSubmit={form.handleSubmit(handleSubmit)}>
             {form.formState.errors.root?.message ? (
-              <Alert color="red" title={t('errors.actionFailed')}>
+              <Alert color="error" title={t('errors.actionFailed')}>
                 {form.formState.errors.root.message}
               </Alert>
             ) : null}

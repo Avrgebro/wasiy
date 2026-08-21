@@ -30,7 +30,7 @@ export function DashboardPage() {
 
   if (!location) {
     return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+      <Alert color="warning" title={t('auth.noAccessTitle')}>
         {hasAccessibleLocations
           ? t('auth.selectLocationRequired')
           : t('auth.noAssignedLocation')}
@@ -56,15 +56,15 @@ export function DashboardPage() {
           <Button leftSection={<Download size={16} />} variant="default">
             {t('actions.export')}
           </Button>
-          {/* The screen's single amber CTA (colorschema.md rule 1). */}
-          <Button color="amber.4" leftSection={<AddCircle size={16} />}>
+          {/* The screen's single amber CTA (docs/colorschema.md rule 1). */}
+          <Button color="accent" leftSection={<AddCircle size={16} />}>
             {t('actions.newVisitor')}
           </Button>
         </div>
       </section>
 
       {dashboardQuery.isError ? (
-        <Alert color="red" title={t('errors.loadFailed')}>
+        <Alert color="error" title={t('errors.loadFailed')}>
           <p>{getErrorMessage(dashboardQuery.error)}</p>
           <Button
             className="mt-3"

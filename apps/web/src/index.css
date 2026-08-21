@@ -14,25 +14,29 @@
   --font-brand: 'Instrument Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Paleta «Puerto» (colorschema.md). The Mantine scales live in
-   src/app/theme.ts; these are the semantic reference tokens plus the
-   shell-specific tokens built on top of Mantine's CSS variables. */
+/* Paleta «Puerto» (docs/colorschema.md). The Mantine scales live
+   in src/app/theme.ts; these are the 14 semantic roles («un rol, dos
+   valores» — every token exists in both schemes) plus the shell-specific
+   tokens built on top of them.
+
+   No light-dark() anywhere: it needs Chrome 123+/Safari 17.5+, and older
+   phone browsers treat it as invalid, collapsing colors to transparent.
+   Dark values are swapped via the data-mantine-color-scheme block below. */
 
 :root {
   --wa-primary: #124e52;
-  --wa-primary-dark: #0a3538;
   --wa-secondary: #3e7c80;
+  --wa-interactive: #106e74;
   --wa-accent: #e0a438;
-  --wa-accent-hover: #e8b45c;
   --wa-bg: #f7f5f0;
   --wa-surface: #ffffff;
+  --wa-surface-2: #efebe2;
   --wa-text: #1c2b2c;
-  --wa-text-muted: #5a6b6b;
-  --wa-text-disabled: #9aa6a4;
+  --wa-text-2: #5a6b6b;
   --wa-border: #dde4e1;
   --wa-success: #2e7d5b;
   --wa-warning: #b97f24;
-  --wa-danger: #c0442e;
+  --wa-error: #c0442e;
   --wa-info: #2f6f8f;
 
   /* Foco visible: anillo 2 px info en claro; en oscuro borde interactive +
@@ -40,15 +44,17 @@
   --wa-focus: var(--wa-info);
   --wa-focus-halo: transparent;
 
-  /* App shell ("Soft workspace" layout). Light: white sidebar/surfaces float
-     on warm paper; dark: sunken sidebar per the elevation hierarchy. */
+  /* App shell ("Soft workspace" layout). Light: near-white rail floating on
+     the paper canvas; dark: surface 2°, above the background — hierarchy by
+     elevation, not borders. The mobile topbar has its own knob so the rail
+     can be recolored without dragging the header along. */
   --app-canvas: var(--mantine-color-body);
-  /* No light-dark() here: it needs Chrome 123+/Safari 17.5+, and older phone
-     browsers treat it as invalid, collapsing the background to transparent.
-     Dark values are swapped via the data-mantine-color-scheme block below. */
-  --sidebar: var(--wa-surface);
+  --sidebar: #fcfbf8;
+  --topbar: var(--wa-surface-2);
   --sidebar-foreground: var(--mantine-color-text);
-  --sidebar-hover: var(--wa-tint);
+  /* One step deeper than --wa-tint: the rail sits on surface 2°, where the
+     teal-0 tint is indistinguishable. */
+  --sidebar-hover: var(--mantine-color-teal-1);
   --sidebar-accent: var(--mantine-primary-color-filled);
   --sidebar-accent-foreground: var(--mantine-primary-color-contrast);
 
@@ -69,26 +75,26 @@
 }
 
 :root[data-mantine-color-scheme='dark'] {
+  --wa-primary: #1a6b70;
+  --wa-interactive: #7fb5b0;
+  --wa-accent: #e8b45c;
   --wa-bg: #101d1e;
   --wa-surface: #16282a;
-  --wa-surface-raised: #1d3335;
-  --wa-surface-sunken: #0d1a1b;
+  --wa-surface-2: #1d3335;
   --wa-text: #e9ece8;
-  --wa-text-muted: #9fb0ae;
-  --wa-text-subtle: #5f7371;
+  --wa-text-2: #9fb0ae;
   --wa-border: #2a3f40;
-  --wa-interactive: #7fb5b0;
-  --wa-success: #6fbf97;
-  --wa-warning: #d9a64c;
-  --wa-danger: #e37b66;
-  --wa-info: #6fa8c9;
+  --wa-success: #4fa97c;
+  --wa-warning: #e0a438;
+  --wa-error: #e0705c;
+  --wa-info: #6fa8c7;
 
   --wa-focus: var(--wa-interactive);
   --wa-focus-halo: rgba(127, 181, 176, 0.18);
 
-  /* Petroleum stops being the interactive text color in dark (insufficient
-     contrast); links use teal.3 instead. */
-  --mantine-color-anchor: var(--mantine-color-teal-3);
+  --sidebar: var(--wa-surface-2);
+  /* dark-5 would vanish against the surface-2° rail. */
+  --sidebar-hover: var(--mantine-color-dark-4);
 
   --wa-brand-mark: #f7f5f0;
   --wa-watermark: #112325;

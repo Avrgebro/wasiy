@@ -1,7 +1,6 @@
 import { Alert, Loader } from '@mantine/core'
 import { AltArrowRight } from '@solar-icons/react'
 import { useRouter } from '@tanstack/react-router'
-import '@fontsource/sora/600.css'
 import '@fontsource/instrument-sans/400.css'
 import '@fontsource/instrument-sans/500.css'
 import '@fontsource/instrument-sans/600.css'
@@ -100,7 +99,7 @@ export function SelectAccountPage() {
           ) : null}
 
           {error ? (
-            <Alert color="red" title={t('accountSelection.selectFailed')}>
+            <Alert color="error" title={t('accountSelection.selectFailed')}>
               {getErrorMessage(error)}
             </Alert>
           ) : null}
@@ -118,7 +117,7 @@ export function SelectAccountPage() {
                 onClick={() => handleSelectAccount(account.id)}
                 type="button"
               >
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-[11px] border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] font-display text-[17px] font-semibold text-[var(--wa-teal-text)] transition-colors group-hover:border-transparent group-hover:bg-[var(--mantine-color-amber-4)] group-hover:text-[#1C2B2C]">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-[11px] border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] font-display text-[17px] font-semibold text-[var(--wa-teal-text)] transition-colors group-hover:border-transparent group-hover:bg-[var(--wa-accent)] group-hover:text-[#1C2B2C]">
                   {accountInitials(account.name)}
                 </span>
                 <span className="min-w-0 flex-1">

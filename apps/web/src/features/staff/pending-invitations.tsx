@@ -167,7 +167,7 @@ export function PendingInvitations({
                   {t('staff.pending.resend')}
                 </Button>
                 <Button
-                  color="red"
+                  color="error"
                   fw={600}
                   radius="md"
                   size="compact-sm"
@@ -196,7 +196,7 @@ export function PendingInvitations({
               {t('actions.cancel')}
             </Button>
             <Button
-              color="red"
+              color="error"
               loading={revokeMutation.isPending}
               onClick={() => revoking && revokeMutation.mutate(revoking.id)}
             >

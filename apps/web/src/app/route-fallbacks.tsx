@@ -24,7 +24,7 @@ export function RouteErrorFallback({ error }: ErrorComponentProps) {
   return (
     <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4">
       <div className="w-full max-w-md">
-        <Alert color="red" title={t('router.errorTitle')}>
+        <Alert color="error" title={t('router.errorTitle')}>
           <p>{getErrorMessage(error)}</p>
           <Button
             className="mt-3"
