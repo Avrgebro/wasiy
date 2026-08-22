@@ -1,6 +1,6 @@
 import { ActionIcon, Avatar, Drawer } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
-import { CloseCircle, Logout } from '@solar-icons/react'
+import { AltArrowLeft, CloseCircle, Logout } from '@solar-icons/react'
 import { useRouter, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { getRoleLabelKey } from '../../../features/auth/access'
@@ -103,14 +103,31 @@ function SidebarNav({
 
 function SidebarContent({
   navItems,
+  onClose,
   onNavigate,
 }: {
   navItems: LayoutNavEntry[]
+  onClose: () => void
   onNavigate?: () => void
 }) {
+  const { t } = useTranslation('common')
+
   return (
     <div className="flex h-full min-h-0 flex-col rounded-2xl border border-[var(--mantine-color-default-border)] bg-[var(--sidebar)] px-3 pb-4 pt-5 shadow-sm">
-      <Brand />
+      <div className="flex items-start justify-between">
+        <Brand />
+        {/* Only the sm–xl overlay is closable; the pinned rail is not. */}
+        <ActionIcon
+          aria-label={t('shell.closeNav')}
+          className="xl:hidden"
+          onClick={onClose}
+          radius={10}
+          size={40}
+          variant="default"
+        >
+          <AltArrowLeft aria-hidden="true" size={18} />
+        </ActionIcon>
+      </div>
       <div className="pb-4">
         <LocationSwitcher />
       </div>
@@ -176,7 +193,10 @@ function MobileSidebarContent({
   const { t } = useTranslation('common')
 
   return (
-    <div className="flex h-[100dvh] min-h-0 flex-col bg-[var(--sidebar)]">
+    // h-full, not 100dvh: the Drawer body is already viewport-height, and
+    // dvh has misreported the visible height on real devices (see the
+    // viewport note in index.css).
+    <div className="flex h-full min-h-0 flex-col bg-[var(--sidebar)]">
       <div className="flex items-center justify-between px-4 py-3.5">
         <Brand className="flex items-center gap-2.5" />
         <ActionIcon
@@ -244,17 +264,21 @@ export function Sidebar({
       {mobileOpened && !isMobile ? (
         <button
           aria-label={t('shell.closeNav')}
-          className="fixed inset-0 z-30 hidden border-0 bg-black/40 sm:block lg:hidden"
+          className="fixed inset-0 z-30 hidden border-0 bg-black/40 sm:block xl:hidden"
           onClick={onMobileClose}
           type="button"
         />
       ) : null}
 
       <aside
-        className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 sm:block lg:static lg:z-auto lg:h-full lg:translate-x-0"
+        className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 sm:block xl:static xl:z-auto xl:h-full xl:translate-x-0"
         data-opened={mobileOpened}
       >
-        <SidebarContent navItems={navItems} onNavigate={onMobileClose} />
+        <SidebarContent
+          navItems={navItems}
+          onClose={onMobileClose}
+          onNavigate={onMobileClose}
+        />
       </aside>
     </>
   )

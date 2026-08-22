@@ -28,12 +28,12 @@ export function Topbar({
   return (
     <header className="sticky top-0 z-10 flex min-h-[68px] items-center justify-between border-b border-[var(--mantine-color-default-border)] bg-[var(--topbar)]/95 px-4 backdrop-blur sm:min-h-16 sm:border-b-0 sm:bg-[var(--app-canvas)]/85 lg:px-8">
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        {/* Tailwind lg, not Mantine hiddenFrom="lg" (75em): the sidebar this
-            toggles is pinned open by Tailwind lg classes in app-shell and
-            sidebar, and the two scales disagree between 1024 and 1200px. */}
+        {/* Tailwind xl, not Mantine hiddenFrom: the sidebar this toggles is
+            pinned open by Tailwind xl classes in app-shell and sidebar, and
+            the two breakpoint scales disagree — keep them on one scale. */}
         <ActionIcon
           aria-label={t('shell.openNav')}
-          className="lg:hidden"
+          className="xl:hidden"
           onClick={onMobileNavOpen}
           radius={10}
           size={40}

@@ -92,7 +92,7 @@
   --wa-focus: var(--wa-interactive);
   --wa-focus-halo: rgba(127, 181, 176, 0.18);
 
-  --sidebar: var(--wa-surface-2);
+  --sidebar: #16282A;
   /* dark-5 would vanish against the surface-2° rail. */
   --sidebar-hover: var(--mantine-color-dark-4);
 
@@ -122,23 +122,23 @@
   box-shadow: 0 0 0 3px var(--wa-focus-halo);
 }
 
-/* Full-viewport height with a vh fallback for browsers without dvh
-   (pre-2022 phones) — same compatibility posture as the light-dark() ban. */
-.h-dvh-safe {
-  height: 100vh;
-  height: 100dvh;
-}
-
 html {
   font-family: Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0;
 }
 
-body {
-  margin: 0;
-  min-height: 100svh;
+/* The 100% chain equals the SMALL viewport (address bar visible) on every
+   mobile browser — unlike 100vh (defined as the LARGE viewport) and 100dvh
+   (seen resolving to the large viewport on Chrome/Android tablets when the
+   document never scrolls, besides lacking support on older devices). The
+   app shell fills it with h-full; taller pages (auth) still overflow #root
+   and scroll the document normally. */
+html,
+body,
+#root {
+  height: 100%;
 }
 
-#root {
-  min-height: 100svh;
+body {
+  margin: 0;
 }

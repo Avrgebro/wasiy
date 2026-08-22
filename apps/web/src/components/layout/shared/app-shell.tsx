@@ -31,10 +31,14 @@ export function AppShell({ children, navItems }: AppShellProps) {
   }
 
   return (
-    // Fixed-height shell: the document never scrolls, only the content
-    // column does. Keeps mobile/tablet browser chrome from expanding and
-    // collapsing on scroll.
-    <div className="h-dvh-safe overflow-hidden bg-[var(--app-canvas)] text-[var(--mantine-color-text)] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] [--sidebar-width:18rem]">
+    // Fixed-height shell (100% chain from html/body/#root in index.css —
+    // the always-visible small viewport): the document never scrolls, only
+    // the content column does. Keeps mobile/tablet browser chrome from
+    // expanding and collapsing on scroll.
+    // grid-rows minmax(0,1fr) is load-bearing: without it the implicit auto
+    // row grows to fit the content, past the fixed shell height, and the
+    // content column never gets a scrollable constraint.
+    <div className="h-full overflow-hidden bg-[var(--app-canvas)] text-[var(--mantine-color-text)] xl:grid xl:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)] [--sidebar-width:24rem] xl:[--sidebar-width:18rem]">
       <Sidebar
         mobileOpened={mobileNavOpened}
         navItems={navItems}
