@@ -49,6 +49,10 @@
      elevation, not borders. The mobile topbar has its own knob so the rail
      can be recolored without dragging the header along. */
   --app-canvas: var(--mantine-color-body);
+  /* On :root, not the shell div: the sidebar Drawer portals to <body> and
+     must resolve it too. Overlay width below xl; the pinned-rail width is
+     set in the xl media query below. */
+  --sidebar-width: 24rem;
   --sidebar: #fcfbf8;
   --topbar: var(--wa-surface-2);
   --sidebar-foreground: var(--mantine-color-text);
@@ -103,6 +107,14 @@
   --wa-tint-selected: var(--mantine-color-teal-6);
   --wa-tint-foreground: var(--mantine-color-dark-2);
   --wa-teal-text: var(--mantine-color-teal-3);
+}
+
+/* Pinned rail width. Must match Tailwind's `xl` breakpoint (80rem) — the
+   same seam as the xl classes in app-shell/sidebar/topbar. */
+@media (min-width: 80rem) {
+  :root {
+    --sidebar-width: 20rem;
+  }
 }
 
 /* Papel, no blanco: the light body (#F7F5F0) is set via cssVariablesResolver

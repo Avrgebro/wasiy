@@ -26,11 +26,14 @@ type SidebarProps = {
   onMobileLocationOpen: () => void
 }
 
-// Must match Tailwind v4's `sm` breakpoint (40em/40rem): below it the Drawer
-// nav renders, from it up the `hidden sm:block` aside takes over. If `sm` is
-// ever customized, update this literal with it or both navs disagree at the
-// seam.
+// Must match Tailwind v4's breakpoints: below `sm` (40em) the Drawer shows
+// the full-screen mobile nav; between `sm` and `xl` (80em) the same Drawer
+// shows the rail card over an overlay; from `xl` up app-shell's grid pins
+// the aside. If either breakpoint is customized, update these literals (and
+// the xl media query for --sidebar-width in index.css) or the navs disagree
+// at the seams.
 const BELOW_SM_MEDIA_QUERY = '(max-width: 39.999em)'
+const BELOW_XL_MEDIA_QUERY = '(max-width: 79.999em)'
 
 function isGroup(entry: LayoutNavEntry) {
   return entry.type === 'group'
@@ -229,51 +232,66 @@ export function Sidebar({
   onMobileClose,
   onMobileLocationOpen,
 }: SidebarProps) {
-  const { t } = useTranslation('common')
   const isMobile = useMediaQuery(BELOW_SM_MEDIA_QUERY)
+  const isOverlay = useMediaQuery(BELOW_XL_MEDIA_QUERY)
 
   return (
     <>
-      {isMobile ? (
+      {/* One Drawer for every non-pinned width, so Escape, focus trapping,
+          scroll locking, and modal semantics come from Mantine in both the
+          phone and tablet ranges. Only the dressing differs: full-screen
+          mobile nav below sm, the floating rail card over an overlay from
+          sm to xl. */}
+      {isOverlay ? (
         <Drawer
           classNames={{ content: '!border-0 !p-0' }}
-          styles={{
-            body: {
-              backgroundColor: 'var(--sidebar)',
-              height: '100%',
-              padding: 0,
-            },
-            content: { backgroundColor: 'var(--sidebar)' },
-          }}
+          styles={
+            isMobile
+              ? {
+                  body: {
+                    backgroundColor: 'var(--sidebar)',
+                    height: '100%',
+                    padding: 0,
+                  },
+                  content: { backgroundColor: 'var(--sidebar)' },
+                }
+              : {
+                  body: { height: '100%', padding: '0.75rem' },
+                  content: {
+                    backgroundColor: 'transparent',
+                    boxShadow: 'none',
+                  },
+                }
+          }
           onClose={onMobileClose}
           opened={mobileOpened}
           padding={0}
           position="left"
-          size="100%"
+          size={isMobile ? '100%' : 'var(--sidebar-width)'}
           withCloseButton={false}
-          withOverlay={false}
+          withOverlay={!isMobile}
         >
-          <MobileSidebarContent
-            navItems={navItems}
-            onClose={onMobileClose}
-            onLocationOpen={onMobileLocationOpen}
-          />
+          {isMobile ? (
+            <MobileSidebarContent
+              navItems={navItems}
+              onClose={onMobileClose}
+              onLocationOpen={onMobileLocationOpen}
+            />
+          ) : (
+            <SidebarContent
+              navItems={navItems}
+              onClose={onMobileClose}
+              onNavigate={onMobileClose}
+            />
+          )}
         </Drawer>
       ) : null}
 
-      {mobileOpened && !isMobile ? (
-        <button
-          aria-label={t('shell.closeNav')}
-          className="fixed inset-0 z-30 hidden border-0 bg-black/40 sm:block xl:hidden"
-          onClick={onMobileClose}
-          type="button"
-        />
-      ) : null}
-
-      <aside
-        className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] -translate-x-full p-3 transition-transform duration-200 ease-out data-[opened=true]:translate-x-0 sm:block xl:static xl:z-auto xl:h-full xl:translate-x-0"
-        data-opened={mobileOpened}
-      >
+      {/* Pinned rail: a plain grid child from xl up. Size it only through
+          --sidebar-width (index.css) — the grid column in app-shell reads
+          the same variable, so widening the aside directly overlaps the
+          content instead of pushing it. */}
+      <aside className="hidden h-full w-[var(--sidebar-width)] p-3 xl:block">
         <SidebarContent
           navItems={navItems}
           onClose={onMobileClose}
