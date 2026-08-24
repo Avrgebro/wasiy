@@ -151,6 +151,19 @@ class AccessContextService
         return $account;
     }
 
+    /**
+     * Drop the session's Active Location when it is the given one — used by
+     * Location deactivation so the actor is not left operating a Location
+     * that no longer grants access. Other users' sessions self-heal through
+     * sync()'s stale-selection repair.
+     */
+    public function forgetLocationIfActive(Request $request, Location $location): void
+    {
+        if ($request->session()->get(self::ACTIVE_LOCATION_KEY) === $location->id) {
+            $request->session()->forget(self::ACTIVE_LOCATION_KEY);
+        }
+    }
+
     public function forget(Request $request): void
     {
         $request->session()->forget([
@@ -275,7 +288,7 @@ class AccessContextService
             'name' => $location->name,
             'slug' => $location->slug,
             'timezone' => $location->timezone,
-            'address' => $location->address,
+            'address' => $location->formattedAddress(),
             'roles' => array_values(array_unique($roles)),
             'access_source' => $accessSource,
         ];

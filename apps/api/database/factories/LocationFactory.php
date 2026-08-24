@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\LocationType;
 use App\Models\Account;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,8 +26,12 @@ class LocationFactory extends Factory
             'account_id' => Account::factory(),
             'name' => $name,
             'slug' => Str::slug($name).'-'.fake()->unique()->bothify('####'),
+            'type' => LocationType::MultifamilyBuilding,
             'timezone' => 'America/Lima',
-            'address' => fake()->address(),
+            'address_line1' => fake()->streetAddress(),
+            'district' => 'San Isidro',
+            'city' => 'Lima',
+            'country' => 'PE',
         ];
     }
 }

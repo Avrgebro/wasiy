@@ -1,9 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\AccessContextController;
+use App\Http\Controllers\Api\AccountSettingsController;
 use App\Http\Controllers\Api\AccountStaffController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\LocationDashboardController;
+use App\Http\Controllers\Api\LocationPhotoController;
+use App\Http\Controllers\Api\LocationSettingsController;
 use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\PhotoController;
 use App\Http\Controllers\Api\PortalResidentController;
 use App\Http\Controllers\Api\PortalVehicleController;
 use App\Http\Controllers\Api\RegistryExportController;
@@ -41,6 +46,29 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::post('/accounts/{account}/staff/{user}/deactivate', [AccountStaffController::class, 'deactivate']);
         Route::post('/accounts/{account}/staff/{user}/reactivate', [AccountStaffController::class, 'reactivate']);
     });
+
+    // Location management: cross-account probes 404 in the controllers,
+    // role-level rules live in LocationPolicy / AccountPolicy. Scoped
+    // bindings resolve {location} inside {account}, so a Location reached
+    // through the wrong Account 404s before any policy runs.
+    Route::scopeBindings()->group(function () {
+        Route::get('/accounts/{account}/locations', [LocationController::class, 'index']);
+        Route::post('/accounts/{account}/locations', [LocationController::class, 'store']);
+        Route::get('/accounts/{account}/locations/{location}', [LocationController::class, 'show']);
+        Route::patch('/accounts/{account}/locations/{location}', [LocationController::class, 'update']);
+        Route::post('/accounts/{account}/locations/{location}/deactivate', [LocationController::class, 'deactivate']);
+        Route::post('/accounts/{account}/locations/{location}/reactivate', [LocationController::class, 'reactivate']);
+        Route::post('/accounts/{account}/locations/{location}/photos', [LocationPhotoController::class, 'store']);
+        Route::put('/accounts/{account}/locations/{location}/photos/order', [LocationPhotoController::class, 'reorder']);
+        Route::delete('/accounts/{account}/locations/{location}/photos/{photo}', [LocationPhotoController::class, 'destroy']);
+        Route::post('/accounts/{account}/locations/{location}/photos/{photo}/cover', [LocationPhotoController::class, 'cover']);
+        Route::get('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'show']);
+        Route::put('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'update']);
+    });
+    // Photo bytes: authorization delegates to the owner's view policy.
+    Route::get('/photos/{photo}', [PhotoController::class, 'show']);
+    Route::get('/accounts/{account}/settings', [AccountSettingsController::class, 'show']);
+    Route::put('/accounts/{account}/settings', [AccountSettingsController::class, 'update']);
 
     // Staff registry surface: fine-grained authorization lives in the
     // controllers' gates and FormRequests.

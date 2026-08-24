@@ -32,6 +32,12 @@ enum ActivityEventType: string
     case VehicleUpdated = 'vehicle.updated';
     case VehicleDeleted = 'vehicle.deleted';
     case VehicleInactivated = 'vehicle.inactivated';
+    case LocationCreated = 'location.created';
+    case LocationUpdated = 'location.updated';
+    case LocationDeactivated = 'location.deactivated';
+    case LocationReactivated = 'location.reactivated';
+    case LocationSettingsChanged = 'location.settings_changed';
+    case AccountSettingsChanged = 'account.settings_changed';
     case ExportRequested = 'export.requested';
     case ExportCompleted = 'export.completed';
     case ExportFailed = 'export.failed';

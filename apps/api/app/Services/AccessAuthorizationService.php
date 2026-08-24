@@ -277,11 +277,12 @@ class AccessAuthorizationService
         }
 
         if ($this->hasAccountRole($user, $account, AccountRole::AccountAdmin)) {
-            return $account->locations()->getQuery();
+            return $account->locations()->getQuery()->whereNull('deactivated_at');
         }
 
         return Location::query()
             ->where('account_id', $account->id)
+            ->whereNull('deactivated_at')
             ->whereIn('id', StaffLocationRole::query()
                 ->select('location_id')
                 ->where('account_id', $account->id)
@@ -306,12 +307,15 @@ class AccessAuthorizationService
     }
 
     /**
-     * The single owner of soft-delete liveness: a location counts only when
-     * neither it nor its account is trashed.
+     * The single owner of operational liveness: a location grants access only
+     * when neither it nor its account is trashed and it has not been
+     * deactivated. A deactivated Location keeps its history but grants no
+     * operational access; only the admin Location surface can still see it.
      */
     private function isLiveLocation(Location $location): bool
     {
         return ! $location->trashed()
+            && ! $location->isDeactivated()
             && Account::query()->whereKey($location->account_id)->exists();
     }
 

@@ -299,7 +299,11 @@
     "passwordMismatch": "Passwords do not match.",
     "locationRequired": "Select a location.",
     "locationDuplicated": "This location is already assigned.",
-    "locationAssignmentsRequired": "Add at least one location."
+    "locationAssignmentsRequired": "Add at least one location.",
+    "nameRequired": "Enter the name.",
+    "typeRequired": "Select a property type.",
+    "addressLine1Required": "Enter the address.",
+    "cityRequired": "Enter the city."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -395,5 +399,81 @@
     "filters": "Filters",
     "clearFilters": "Clear filters",
     "removeFilter": "Remove filter {{filter}}"
+  },
+  "locations": {
+    "title": "Locations",
+    "subtitle": "{{count}} properties in the {{account}} account.",
+    "new": "New location",
+    "searchPlaceholder": "Search by name or address…",
+    "type": "Type",
+    "allTypes": "All types",
+    "allStatuses": "All statuses",
+    "activeLocation": "Active location",
+    "noPhotos": "No photos yet",
+    "actionsFor": "Actions for {{name}}",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "deactivated": "Location deactivated.",
+    "reactivated": "Location reactivated.",
+    "created": "Location created.",
+    "updated": "Location updated.",
+    "createTitle": "New location",
+    "createSubtitle": "Created active and available immediately.",
+    "editTitle": "Edit location",
+    "create": "Create location",
+    "saveChanges": "Save changes",
+    "deactivateConfirmTitle": "Deactivate {{name}}?",
+    "deactivateHint": "The location disappears from the resident portal and stops accepting new visits and reservations. History is kept.",
+    "deactivateReversible": "You can reactivate it at any time without reloading the registry.",
+    "statuses": {
+      "active": "Active",
+      "deactivated": "Inactive"
+    },
+    "types": {
+      "multifamily_building": "Multifamily building",
+      "condominium": "Condominium",
+      "residential_community": "Residential community",
+      "other": "Other"
+    },
+    "counts": {
+      "units": "units",
+      "residents": "residents",
+      "vehicles": "vehicles",
+      "staff": "staff",
+      "unclaimedInvitations": "unclaimed invit."
+    },
+    "affected": {
+      "units": "Affected units",
+      "residents": "Residents with access",
+      "staff": "Assigned staff"
+    },
+    "empty": {
+      "title": "No locations yet",
+      "body": "Create your account's first property. You can load units, residents, and amenities afterwards.",
+      "filteredTitle": "No results",
+      "filteredBody": "No location matches the current search and filters."
+    },
+    "form": {
+      "name": "Location name",
+      "namePlaceholder": "e.g. Torre Mirador",
+      "type": "Type",
+      "timezone": "Timezone",
+      "addressSection": "Address",
+      "addressLine1": "Address line 1",
+      "addressLine1Placeholder": "Street and number",
+      "addressLine2": "Address line 2",
+      "addressLine2Placeholder": "Tower, floor, reference (optional)",
+      "district": "District",
+      "city": "City",
+      "state": "Region / state",
+      "postalCode": "Postal code",
+      "country": "Country",
+      "contactSection": "Contact",
+      "phone": "Front desk phone",
+      "contactEmail": "Operations email",
+      "accessNotes": "Access notes",
+      "accessNotesHint": "Visible to front desk staff.",
+      "accessNotesPlaceholder": "Directions for visitors and vendors: vehicle entrance, package delivery, restrictions."
+    }
   }
 }
