@@ -1,15 +1,13 @@
 import { ActionIcon, Alert, Button, Group, Skeleton, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
 import { AddCircle, AltArrowLeft, AltArrowRight } from '@solar-icons/react'
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
-import { getLocations, reactivateLocation, type LocationSummary } from './api'
+import { getLocations } from './api'
 import { LocationCard } from './location-card'
-import { LocationDeactivateModal } from './location-deactivate-modal'
 import { LocationEmptyState } from './location-empty-state'
 import { LocationFilters } from './location-filters'
 import { LocationFormDrawer } from './location-form-drawer'
@@ -51,10 +49,7 @@ function LocationsPageContent({
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
-  const queryClient = useQueryClient()
   const [drawerOpened, setDrawerOpened] = useState(false)
-  const [editing, setEditing] = useState<LocationSummary | null>(null)
-  const [deactivating, setDeactivating] = useState<LocationSummary | null>(null)
 
   const listQuery = useQuery({
     queryKey: ['locations', 'list', accountId, search],
@@ -75,26 +70,8 @@ function LocationsPageContent({
   }
 
   function openCreate() {
-    setEditing(null)
     setDrawerOpened(true)
   }
-
-  function openEdit(location: LocationSummary) {
-    setEditing(location)
-    setDrawerOpened(true)
-  }
-
-  const reactivateMutation = useMutation({
-    mutationFn: (location: LocationSummary) => reactivateLocation(accountId, location.id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['locations'] })
-      await queryClient.invalidateQueries({ queryKey: ['auth'] })
-      showNotification({ color: 'green', message: t('locations.reactivated') })
-    },
-    onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
-    },
-  })
 
   const locations = listQuery.data?.data ?? []
   const meta = listQuery.data?.meta
@@ -148,9 +125,13 @@ function LocationsPageContent({
               key={location.id}
               isActiveLocation={location.id === activeLocationId}
               location={location}
-              onDeactivate={() => setDeactivating(location)}
-              onEdit={() => openEdit(location)}
-              onReactivate={() => reactivateMutation.mutate(location)}
+              onOpen={() =>
+                void navigate({
+                  to: '/admin/locations/$locationId',
+                  params: { locationId: location.id },
+                  search: { tab: 'info' },
+                })
+              }
             />
           ))}
         </div>
@@ -190,14 +171,9 @@ function LocationsPageContent({
 
       <LocationFormDrawer
         accountId={accountId}
-        editing={editing}
+        editing={null}
         opened={drawerOpened}
         onClose={() => setDrawerOpened(false)}
-      />
-      <LocationDeactivateModal
-        accountId={accountId}
-        location={deactivating}
-        onClose={() => setDeactivating(null)}
       />
     </div>
   )

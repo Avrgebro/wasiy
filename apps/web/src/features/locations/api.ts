@@ -110,3 +110,104 @@ export function reactivateLocation(accountId: string, locationId: string) {
     { method: 'POST' },
   )
 }
+
+export function getLocation(accountId: string, locationId: string) {
+  return apiRequest<{ data: LocationSummary }>(
+    `/api/accounts/${accountId}/locations/${locationId}`,
+  )
+}
+
+export function uploadLocationPhoto(accountId: string, locationId: string, file: File) {
+  const data = new FormData()
+  data.append('file', file)
+
+  return apiRequest<{ data: LocationPhoto }>(
+    `/api/accounts/${accountId}/locations/${locationId}/photos`,
+    { data, method: 'POST' },
+  )
+}
+
+export function deleteLocationPhoto(accountId: string, locationId: string, photoId: string) {
+  return apiRequest<void>(
+    `/api/accounts/${accountId}/locations/${locationId}/photos/${photoId}`,
+    { method: 'DELETE' },
+  )
+}
+
+export function setLocationCoverPhoto(accountId: string, locationId: string, photoId: string) {
+  return apiRequest<{ data: LocationPhoto }>(
+    `/api/accounts/${accountId}/locations/${locationId}/photos/${photoId}/cover`,
+    { method: 'POST' },
+  )
+}
+
+export function reorderLocationPhotos(accountId: string, locationId: string, photoIds: string[]) {
+  return apiRequest<{ data: LocationPhoto[] }>(
+    `/api/accounts/${accountId}/locations/${locationId}/photos/order`,
+    { data: { photo_ids: photoIds }, method: 'PUT' },
+  )
+}
+
+
+export type OperationalSettingsValues = {
+  visitor_preregistration_enabled: boolean
+  visitor_auto_checkout_hours: number
+  reservation_max_advance_days: number
+  reservation_max_concurrent_per_unit: number
+  reservation_cancellation_window_hours: number
+  quiet_hours_enabled: boolean
+  quiet_hours_start: string | null
+  quiet_hours_end: string | null
+  announcements_location_manager_can_post: boolean
+  announcements_email_residents: boolean
+}
+
+export type SettingsSource = 'location' | 'account' | 'default'
+
+export type SettingsExplanation = {
+  [K in keyof OperationalSettingsValues]: {
+    value: OperationalSettingsValues[K]
+    source: SettingsSource
+    account_value?: OperationalSettingsValues[K]
+  }
+}
+
+export type SettingsResponse = {
+  data: {
+    values: OperationalSettingsValues
+    explanation: SettingsExplanation
+  }
+}
+
+/**
+ * Merge-write contract: a key present with a value becomes this level's
+ * override, null clears the override back to inherited, absent keys are
+ * untouched — so per-group saves never clobber each other.
+ */
+export type SettingsPayload = {
+  [K in keyof OperationalSettingsValues]?: OperationalSettingsValues[K] | null
+}
+
+export function getLocationSettings(accountId: string, locationId: string) {
+  return apiRequest<SettingsResponse>(
+    `/api/accounts/${accountId}/locations/${locationId}/settings`,
+  )
+}
+
+export function updateLocationSettings(accountId: string, locationId: string, payload: SettingsPayload) {
+  return apiRequest<SettingsResponse>(
+    `/api/accounts/${accountId}/locations/${locationId}/settings`,
+    { data: payload, method: 'PUT' },
+  )
+}
+
+export function getAccountSettings(accountId: string) {
+  return apiRequest<SettingsResponse>(`/api/accounts/${accountId}/settings`)
+}
+
+export function updateAccountSettings(accountId: string, payload: SettingsPayload) {
+  return apiRequest<SettingsResponse>(`/api/accounts/${accountId}/settings`, {
+    data: payload,
+    method: 'PUT',
+  })
+}

@@ -80,11 +80,13 @@ export function LocationFormDrawer({
   accountId,
   editing,
   onClose,
+  onDeactivate,
   opened,
 }: {
   accountId: string
   editing: LocationSummary | null
   onClose: () => void
+  onDeactivate?: () => void
   opened: boolean
 }) {
   const { t } = useTranslation('common')
@@ -231,6 +233,21 @@ export function LocationFormDrawer({
                 />
               )}
             />
+            {editing && onDeactivate ? (
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--wa-error)]/40 p-3.5">
+                <div className="min-w-0">
+                  <Text fw={600} size="sm">
+                    {t('locations.form.sensitiveZone')}
+                  </Text>
+                  <Text c="dimmed" size="xs">
+                    {t('locations.form.sensitiveZoneHint')}
+                  </Text>
+                </div>
+                <Button color="error" size="xs" variant="light" onClick={onDeactivate}>
+                  {t('locations.deactivate')}
+                </Button>
+              </div>
+            ) : null}
           </div>
         </AppDrawerBody>
         <AppDrawerFooter>

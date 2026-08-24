@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Amenity;
 use App\Models\Location;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
         // Stable storage aliases for polymorphic types: rows say
         // 'location', never a class name that a refactor could orphan.
         Relation::enforceMorphMap([
+            'amenity' => Amenity::class,
             'location' => Location::class,
         ]);
 

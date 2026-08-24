@@ -32,6 +32,10 @@ enum ActivityEventType: string
     case VehicleUpdated = 'vehicle.updated';
     case VehicleDeleted = 'vehicle.deleted';
     case VehicleInactivated = 'vehicle.inactivated';
+    case AmenityCreated = 'amenity.created';
+    case AmenityUpdated = 'amenity.updated';
+    case AmenityDeactivated = 'amenity.deactivated';
+    case AmenityReactivated = 'amenity.reactivated';
     case LocationCreated = 'location.created';
     case LocationUpdated = 'location.updated';
     case LocationDeactivated = 'location.deactivated';

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\AccessContextController;
 use App\Http\Controllers\Api\AccountSettingsController;
 use App\Http\Controllers\Api\AccountStaffController;
+use App\Http\Controllers\Api\AmenityController;
+use App\Http\Controllers\Api\AmenityPhotoController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\LocationDashboardController;
 use App\Http\Controllers\Api\LocationPhotoController;
@@ -62,6 +64,16 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::put('/accounts/{account}/locations/{location}/photos/order', [LocationPhotoController::class, 'reorder']);
         Route::delete('/accounts/{account}/locations/{location}/photos/{photo}', [LocationPhotoController::class, 'destroy']);
         Route::post('/accounts/{account}/locations/{location}/photos/{photo}/cover', [LocationPhotoController::class, 'cover']);
+        Route::get('/accounts/{account}/locations/{location}/amenities', [AmenityController::class, 'index']);
+        Route::post('/accounts/{account}/locations/{location}/amenities', [AmenityController::class, 'store']);
+        Route::get('/accounts/{account}/locations/{location}/amenities/{amenity}', [AmenityController::class, 'show']);
+        Route::patch('/accounts/{account}/locations/{location}/amenities/{amenity}', [AmenityController::class, 'update']);
+        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/deactivate', [AmenityController::class, 'deactivate']);
+        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/reactivate', [AmenityController::class, 'reactivate']);
+        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/photos', [AmenityPhotoController::class, 'store']);
+        Route::put('/accounts/{account}/locations/{location}/amenities/{amenity}/photos/order', [AmenityPhotoController::class, 'reorder']);
+        Route::delete('/accounts/{account}/locations/{location}/amenities/{amenity}/photos/{photo}', [AmenityPhotoController::class, 'destroy']);
+        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/photos/{photo}/cover', [AmenityPhotoController::class, 'cover']);
         Route::get('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'show']);
         Route::put('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'update']);
     });

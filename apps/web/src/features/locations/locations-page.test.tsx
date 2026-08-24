@@ -1,7 +1,7 @@
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -206,21 +206,20 @@ describe('LocationsPage', () => {
     expect(screen.getByRole('button', { name: 'Limpiar filtros' })).toBeInTheDocument()
   })
 
-  it('the deactivate modal names the affected counts before confirming', async () => {
+  it('clicking a card navigates to the location detail', async () => {
     installAdapter([locationSummary({ id: 'loc_9', name: 'Torre Norte' })])
     renderPage()
     await screen.findByText('Torre Norte')
 
     const user = userEvent.setup()
-    await user.click(screen.getByRole('button', { name: 'Acciones para Torre Norte' }))
-    await user.click(await screen.findByRole('menuitem', { name: 'Desactivar' }))
+    await user.click(screen.getByRole('button', { name: 'Torre Norte' }))
 
-    expect(await screen.findByText('¿Desactivar Torre Norte?')).toBeInTheDocument()
-    const modal = screen.getByRole('dialog')
-    expect(within(modal).getByText('Unidades afectadas')).toBeInTheDocument()
-    expect(within(modal).getByText('Residentes con acceso')).toBeInTheDocument()
-    expect(within(modal).getByText('Personal asignado')).toBeInTheDocument()
-    expect(within(modal).getByText('214')).toBeInTheDocument()
+    expect(navigateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: '/admin/locations/$locationId',
+        params: { locationId: 'loc_9' },
+      }),
+    )
   })
 
   it('creating a location posts the payload and closes the drawer', async () => {

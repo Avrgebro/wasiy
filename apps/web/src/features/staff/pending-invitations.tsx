@@ -10,7 +10,7 @@ import {
   revokeStaffInvitation,
   type PendingStaffInvitation,
 } from './api'
-import { AccessChip } from './staff-badges'
+import { AccessChip } from '../../components/ui/chips'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 

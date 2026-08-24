@@ -59,8 +59,7 @@ class LocationResource extends JsonResource
             'vehicles_count' => (int) ($this->vehicles_count ?? 0),
             'staff_count' => (int) ($this->staff_count ?? 0),
             'unclaimed_invitations_count' => (int) ($this->unclaimed_invitations_count ?? 0),
-            // Amenities arrive in M6 slice 8; the tile contract ships now.
-            'active_amenities_count' => 0,
+            'active_amenities_count' => (int) ($this->active_amenities_count ?? 0),
             'created_at' => $this->created_at?->toJSON(),
             'updated_at' => $this->updated_at?->toJSON(),
         ];

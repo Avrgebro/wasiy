@@ -1,5 +1,5 @@
-import { ActionIcon, Badge, Menu, Text } from '@mantine/core'
-import { Buildings2, MenuDots } from '@solar-icons/react'
+import { Badge, Text } from '@mantine/core'
+import { Buildings2 } from '@solar-icons/react'
 import { useTranslation } from 'react-i18next'
 import type { LocationSummary } from './api'
 
@@ -27,17 +27,11 @@ function CountStat({ accent, label, value }: { accent?: boolean; label: string; 
 export function LocationCard({
   isActiveLocation,
   location,
-  onDeactivate,
-  onEdit,
   onOpen,
-  onReactivate,
 }: {
   isActiveLocation: boolean
   location: LocationSummary
-  onDeactivate: () => void
-  onEdit: () => void
-  onOpen?: () => void
-  onReactivate: () => void
+  onOpen: () => void
 }) {
   const { t } = useTranslation('common')
   const deactivated = location.status === 'deactivated'
@@ -110,31 +104,6 @@ export function LocationCard({
           </div>
         </div>
       </button>
-      <div className="absolute right-2 top-2">
-        <Menu position="bottom-end" withinPortal>
-          <Menu.Target>
-            <ActionIcon
-              aria-label={t('locations.actionsFor', { name: location.name })}
-              className="bg-[var(--mantine-color-body)]/80"
-              variant="subtle"
-            >
-              <MenuDots size={18} />
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            {deactivated ? (
-              <Menu.Item onClick={onReactivate}>{t('locations.reactivate')}</Menu.Item>
-            ) : (
-              <>
-                <Menu.Item onClick={onEdit}>{t('actions.edit')}</Menu.Item>
-                <Menu.Item color="red" onClick={onDeactivate}>
-                  {t('locations.deactivate')}
-                </Menu.Item>
-              </>
-            )}
-          </Menu.Dropdown>
-        </Menu>
-      </div>
     </article>
   )
 }

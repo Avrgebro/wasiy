@@ -45,3 +45,14 @@ export const locationFormSchema = z.object({
 })
 
 export type LocationFormValues = z.infer<typeof locationFormSchema>
+
+export const locationDetailTabs = ['info', 'amenities', 'staff', 'settings'] as const
+
+export type LocationDetailTab = (typeof locationDetailTabs)[number]
+
+/**
+ * The active tab lives in the URL so a tab is linkable and survives reload.
+ */
+export const locationDetailSearchSchema = z.object({
+  tab: z.enum(locationDetailTabs).catch('info'),
+})

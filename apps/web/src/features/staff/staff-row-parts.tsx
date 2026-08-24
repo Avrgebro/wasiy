@@ -2,7 +2,7 @@ import { Text } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { accountRoles, getRoleLabelKey } from '../auth/access'
 import type { StaffSummary } from './api'
-import { AccessChip, TintChip } from './staff-badges'
+import { AccessChip, TintChip } from '../../components/ui/chips'
 import { staffStatus, type StaffStatus } from './staff-status'
 
 const MAX_VISIBLE_ASSIGNMENTS = 2

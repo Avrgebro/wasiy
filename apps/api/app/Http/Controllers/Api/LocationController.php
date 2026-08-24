@@ -168,6 +168,7 @@ class LocationController extends Controller
             ->withCount([
                 'units as units_count' => fn (Builder $units) => $units->where('status', RegistryStatus::Active),
                 'vehicles as vehicles_count' => fn (Builder $vehicles) => $vehicles->where('status', RegistryStatus::Active),
+                'amenities as active_amenities_count' => fn (Builder $amenities) => $amenities->whereNull('deactivated_at'),
             ])
             ->addSelect([
                 'residents_count' => UnitMembership::query()

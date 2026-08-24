@@ -121,6 +121,14 @@ class Location extends Model
     }
 
     /**
+     * @return HasMany<Amenity, $this>
+     */
+    public function amenities(): HasMany
+    {
+        return $this->hasMany(Amenity::class);
+    }
+
+    /**
      * @return MorphMany<Photo, $this>
      */
     public function photos(): MorphMany

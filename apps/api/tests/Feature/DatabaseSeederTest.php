@@ -2,6 +2,7 @@
 
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
+use App\Enums\BookingMode;
 use App\Enums\ExportType;
 use App\Enums\ImportRowStatus;
 use App\Enums\ImportStatus;
@@ -16,6 +17,7 @@ use App\Jobs\CommitRegistryImport;
 use App\Jobs\ValidateRegistryImport;
 use App\Models\Account;
 use App\Models\ActivityLog;
+use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\RegistryImport;
 use App\Models\RegistryImportRow;
@@ -126,7 +128,9 @@ test('seeded users expose the final m2 access context scenarios', function () {
     $northTower = Location::query()->where('slug', 'torre-norte')->sole();
     $beachLocation = Location::query()->where('slug', 'edificio-playa')->sole();
     $valleLocation = Location::query()->where('slug', 'condominio-valle')->sole();
-    $demoLocationCount = Location::query()->where('account_id', $demoAccount->id)->count();
+    // Deactivated locations grant no access, so they are absent from
+    // accessible_locations (M6); jardines-de-miraflores seeds deactivated.
+    $demoLocationCount = Location::query()->where('account_id', $demoAccount->id)->active()->count();
 
     $admin = User::query()->where('email', 'admin@wasiy.test')->sole();
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
@@ -650,4 +654,44 @@ test('factory built invitations can be resolved by their token', function () {
             ->resolve($residentToken, UserInvitationPurpose::Resident)
             ->purpose,
     )->toBe(UserInvitationPurpose::Resident);
+});
+
+test('it seeds the m6 locations settings amenity matrix and photos', function () {
+    Storage::fake('local');
+    $this->seed();
+
+    $account = Account::query()->where('slug', 'wasiy-demo')->sole();
+    $central = Location::query()->where('slug', 'edificio-central')->sole();
+
+    // The cascade has a real override to show.
+    expect($account->settings)->toMatchArray(['visitor_auto_checkout_hours' => 24])
+        ->and($central->settings)->toMatchArray(['visitor_auto_checkout_hours' => 12]);
+
+    // One retired property, with who and when stamped.
+    $jardines = Location::query()->where('slug', 'jardines-de-miraflores')->sole();
+    expect($jardines->isDeactivated())->toBeTrue()
+        ->and($jardines->deactivatedBy->email)->toBe('admin@wasiy.test');
+
+    // The amenity matrix: approval+fee+deposit, instant free, instant with
+    // fee, common space, and deactivated.
+    $amenities = Amenity::query()->where('location_id', $central->id)->get()->keyBy('slug');
+    expect($amenities)->toHaveCount(5)
+        ->and($amenities['salon-de-eventos']->booking_mode)->toBe(BookingMode::Approval)
+        ->and($amenities['salon-de-eventos']->fee_amount)->toBe(150)
+        ->and($amenities['salon-de-eventos']->deposit_amount)->toBe(300)
+        ->and($amenities['gimnasio']->fee_amount)->toBeNull()
+        ->and($amenities['parrilla-terraza']->fee_amount)->toBe(50)
+        ->and($amenities['parrilla-terraza']->availabilitySchedule->isOpenOn('monday'))->toBeFalse()
+        ->and($amenities['lobby-recepcion']->is_reservable)->toBeFalse()
+        ->and($amenities['cancha-de-squash']->isDeactivated())->toBeTrue();
+
+    // Covers exist for the location and the event room, files included.
+    expect($central->photos()->where('is_cover', true)->count())->toBe(1)
+        ->and($amenities['salon-de-eventos']->photos()->where('is_cover', true)->count())->toBe(1);
+    $central->photos->each(fn ($photo) => Storage::disk($photo->disk)->assertExists($photo->path));
+
+    // Idempotent: reseeding stacks nothing.
+    $this->seed();
+    expect(Amenity::query()->where('location_id', $central->id)->count())->toBe(5)
+        ->and($central->photos()->count())->toBe(2);
 });

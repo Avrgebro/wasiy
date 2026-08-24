@@ -473,7 +473,207 @@
       "contactEmail": "Operations email",
       "accessNotes": "Access notes",
       "accessNotesHint": "Visible to front desk staff.",
-      "accessNotesPlaceholder": "Directions for visitors and vendors: vehicle entrance, package delivery, restrictions."
+      "accessNotesPlaceholder": "Directions for visitors and vendors: vehicle entrance, package delivery, restrictions.",
+      "sensitiveZone": "Sensitive zone",
+      "sensitiveZoneHint": "Deactivating hides the location from the portal and blocks new reservations."
+    },
+    "tabs": {
+      "info": "Information",
+      "amenities": "Amenities",
+      "staff": "Staff",
+      "settings": "Settings"
+    },
+    "stats": {
+      "units": "Units",
+      "residents": "Residents",
+      "vehicles": "Vehicles",
+      "unclaimedInvitations": "Unclaimed invitations",
+      "activeAmenities": "Active amenities"
+    },
+    "info": {
+      "title": "General information",
+      "editBlocked": "Editing blocked"
+    },
+    "photos": {
+      "title": "Photos",
+      "hint": "The cover shows on the locations list. All photos are visible in the resident portal.",
+      "cover": "Cover",
+      "makeCover": "Make cover",
+      "delete": "Delete",
+      "add": "Add photos",
+      "constraints": "JPG or PNG · max. 10 MB",
+      "rejected": "The file must be a JPG or PNG up to 10 MB.",
+      "none": "No photos yet",
+      "emptyHint": "Without photos, the locations list shows a placeholder and the portal displays no property images."
+    },
+    "staffTab": {
+      "readOnly": "Read-only view.",
+      "readOnlyBody": "Assignments and roles are managed in",
+      "person": "Person",
+      "access": "Access",
+      "thisLocation": "This location",
+      "frontDeskAccess": "Front desk only",
+      "emptyTitle": "Nobody assigned to this location",
+      "emptyBody": "Staff are assigned in Staff. Until then, only the Account Admin can operate front desk and reservations here.",
+      "goToStaff": "Go to Staff"
+    },
+    "detail": {
+      "reactivateLocation": "Reactivate location",
+      "deactivatedTitle": "This location is deactivated",
+      "deactivatedBody": "Deactivated by {{name}} on {{date}}. It does not appear in the resident portal, accepts no new visits or reservations, and every form is read-only. The registry is fully preserved.",
+      "notFoundTitle": "Location not found",
+      "notFoundBody": "The location does not exist or does not belong to this account.",
+      "backToList": "Back to Locations",
+      "amenitiesSoon": "This location's amenities will be managed here soon.",
+      "settingsSoon": "This location's operational settings will be managed here soon."
+    }
+  },
+  "settings": {
+    "intro": "Each group saves separately. The values shown are the ones in effect, including those inherited from the account.",
+    "introAccount": "Defaults for every location in the account. Each location may override them.",
+    "accountTitle": "Settings",
+    "accountSubtitle": "Operational settings for the {{account}} account.",
+    "saved": "Settings saved.",
+    "discard": "Discard",
+    "clearOverride": "· Reset to the account value",
+    "willInherit": "On save, it will inherit the account value.",
+    "appliesOnlyTo": "Applies only to {{name}}.",
+    "appliesToAccount": "Applies to the whole {{name}} account.",
+    "effectWithAccount": "In effect: {{effective}} · account value: {{account}}",
+    "effectOnly": "In effect: {{effective}}",
+    "overridesAccount": "Overrides the account value ({{account}})",
+    "inheritedFromAccount": "Inherited from the account ({{account}})",
+    "hoursValue": "{{hours}} hours",
+    "visitors": {
+      "title": "Visitors",
+      "preregistration": "Resident pre-registration",
+      "preregistrationHint": "Residents can announce visitors from the portal.",
+      "autoCheckout": "Automatic visit close",
+      "autoCheckoutHint": "Visits without a recorded exit close on their own.",
+      "never": "Never"
+    },
+    "reservations": {
+      "title": "Reservations",
+      "maxAdvance": "Max. advance days",
+      "maxConcurrent": "Concurrent reservations per unit",
+      "cancellationWindow": "Cancellation window",
+      "days": "days",
+      "reservations": "reservations",
+      "hours": "hours",
+      "amenityOverrideHint": "Each amenity may override these values in its own booking policy.",
+      "footer": "Applies to amenities that do not define their own value."
+    },
+    "quietHours": {
+      "title": "Quiet hours",
+      "enabled": "Quiet hours active",
+      "enabledHint": "Shown in the portal and blocks nighttime reservations.",
+      "start": "Start",
+      "end": "End",
+      "effect": "In effect: {{start}}–{{end}}, location time ({{timezone}})",
+      "footer": "Turning it off leaves nights unrestricted."
+    },
+    "announcements": {
+      "title": "Announcements",
+      "managerCanPost": "Location Managers can post",
+      "managerCanPostHint": "If disabled, only the Account Admin posts announcements.",
+      "emailResidents": "Email residents on new announcement",
+      "emailResidentsHint": "Optional send in addition to the portal notification."
+    }
+  },
+  "amenities": {
+    "add": "Add amenity",
+    "createTitle": "New amenity",
+    "createSubtitle": "Residents will see it in the portal.",
+    "editTitle": "Edit amenity",
+    "create": "Create amenity",
+    "created": "Amenity created.",
+    "updated": "Amenity updated.",
+    "deactivated": "Amenity deactivated.",
+    "reactivated": "Amenity reactivated.",
+    "summary": "{{count}} amenities · {{reservable}} reservable",
+    "noFee": "Free",
+    "feeWithDeposit": "{{fee}} + deposit {{deposit}}",
+    "instant": "Instant",
+    "approval": "Requires approval",
+    "variableSchedule": "Variable schedule",
+    "pausedFootnote": "Inactive amenities do not appear in the resident portal. Changes are recorded in the activity log.",
+    "deactivateConfirmTitle": "Deactivate {{name}}?",
+    "deactivateHint": "The amenity is hidden from the portal and accepts no new reservations. Its history and recorded fees are kept.",
+    "statuses": {
+      "reservable": "Reservable",
+      "common": "Common",
+      "deactivated": "Inactive"
+    },
+    "columns": {
+      "amenity": "Amenity",
+      "schedule": "Schedule",
+      "capacity": "Capacity",
+      "fee": "Fee / deposit",
+      "approval": "Approval",
+      "actions": "Actions"
+    },
+    "types": {
+      "pool": "pool",
+      "gym": "gym",
+      "event_room": "event room",
+      "meeting_room": "meeting room",
+      "court": "court",
+      "rooftop": "rooftop",
+      "other": "other"
+    },
+    "empty": {
+      "title": "No amenities yet",
+      "body": "Add a pool, gym, event room, or common spaces so residents can reserve them."
+    },
+    "sections": {
+      "basics": "Basics",
+      "availability": "Availability",
+      "policy": "Booking policy",
+      "fees": "Fees"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "e.g. Event room",
+      "type": "Type",
+      "capacity": "Capacity",
+      "people": "people",
+      "description": "Description",
+      "reservable": "Reservable",
+      "reservableHint": "If disabled it becomes a common space, with no reservations.",
+      "maxDuration": "Maximum duration",
+      "requiresApproval": "Requires approval",
+      "approvalHint": "If disabled, reservations confirm instantly.",
+      "fee": "Usage fee",
+      "deposit": "Refundable deposit",
+      "feesHint": "Amounts in soles, no decimals. The deposit is recorded manually when the reservation is confirmed.",
+      "photosAfterCreate": "You can add photos by editing the amenity once created."
+    },
+    "policy": {
+      "inheritHint": "Empty = inherit from the location ({{value}} {{unit}})",
+      "overrideHint": "Overrides the location value ({{value}} {{unit}})"
+    },
+    "availability": {
+      "columns": "Day · open · windows",
+      "timezoneNote": "Location local time ({{timezone}})",
+      "closed": "Closed",
+      "openDay": "Open and add a window",
+      "addWindow": "Add window",
+      "copyToAll": "Copy to all days",
+      "removeWindow": "Remove window from {{day}}",
+      "startFor": "Start {{n}} for {{day}}",
+      "endFor": "End {{n}} for {{day}}",
+      "to": "to",
+      "overlap": "Windows overlap between {{start}} and {{end}}. Adjust one of them to save.",
+      "inverted": "The window closes before it opens."
+    },
+    "weekdays": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
     }
   }
 }

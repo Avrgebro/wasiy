@@ -473,7 +473,207 @@
       "contactEmail": "Correo operativo",
       "accessNotes": "Notas de acceso",
       "accessNotesHint": "Visible para el personal de recepción.",
-      "accessNotesPlaceholder": "Indicaciones para visitas y proveedores: ingreso vehicular, entrega de paquetes, restricciones."
+      "accessNotesPlaceholder": "Indicaciones para visitas y proveedores: ingreso vehicular, entrega de paquetes, restricciones.",
+      "sensitiveZone": "Zona sensible",
+      "sensitiveZoneHint": "Desactivar oculta la ubicación del portal y bloquea nuevas reservas."
+    },
+    "tabs": {
+      "info": "Información",
+      "amenities": "Amenidades",
+      "staff": "Personal",
+      "settings": "Configuración"
+    },
+    "stats": {
+      "units": "Unidades",
+      "residents": "Residentes",
+      "vehicles": "Vehículos",
+      "unclaimedInvitations": "Invitaciones sin reclamar",
+      "activeAmenities": "Amenidades activas"
+    },
+    "info": {
+      "title": "Información general",
+      "editBlocked": "Edición bloqueada"
+    },
+    "photos": {
+      "title": "Fotos",
+      "hint": "La portada se muestra en la lista de ubicaciones. Todas son visibles en el portal del residente.",
+      "cover": "Portada",
+      "makeCover": "Hacer portada",
+      "delete": "Eliminar",
+      "add": "Agregar fotos",
+      "constraints": "JPG o PNG · máx. 10 MB",
+      "rejected": "El archivo debe ser JPG o PNG de hasta 10 MB.",
+      "none": "Sin fotos aún",
+      "emptyHint": "Sin fotos, la lista de ubicaciones muestra un marcador y el portal no exhibe imágenes de la propiedad."
+    },
+    "staffTab": {
+      "readOnly": "Vista de solo lectura.",
+      "readOnlyBody": "Las asignaciones y los roles se administran en",
+      "person": "Persona",
+      "access": "Acceso",
+      "thisLocation": "Esta ubicación",
+      "frontDeskAccess": "Solo recepción",
+      "emptyTitle": "Nadie asignado a esta ubicación",
+      "emptyBody": "El personal se asigna en Personal. Hasta entonces, solo el Account Admin puede operar recepción y reservas aquí.",
+      "goToStaff": "Ir a Personal"
+    },
+    "detail": {
+      "reactivateLocation": "Reactivar ubicación",
+      "deactivatedTitle": "Esta ubicación está desactivada",
+      "deactivatedBody": "Desactivada por {{name}} el {{date}}. No aparece en el portal del residente, no admite visitas ni reservas nuevas, y todos los formularios están en solo lectura. El registro se conserva íntegro.",
+      "notFoundTitle": "Ubicación no encontrada",
+      "notFoundBody": "La ubicación no existe o no pertenece a esta cuenta.",
+      "backToList": "Volver a Ubicaciones",
+      "amenitiesSoon": "Las amenidades de esta ubicación se administrarán aquí próximamente.",
+      "settingsSoon": "La configuración operativa de esta ubicación se administrará aquí próximamente."
+    }
+  },
+  "settings": {
+    "intro": "Cada grupo se guarda por separado. Los valores mostrados son los que están en vigencia, incluidos los heredados de la cuenta.",
+    "introAccount": "Valores predeterminados para todas las ubicaciones de la cuenta. Cada ubicación puede sobrescribirlos.",
+    "accountTitle": "Configuración",
+    "accountSubtitle": "Configuración operativa de la cuenta {{account}}.",
+    "saved": "Configuración guardada.",
+    "discard": "Descartar",
+    "clearOverride": "· Restablecer al valor de la cuenta",
+    "willInherit": "Al guardar, heredará el valor de la cuenta.",
+    "appliesOnlyTo": "Aplica solo a {{name}}.",
+    "appliesToAccount": "Aplica a toda la cuenta {{name}}.",
+    "effectWithAccount": "En vigencia: {{effective}} · valor de la cuenta: {{account}}",
+    "effectOnly": "En vigencia: {{effective}}",
+    "overridesAccount": "Sobrescribe el valor de la cuenta ({{account}})",
+    "inheritedFromAccount": "Heredado de la cuenta ({{account}})",
+    "hoursValue": "{{hours}} horas",
+    "visitors": {
+      "title": "Visitas",
+      "preregistration": "Pre-registro por residentes",
+      "preregistrationHint": "Los residentes pueden anunciar visitas desde el portal.",
+      "autoCheckout": "Cierre automático de visitas",
+      "autoCheckoutHint": "Las visitas sin salida registrada se cierran solas.",
+      "never": "Nunca"
+    },
+    "reservations": {
+      "title": "Reservas",
+      "maxAdvance": "Días de anticipación máx.",
+      "maxConcurrent": "Reservas simultáneas por unidad",
+      "cancellationWindow": "Ventana de cancelación",
+      "days": "días",
+      "reservations": "reservas",
+      "hours": "horas",
+      "amenityOverrideHint": "Cada amenidad puede sobrescribir estos valores en su propia política de reserva.",
+      "footer": "Aplica a las amenidades que no definan su propio valor."
+    },
+    "quietHours": {
+      "title": "Horario de silencio",
+      "enabled": "Horario de silencio activo",
+      "enabledHint": "Se muestra en el portal y bloquea reservas nocturnas.",
+      "start": "Inicio",
+      "end": "Fin",
+      "effect": "En vigencia: {{start}}–{{end}}, hora de la ubicación ({{timezone}})",
+      "footer": "Desactivar deja las noches sin restricción."
+    },
+    "announcements": {
+      "title": "Anuncios",
+      "managerCanPost": "Los Location Managers pueden publicar",
+      "managerCanPostHint": "Si se desactiva, solo el Account Admin publica anuncios.",
+      "emailResidents": "Correo a residentes por anuncio nuevo",
+      "emailResidentsHint": "Envío opcional además de la notificación en el portal."
+    }
+  },
+  "amenities": {
+    "add": "Agregar amenidad",
+    "createTitle": "Nueva amenidad",
+    "createSubtitle": "Los residentes la verán en el portal.",
+    "editTitle": "Editar amenidad",
+    "create": "Crear amenidad",
+    "created": "Amenidad creada.",
+    "updated": "Amenidad actualizada.",
+    "deactivated": "Amenidad desactivada.",
+    "reactivated": "Amenidad reactivada.",
+    "summary": "{{count}} amenidades · {{reservable}} reservables",
+    "noFee": "Sin costo",
+    "feeWithDeposit": "{{fee}} + depósito {{deposit}}",
+    "instant": "Instantánea",
+    "approval": "Requiere aprobación",
+    "variableSchedule": "Horario variable",
+    "pausedFootnote": "Las amenidades inactivas no aparecen en el portal del residente. Los cambios quedan en el registro de actividad.",
+    "deactivateConfirmTitle": "¿Desactivar {{name}}?",
+    "deactivateHint": "La amenidad se oculta del portal y no acepta reservas nuevas. Su historial y sus cuotas registradas se conservan.",
+    "statuses": {
+      "reservable": "Reservable",
+      "common": "Común",
+      "deactivated": "Inactiva"
+    },
+    "columns": {
+      "amenity": "Amenidad",
+      "schedule": "Horario",
+      "capacity": "Aforo",
+      "fee": "Cuota / depósito",
+      "approval": "Aprobación",
+      "actions": "Acciones"
+    },
+    "types": {
+      "pool": "piscina",
+      "gym": "gimnasio",
+      "event_room": "salón de eventos",
+      "meeting_room": "sala de reuniones",
+      "court": "cancha",
+      "rooftop": "azotea",
+      "other": "otro"
+    },
+    "empty": {
+      "title": "Sin amenidades registradas",
+      "body": "Agrega piscina, gimnasio, salón de eventos o espacios comunes para que los residentes puedan reservarlos."
+    },
+    "sections": {
+      "basics": "Básicos",
+      "availability": "Disponibilidad",
+      "policy": "Política de reserva",
+      "fees": "Cuotas"
+    },
+    "form": {
+      "name": "Nombre",
+      "namePlaceholder": "ej. Salón de eventos",
+      "type": "Tipo",
+      "capacity": "Aforo",
+      "people": "personas",
+      "description": "Descripción",
+      "reservable": "Reservable",
+      "reservableHint": "Si se desactiva queda como espacio común, sin reservas.",
+      "maxDuration": "Duración máxima",
+      "requiresApproval": "Requiere aprobación",
+      "approvalHint": "Si se desactiva, la reserva se confirma al instante.",
+      "fee": "Cuota de uso",
+      "deposit": "Depósito reembolsable",
+      "feesHint": "Montos en soles, sin decimales. El depósito se registra manualmente al confirmar la reserva.",
+      "photosAfterCreate": "Podrás agregar fotos al editar la amenidad una vez creada."
+    },
+    "policy": {
+      "inheritHint": "Vacío = heredar de la ubicación ({{value}} {{unit}})",
+      "overrideHint": "Sobrescribe el valor de la ubicación ({{value}} {{unit}})"
+    },
+    "availability": {
+      "columns": "Día · abierto · horarios",
+      "timezoneNote": "Hora local de la ubicación ({{timezone}})",
+      "closed": "Cerrado",
+      "openDay": "Abrir y agregar horario",
+      "addWindow": "Agregar horario",
+      "copyToAll": "Copiar a todos los días",
+      "removeWindow": "Quitar horario de {{day}}",
+      "startFor": "Inicio {{n}} de {{day}}",
+      "endFor": "Fin {{n}} de {{day}}",
+      "to": "a",
+      "overlap": "Los horarios se superponen entre {{start}} y {{end}}. Ajusta uno de los dos para guardar.",
+      "inverted": "El horario cierra antes de abrir."
+    },
+    "weekdays": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
     }
   }
 }
