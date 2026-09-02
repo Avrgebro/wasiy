@@ -1,5 +1,5 @@
 import { Alert, Button, Group, Modal, Skeleton, Stack, Table, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { AddCircle, Confetti } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -66,9 +66,9 @@ export function LocationAmenitiesTab({
     mutationFn: (amenity: AmenitySummary) => reactivateAmenity(accountId, locationId, amenity.id),
     onSuccess: async () => {
       await invalidate()
-      showNotification({ color: 'green', message: t('amenities.reactivated') })
+      notifySuccess(t('amenities.reactivated'))
     },
-    onError: (error) => showNotification({ color: 'red', message: getErrorMessage(error) }),
+    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const deactivateMutation = useMutation({
@@ -76,9 +76,9 @@ export function LocationAmenitiesTab({
     onSuccess: async () => {
       setDeactivating(null)
       await invalidate()
-      showNotification({ color: 'green', message: t('amenities.deactivated') })
+      notifySuccess(t('amenities.deactivated'))
     },
-    onError: (error) => showNotification({ color: 'red', message: getErrorMessage(error) }),
+    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   if (listQuery.isLoading) {

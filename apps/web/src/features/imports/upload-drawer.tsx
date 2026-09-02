@@ -1,6 +1,6 @@
 import { Alert, Badge, Button, Drawer, Stack, Text } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { Upload } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -31,11 +31,7 @@ export function UploadDrawer({
       setSelectedFile(null)
       onUploaded(response.data.id)
       await queryClient.invalidateQueries({ queryKey: ['registry', 'imports'] })
-      showNotification({
-        color: 'green',
-        message: t('registry.imports.uploaded'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(t('registry.imports.uploaded'), t('registry.savedTitle'))
     },
   })
 

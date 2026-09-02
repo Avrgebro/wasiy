@@ -8,7 +8,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { AddCircle, CloseCircle } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, type ReactNode } from 'react'
@@ -196,11 +196,7 @@ export function StaffAccessDrawer({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
       onClose()
-      showNotification({
-        color: 'green',
-        message: editing ? t('registry.saved') : t('staff.invited'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(editing ? t('registry.saved') : t('staff.invited'), t('registry.savedTitle'))
     },
   })
 

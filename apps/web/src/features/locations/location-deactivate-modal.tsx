@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
@@ -40,10 +40,10 @@ export function LocationDeactivateModal({
       await queryClient.invalidateQueries({ queryKey: ['locations'] })
       // Deactivation also drops the location from accessible_locations.
       await queryClient.invalidateQueries({ queryKey: ['auth'] })
-      showNotification({ color: 'green', message: t('locations.deactivated') })
+      notifySuccess(t('locations.deactivated'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 

@@ -1,5 +1,5 @@
 import { Alert, Button, Group, SimpleGrid, Stack, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { CheckCircle, Refresh } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -24,11 +24,7 @@ export function ImportDetailPanel({
         queryClient.invalidateQueries({ queryKey: ['registry', 'units'] }),
         queryClient.invalidateQueries({ queryKey: ['registry', 'residents'] }),
       ])
-      showNotification({
-        color: 'green',
-        message: t('registry.imports.confirmed'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(t('registry.imports.confirmed'), t('registry.savedTitle'))
     },
   })
 
@@ -36,11 +32,7 @@ export function ImportDetailPanel({
     mutationFn: (importId: string) => retryRegistryImport(importId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['registry', 'imports'] })
-      showNotification({
-        color: 'green',
-        message: t('registry.imports.retryQueued'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(t('registry.imports.retryQueued'), t('registry.savedTitle'))
     },
   })
 

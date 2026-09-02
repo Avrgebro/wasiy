@@ -1,5 +1,5 @@
 import { Alert, Button, NumberInput, Skeleton, Switch, Text, TextInput } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -116,10 +116,10 @@ function useGroup(props: GroupProps) {
     onSuccess: async () => {
       setDraft({})
       await queryClient.invalidateQueries({ queryKey: props.settingsQueryKey })
-      showNotification({ color: 'green', message: props.t('settings.saved') })
+      notifySuccess(props.t('settings.saved'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 

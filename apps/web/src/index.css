@@ -154,3 +154,52 @@ body,
 body {
   margin: 0;
 }
+
+/* Toasts («wa-toast», set by lib/notify.tsx — the only caller of
+   showNotification): card chrome instead of Mantine's stock colored
+   sidebar; the tinted icon chip carries the role color, passed per-variant
+   as --wa-toast-color. Unlayered so it wins over Mantine's layered styles. */
+.wa-toast {
+  background: var(--mantine-color-default);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(28, 43, 44, 0.14);
+  padding: 13px 14px;
+}
+
+.wa-toast::before {
+  display: none;
+}
+
+.wa-toast__icon {
+  background: color-mix(in srgb, var(--wa-toast-color) 12%, transparent);
+  border-radius: 10px;
+  color: var(--wa-toast-color);
+  height: 34px;
+  margin-inline-end: 12px;
+  width: 34px;
+}
+
+.wa-toast__title {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.wa-toast__description {
+  color: var(--mantine-color-text);
+  font-size: 12.5px;
+}
+
+/* Only demote the message to dimmed when a title carries the weight. */
+.wa-toast__title ~ .wa-toast__description {
+  color: var(--mantine-color-dimmed);
+}
+
+.wa-toast__close {
+  color: var(--mantine-color-dimmed);
+}
+
+/* Jerarquía por elevación en oscuro: borders delimit, no shadows. */
+:root[data-mantine-color-scheme='dark'] .wa-toast {
+  box-shadow: none;
+}

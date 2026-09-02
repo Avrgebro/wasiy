@@ -1,5 +1,5 @@
 import { Alert, Button, Drawer, Loader, Pagination } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query'
 import { getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table'
 import { useState, type ReactNode } from 'react'
@@ -77,11 +77,7 @@ export function RegistryCrudPage<TRow extends { id: string }, TForm extends Fiel
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: invalidateKey })
       setDrawerOpened(false)
-      showNotification({
-        color: 'green',
-        message: t('registry.saved'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(t('registry.saved'), t('registry.savedTitle'))
     },
   })
   function openCreate() {

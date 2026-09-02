@@ -1,5 +1,5 @@
 import { Alert, Button, NumberInput, Select, Switch, Text, Textarea, TextInput } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -183,10 +183,7 @@ function AmenityForm({
     onSuccess: async () => {
       onClose()
       await queryClient.invalidateQueries({ queryKey: ['locations'] })
-      showNotification({
-        color: 'green',
-        message: editing ? t('amenities.updated') : t('amenities.created'),
-      })
+      notifySuccess(editing ? t('amenities.updated') : t('amenities.created'))
     },
     onError: (error) => {
       setServerError(

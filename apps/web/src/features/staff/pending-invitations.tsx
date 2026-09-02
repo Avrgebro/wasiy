@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -56,10 +56,10 @@ export function PendingInvitations({
       // Resending issues a fresh token with a new expiry, so the card's
       // "Vence en N días" needs the latest data.
       await queryClient.invalidateQueries({ queryKey: ['staff', 'invitations'] })
-      showNotification({ color: 'green', message: t('staff.pending.resent') })
+      notifySuccess(t('staff.pending.resent'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 
@@ -68,10 +68,10 @@ export function PendingInvitations({
     onSuccess: async () => {
       setRevoking(null)
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
-      showNotification({ color: 'green', message: t('staff.pending.revoked') })
+      notifySuccess(t('staff.pending.revoked'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 

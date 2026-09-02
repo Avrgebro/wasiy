@@ -25,4 +25,25 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
+  {
+    // Toasts go through lib/notify so variant styling lives in one place.
+    // Exceptions: notify itself, main.tsx (mounts the provider), and tests
+    // (they mount the provider to assert on toasts).
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['src/lib/notify.tsx', 'src/main.tsx', 'src/**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@mantine/notifications',
+              message:
+                'Use notifySuccess/notifyError/notifyWarning/notifyInfo from lib/notify instead.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ])

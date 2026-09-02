@@ -1,6 +1,6 @@
 import { Text } from '@mantine/core'
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone'
-import { showNotification } from '@mantine/notifications'
+import { notifyError } from '../../lib/notify'
 import { AddCircle, Camera } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
@@ -41,33 +41,33 @@ export function LocationPhotoGallery({
     await queryClient.invalidateQueries({ queryKey: ['locations'] })
   }
 
-  const notifyError = (error: unknown) => {
-    showNotification({ color: 'red', message: getErrorMessage(error) })
+  const notifyMutationError = (error: unknown) => {
+    notifyError(getErrorMessage(error))
   }
 
   const uploadMutation = useMutation({
     mutationFn: (files: File[]) =>
       Promise.all(files.map((file) => uploadLocationPhoto(accountId, locationId, file))),
     onSuccess: invalidate,
-    onError: notifyError,
+    onError: notifyMutationError,
   })
 
   const deleteMutation = useMutation({
     mutationFn: (photoId: string) => deleteLocationPhoto(accountId, locationId, photoId),
     onSuccess: invalidate,
-    onError: notifyError,
+    onError: notifyMutationError,
   })
 
   const coverMutation = useMutation({
     mutationFn: (photoId: string) => setLocationCoverPhoto(accountId, locationId, photoId),
     onSuccess: invalidate,
-    onError: notifyError,
+    onError: notifyMutationError,
   })
 
   const reorderMutation = useMutation({
     mutationFn: (photoIds: string[]) => reorderLocationPhotos(accountId, locationId, photoIds),
     onSuccess: invalidate,
-    onError: notifyError,
+    onError: notifyMutationError,
   })
 
   function handleDrop(targetIndex: number) {
@@ -163,7 +163,7 @@ export function LocationPhotoGallery({
             loading={uploadMutation.isPending}
             maxSize={10 * 1024 * 1024}
             onDrop={(files) => uploadMutation.mutate(files)}
-            onReject={() => showNotification({ color: 'red', message: t('locations.photos.rejected') })}
+            onReject={() => notifyError(t('locations.photos.rejected'))}
           >
             <div className="pointer-events-none flex flex-col items-center gap-1.5 text-center">
               <AddCircle className="text-[var(--mantine-color-dimmed)]" size={22} />

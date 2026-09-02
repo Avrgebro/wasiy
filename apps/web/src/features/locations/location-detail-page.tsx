@@ -1,5 +1,5 @@
 import { Alert, Button, Skeleton, Tabs, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { Buildings2, CameraMinimalistic, DangerTriangle } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
@@ -63,10 +63,10 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['locations'] })
       await queryClient.invalidateQueries({ queryKey: ['auth'] })
-      showNotification({ color: 'green', message: t('locations.reactivated') })
+      notifySuccess(t('locations.reactivated'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 

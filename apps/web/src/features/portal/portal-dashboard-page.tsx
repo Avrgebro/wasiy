@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Badge, Button, Loader, TextInput } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -51,11 +51,7 @@ export function PortalDashboardPage() {
         return { status: 'authenticated', me }
       })
 
-      showNotification({
-        color: 'green',
-        message: t('portal.phoneSaved'),
-        title: t('portal.phoneSavedTitle'),
-      })
+      notifySuccess(t('portal.phoneSaved'), t('portal.phoneSavedTitle'))
     },
   })
   const form = useForm<PortalPhoneFormValues>({

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, Select, Text, Textarea } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -111,10 +111,7 @@ export function LocationFormDrawer({
     onSuccess: async () => {
       onClose()
       await queryClient.invalidateQueries({ queryKey: ['locations'] })
-      showNotification({
-        color: 'green',
-        message: editing ? t('locations.updated') : t('locations.created'),
-      })
+      notifySuccess(editing ? t('locations.updated') : t('locations.created'))
     },
   })
 
