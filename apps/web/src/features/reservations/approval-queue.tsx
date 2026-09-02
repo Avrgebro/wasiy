@@ -1,5 +1,6 @@
 import { Badge, Button, Group, Modal, Stack, Text, Textarea } from '@mantine/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
@@ -27,7 +28,7 @@ function waitingDays(reservation: ReservationSummary): number {
   return Math.floor((Date.now() - new Date(reservation.created_at).getTime()) / 86_400_000)
 }
 
-function feeLine(reservation: ReservationSummary, t: (key: string, options?: object) => string) {
+function feeLine(reservation: ReservationSummary, t: TFunction<'common'>) {
   const parts = []
   if (reservation.fee_snapshot) {
     parts.push(t('reservations.queue.fee', { amount: reservation.fee_snapshot }))
