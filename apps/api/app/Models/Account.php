@@ -38,6 +38,14 @@ class Account extends Model
     }
 
     /**
+     * @return HasMany<Reservation, $this>
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    /**
      * @return HasMany<StaffMembership, $this>
      */
     public function staffMemberships(): HasMany

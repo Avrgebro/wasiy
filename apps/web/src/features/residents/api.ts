@@ -25,7 +25,10 @@ export type ResidentSummary = {
   }>
 }
 
-export function getResidents(accountId: string, search: RegistrySearch & { location_id?: string }) {
+export function getResidents(
+  accountId: string,
+  search: RegistrySearch & { location_id?: string; unit_id?: string },
+) {
   const params = buildParams(search)
 
   return apiRequest<PaginatedApiResponse<ResidentSummary>>(

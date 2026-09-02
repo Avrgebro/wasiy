@@ -303,7 +303,12 @@
     "nameRequired": "Enter the name.",
     "typeRequired": "Select a property type.",
     "addressLine1Required": "Enter the address.",
-    "cityRequired": "Enter the city."
+    "cityRequired": "Enter the city.",
+    "amenityRequired": "Select an amenity.",
+    "dateRequired": "Select a date.",
+    "startRequired": "Set a start time.",
+    "endRequired": "Set an end time.",
+    "endAfterStart": "The end time must be after the start."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -527,6 +532,94 @@
       "amenitiesSoon": "This location's amenities will be managed here soon.",
       "settingsSoon": "This location's operational settings will be managed here soon."
     }
+  },
+  "reservations": {
+    "title": "Reservations",
+    "subtitle": "{{location}} amenities",
+    "noLocation": "Select a location to see its reservations.",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "emptyWeek": "No reservations this week.",
+    "allAmenities": "All amenities",
+    "chips": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Confirmed",
+      "completed": "Completed"
+    },
+    "columns": {
+      "amenity": "Amenity",
+      "unit": "Unit",
+      "resident": "Resident",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "approved": "Confirmed",
+      "observed": "Observed",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    },
+    "queue": {
+      "title": "Awaiting approval",
+      "empty": "No pending requests.",
+      "waiting_one": "Waiting for {{count}} day",
+      "waiting_other": "Waiting for {{count}} days",
+      "conflictNone": "conflict: none",
+      "conflictWith": "conflict: overlaps {{label}}",
+      "fee": "fee S/ {{amount}}",
+      "deposit": "deposit S/ {{amount}}",
+      "free": "no charge",
+      "showAll": "See all {{count}} pending →",
+      "showFewer": "Show fewer"
+    },
+    "actions": {
+      "approve": "Approve",
+      "observe": "Observe",
+      "reject": "Reject",
+      "cancel": "Cancel reservation"
+    },
+    "noteModal": {
+      "rejectTitle": "Reject reservation",
+      "observeTitle": "Observe reservation",
+      "noteLabel": "Note for the resident",
+      "observeHint": "The resident will see this note; the request stays open to approve or reject.",
+      "rejectHint": "The resident will see this note as the rejection reason."
+    },
+    "toasts": {
+      "approved": "Reservation approved.",
+      "rejected": "Reservation rejected.",
+      "observed": "Reservation observed.",
+      "created": "Reservation created.",
+      "requested": "Request sent for approval.",
+      "cancelled": "Reservation cancelled."
+    },
+    "newReservation": "New reservation",
+    "form": {
+      "amenity": "Amenity",
+      "unit": "Unit",
+      "resident": "Resident (optional)",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "availableWindows": "Available that day: {{windows}}",
+      "closedThatDay": "The amenity is closed that day.",
+      "submit": "Create reservation"
+    },
+    "detail": {
+      "fee": "Fee",
+      "deposit": "Deposit",
+      "feeHint": "Prices as of booking time — payment is recorded manually.",
+      "note": "Note",
+      "createdBy": "Created by {{name}} · {{date}}",
+      "decidedBy": "by {{name}} · {{date}}"
+    },
+    "weekOf": "Week of {{range}}"
   },
   "settings": {
     "intro": "Each group saves separately. The values shown are the ones in effect, including those inherited from the account.",

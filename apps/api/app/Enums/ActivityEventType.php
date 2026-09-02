@@ -32,6 +32,12 @@ enum ActivityEventType: string
     case VehicleUpdated = 'vehicle.updated';
     case VehicleDeleted = 'vehicle.deleted';
     case VehicleInactivated = 'vehicle.inactivated';
+    case ReservationCreated = 'reservation.created';
+    case ReservationUpdated = 'reservation.updated';
+    case ReservationApproved = 'reservation.approved';
+    case ReservationRejected = 'reservation.rejected';
+    case ReservationObserved = 'reservation.observed';
+    case ReservationCancelled = 'reservation.cancelled';
     case AmenityCreated = 'amenity.created';
     case AmenityUpdated = 'amenity.updated';
     case AmenityDeactivated = 'amenity.deactivated';

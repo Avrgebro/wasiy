@@ -61,6 +61,7 @@ function SidebarLink({
         <Icon aria-hidden="true" className="hidden sm:block" size={20} />
       )}
       <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
+      {item.badge ? <item.badge /> : null}
     </Link>
   )
 }

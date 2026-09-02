@@ -19,6 +19,7 @@ import type {
   LayoutNavLeaf,
 } from '../../components/layout/shared/types'
 import { canManageRegistry, isAccountAdmin, type Surface } from '../auth/access'
+import { PendingReservationsBadge } from '../reservations/pending-reservations-badge'
 import type { MeResponse } from '../auth/types'
 
 /**
@@ -122,6 +123,7 @@ const locationNavigationGroup: NavGroupSpec = {
     { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units' },
     { icon: KeySquare, labelKey: 'nav.vehicles', to: '/admin/registry/vehicles' },
     {
+      badge: PendingReservationsBadge,
       icon: Calendar,
       labelKey: 'nav.reservations',
       to: '/admin/reservations',

@@ -303,7 +303,12 @@
     "nameRequired": "Ingresa el nombre.",
     "typeRequired": "Selecciona un tipo de propiedad.",
     "addressLine1Required": "Ingresa la dirección.",
-    "cityRequired": "Ingresa la ciudad."
+    "cityRequired": "Ingresa la ciudad.",
+    "amenityRequired": "Selecciona una amenidad.",
+    "dateRequired": "Selecciona una fecha.",
+    "startRequired": "Indica la hora de inicio.",
+    "endRequired": "Indica la hora de fin.",
+    "endAfterStart": "La hora de fin debe ser posterior al inicio."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",
@@ -527,6 +532,94 @@
       "amenitiesSoon": "Las amenidades de esta ubicación se administrarán aquí próximamente.",
       "settingsSoon": "La configuración operativa de esta ubicación se administrará aquí próximamente."
     }
+  },
+  "reservations": {
+    "title": "Reservas",
+    "subtitle": "Amenidades de {{location}}",
+    "noLocation": "Selecciona una ubicación para ver sus reservas.",
+    "previousWeek": "Semana anterior",
+    "nextWeek": "Semana siguiente",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "emptyWeek": "Sin reservas esta semana.",
+    "allAmenities": "Todas las amenidades",
+    "chips": {
+      "all": "Todas",
+      "pending": "Pendientes",
+      "approved": "Confirmadas",
+      "completed": "Completadas"
+    },
+    "columns": {
+      "amenity": "Amenidad",
+      "unit": "Unidad",
+      "resident": "Residente",
+      "date": "Fecha",
+      "time": "Horario",
+      "status": "Estado"
+    },
+    "statuses": {
+      "pending": "Pendiente",
+      "approved": "Confirmada",
+      "observed": "Observada",
+      "rejected": "Rechazada",
+      "cancelled": "Cancelada",
+      "completed": "Completada"
+    },
+    "queue": {
+      "title": "Por aprobar",
+      "empty": "No hay solicitudes pendientes.",
+      "waiting_one": "Esperando hace {{count}} día",
+      "waiting_other": "Esperando hace {{count}} días",
+      "conflictNone": "conflicto: ninguno",
+      "conflictWith": "conflicto: se cruza con {{label}}",
+      "fee": "cuota S/ {{amount}}",
+      "deposit": "depósito S/ {{amount}}",
+      "free": "sin costo",
+      "showAll": "Ver las {{count}} pendientes →",
+      "showFewer": "Ver menos"
+    },
+    "actions": {
+      "approve": "Aprobar",
+      "observe": "Observar",
+      "reject": "Rechazar",
+      "cancel": "Cancelar reserva"
+    },
+    "noteModal": {
+      "rejectTitle": "Rechazar reserva",
+      "observeTitle": "Observar reserva",
+      "noteLabel": "Nota para el residente",
+      "observeHint": "El residente verá esta nota; la solicitud queda abierta para aprobar o rechazar.",
+      "rejectHint": "El residente verá esta nota como motivo del rechazo."
+    },
+    "toasts": {
+      "approved": "Reserva aprobada.",
+      "rejected": "Reserva rechazada.",
+      "observed": "Reserva observada.",
+      "created": "Reserva registrada.",
+      "requested": "Solicitud enviada a aprobación.",
+      "cancelled": "Reserva cancelada."
+    },
+    "newReservation": "Nueva reserva",
+    "form": {
+      "amenity": "Amenidad",
+      "unit": "Unidad",
+      "resident": "Residente (opcional)",
+      "date": "Fecha",
+      "start": "Inicio",
+      "end": "Fin",
+      "availableWindows": "Disponible ese día: {{windows}}",
+      "closedThatDay": "La amenidad está cerrada ese día.",
+      "submit": "Registrar reserva"
+    },
+    "detail": {
+      "fee": "Cuota",
+      "deposit": "Depósito",
+      "feeHint": "Precios al momento de la reserva — el cobro se registra manualmente.",
+      "note": "Nota",
+      "createdBy": "Registrada por {{name}} · {{date}}",
+      "decidedBy": "por {{name}} · {{date}}"
+    },
+    "weekOf": "Semana del {{range}}"
   },
   "settings": {
     "intro": "Cada grupo se guarda por separado. Los valores mostrados son los que están en vigencia, incluidos los heredados de la cuenta.",

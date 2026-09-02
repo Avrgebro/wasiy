@@ -14,6 +14,8 @@ export type LayoutNavTarget = FileRouteTypes['to']
 export type LayoutNavLeaf = {
   activeMatch?: 'exact' | 'prefix'
   type?: 'item'
+  /** Optional live counter rendered after the label (e.g. pending reservations). */
+  badge?: ComponentType
   icon: LayoutIcon
   labelKey: string
   to: LayoutNavTarget
