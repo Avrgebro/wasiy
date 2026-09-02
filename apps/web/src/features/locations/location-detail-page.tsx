@@ -1,11 +1,12 @@
-import { Alert, Badge, Button, Skeleton, Tabs, Text } from '@mantine/core'
+import { Alert, Button, Skeleton, Tabs, Text } from '@mantine/core'
 import { showNotification } from '@mantine/notifications'
-import { Buildings2, DangerTriangle } from '@solar-icons/react'
+import { Buildings2, CameraMinimalistic, DangerTriangle } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../app/api-client'
+import { WasiyLogo } from '../../components/layout/shared/wasiy-logo'
 import { getErrorMessage } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 import {
@@ -122,21 +123,54 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
           <LocationCoverPlaceholder logoSize={280} />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.55)] via-transparent to-transparent" />
+        {!deactivated && (
+          <button
+            className="absolute right-4 top-4 flex cursor-pointer items-center gap-[7px] rounded-lg border border-[#2A3F40] bg-[rgba(16,29,30,0.85)] px-[13px] py-2 text-[12.5px] font-semibold text-[#E9ECE8]"
+            type="button"
+            onClick={() => {
+              void navigate({
+                params: { locationId },
+                search: { tab: 'info' as LocationDetailTab },
+              }).then(() => {
+                requestAnimationFrame(() => {
+                  document
+                    .getElementById('location-photos')
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                })
+              })
+            }}
+          >
+            <CameraMinimalistic size={15} />
+            {t('locations.detail.changeCover')}
+          </button>
+        )}
         {/* In flow (not absolute) so on narrow screens the actions wrap
             below the name instead of overlapping it. */}
         <div className="relative flex flex-wrap items-end justify-between gap-3 px-4 pb-[18px] pt-8 sm:px-6">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="text-[26px] font-semibold tracking-tight text-white">
-                {location.name}
-              </span>
-              <Badge color={deactivated ? 'gray' : 'success'} radius="xl" size="sm" variant="light">
-                {t(`locations.statuses.${location.status}`)}
-              </Badge>
+          <div className="flex min-w-0 items-end gap-4">
+            {/* Brand tile stands in for the location avatar for now (mockup 03). */}
+            <div className="grid size-16 shrink-0 place-items-center rounded-[14px] border border-[#2A3F40] bg-[#124E52] text-[#F7F5F0]">
+              <WasiyLogo size={34} />
             </div>
-            <Text c="gray.3" mt={4} size="sm">
-              {[location.formatted_address, location.timezone].filter(Boolean).join(' · ')}
-            </Text>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="text-[26px] font-semibold tracking-tight text-white">
+                  {location.name}
+                </span>
+                {/* The header always sits on a photo/dark cover, so the pill keeps
+                    the mockup's dark-surface colors in both themes. */}
+                <span
+                  className={`rounded-full bg-[rgba(29,51,53,0.9)] px-[11px] py-1 text-[11.5px] font-semibold ${
+                    deactivated ? 'text-[#9FB0AE]' : 'text-[#6FBF97]'
+                  }`}
+                >
+                  {t(`locations.statuses.${location.status}`)}
+                </span>
+              </div>
+              <Text c="gray.3" mt={4} size="sm">
+                {[location.formatted_address, location.timezone].filter(Boolean).join(' · ')}
+              </Text>
+            </div>
           </div>
           {deactivated ? (
             <Button

@@ -86,7 +86,10 @@ export function LocationPhotoGallery({
   }
 
   return (
-    <section className="overflow-hidden rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section
+      className="overflow-hidden rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]"
+      id="location-photos"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--mantine-color-default-border)] px-5 py-4">
         <div>
           <Text fw={600}>{t('locations.photos.title')}</Text>
@@ -153,7 +156,10 @@ export function LocationPhotoGallery({
           <Dropzone
             accept={IMAGE_MIME_TYPE.filter((type) => type === 'image/jpeg' || type === 'image/png')}
             aria-label={t('locations.photos.add')}
-            className="grid h-[170px] place-items-center rounded-xl border border-dashed border-[var(--mantine-color-default-border)] bg-transparent"
+            // relative is load-bearing: the hidden file <input> inside is
+            // position:absolute, and without a positioned ancestor it anchors
+            // to the document and gives the page a second scrollbar.
+            className="relative grid h-[170px] place-items-center rounded-xl border border-dashed border-[var(--mantine-color-default-border)] bg-transparent"
             loading={uploadMutation.isPending}
             maxSize={10 * 1024 * 1024}
             onDrop={(files) => uploadMutation.mutate(files)}

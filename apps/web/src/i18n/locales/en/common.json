@@ -517,6 +517,7 @@
       "goToStaff": "Go to Staff"
     },
     "detail": {
+      "changeCover": "Change cover",
       "reactivateLocation": "Reactivate location",
       "deactivatedTitle": "This location is deactivated",
       "deactivatedBody": "Deactivated by {{name}} on {{date}}. It does not appear in the resident portal, accepts no new visits or reservations, and every form is read-only. The registry is fully preserved.",

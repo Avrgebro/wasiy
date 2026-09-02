@@ -517,6 +517,7 @@
       "goToStaff": "Ir a Personal"
     },
     "detail": {
+      "changeCover": "Cambiar portada",
       "reactivateLocation": "Reactivar ubicación",
       "deactivatedTitle": "Esta ubicación está desactivada",
       "deactivatedBody": "Desactivada por {{name}} el {{date}}. No aparece en el portal del residente, no admite visitas ni reservas nuevas, y todos los formularios están en solo lectura. El registro se conserva íntegro.",

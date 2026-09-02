@@ -1,8 +1,8 @@
-import { Select, TextInput } from '@mantine/core'
-import { Magnifier } from '@solar-icons/react'
+import { Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { FilterButton } from '../../components/table/filter-button'
-import { FilterChips, type FilterChip } from '../../components/table/filter-chips'
+import { buildFilterChips, FilterChips } from '../../components/table/filter-chips'
+import { SearchInput } from '../../components/table/search-input'
 import { locationTypeValues } from './schemas'
 import type { LocationsSearchValues } from './schemas'
 
@@ -28,34 +28,29 @@ export function LocationFilters({
     value,
   }))
 
-  const chips: FilterChip[] = []
-  if (search.status) {
-    const label =
-      statusOptions.find((option) => option.value === search.status)?.label ?? search.status
-    chips.push({
+  const chips = buildFilterChips([
+    {
       key: 'status',
-      label: `${t('registry.status')}: ${label}`,
+      label: t('registry.status'),
+      value: search.status,
+      options: statusOptions,
       onRemove: () => onChange({ status: '' }),
-    })
-  }
-  if (search.type) {
-    const label = typeOptions.find((option) => option.value === search.type)?.label ?? search.type
-    chips.push({
+    },
+    {
       key: 'type',
-      label: `${t('locations.type')}: ${label}`,
+      label: t('locations.type'),
+      value: search.type,
+      options: typeOptions,
       onRemove: () => onChange({ type: '' }),
-    })
-  }
+    },
+  ])
 
   return (
     <div className="flex flex-wrap items-center gap-2.5">
-      <TextInput
-        aria-label={t('actions.search')}
-        className="w-full sm:w-64 lg:w-80"
+      <SearchInput
         defaultValue={search.search}
-        leftSection={<Magnifier size={15} />}
         placeholder={t('locations.searchPlaceholder')}
-        onBlur={(event) => onChange({ search: event.currentTarget.value })}
+        onApply={(value) => onChange({ search: value })}
       />
       <FilterButton activeCount={chips.length}>
         <Select

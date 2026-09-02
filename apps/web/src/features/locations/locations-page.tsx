@@ -51,9 +51,12 @@ function LocationsPageContent({
   const search = routeApi.useSearch()
   const [drawerOpened, setDrawerOpened] = useState(false)
 
+  // 10 per page instead of the API's default 15: the grid is two columns,
+  // so an even page size keeps the last row full.
+  const listSearch = { ...search, per_page: search.per_page ?? 10 }
   const listQuery = useQuery({
-    queryKey: ['locations', 'list', accountId, search],
-    queryFn: () => getLocations(accountId, search),
+    queryKey: ['locations', 'list', accountId, listSearch],
+    queryFn: () => getLocations(accountId, listSearch),
     // Page/filter changes swap tiles in place instead of dropping to a
     // loader; only the very first load shows skeletons.
     placeholderData: keepPreviousData,
