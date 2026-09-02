@@ -170,7 +170,6 @@ describe('LocationsPage', () => {
     expect(screen.getByText('Ubicación activa')).toBeInTheDocument()
     expect(screen.getByText('Inactiva')).toBeInTheDocument()
     expect(screen.getAllByText('86').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Sin fotos aún').length).toBeGreaterThan(0)
     expect(
       screen.getByText('2 propiedades en la cuenta Administradora Horizonte.'),
     ).toBeInTheDocument()

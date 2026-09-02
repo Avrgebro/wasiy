@@ -1,7 +1,7 @@
 import { Badge, Text } from '@mantine/core'
-import { Buildings2 } from '@solar-icons/react'
 import { useTranslation } from 'react-i18next'
 import type { LocationSummary } from './api'
+import { LocationCoverPlaceholder } from './location-cover-placeholder'
 
 function CountStat({ accent, label, value }: { accent?: boolean; label: string; value: number }) {
   return (
@@ -58,14 +58,7 @@ export function LocationCard({
               src={location.cover_photo_url}
             />
           ) : (
-            <div className="absolute inset-0 grid place-items-center text-[var(--mantine-color-dimmed)]">
-              <div className="flex flex-col items-center gap-1">
-                <Buildings2 size={24} />
-                <Text c="dimmed" size="xs">
-                  {t('locations.noPhotos')}
-                </Text>
-              </div>
-            </div>
+            <LocationCoverPlaceholder logoSize={160} />
           )}
           {isActiveLocation ? (
             <span className="absolute left-3.5 top-3 flex items-center gap-1.5 rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)]/90 px-3 py-1 text-[11.5px] font-semibold text-[var(--wa-interactive)]">

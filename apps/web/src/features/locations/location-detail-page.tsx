@@ -16,6 +16,7 @@ import {
   type LocationSummary,
 } from './api'
 import { LocationAmenitiesTab } from './location-amenities-tab'
+import { LocationCoverPlaceholder } from './location-cover-placeholder'
 import { LocationDeactivateModal } from './location-deactivate-modal'
 import { LocationFormDrawer } from './location-form-drawer'
 import { LocationInfoTab } from './location-info-tab'
@@ -118,9 +119,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         {location.cover_photo_url ? (
           <img alt="" className="absolute inset-0 size-full object-cover" src={location.cover_photo_url} />
         ) : (
-          <div className="absolute inset-0 grid place-items-center text-[var(--mantine-color-dimmed)]">
-            <Buildings2 size={40} />
-          </div>
+          <LocationCoverPlaceholder logoSize={280} />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.55)] via-transparent to-transparent" />
         {/* In flow (not absolute) so on narrow screens the actions wrap
