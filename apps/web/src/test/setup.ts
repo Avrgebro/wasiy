@@ -29,3 +29,9 @@ class ResizeObserverStub {
 }
 
 window.ResizeObserver = ResizeObserverStub
+
+// jsdom has no layout: Mantine's Combobox scrolls the selected option into
+// view when a Select opens with a value, which would otherwise throw.
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => undefined
+}
