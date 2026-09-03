@@ -308,7 +308,14 @@
     "dateRequired": "Select a date.",
     "startRequired": "Set a start time.",
     "endRequired": "Set an end time.",
-    "endAfterStart": "The end time must be after the start."
+    "endAfterStart": "The end time must be after the start.",
+    "categoryRequired": "Select a category.",
+    "amountRequired": "Enter an amount greater than zero.",
+    "conceptRequired": "Enter the concept.",
+    "conceptTooLong": "The concept cannot exceed 120 characters.",
+    "detailTooLong": "The detail cannot exceed 255 characters.",
+    "counterpartyTooLong": "The vendor cannot exceed 120 characters.",
+    "noteTooLong": "The note cannot exceed 1000 characters."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -617,7 +624,9 @@
       "feeHint": "Prices as of booking time — payment is recorded manually.",
       "note": "Note",
       "createdBy": "Created by {{name}} · {{date}}",
-      "decidedBy": "by {{name}} · {{date}}"
+      "decidedBy": "by {{name}} · {{date}}",
+      "charges": "Charges",
+      "chargesOnApproval": "Charges are created in Finances when the reservation is approved."
     },
     "weekOf": "Week of {{range}}"
   },
@@ -768,6 +777,108 @@
       "friday": "Friday",
       "saturday": "Saturday",
       "sunday": "Sunday"
+    }
+  },
+  "finances": {
+    "title": "Finances",
+    "subtitle": "Income, expenses and deposits · {{location}} · {{month}}",
+    "noLocation": "Select a location to see its finances.",
+    "disclaimer": "Wasiy does not process payments: income (reservation fees and deposits) and building expenses (power, water, cleaning, maintenance) are recorded here by hand. Formal accounting will arrive as a future module.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "updated": "Movement updated",
+    "emptyMonth": "No movements in {{month}}.",
+    "emptyFiltered": "No movement matches the filter in {{month}}.",
+    "chips": {
+      "all": "All",
+      "income": "Income",
+      "expense": "Expenses",
+      "pending": "Pending",
+      "paid": "Paid",
+      "deposits": "Deposits",
+      "refunded": "Refunded"
+    },
+    "tiles": {
+      "income": "Income this month",
+      "incomeDetail_one": "{{count}} fee collected",
+      "incomeDetail_other": "{{count}} fees collected",
+      "expense": "Expenses this month",
+      "expenseDetail_one": "{{count}} expense paid",
+      "expenseDetail_other": "{{count}} expenses paid",
+      "balance": "Balance this month",
+      "balancePositive": "Income covers expenses",
+      "balanceNegative": "Covered by maintenance dues",
+      "receivable": "Receivable · deposits held",
+      "heldAside": "· {{amount}} held",
+      "receivableDetail": "{{pending}} pending · {{refunds}} to refund"
+    },
+    "columns": {
+      "date": "Date",
+      "concept": "Concept",
+      "unit": "Unit",
+      "amount": "Amount",
+      "status": "Status",
+      "action": "Action"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "payable": "To pay",
+      "paid": "Paid",
+      "held": "Held",
+      "to_refund": "To refund",
+      "refunded": "Refunded",
+      "retained": "Retained",
+      "voided": "Voided"
+    },
+    "transitions": {
+      "pending": "Mark pending",
+      "paid": "Mark paid",
+      "held": "Mark received",
+      "to_refund": "Release deposit",
+      "refunded": "Mark refunded",
+      "retained": "Retain deposit",
+      "voided": "Void"
+    },
+    "categories": {
+      "reservation_fee": "Reservation fee",
+      "reservation_deposit": "Reservation deposit",
+      "utility": "Utilities",
+      "cleaning": "Cleaning",
+      "maintenance": "Maintenance",
+      "other": "Other"
+    },
+    "detail": {
+      "open": "Details",
+      "dueOn": "Due",
+      "category": "Category",
+      "recordedBy": "Recorded by",
+      "settledBy": "Last handled by",
+      "note": "Note"
+    },
+    "record": "Record movement",
+    "form": {
+      "subtitle": "Manual entry · Wasiy does not process payments",
+      "expense": "Expense",
+      "income": "Income",
+      "category": "Category",
+      "amount": "Amount",
+      "concept": "Concept",
+      "conceptExpenseHint": "Water · common areas",
+      "conceptIncomeHint": "Fee · Event hall",
+      "detail": "Detail",
+      "detailHint": "Receipt, invoice or reference",
+      "counterparty": "Vendor",
+      "counterpartyHint": "Sedapal, Luz del Sur…",
+      "unit": "Unit",
+      "occurredOn": "Date",
+      "dueOn": "Due",
+      "status": "Initial status",
+      "statusPending": "Pending",
+      "statusPaid": "Already paid",
+      "statusHeld": "Already received (held)",
+      "note": "Note",
+      "submit": "Record",
+      "recorded": "Movement recorded"
     }
   }
 }

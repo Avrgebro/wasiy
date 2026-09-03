@@ -308,7 +308,14 @@
     "dateRequired": "Selecciona una fecha.",
     "startRequired": "Indica la hora de inicio.",
     "endRequired": "Indica la hora de fin.",
-    "endAfterStart": "La hora de fin debe ser posterior al inicio."
+    "endAfterStart": "La hora de fin debe ser posterior al inicio.",
+    "categoryRequired": "Selecciona una categoría.",
+    "amountRequired": "Ingresa un monto mayor a cero.",
+    "conceptRequired": "Ingresa el concepto.",
+    "conceptTooLong": "El concepto no puede superar 120 caracteres.",
+    "detailTooLong": "El detalle no puede superar 255 caracteres.",
+    "counterpartyTooLong": "El proveedor no puede superar 120 caracteres.",
+    "noteTooLong": "La nota no puede superar 1000 caracteres."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",
@@ -617,7 +624,9 @@
       "feeHint": "Precios al momento de la reserva — el cobro se registra manualmente.",
       "note": "Nota",
       "createdBy": "Registrada por {{name}} · {{date}}",
-      "decidedBy": "por {{name}} · {{date}}"
+      "decidedBy": "por {{name}} · {{date}}",
+      "charges": "Cobros",
+      "chargesOnApproval": "Los cobros se generan en Finanzas al aprobar la reserva."
     },
     "weekOf": "Semana del {{range}}"
   },
@@ -768,6 +777,108 @@
       "friday": "Viernes",
       "saturday": "Sábado",
       "sunday": "Domingo"
+    }
+  },
+  "finances": {
+    "title": "Finanzas",
+    "subtitle": "Ingresos, egresos y depósitos · {{location}} · {{month}}",
+    "noLocation": "Selecciona una ubicación para ver sus finanzas.",
+    "disclaimer": "Wasiy no procesa pagos: aquí se registran manualmente los ingresos (cuotas y depósitos de reservas) y los egresos del edificio (luz, agua, limpieza, mantenimiento). La contabilidad formal llegará como módulo futuro.",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "updated": "Movimiento actualizado",
+    "emptyMonth": "Sin movimientos en {{month}}.",
+    "emptyFiltered": "Ningún movimiento coincide con el filtro en {{month}}.",
+    "chips": {
+      "all": "Todo",
+      "income": "Ingresos",
+      "expense": "Egresos",
+      "pending": "Pendientes",
+      "paid": "Pagados",
+      "deposits": "Depósitos",
+      "refunded": "Devueltos"
+    },
+    "tiles": {
+      "income": "Ingresos del mes",
+      "incomeDetail_one": "{{count}} cuota cobrada",
+      "incomeDetail_other": "{{count}} cuotas cobradas",
+      "expense": "Egresos del mes",
+      "expenseDetail_one": "{{count}} egreso pagado",
+      "expenseDetail_other": "{{count}} egresos pagados",
+      "balance": "Balance del mes",
+      "balancePositive": "Los ingresos cubren los egresos",
+      "balanceNegative": "Se cubre con cuotas de mantenimiento",
+      "receivable": "Por cobrar · depósitos retenidos",
+      "heldAside": "· {{amount}} en garantía",
+      "receivableDetail": "{{pending}} pendientes · {{refunds}} por devolver"
+    },
+    "columns": {
+      "date": "Fecha",
+      "concept": "Concepto",
+      "unit": "Unidad",
+      "amount": "Monto",
+      "status": "Estado",
+      "action": "Acción"
+    },
+    "statuses": {
+      "pending": "Pendiente",
+      "payable": "Por pagar",
+      "paid": "Pagado",
+      "held": "En garantía",
+      "to_refund": "Por devolver",
+      "refunded": "Devuelto",
+      "retained": "Retenido",
+      "voided": "Anulado"
+    },
+    "transitions": {
+      "pending": "Marcar pendiente",
+      "paid": "Marcar pagado",
+      "held": "Marcar recibido",
+      "to_refund": "Liberar depósito",
+      "refunded": "Marcar devuelto",
+      "retained": "Retener depósito",
+      "voided": "Anular"
+    },
+    "categories": {
+      "reservation_fee": "Cuota de reserva",
+      "reservation_deposit": "Depósito de reserva",
+      "utility": "Servicios",
+      "cleaning": "Limpieza",
+      "maintenance": "Mantenimiento",
+      "other": "Otro"
+    },
+    "detail": {
+      "open": "Detalle",
+      "dueOn": "Vence",
+      "category": "Categoría",
+      "recordedBy": "Registrado por",
+      "settledBy": "Última gestión",
+      "note": "Nota"
+    },
+    "record": "Registrar movimiento",
+    "form": {
+      "subtitle": "Registro manual · Wasiy no procesa pagos",
+      "expense": "Egreso",
+      "income": "Ingreso",
+      "category": "Categoría",
+      "amount": "Monto",
+      "concept": "Concepto",
+      "conceptExpenseHint": "Agua · áreas comunes",
+      "conceptIncomeHint": "Cuota · Salón de eventos",
+      "detail": "Detalle",
+      "detailHint": "Recibo, factura o referencia",
+      "counterparty": "Proveedor",
+      "counterpartyHint": "Sedapal, Luz del Sur…",
+      "unit": "Unidad",
+      "occurredOn": "Fecha",
+      "dueOn": "Vence",
+      "status": "Estado inicial",
+      "statusPending": "Pendiente",
+      "statusPaid": "Ya pagado",
+      "statusHeld": "Ya recibido (en garantía)",
+      "note": "Nota",
+      "submit": "Registrar",
+      "recorded": "Movimiento registrado"
     }
   }
 }

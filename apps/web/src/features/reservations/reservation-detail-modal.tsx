@@ -1,9 +1,18 @@
-import { Button, Group, Modal, Text } from '@mantine/core'
+import { Badge, Button, Group, Modal, Text } from '@mantine/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../lib/dates'
+import { formatMoney } from '../../lib/money'
 import { getErrorMessage } from '../../lib/errors'
 import { notifyError, notifySuccess } from '../../lib/notify'
+import { transitionMovement, type MovementStatus, type MovementSummary } from '../finances/api'
+import {
+  amountClassName,
+  primaryTransition,
+  statusColor,
+  statusLabel,
+  transitionLabel,
+} from '../finances/movement-presentation'
 import { approveReservation, cancelReservation, type ReservationSummary } from './api'
 import { ReservationField as Field, ReservationSlotBand } from './reservation-modal-parts'
 
@@ -31,7 +40,11 @@ export function ReservationDetailModal({
   const queryClient = useQueryClient()
 
   const invalidate = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['reservations'] })
+    // Approval and cancellation write ledger rows too.
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['reservations'] }),
+      queryClient.invalidateQueries({ queryKey: ['finances'] }),
+    ])
   }
 
   const approveMutation = useMutation({
@@ -53,12 +66,22 @@ export function ReservationDetailModal({
     onError: (error) => notifyError(getErrorMessage(error)),
   })
 
+  const movementMutation = useMutation({
+    mutationFn: ({ movement, status }: { movement: MovementSummary; status: MovementStatus }) =>
+      transitionMovement(accountId, movement.id, status),
+    onSuccess: async () => {
+      await invalidate()
+      notifySuccess(t('finances.updated'))
+    },
+    onError: (error) => notifyError(getErrorMessage(error)),
+  })
+
   const isOpenRequest =
     reservation?.status === 'pending' || reservation?.status === 'observed'
   const cancellable =
     reservation !== null &&
     (isOpenRequest || (reservation.status === 'approved' && !reservation.is_completed))
-  const money = (amount: number | null) => (amount === null ? '—' : `S/ ${amount}`)
+  const money = (amount: number | null) => (amount === null ? '—' : formatMoney(amount))
 
   return (
     <Modal
@@ -79,36 +102,75 @@ export function ReservationDetailModal({
               label={t('reservations.columns.resident')}
               value={reservation.resident_name ?? '—'}
             />
-            <Field
-              label={t('reservations.detail.fee')}
-              value={
-                reservation.fee_snapshot === null && reservation.deposit_snapshot === null ? (
-                  t('reservations.queue.free')
-                ) : (
-                  <span className="font-semibold text-[var(--wa-warning)]">
-                    {money(reservation.fee_snapshot)}
-                  </span>
-                )
-              }
-            />
-            <Field
-              label={t('reservations.detail.deposit')}
-              value={
-                reservation.deposit_snapshot === null ? (
-                  '—'
-                ) : (
-                  <span className="font-semibold text-[var(--wa-warning)]">
-                    {money(reservation.deposit_snapshot)}
-                  </span>
-                )
-              }
-            />
           </div>
-          {reservation.fee_snapshot !== null || reservation.deposit_snapshot !== null ? (
-            <Text c="dimmed" mt={-8} size="xs">
-              {t('reservations.detail.feeHint')}
+
+          {/* Cobros: the ledger rows once approved, the snapshot prices before. */}
+          <div className="flex flex-col gap-2">
+            <Text c="dimmed" fw={600} size="xs" tt="uppercase">
+              {t('reservations.detail.charges')}
             </Text>
-          ) : null}
+            {reservation.movements && reservation.movements.length > 0 ? (
+              reservation.movements.map((movement) => {
+                const next = primaryTransition(movement)
+
+                return (
+                  <div
+                    key={movement.id}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[10px] border border-[var(--mantine-color-default-border)] px-3 py-2"
+                  >
+                    <span className="min-w-0 flex-1 text-sm font-medium">
+                      {t(
+                        movement.category === 'reservation_deposit'
+                          ? 'reservations.detail.deposit'
+                          : 'reservations.detail.fee',
+                      )}
+                    </span>
+                    <span className={`font-mono text-sm font-semibold ${amountClassName(movement)}`}>
+                      {formatMoney(movement.amount)}
+                    </span>
+                    <Badge color={statusColor(movement.status)} radius="xl" size="sm" variant="light">
+                      {statusLabel(movement, t)}
+                    </Badge>
+                    {canDecide && next ? (
+                      <Button
+                        loading={
+                          movementMutation.isPending &&
+                          movementMutation.variables?.movement.id === movement.id
+                        }
+                        size="compact-xs"
+                        variant="subtle"
+                        onClick={() => movementMutation.mutate({ movement, status: next })}
+                      >
+                        {transitionLabel(next, t)}
+                      </Button>
+                    ) : null}
+                  </div>
+                )
+              })
+            ) : reservation.fee_snapshot === null && reservation.deposit_snapshot === null ? (
+              <Text c="dimmed" size="sm">
+                {t('reservations.queue.free')}
+              </Text>
+            ) : (
+              <>
+                <Text size="sm">
+                  {[
+                    reservation.fee_snapshot !== null
+                      ? `${t('reservations.detail.fee')} ${money(reservation.fee_snapshot)}`
+                      : null,
+                    reservation.deposit_snapshot !== null
+                      ? `${t('reservations.detail.deposit')} ${money(reservation.deposit_snapshot)}`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </Text>
+                <Text c="dimmed" size="xs">
+                  {t(isOpenRequest ? 'reservations.detail.chargesOnApproval' : 'reservations.detail.feeHint')}
+                </Text>
+              </>
+            )}
+          </div>
 
           {reservation.status_note ? (
             <div className="rounded-[10px] border border-[var(--wa-info)]/40 bg-[var(--wa-info)]/10 px-3.5 py-2.5">

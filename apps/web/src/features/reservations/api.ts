@@ -1,5 +1,6 @@
 import { apiRequest } from '../../app/api-client'
 import { buildParams } from '../../lib/query-params'
+import type { MovementSummary } from '../finances/api'
 
 export type ReservationStatusValue =
   | 'pending'
@@ -25,6 +26,8 @@ export type ReservationSummary = {
   status_note: string | null
   fee_snapshot: number | null
   deposit_snapshot: number | null
+  /** Ledger rows opened on approval; absent or empty for pending requests. */
+  movements?: MovementSummary[]
   created_by_name?: string | null
   decided_by_name?: string | null
   decided_at: string | null

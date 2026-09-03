@@ -376,4 +376,72 @@ describe('ReservationsPage', () => {
     expect(within(modal).getByText(/19:00–21:00/)).toBeInTheDocument()
     expect(within(modal).getByRole('button', { name: 'Cancelar reserva' })).toBeInTheDocument()
   })
+
+  it('shows the linked ledger rows in the detail modal with their forward action', async () => {
+    installAdapter([
+      reservation({
+        starts_at: tomorrowAt(19),
+        ends_at: tomorrowAt(21),
+        fee_snapshot: 50,
+        deposit_snapshot: 300,
+        movements: [
+          {
+            id: 'mv_fee',
+            account_id: 'acc_1',
+            location_id: 'loc_1',
+            direction: 'income',
+            category: 'reservation_fee',
+            status: 'pending',
+            allowed_transitions: ['paid', 'voided'],
+            amount: 50,
+            concept: 'Cuota · Parrilla / terraza',
+            detail: null,
+            counterparty: null,
+            unit_id: 'un_1',
+            reservation_id: 'res_1',
+            occurred_on: '2026-09-03',
+            due_on: null,
+            note: null,
+            created_by: 'usr_1',
+            settled_by: null,
+            settled_at: null,
+            created_at: null,
+          },
+          {
+            id: 'mv_dep',
+            account_id: 'acc_1',
+            location_id: 'loc_1',
+            direction: 'income',
+            category: 'reservation_deposit',
+            status: 'held',
+            allowed_transitions: ['to_refund', 'retained', 'pending'],
+            amount: 300,
+            concept: 'Depósito · Parrilla / terraza',
+            detail: null,
+            counterparty: null,
+            unit_id: 'un_1',
+            reservation_id: 'res_1',
+            occurred_on: '2026-09-03',
+            due_on: null,
+            note: null,
+            created_by: 'usr_1',
+            settled_by: 'usr_1',
+            settled_at: null,
+            created_at: null,
+          },
+        ],
+      }),
+    ])
+
+    renderPage()
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: /Parrilla \/ terraza/ }))
+
+    const modal = await screen.findByRole('dialog')
+    expect(within(modal).getByText('Cobros')).toBeInTheDocument()
+    expect(within(modal).getByText('Pendiente')).toBeInTheDocument()
+    expect(within(modal).getByText('En garantía')).toBeInTheDocument()
+    expect(within(modal).getByRole('button', { name: 'Marcar pagado' })).toBeInTheDocument()
+    expect(within(modal).getByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
+  })
 })

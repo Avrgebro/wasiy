@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -113,5 +114,15 @@ class Reservation extends Model
     public function decidedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'decided_by');
+    }
+
+    /**
+     * The ledger rows this booking opened on approval (ADR 0034).
+     *
+     * @return HasMany<FinancialMovement, $this>
+     */
+    public function movements(): HasMany
+    {
+        return $this->hasMany(FinancialMovement::class)->orderBy('category');
     }
 }

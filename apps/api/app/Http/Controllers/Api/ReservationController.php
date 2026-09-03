@@ -54,7 +54,7 @@ class ReservationController extends Controller
 
         $reservations = Reservation::query()
             ->where('location_id', $location->id)
-            ->with(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy'])
+            ->with(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements'])
             ->when($validated['from'] ?? null, fn ($query, string $from) => $query->where(
                 'ends_at', '>', CarbonImmutable::parse($from, $timezone)->startOfDay()->utc(),
             ))
@@ -100,7 +100,7 @@ class ReservationController extends Controller
 
         $reservation = $createReservation->handle($amenity, $unit, $resident, $actor, $startsAt, $endsAt);
 
-        return (new ReservationResource($reservation->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy'])))
+        return (new ReservationResource($reservation->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements'])))
             ->response()->setStatusCode(201);
     }
 
@@ -108,7 +108,7 @@ class ReservationController extends Controller
     {
         $actor = $this->authorizeDecision($request, $account, $reservation);
 
-        return new ReservationResource($decide->approve($reservation, $actor)->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy']));
+        return new ReservationResource($decide->approve($reservation, $actor)->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements']));
     }
 
     public function reject(Request $request, Account $account, Reservation $reservation, DecideReservation $decide): JsonResource
@@ -116,7 +116,7 @@ class ReservationController extends Controller
         $actor = $this->authorizeDecision($request, $account, $reservation);
         $validated = $request->validate(['note' => ['required', 'string', 'max:1000']]);
 
-        return new ReservationResource($decide->reject($reservation, $actor, $validated['note'])->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy']));
+        return new ReservationResource($decide->reject($reservation, $actor, $validated['note'])->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements']));
     }
 
     public function observe(Request $request, Account $account, Reservation $reservation, DecideReservation $decide): JsonResource
@@ -124,7 +124,7 @@ class ReservationController extends Controller
         $actor = $this->authorizeDecision($request, $account, $reservation);
         $validated = $request->validate(['note' => ['required', 'string', 'max:1000']]);
 
-        return new ReservationResource($decide->observe($reservation, $actor, $validated['note'])->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy']));
+        return new ReservationResource($decide->observe($reservation, $actor, $validated['note'])->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements']));
     }
 
     public function cancel(Request $request, Account $account, Reservation $reservation, DecideReservation $decide): JsonResource
@@ -142,7 +142,7 @@ class ReservationController extends Controller
 
         return new ReservationResource(
             $decide->cancel($reservation, $actor, $validated['note'] ?? null, $bypassWindow)
-                ->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy']),
+                ->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements']),
         );
     }
 
