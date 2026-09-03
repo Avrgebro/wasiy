@@ -734,6 +734,7 @@
       "reservable": "Reservable",
       "reservableHint": "Si se desactiva queda como espacio común, sin reservas.",
       "maxDuration": "Duración máxima",
+      "maxDurationHint": "Opcional (sin límite)",
       "requiresApproval": "Requiere aprobación",
       "approvalHint": "Si se desactiva, la reserva se confirma al instante.",
       "fee": "Cuota de uso",
@@ -742,8 +743,8 @@
       "photosAfterCreate": "Podrás agregar fotos al editar la amenidad una vez creada."
     },
     "policy": {
-      "inheritHint": "Vacío = heredar de la ubicación ({{value}} {{unit}})",
-      "overrideHint": "Sobrescribe el valor de la ubicación ({{value}} {{unit}})"
+      "inheritHint": "Hereda: {{value}} {{unit}}",
+      "overrideHint": "Sobrescribe (base: {{value}} {{unit}})"
     },
     "availability": {
       "columns": "Día · abierto · horarios",

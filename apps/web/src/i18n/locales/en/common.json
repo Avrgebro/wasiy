@@ -734,6 +734,7 @@
       "reservable": "Reservable",
       "reservableHint": "If disabled it becomes a common space, with no reservations.",
       "maxDuration": "Maximum duration",
+      "maxDurationHint": "Optional (no limit)",
       "requiresApproval": "Requires approval",
       "approvalHint": "If disabled, reservations confirm instantly.",
       "fee": "Usage fee",
@@ -742,8 +743,8 @@
       "photosAfterCreate": "You can add photos by editing the amenity once created."
     },
     "policy": {
-      "inheritHint": "Empty = inherit from the location ({{value}} {{unit}})",
-      "overrideHint": "Overrides the location value ({{value}} {{unit}})"
+      "inheritHint": "Inherits: {{value}} {{unit}}",
+      "overrideHint": "Overrides (base: {{value}} {{unit}})"
     },
     "availability": {
       "columns": "Day · open · windows",

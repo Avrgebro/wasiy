@@ -28,6 +28,13 @@ const AMENITY_TYPES: AmenityTypeValue[] = [
   'other',
 ]
 
+const INPUT_WRAPPER_ORDER: ('label' | 'input' | 'description' | 'error')[] = [
+  'label',
+  'input',
+  'description',
+  'error',
+]
+
 type FormState = {
   name: string
   type: AmenityTypeValue
@@ -246,7 +253,7 @@ function AmenityForm({
             value={form.name}
             onChange={(event) => set('name', event.currentTarget.value)}
           />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Select
               allowDeselect={false}
               data={typeOptions}
@@ -288,10 +295,11 @@ function AmenityForm({
           {form.is_reservable ? (
             <>
               <SectionLabel>{t('amenities.sections.policy')}</SectionLabel>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:[&_.mantine-InputWrapper-label]:min-h-[2.5rem] sm:[&_.mantine-InputWrapper-label]:flex sm:[&_.mantine-InputWrapper-label]:items-end">
                 <NumberInput
                   allowNegative={false}
                   description={inheritHint('max_advance_days', 'settings.reservations.days')}
+                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('settings.reservations.maxAdvance')}
                   min={1}
                   placeholder={String(locationDefaults?.reservation_max_advance_days ?? '')}
@@ -301,6 +309,7 @@ function AmenityForm({
                 <NumberInput
                   allowNegative={false}
                   description={inheritHint('max_concurrent_per_unit', 'settings.reservations.reservations')}
+                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('settings.reservations.maxConcurrent')}
                   min={1}
                   placeholder={String(locationDefaults?.reservation_max_concurrent_per_unit ?? '')}
@@ -312,6 +321,7 @@ function AmenityForm({
                 <NumberInput
                   allowNegative={false}
                   description={inheritHint('cancellation_window_hours', 'settings.reservations.hours')}
+                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('settings.reservations.cancellationWindow')}
                   min={1}
                   placeholder={String(locationDefaults?.reservation_cancellation_window_hours ?? '')}
@@ -322,6 +332,12 @@ function AmenityForm({
                 />
                 <NumberInput
                   allowNegative={false}
+                  description={
+                    form.max_duration_hours === ''
+                      ? t('amenities.form.maxDurationHint')
+                      : undefined
+                  }
+                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('amenities.form.maxDuration')}
                   min={1}
                   placeholder="—"
@@ -338,7 +354,7 @@ function AmenityForm({
               />
 
               <SectionLabel>{t('amenities.sections.fees')}</SectionLabel>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <NumberInput
                   allowDecimal={false}
                   allowNegative={false}
