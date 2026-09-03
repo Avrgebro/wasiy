@@ -2,6 +2,7 @@
 
 namespace App\Actions\Reservations;
 
+use App\Actions\Finances\SyncReservationMovements;
 use App\Enums\ActivityEventType;
 use App\Enums\ReservationStatus;
 use App\Models\Amenity;
@@ -23,6 +24,7 @@ class DecideReservation
         private readonly ValidateReservationSlot $validator,
         private readonly ActivityLogger $activityLogger,
         private readonly SettingsResolver $settings,
+        private readonly SyncReservationMovements $movements,
     ) {}
 
     public function approve(Reservation $reservation, User $actor): Reservation
@@ -40,8 +42,13 @@ class DecideReservation
                 ignore: $reservation,
             );
 
-            return $this->transition($reservation, $actor, ReservationStatus::Approved, null, ActivityEventType::ReservationApproved,
+            $approved = $this->transition($reservation, $actor, ReservationStatus::Approved, null, ActivityEventType::ReservationApproved,
                 "Se aprobó la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
+
+            // Approval is when a booking starts owing money (ADR 0034).
+            $this->movements->openFor($approved, $actor);
+
+            return $approved;
         });
     }
 
@@ -85,8 +92,15 @@ class DecideReservation
             }
         }
 
-        return $this->transition($reservation, $actor, ReservationStatus::Cancelled, $note, ActivityEventType::ReservationCancelled,
-            "Se canceló la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
+        return DB::transaction(function () use ($reservation, $actor, $note): Reservation {
+            $cancelled = $this->transition($reservation, $actor, ReservationStatus::Cancelled, $note, ActivityEventType::ReservationCancelled,
+                "Se canceló la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
+
+            // Pending charges disappear; a held deposit is owed back.
+            $this->movements->closeFor($cancelled, $actor);
+
+            return $cancelled;
+        });
     }
 
     private function assertOpen(Reservation $reservation): void

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Reservations;
 
+use App\Actions\Finances\SyncReservationMovements;
 use App\Enums\ActivityEventType;
 use App\Enums\BookingMode;
 use App\Enums\ReservationStatus;
@@ -19,6 +20,7 @@ class CreateReservation
     public function __construct(
         private readonly ValidateReservationSlot $validator,
         private readonly ActivityLogger $activityLogger,
+        private readonly SyncReservationMovements $movements,
     ) {}
 
     /**
@@ -70,6 +72,10 @@ class CreateReservation
                 subjectType: 'reservation',
                 subjectId: $reservation->id,
             );
+
+            if ($instant) {
+                $this->movements->openFor($reservation, $actor);
+            }
 
             return $reservation;
         });

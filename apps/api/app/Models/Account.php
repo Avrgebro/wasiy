@@ -46,6 +46,14 @@ class Account extends Model
     }
 
     /**
+     * @return HasMany<FinancialMovement, $this>
+     */
+    public function financialMovements(): HasMany
+    {
+        return $this->hasMany(FinancialMovement::class);
+    }
+
+    /**
      * @return HasMany<StaffMembership, $this>
      */
     public function staffMemberships(): HasMany

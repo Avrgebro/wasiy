@@ -38,6 +38,8 @@ enum ActivityEventType: string
     case ReservationRejected = 'reservation.rejected';
     case ReservationObserved = 'reservation.observed';
     case ReservationCancelled = 'reservation.cancelled';
+    case MovementRecorded = 'movement.recorded';
+    case MovementStatusChanged = 'movement.status_changed';
     case AmenityCreated = 'amenity.created';
     case AmenityUpdated = 'amenity.updated';
     case AmenityDeactivated = 'amenity.deactivated';

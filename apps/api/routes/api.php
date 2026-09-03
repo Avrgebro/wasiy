@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AccountSettingsController;
 use App\Http\Controllers\Api\AccountStaffController;
 use App\Http\Controllers\Api\AmenityController;
 use App\Http\Controllers\Api\AmenityPhotoController;
+use App\Http\Controllers\Api\FinancialMovementController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\LocationDashboardController;
 use App\Http\Controllers\Api\LocationPhotoController;
@@ -81,6 +82,10 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::post('/accounts/{account}/reservations/{reservation}/reject', [ReservationController::class, 'reject']);
         Route::post('/accounts/{account}/reservations/{reservation}/observe', [ReservationController::class, 'observe']);
         Route::post('/accounts/{account}/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
+        Route::get('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'index']);
+        Route::get('/accounts/{account}/locations/{location}/finances/summary', [FinancialMovementController::class, 'summary']);
+        Route::post('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'store']);
+        Route::post('/accounts/{account}/finances/movements/{financialMovement}/status', [FinancialMovementController::class, 'transition']);
         Route::get('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'show']);
         Route::put('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'update']);
     });
