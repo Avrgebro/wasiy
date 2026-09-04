@@ -111,7 +111,7 @@ export function SelectAccountPage() {
 
             return (
               <button
-                className="group flex cursor-pointer items-center gap-3.5 rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-[18px] py-4 text-left transition-colors hover:border-[var(--mantine-color-teal-4)] hover:bg-[var(--wa-tint)] disabled:cursor-not-allowed disabled:opacity-60"
+                className="group flex cursor-pointer items-center gap-3.5 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-[18px] py-4 text-left transition-colors hover:border-[var(--mantine-color-teal-4)] hover:bg-[var(--wa-tint)] disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={selectAccountMutation.isPending}
                 key={account.id}
                 onClick={() => handleSelectAccount(account.id)}

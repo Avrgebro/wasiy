@@ -86,7 +86,7 @@ function AccessTypeCard({
 }) {
   return (
     <div
-      className={`flex flex-col gap-3.5 rounded-xl border p-3.5 ${
+      className={`flex flex-col gap-3.5 rounded-inner border p-3.5 ${
         active
           ? 'border-[var(--mantine-primary-color-filled)] bg-[var(--mantine-color-default-hover)]'
           : 'border-[var(--mantine-color-default-border)]'

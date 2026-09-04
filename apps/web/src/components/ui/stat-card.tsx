@@ -21,7 +21,7 @@ const toneClasses: Record<NonNullable<StatCardProps['tone']>, string> = {
 export function StatCard({ label, value, detail, tone, aside, highlighted = false }: StatCardProps) {
   return (
     <section
-      className={`relative rounded-md border bg-[var(--mantine-color-default)] p-4 ${
+      className={`relative rounded-surface border bg-[var(--mantine-color-default)] p-4 ${
         highlighted ? 'border-[var(--wa-accent)]/40' : 'border-[var(--mantine-color-default-border)]'
       }`}
     >

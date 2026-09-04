@@ -361,7 +361,7 @@ function LocationPickerFooter({ picker }: { picker: LocationPicker }) {
   return (
     <div className="border-t border-[var(--mantine-color-default-border)] p-2">
       <Link
-        className="flex min-h-11 items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-[13px] font-semibold text-[var(--mantine-color-text)] no-underline transition-colors hover:bg-[var(--wa-tint)]"
+        className="flex min-h-11 items-center gap-2.5 rounded-inner px-2.5 py-2 text-[13px] font-semibold text-[var(--mantine-color-text)] no-underline transition-colors hover:bg-[var(--wa-tint)]"
         onClick={picker.close}
         to="/admin/locations"
       >
@@ -420,7 +420,7 @@ export function LocationSwitcher() {
 
       <Popover.Dropdown
         aria-label={t('shell.selectLocation')}
-        className="max-w-[calc(100vw-2rem)] overflow-hidden rounded-[14px] border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-0"
+        className="max-w-[calc(100vw-2rem)] overflow-hidden rounded-surface border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-0"
         role="dialog"
       >
         <div className="flex flex-col gap-2.5 border-b border-[var(--mantine-color-default-border)] px-3.5 py-3">
@@ -461,7 +461,7 @@ export function MobileLocationButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       aria-label={interactive ? t('shell.selectLocation') : undefined}
-      className="flex w-full items-center gap-3 rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] px-3.5 py-3 text-left disabled:cursor-default"
+      className="flex w-full items-center gap-3 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--wa-tint)] px-3.5 py-3 text-left disabled:cursor-default"
       disabled={!interactive}
       onClick={onClick}
       type="button"

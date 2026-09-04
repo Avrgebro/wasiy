@@ -41,7 +41,7 @@ export function ImportDetailPanel({
   const canRetry = selectedImport?.status === 'failed' && !selectedImport.confirmed_at
 
   return (
-    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
+    <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
       {selectedImport ? (
         <Stack gap="md">
           <Group align="start" justify="space-between">
@@ -117,7 +117,7 @@ function ImportCounters({ registryImport }: { registryImport: RegistryImportSumm
     <SimpleGrid cols={{ base: 2, sm: 5 }} spacing="xs">
       {counters.map(([key, value]) => (
         <div
-          className="rounded-md border border-[var(--mantine-color-default-border)] p-3"
+          className="rounded-inner border border-[var(--mantine-color-default-border)] p-3"
           key={key}
         >
           <Text c="dimmed" size="xs">

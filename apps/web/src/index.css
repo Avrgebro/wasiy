@@ -10,6 +10,11 @@
    Instrument Sans for body. Product UI stays on Inter per DESIGN-SYSTEM.md —
    apply these via the font-display / font-brand utilities, never globally. */
 @theme {
+  /* Radius scale (mockups): surface = cards, tables, tiles, panels, modals;
+     inner = nested cards, bands, rows inside a surface; controls use
+     Mantine's md (8px). */
+  --radius-surface: 14px;
+  --radius-inner: 10px;
   --font-display: 'Sora', 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-brand: 'Instrument Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
 }

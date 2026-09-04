@@ -168,7 +168,7 @@ function SettingsGroup({
   title: string
 }) {
   return (
-    <section className="overflow-hidden rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <div className="border-b border-[var(--mantine-color-default-border)] px-5 py-4">
         <Text fw={600}>{title}</Text>
       </div>

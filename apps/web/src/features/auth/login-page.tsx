@@ -108,7 +108,7 @@ function BrandPanel() {
 
 function BrandStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 rounded-[14px] border border-[var(--mantine-color-dark-4)] bg-[var(--mantine-color-dark-5)]/70 px-5 py-[18px] backdrop-blur-sm">
+    <div className="flex-1 rounded-surface border border-[var(--mantine-color-dark-4)] bg-[var(--mantine-color-dark-5)]/70 px-5 py-[18px] backdrop-blur-sm">
       {/* Constant petroleum panel: the accent stays at its dark value. */}
       <div className="font-display text-2xl font-semibold text-[var(--mantine-color-accent-5)]">
         {value}

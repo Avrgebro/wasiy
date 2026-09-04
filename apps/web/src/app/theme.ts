@@ -125,6 +125,10 @@ const dark: MantineColorsTuple = [
 ];
 
 export const mantineTheme: MantineThemeOverride = createTheme({
+  // `lg` is the surface radius (14px, see --radius-surface in index.css) so
+  // Modal/Paper/Skeleton radius="lg" match the Tailwind cards; md stays the
+  // 8px control radius.
+  radius: { xs: rem(2), sm: rem(4), md: rem(8), lg: rem(14), xl: rem(32) },
   fontSizes: {
     xs: rem("12px"),
     sm: rem("14px"),

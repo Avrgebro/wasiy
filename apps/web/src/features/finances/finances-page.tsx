@@ -209,7 +209,7 @@ function FinancesContent({
         </Button>
       </div>
 
-      <div className="flex items-center gap-2.5 rounded-xl border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3">
+      <div className="flex items-center gap-2.5 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3">
         <InfoCircle className="shrink-0 text-[var(--wa-interactive)]" size={16} />
         <Text c="dimmed" size="sm">
           {t('finances.disclaimer')}
@@ -227,7 +227,7 @@ function FinancesContent({
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 @4xl:grid-cols-4">
           {[0, 1, 2, 3].map((index) => (
-            <Skeleton key={index} height={112} radius="md" />
+            <Skeleton key={index} height={112} radius="lg" />
           ))}
         </div>
       )}

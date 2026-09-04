@@ -99,14 +99,14 @@ export function PortalDashboardPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
+        <div className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
           <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
             {t('portal.householdTitle')}
           </h2>
           <div className="mt-4 grid gap-3">
             {memberships.map((membership) => (
               <div
-                className="rounded-md border border-[var(--mantine-color-default-border)] p-3"
+                className="rounded-inner border border-[var(--mantine-color-default-border)] p-3"
                 key={membership.unit_membership_id}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -128,7 +128,7 @@ export function PortalDashboardPage() {
         </div>
 
         <form
-          className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4"
+          className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4"
           onSubmit={form.handleSubmit(handleSubmit)}
         >
           <h2 className="text-base font-bold text-[var(--mantine-color-text)]">

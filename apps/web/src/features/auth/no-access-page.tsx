@@ -18,7 +18,7 @@ export function NoAccessPage() {
 
   return (
     <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4 py-8">
-      <section className="w-full max-w-md rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
+      <section className="w-full max-w-md rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
         <Brand />
         <div className="mt-2">
           <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">

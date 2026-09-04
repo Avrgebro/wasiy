@@ -23,7 +23,7 @@ export function ReservationSlotBand({
   const badgeKey = reservation.is_completed ? 'completed' : reservation.status
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] bg-[var(--wa-surface-2)] px-3.5 py-2.5">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-inner bg-[var(--wa-surface-2)] px-3.5 py-2.5">
       <Text fw={600} size="sm">
         {shortDayLabel(localDateString(new Date(reservation.starts_at), timezone))} ·{' '}
         {formatTimeRange(reservation, timezone)}

@@ -101,7 +101,7 @@ export function DataTable<TRow extends { id: string }>({
   const activeSort = parseSort(sort)
 
   return (
-    <section className="overflow-hidden rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       {toolbar ? (
         <div className="border-b border-[var(--mantine-color-default-border)]">{toolbar}</div>
       ) : null}

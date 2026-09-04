@@ -74,7 +74,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
     return (
       <div className="flex flex-col gap-5">
         <Skeleton height={220} radius="lg" />
-        <Skeleton height={44} radius="md" />
+        <Skeleton height={44} radius="lg" />
         <Skeleton height={320} radius="lg" />
       </div>
     )
@@ -116,7 +116,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         <span className="font-semibold text-[var(--mantine-color-text)]">{location.name}</span>
       </nav>
 
-      <header className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-[14px] bg-[var(--wa-surface-2)]">
+      <header className="relative flex min-h-[220px] flex-col justify-end overflow-hidden rounded-surface bg-[var(--wa-surface-2)]">
         {location.cover_photo_url ? (
           <img alt="" className="absolute inset-0 size-full object-cover" src={location.cover_photo_url} />
         ) : (
@@ -149,7 +149,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         <div className="relative flex flex-wrap items-end justify-between gap-3 px-4 pb-[18px] pt-8 sm:px-6">
           <div className="flex min-w-0 items-end gap-4">
             {/* Brand tile stands in for the location avatar for now (mockup 03). */}
-            <div className="grid size-16 shrink-0 place-items-center rounded-[14px] border border-[#2A3F40] bg-[#124E52] text-[#F7F5F0]">
+            <div className="grid size-16 shrink-0 place-items-center rounded-surface border border-[#2A3F40] bg-[#124E52] text-[#F7F5F0]">
               <WasiyLogo size={34} />
             </div>
             <div className="min-w-0">
@@ -189,7 +189,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
       </header>
 
       {deactivated ? (
-        <div className="flex flex-wrap items-center gap-3.5 rounded-xl border border-[var(--wa-warning)]/50 bg-[var(--wa-warning)]/10 px-[18px] py-3.5">
+        <div className="flex flex-wrap items-center gap-3.5 rounded-surface border border-[var(--wa-warning)]/50 bg-[var(--wa-warning)]/10 px-[18px] py-3.5">
           <DangerTriangle className="shrink-0 text-[var(--wa-warning)]" size={22} />
           <div className="min-w-0 flex-1">
             <Text fw={600} size="sm">

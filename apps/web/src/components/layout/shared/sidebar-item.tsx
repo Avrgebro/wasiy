@@ -12,7 +12,7 @@ type SidebarItemProps = {
 }
 
 const sidebarItemBaseClassName =
-  'flex min-h-12 w-full transform-gpu appearance-none items-center gap-3 rounded-[10px] border-0 px-3.5 text-left font-sans text-[15px] font-semibold leading-5 tracking-normal transition-all duration-150 ease-out motion-reduce:transition-none sm:min-h-10 sm:rounded-md sm:px-3 sm:text-sm sm:hover:translate-x-1 sm:motion-reduce:hover:translate-x-0'
+  'flex min-h-12 w-full transform-gpu appearance-none items-center gap-3 rounded-inner border-0 px-3.5 text-left font-sans text-[15px] font-semibold leading-5 tracking-normal transition-all duration-150 ease-out motion-reduce:transition-none sm:min-h-10 sm:rounded-md sm:px-3 sm:text-sm sm:hover:translate-x-1 sm:motion-reduce:hover:translate-x-0'
 
 // Class lists are computed from state instead of stacked data-attribute
 // variants: with data-[nested]/data-[active] overrides the winner depends on

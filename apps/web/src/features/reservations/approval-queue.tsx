@@ -105,7 +105,7 @@ export function ApprovalQueue({
   }
 
   return (
-    <section className="overflow-hidden rounded-[14px] border border-[var(--wa-warning)]/40 bg-[var(--mantine-color-default)]">
+    <section className="overflow-hidden rounded-surface border border-[var(--wa-warning)]/40 bg-[var(--mantine-color-default)]">
       <div className="flex items-center gap-2.5 px-5 py-3.5">
         <span className="size-2 rounded-full bg-[var(--wa-warning)]" />
         <Text fw={600}>{t('reservations.queue.title')}</Text>
@@ -128,7 +128,7 @@ export function ApprovalQueue({
             return (
               <div
                 key={request.id}
-                className={`rounded-xl bg-[var(--wa-surface-2)] px-4 py-3.5 ${onSelect ? 'cursor-pointer hover:bg-[var(--mantine-color-default-hover)]' : ''}`}
+                className={`rounded-inner bg-[var(--wa-surface-2)] px-4 py-3.5 ${onSelect ? 'cursor-pointer hover:bg-[var(--mantine-color-default-hover)]' : ''}`}
                 onClick={onSelect ? () => onSelect(request) : undefined}
               >
                 <div className="flex items-baseline justify-between gap-2.5">
@@ -199,7 +199,7 @@ export function ApprovalQueue({
 
       <Modal
         opened={noteAction !== null}
-        radius={14}
+        radius="lg"
         title={
           <span className="text-base font-semibold">
             {noteAction ? t(`reservations.noteModal.${noteAction.kind}Title`) : ''}

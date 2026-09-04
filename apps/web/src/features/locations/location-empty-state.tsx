@@ -18,7 +18,7 @@ export function LocationEmptyState({
   const { t } = useTranslation('common')
 
   return (
-    <div className="grid min-h-72 place-items-center rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-6 text-center sm:p-10">
+    <div className="grid min-h-72 place-items-center rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-6 text-center sm:p-10">
       <div className="flex flex-col items-center gap-2">
         <Buildings2 className="text-[var(--mantine-color-dimmed)]" size={28} />
         <Text fw={700}>

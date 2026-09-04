@@ -3,7 +3,7 @@ import { flexRender, type useReactTable } from '@tanstack/react-table'
 
 export function RegistryTable<T>({ table }: { table: ReturnType<typeof useReactTable<T>> }) {
   return (
-    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <Table highlightOnHover verticalSpacing="sm">
         <Table.Thead>
           {table.getHeaderGroups().map((headerGroup) => (

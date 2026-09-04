@@ -117,7 +117,7 @@ export function LocationAmenitiesTab({
       </div>
 
       {amenities.length === 0 ? (
-        <div className="grid min-h-64 place-items-center rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-8 text-center">
+        <div className="grid min-h-64 place-items-center rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-8 text-center">
           <div className="flex flex-col items-center gap-2">
             <Confetti className="text-[var(--mantine-color-dimmed)]" size={26} />
             <Text fw={700}>{t('amenities.empty.title')}</Text>
@@ -132,7 +132,7 @@ export function LocationAmenitiesTab({
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+        <div className="overflow-x-auto rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
           <Table verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>

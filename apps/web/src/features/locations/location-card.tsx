@@ -38,7 +38,7 @@ export function LocationCard({
 
   return (
     <article
-      className={`relative overflow-hidden rounded-[14px] border bg-[var(--mantine-color-default)] transition-colors ${
+      className={`relative overflow-hidden rounded-surface border bg-[var(--mantine-color-default)] transition-colors ${
         isActiveLocation
           ? 'border-[var(--wa-secondary)]'
           : 'border-[var(--mantine-color-default-border)] hover:border-[var(--wa-secondary)]'

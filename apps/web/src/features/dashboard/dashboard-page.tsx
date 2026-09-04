@@ -90,7 +90,7 @@ export function DashboardPage() {
         />
       </section>
 
-      <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+      <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
         <div className="border-b border-[var(--mantine-color-default-border)] px-4 py-3">
           <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
             {t('dashboard.registryTitle')}

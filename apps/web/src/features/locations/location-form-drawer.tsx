@@ -231,7 +231,7 @@ export function LocationFormDrawer({
               )}
             />
             {editing && onDeactivate ? (
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--wa-error)]/40 p-3.5">
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
                 <div className="min-w-0">
                   <Text fw={600} size="sm">
                     {t('locations.form.sensitiveZone')}

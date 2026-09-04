@@ -6,7 +6,7 @@ import { LocationPhotoGallery } from './location-photo-gallery'
 
 function StatCard({ accent, label, value }: { accent?: boolean; label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-[18px] py-3.5">
+    <div className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-[18px] py-3.5">
       <div
         className={`text-2xl font-semibold ${
           accent ? 'text-[var(--wa-warning)]' : 'text-[var(--mantine-color-text)]'
@@ -68,7 +68,7 @@ export function LocationInfoTab({
         <StatCard label={t('locations.stats.activeAmenities')} value={location.active_amenities_count} />
       </div>
 
-      <section className="overflow-hidden rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+      <section className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
         <div className="flex items-center justify-between gap-3 border-b border-[var(--mantine-color-default-border)] px-5 py-4">
           <Text fw={600}>{t('locations.info.title')}</Text>
           {readOnly ? (

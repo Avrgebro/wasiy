@@ -49,7 +49,7 @@ export function LocationStaffTab({ accountId, locationId }: { accountId: string;
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 rounded-xl border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3">
+      <div className="flex items-center gap-3 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3">
         <Lock className="shrink-0 text-[var(--wa-interactive)]" size={15} />
         <Text c="dimmed" size="sm">
           <strong className="text-[var(--mantine-color-text)]">{t('locations.staffTab.readOnly')}</strong>{' '}
@@ -66,7 +66,7 @@ export function LocationStaffTab({ accountId, locationId }: { accountId: string;
       </div>
 
       {staff.length === 0 ? (
-        <div className="grid min-h-56 place-items-center rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-8 text-center">
+        <div className="grid min-h-56 place-items-center rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-8 text-center">
           <div className="flex flex-col items-center gap-2">
             <UsersGroupRounded className="text-[var(--mantine-color-dimmed)]" size={26} />
             <Text fw={700}>{t('locations.staffTab.emptyTitle')}</Text>
@@ -83,7 +83,7 @@ export function LocationStaffTab({ accountId, locationId }: { accountId: string;
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+        <div className="overflow-x-auto rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
           <Table verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>

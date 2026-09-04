@@ -42,7 +42,7 @@ export function AmenityAvailabilityEditor({
           {t('amenities.availability.timezoneNote', { timezone })}
         </Text>
       </div>
-      <div className="flex flex-col divide-y divide-[var(--mantine-color-default-border)] overflow-hidden rounded-xl border border-[var(--mantine-color-default-border)]">
+      <div className="flex flex-col divide-y divide-[var(--mantine-color-default-border)] overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)]">
         {WEEKDAYS.map((day) => {
           const windows = value[day] ?? []
           const conflict = findDayConflict(windows)

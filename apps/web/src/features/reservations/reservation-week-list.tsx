@@ -64,7 +64,7 @@ export function ReservationWeekList({
   const days = [...byDay.keys()].sort()
 
   return (
-    <div className="overflow-hidden rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <div className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <div className="overflow-x-auto">
         <div className="min-w-[640px]">
           <div

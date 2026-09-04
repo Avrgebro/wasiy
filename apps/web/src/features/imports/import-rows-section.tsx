@@ -56,7 +56,7 @@ export function ImportRowsSection({ importId }: { importId: string | null }) {
   )
 
   return (
-    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <Stack gap="md" p="md">
         <Group justify="space-between">
           <Text fw={700}>{t('registry.imports.preview')}</Text>

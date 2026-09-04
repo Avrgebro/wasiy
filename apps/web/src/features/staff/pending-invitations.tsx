@@ -83,7 +83,7 @@ export function PendingInvitations({
     // @container makes the row breakpoints track the card's own width, not
     // the viewport — with the sidebar open a 1024px screen leaves ~690px of
     // card, where the columnar layout can't fit without overlapping.
-    <section className="@container overflow-hidden rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section className="@container overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <Group gap="xs" className="border-b border-[var(--mantine-color-default-border)] px-4 py-3.5 sm:px-5">
         <Text component="h2" fw={700} size="md">
           {t('staff.pending.title')}

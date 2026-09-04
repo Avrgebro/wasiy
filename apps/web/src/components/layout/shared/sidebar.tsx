@@ -116,7 +116,7 @@ function SidebarContent({
   const { t } = useTranslation('common')
 
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-2xl border border-[var(--mantine-color-default-border)] bg-[var(--sidebar)] px-3 pb-4 pt-5 shadow-sm">
+    <div className="flex h-full min-h-0 flex-col rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--sidebar)] px-3 pb-4 pt-5 shadow-sm">
       <div className="flex items-start justify-between">
         <Brand />
         {/* Only the sm–xl overlay is closable; the pinned rail is not. */}

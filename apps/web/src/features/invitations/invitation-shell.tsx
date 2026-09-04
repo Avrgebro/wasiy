@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../lib/errors'
 export function InvitationShell({ children }: { children: React.ReactNode }) {
   return (
     <main className="grid min-h-screen place-items-center bg-[var(--mantine-color-body)] px-4">
-      <div className="w-full max-w-sm rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
+      <div className="w-full max-w-sm rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
         {children}
       </div>
     </main>

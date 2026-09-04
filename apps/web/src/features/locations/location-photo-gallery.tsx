@@ -87,7 +87,7 @@ export function LocationPhotoGallery({
 
   return (
     <section
-      className="overflow-hidden rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]"
+      className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]"
       id="location-photos"
     >
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--mantine-color-default-border)] px-5 py-4">
@@ -102,7 +102,7 @@ export function LocationPhotoGallery({
         {photos.map((photo, index) => (
           <div
             key={photo.id}
-            className={`relative h-[170px] overflow-hidden rounded-xl bg-[var(--wa-surface-2)] ${
+            className={`relative h-[170px] overflow-hidden rounded-inner bg-[var(--wa-surface-2)] ${
               dropTarget === index ? 'outline outline-2 outline-[var(--wa-interactive)]' : ''
             }`}
             draggable={!readOnly}
@@ -159,7 +159,7 @@ export function LocationPhotoGallery({
             // relative is load-bearing: the hidden file <input> inside is
             // position:absolute, and without a positioned ancestor it anchors
             // to the document and gives the page a second scrollbar.
-            className="relative grid h-[170px] place-items-center rounded-xl border border-dashed border-[var(--mantine-color-default-border)] bg-transparent"
+            className="relative grid h-[170px] place-items-center rounded-inner border border-dashed border-[var(--mantine-color-default-border)] bg-transparent"
             loading={uploadMutation.isPending}
             maxSize={10 * 1024 * 1024}
             onDrop={(files) => uploadMutation.mutate(files)}
