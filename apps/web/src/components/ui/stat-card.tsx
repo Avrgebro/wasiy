@@ -1,7 +1,7 @@
 type StatCardProps = {
   label: string
   value: string
-  detail: string
+  detail?: string
   /** Colors the value; omit for the neutral text color. */
   tone?: 'success' | 'error' | 'accent'
   /** Secondary figure rendered after the value ("· S/ 900 en garantía"). */
@@ -35,7 +35,7 @@ export function StatCard({ label, value, detail, tone, aside, highlighted = fals
         </span>
         {aside ? <span className="text-sm text-[var(--mantine-color-dimmed)]">{aside}</span> : null}
       </p>
-      <p className="mt-1 text-sm text-[var(--mantine-color-dimmed)]">{detail}</p>
+      {detail ? <p className="mt-1 text-sm text-[var(--mantine-color-dimmed)]">{detail}</p> : null}
     </section>
   )
 }

@@ -65,26 +65,83 @@
     "retry": "Reintentar"
   },
   "dashboard": {
-    "emptyRegistry": "Aún no hay actividad reciente para esta ubicación.",
-    "heading": "Operación de {{location}}",
-    "registryTitle": "Registro reciente",
-    "stats": {
-      "assignedStaff": "Personal asignado",
-      "assignedStaffDetail": "Con acceso a esta ubicación",
-      "expectedVisitors": "Visitantes esperados",
-      "expectedVisitorsDetail": "Para la fecha actual",
-      "occupiedUnits": "Unidades ocupadas",
-      "occupiedUnitsDetail": "En esta ubicación",
-      "pendingReservations": "Reservas pendientes",
-      "pendingReservationsDetail": "Requieren revisión"
+    "heading": "Panel de {{location}}",
+    "today": "Hoy, {{date}}",
+    "overdue": "Excede el tiempo límite",
+    "primaryContact": "Contacto principal",
+    "sections": {
+      "today": "Hoy",
+      "management": "Administración"
     },
-    "summary": "Resumen operativo para recepción, residentes y reservas.",
-    "table": {
+    "actions": {
+      "newMovement": "Nuevo movimiento"
+    },
+    "tiles": {
+      "visitorsInside": "Visitantes dentro",
+      "visitorsOverdue_one": "{{count}} excede el tiempo límite",
+      "visitorsOverdue_other": "{{count}} exceden el tiempo límite",
+      "packagesPending": "Paquetes por entregar",
+      "packagesOldest": "el más antiguo, {{age}}",
+      "reservationsToday": "Reservas hoy",
+      "withDeposit_one": "{{count}} con depósito",
+      "withDeposit_other": "{{count}} con depósito",
+      "pendingMovements": "Movimientos pendientes",
+      "exitsToday": "Salidas registradas hoy",
+      "duesCollected": "Cuotas cobradas",
+      "duesIssued": "de {{total}} emitidas · {{percent}} %",
+      "unitsWithBalance": "Unidades con saldo pendiente",
+      "ofUnits": "de {{total}}",
+      "depositsHeld": "Depósitos retenidos",
+      "depositsHeldCount_one": "{{count}} reserva",
+      "depositsHeldCount_other": "{{count}} reservas",
+      "residentsNotInvited": "Residentes sin invitar"
+    },
+    "cards": {
+      "visitorsInside": "Visitantes dentro",
+      "insideCount": "{{count}} dentro",
+      "packagesPending": "Paquetes por entregar",
+      "atDeskCount": "{{count}} en recepción",
+      "reservationsToday": "Reservas de hoy",
+      "viewCalendar": "Ver calendario →",
+      "viewAll": "Ver todos",
+      "units": "Unidades",
+      "unitsTotal": "{{count}} en total",
+      "activity": "Actividad reciente",
+      "viewAllActivity": "Ver todo →"
+    },
+    "units": {
+      "occupied": "Ocupadas",
+      "vacant": "Vacantes",
+      "noPrimary": "Sin contacto principal"
+    },
+    "empty": {
+      "visitors": "Nadie dentro en este momento.",
+      "packages": "Sin paquetes por entregar.",
+      "reservations": "Sin reservas para hoy.",
+      "activity": "Aún no hay actividad en esta ubicación."
+    },
+    "columns": {
+      "schedule": "Horario",
+      "amenity": "Amenidad",
+      "unit": "Unidad",
       "resident": "Residente",
-      "status": "Estado",
-      "unit": "Unidad"
+      "status": "Estado"
     },
-    "title": "Panel de ubicación"
+    "relative": {
+      "now": "ahora",
+      "minutes": "hace {{count}} min",
+      "hours": "hace {{count}} h",
+      "yesterday": "ayer {{time}}",
+      "today": "hoy {{time}}",
+      "days_one": "hace {{count}} día",
+      "days_other": "hace {{count}} días"
+    },
+    "age": {
+      "today": "hoy",
+      "yesterday": "ayer",
+      "days_one": "{{count}} día",
+      "days_other": "{{count}} días"
+    }
   },
   "frontDesk": {
     "title": "Registro de visitantes"

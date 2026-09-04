@@ -65,26 +65,83 @@
     "retry": "Try again"
   },
   "dashboard": {
-    "emptyRegistry": "There is no recent activity for this location yet.",
-    "heading": "{{location}} operation",
-    "registryTitle": "Recent registry",
-    "stats": {
-      "assignedStaff": "Assigned staff",
-      "assignedStaffDetail": "With access to this location",
-      "expectedVisitors": "Expected visitors",
-      "expectedVisitorsDetail": "For the current date",
-      "occupiedUnits": "Occupied units",
-      "occupiedUnitsDetail": "In this location",
-      "pendingReservations": "Pending reservations",
-      "pendingReservationsDetail": "Require review"
+    "heading": "{{location}} panel",
+    "today": "Today, {{date}}",
+    "overdue": "Past the time limit",
+    "primaryContact": "Primary contact",
+    "sections": {
+      "today": "Today",
+      "management": "Management"
     },
-    "summary": "Operational summary for front desk, residents, and reservations.",
-    "table": {
+    "actions": {
+      "newMovement": "New movement"
+    },
+    "tiles": {
+      "visitorsInside": "Visitors inside",
+      "visitorsOverdue_one": "{{count}} past the time limit",
+      "visitorsOverdue_other": "{{count}} past the time limit",
+      "packagesPending": "Packages to deliver",
+      "packagesOldest": "oldest, {{age}}",
+      "reservationsToday": "Reservations today",
+      "withDeposit_one": "{{count}} with deposit",
+      "withDeposit_other": "{{count}} with deposit",
+      "pendingMovements": "Pending movements",
+      "exitsToday": "Check-outs today",
+      "duesCollected": "Dues collected",
+      "duesIssued": "of {{total}} issued · {{percent}} %",
+      "unitsWithBalance": "Units with pending balance",
+      "ofUnits": "of {{total}}",
+      "depositsHeld": "Deposits held",
+      "depositsHeldCount_one": "{{count}} reservation",
+      "depositsHeldCount_other": "{{count}} reservations",
+      "residentsNotInvited": "Residents not invited"
+    },
+    "cards": {
+      "visitorsInside": "Visitors inside",
+      "insideCount": "{{count}} inside",
+      "packagesPending": "Packages to deliver",
+      "atDeskCount": "{{count}} at the desk",
+      "reservationsToday": "Today's reservations",
+      "viewCalendar": "View calendar →",
+      "viewAll": "View all",
+      "units": "Units",
+      "unitsTotal": "{{count}} in total",
+      "activity": "Recent activity",
+      "viewAllActivity": "View all →"
+    },
+    "units": {
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "noPrimary": "No primary contact"
+    },
+    "empty": {
+      "visitors": "Nobody inside right now.",
+      "packages": "No packages to deliver.",
+      "reservations": "No reservations today.",
+      "activity": "No activity in this location yet."
+    },
+    "columns": {
+      "schedule": "Schedule",
+      "amenity": "Amenity",
+      "unit": "Unit",
       "resident": "Resident",
-      "status": "Status",
-      "unit": "Unit"
+      "status": "Status"
     },
-    "title": "Location dashboard"
+    "relative": {
+      "now": "now",
+      "minutes": "{{count}} min ago",
+      "hours": "{{count}} h ago",
+      "yesterday": "yesterday {{time}}",
+      "today": "today {{time}}",
+      "days_one": "{{count}} day ago",
+      "days_other": "{{count}} days ago"
+    },
+    "age": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days"
+    }
   },
   "frontDesk": {
     "title": "Visitor check-in"
