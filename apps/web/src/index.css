@@ -140,6 +140,43 @@
     --ai-size-input-xs: 2.75rem;
     --ai-size-input-sm: 2.75rem;
   }
+
+  /* Inputs: 44px tall and 16px text. Below 16px, iOS Safari zooms the page
+     when a field gets focus, which is worse than a slightly larger font. */
+  .mantine-Input-wrapper {
+    --input-height-xs: 2.75rem;
+    --input-height-sm: 2.75rem;
+    --input-height-md: 2.75rem;
+  }
+
+  /* Mantine resolves the input font size inline per size, so the element
+     itself is the only reliable place to set it. */
+  .mantine-Input-input {
+    font-size: 1rem;
+  }
+
+  /* Dropdown options and toggles follow the same minimum. */
+  .mantine-Combobox-dropdown {
+    --combobox-option-padding-xs: 0.75rem 0.75rem;
+    --combobox-option-padding-sm: 0.75rem 0.75rem;
+    --combobox-option-padding-md: 0.75rem 0.75rem;
+  }
+
+  .mantine-Switch-root {
+    --switch-height-xs: 1.5rem;
+    --switch-height-sm: 1.5rem;
+    --switch-width-xs: 2.875rem;
+    --switch-width-sm: 2.875rem;
+  }
+
+  .mantine-Checkbox-root {
+    --checkbox-size-xs: 1.5rem;
+    --checkbox-size-sm: 1.5rem;
+  }
+
+  .mantine-SegmentedControl-root {
+    min-height: 2.75rem;
+  }
 }
 
 /* Pinned rail width. Must match Tailwind's `xl` breakpoint (80rem) — the

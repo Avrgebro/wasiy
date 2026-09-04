@@ -207,6 +207,7 @@ Touch targets:
 
 - On a coarse pointer (`@media (pointer: coarse)`, a finger regardless of screen size) every Mantine button and icon button below the default size grows to a `44px` minimum with wider padding. This is one rule in `index.css` on `.mantine-Button-root` and `.mantine-ActionIcon-root`; nothing per page.
 - Custom controls (chip rows, sort headers, filter-chip remove, text links that act) carry Tailwind's `pointer-coarse:min-h-11` and get more gap between neighbours with `pointer-coarse:gap-3`.
+- Inputs follow the same rule: 44px tall and 16px text on a coarse pointer (below 16px, iOS Safari zooms the page on focus). Dropdown options grow to a 44px row, switches and checkboxes step up one size, segmented controls get a 44px minimum. All of it lives in the same `index.css` block.
 - Desktop with a mouse is unchanged. Verify in the browser with device emulation; jsdom cannot evaluate media queries.
 
 ## Forms
