@@ -53,6 +53,7 @@ export function DataTable<TRow extends { id: string }>({
   data,
   emptyState,
   fetching = false,
+  groupBy,
   loading = false,
   meta,
   onPageChange,
@@ -69,6 +70,8 @@ export function DataTable<TRow extends { id: string }>({
   emptyState?: ReactNode
   /** A page swap under keepPreviousData: rows stay visible but recede. */
   fetching?: boolean
+  /** Inserts a band row whenever this key changes between consecutive rows (e.g. building). */
+  groupBy?: (row: TRow) => string | null
   /** First load: nothing to show yet, render a centered loader. */
   loading?: boolean
   /** Laravel pagination meta; the footer pager renders only when present. */
@@ -142,7 +145,22 @@ export function DataTable<TRow extends { id: string }>({
                 ))}
               </Table.Thead>
               <Table.Tbody>
-                {table.getRowModel().rows.map((row) => (
+                {table.getRowModel().rows.map((row, index, rows) => {
+                  const group = groupBy?.(row.original) ?? null
+                  const previous = index > 0 ? (groupBy?.(rows[index - 1].original) ?? null) : undefined
+                  const band =
+                    groupBy && group !== null && group !== previous ? (
+                      <Table.Tr key={`group-${row.id}`} className="pointer-events-none">
+                        <Table.Td
+                          className="bg-[var(--wa-surface-2)] px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]"
+                          colSpan={row.getVisibleCells().length}
+                        >
+                          {group}
+                        </Table.Td>
+                      </Table.Tr>
+                    ) : null
+
+                  return [band, (
                   <Table.Tr
                     key={row.id}
                     aria-selected={selectedId === row.id || undefined}
@@ -166,7 +184,8 @@ export function DataTable<TRow extends { id: string }>({
                       </Table.Td>
                     ))}
                   </Table.Tr>
-                ))}
+                  )]
+                })}
               </Table.Tbody>
             </Table>
           </div>

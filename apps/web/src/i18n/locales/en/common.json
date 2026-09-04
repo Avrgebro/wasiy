@@ -955,5 +955,63 @@
     },
     "searchPlaceholder": "Search concept, detail or vendor…",
     "allCategories": "All categories"
+  },
+  "units": {
+    "title": "Units",
+    "subtitle_one": "{{count}} unit · {{location}}",
+    "subtitle_other": "{{count}} units · {{location}}",
+    "searchPlaceholder": "Search unit, resident or plate…",
+    "allTypes": "All types",
+    "chips": {
+      "all": "All",
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "attention": "No primary contact",
+      "no_portal": "No portal",
+      "no_fee": "No fee"
+    },
+    "columns": {
+      "unit": "Unit",
+      "floorType": "Floor · type",
+      "residents": "Residents",
+      "vehicles": "Vehicles",
+      "fee": "Fee",
+      "portal": "Portal",
+      "status": "Status",
+      "type": "Type"
+    },
+    "floorN": "Floor {{floor}}",
+    "types": {
+      "apartment": "Apartment",
+      "house": "House",
+      "commercial": "Commercial unit",
+      "office": "Office"
+    },
+    "typesShort": {
+      "apartment": "Apt.",
+      "house": "House",
+      "commercial": "Commercial",
+      "office": "Office"
+    },
+    "occupancy": {
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "attention": "Attention"
+    },
+    "portal": {
+      "active": "On the portal",
+      "invited": "Invitation sent",
+      "not_invited": "Not invited"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Deactivated"
+    },
+    "noResidents": "No residents",
+    "noPrimaryContact": "No primary contact",
+    "emptyTitle": "No units in {{location}} yet",
+    "emptyBody": "Import the full roster from a spreadsheet or create the first unit by hand.",
+    "emptyFilteredTitle": "No unit matches",
+    "emptyFilteredBody": "Try another filter or search."
   }
 }

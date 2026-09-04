@@ -955,5 +955,63 @@
     },
     "searchPlaceholder": "Buscar concepto, detalle o proveedor…",
     "allCategories": "Todas las categorías"
+  },
+  "units": {
+    "title": "Unidades",
+    "subtitle_one": "{{count}} unidad · {{location}}",
+    "subtitle_other": "{{count}} unidades · {{location}}",
+    "searchPlaceholder": "Buscar unidad, residente o placa…",
+    "allTypes": "Todos los tipos",
+    "chips": {
+      "all": "Todas",
+      "occupied": "Ocupadas",
+      "vacant": "Vacías",
+      "attention": "Sin contacto principal",
+      "no_portal": "Sin portal",
+      "no_fee": "Sin cuota"
+    },
+    "columns": {
+      "unit": "Unidad",
+      "floorType": "Piso · tipo",
+      "residents": "Residentes",
+      "vehicles": "Vehículos",
+      "fee": "Cuota",
+      "portal": "Portal",
+      "status": "Estado",
+      "type": "Tipo"
+    },
+    "floorN": "Piso {{floor}}",
+    "types": {
+      "apartment": "Departamento",
+      "house": "Casa",
+      "commercial": "Local comercial",
+      "office": "Oficina"
+    },
+    "typesShort": {
+      "apartment": "Depto.",
+      "house": "Casa",
+      "commercial": "Local",
+      "office": "Oficina"
+    },
+    "occupancy": {
+      "occupied": "Ocupada",
+      "vacant": "Vacía",
+      "attention": "Atención"
+    },
+    "portal": {
+      "active": "En el portal",
+      "invited": "Invitación enviada",
+      "not_invited": "Sin invitar"
+    },
+    "statuses": {
+      "active": "Activa",
+      "inactive": "Desactivada"
+    },
+    "noResidents": "Sin residentes",
+    "noPrimaryContact": "Sin contacto principal",
+    "emptyTitle": "Aún no hay unidades en {{location}}",
+    "emptyBody": "Carga el padrón completo desde una hoja de cálculo o crea la primera unidad a mano.",
+    "emptyFilteredTitle": "Ninguna unidad coincide",
+    "emptyFilteredBody": "Prueba con otro filtro o búsqueda."
   }
 }
