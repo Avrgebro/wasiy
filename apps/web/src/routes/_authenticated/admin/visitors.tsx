@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PagePlaceholder } from '../../../components/ui/page-placeholder'
+import { visitsSearchSchema } from '../../../features/visits/schemas'
+import { VisitsPage } from '../../../features/visits/visits-page'
 
 export const Route = createFileRoute('/_authenticated/admin/visitors')({
-  component: () => <PagePlaceholder titleKey="nav.visitors" />,
+  component: VisitsPage,
+  validateSearch: visitsSearchSchema,
 })

@@ -15,6 +15,8 @@ import { useMe } from '../auth/hooks'
 import type { MovementSummary } from '../finances/api'
 import { monthLabel, shortDate, shortDateTime } from '../finances/month'
 import type { PackageSummary } from '../packages/api'
+import type { VisitSummary } from '../visits/api'
+import { checkInLabel } from '../visits/visit-presentation'
 import { amountClassName, statusColor, statusLabel } from '../finances/movement-presentation'
 import type { ReservationSummary } from '../reservations/api'
 import { formatTimeRange, localDateString, shortDayLabel } from '../reservations/week'
@@ -134,7 +136,7 @@ function UnitDetailContent({
     )
   }
 
-  const { data: unit, packages, reservations, movements, movements_month: month, pending_balance: balance, notes } = detailQuery.data
+  const { data: unit, packages, visits, reservations, movements, movements_month: month, pending_balance: balance, notes } = detailQuery.data
   const primaryAction =
     unit.status === 'inactive' ? (
       <Button color="accent" fullWidth={!wide} loading={reactivate.isPending} onClick={() => reactivate.mutate()}>
@@ -225,6 +227,25 @@ function UnitDetailContent({
                   onOpen={canManage ? () => setMember({ open: true, current }) : undefined}
                 />
               ))
+            )}
+          </Section>
+
+          <Section
+            action={
+              <Link
+                className="text-[13px] font-medium text-[var(--wa-interactive)] no-underline hover:underline"
+                search={{ page: 1, search: unit.unit_number, chip: 'all', confirmation: '' }}
+                to="/admin/visitors"
+              >
+                {t('units.detail.seeAll')}
+              </Link>
+            }
+            title={t('units.detail.visits')}
+          >
+            {visits.length === 0 ? (
+              <Empty body={t('units.detail.noVisits')} />
+            ) : (
+              visits.map((visit) => <VisitRow key={visit.id} timezone={timezone} visit={visit} />)
             )}
           </Section>
 
@@ -500,6 +521,27 @@ function MovementRow({ movement }: { movement: MovementSummary }) {
       </span>
       <Badge color={statusColor(movement.status)} radius="xl" size="sm" variant="light">
         {statusLabel(movement, t)}
+      </Badge>
+    </div>
+  )
+}
+
+function VisitRow({ timezone, visit }: { timezone: string; visit: VisitSummary }) {
+  const { t } = useTranslation('common')
+
+  return (
+    <div className="flex items-center gap-3.5 px-5 py-3">
+      <span className="w-24 shrink-0 font-mono text-xs text-[var(--wa-text-3)]">{checkInLabel(visit.checked_in_at, timezone, new Date())}</span>
+      <div className="min-w-0 flex-1">
+        <Text fw={600} size="sm">
+          {visit.visitor_name}
+        </Text>
+        <Text c="dimmed" className="truncate" size="xs">
+          {t(`visits.confirmations.${visit.confirmation}`)}
+        </Text>
+      </div>
+      <Badge color={visit.status === 'inside' ? 'success' : 'gray'} radius="xl" size="sm" variant="light">
+        {t(`visits.statuses.${visit.status}`)}
       </Badge>
     </div>
   )

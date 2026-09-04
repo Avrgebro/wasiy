@@ -2,6 +2,7 @@ import { apiRequest } from '../../app/api-client'
 import { buildParams } from '../../lib/query-params'
 import type { MovementSummary } from '../finances/api'
 import type { PackageSummary } from '../packages/api'
+import type { VisitSummary } from '../visits/api'
 import type { ReservationSummary } from '../reservations/api'
 import type { PaginatedApiResponse, RegistrySearch } from '../registry/types'
 import type { VehicleSummary } from '../vehicles/api'
@@ -121,6 +122,7 @@ export type UnitNote = { id: string; body: string; author_name: string | null; c
 export type UnitDetailResponse = {
   data: UnitDetail
   packages: PackageSummary[]
+  visits: VisitSummary[]
   reservations: ReservationSummary[]
   movements: MovementSummary[]
   movements_month: string

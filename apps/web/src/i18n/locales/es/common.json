@@ -312,7 +312,8 @@
     "noteTooLong": "La nota no puede superar 1000 caracteres.",
     "shareTooHigh": "La participación no puede superar 100 %.",
     "personRequired": "Selecciona una persona.",
-    "emailRequiredForInvite": "Ingresa un correo para enviar la invitación."
+    "emailRequiredForInvite": "Ingresa un correo para enviar la invitación.",
+    "visitorNameRequired": "Ingresa el nombre del visitante."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",
@@ -1058,7 +1059,9 @@
       "confirmDeactivateBody": "{{residents}} residente(s) perderán el acceso al portal y {{vehicles}} vehículo(s) quedarán inactivos. Las reservas futuras se cancelarán. La unidad queda en el historial.",
       "packages": "Paquetes en recepción",
       "packagesHistory": "Ver historial →",
-      "noPackages": "Sin paquetes en recepción."
+      "noPackages": "Sin paquetes en recepción.",
+      "visits": "Visitas recientes",
+      "noVisits": "Sin visitas registradas."
     },
     "form": {
       "createTitle": "Nueva unidad",
@@ -1224,6 +1227,79 @@
       "reactivateHint": "La persona vuelve a aparecer como activa.",
       "confirmDeactivate": "¿Desactivar a {{name}}?",
       "confirmDeactivateBody": "Pierde el acceso al portal. Su historial se conserva y puedes reactivarla después."
+    }
+  },
+  "visits": {
+    "title": "Visitantes",
+    "subtitle": "Recepción · {{location}} · hoy, {{date}}",
+    "subtitleShort": "Recepción · {{location}}",
+    "register": "Registrar visita",
+    "registered": "Ingreso registrado",
+    "markOut": "Marcar salida",
+    "checkedOut": "Salida registrada",
+    "searchPlaceholder": "Buscar visitante, unidad o residente…",
+    "allConfirmations": "Todas",
+    "unitOnly": "Unidad {{unit}}",
+    "chips": {
+      "inside": "Dentro",
+      "today": "Hoy",
+      "all": "Todos"
+    },
+    "columns": {
+      "checkIn": "Ingreso",
+      "visitor": "Visitante",
+      "host": "Recibe",
+      "confirmation": "Confirmación"
+    },
+    "statuses": {
+      "inside": "Dentro",
+      "left": "Salió"
+    },
+    "confirmations": {
+      "none": "Sin confirmar",
+      "intercom": "Intercom",
+      "phone": "Teléfono",
+      "management": "Administración"
+    },
+    "empty": {
+      "inside": "No hay visitantes dentro del edificio.",
+      "today": "Aún no hay visitas hoy.",
+      "all": "Aún no hay visitas registradas."
+    },
+    "emptyFiltered": "Ninguna visita coincide.",
+    "duration": {
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min"
+    },
+    "form": {
+      "visitor": "Visitante",
+      "name": "Nombre",
+      "document": "Documento (opcional)",
+      "documentShort": "Documento",
+      "documentHint": "Solo el número; no se guardan fotos ni copias.",
+      "phone": "Teléfono (opcional)",
+      "destination": "Destino",
+      "host": "Recibe",
+      "hostHint": "Si no eliges a nadie, la visita queda registrada a la unidad.",
+      "primaryContact": "Contacto principal",
+      "confirmation": "Confirmación",
+      "confirmationHint": "Opcional. Wasiy registra cómo se confirmó; no bloquea el ingreso.",
+      "submit": "Registrar ingreso"
+    },
+    "detail": {
+      "insideSince": "Visita a Depto. {{unit}} · Dentro desde las {{time}}",
+      "range": "Visita a Depto. {{unit}} · {{from}} – {{to}}",
+      "insideBuilding": "dentro del edificio",
+      "duration": "de duración",
+      "checkoutNotes": "Notas de salida (opcional)",
+      "checkoutNotesPlaceholder": "Ej. se retira con paquete de la unidad"
+    },
+    "timeline": {
+      "in": "Ingreso registrado",
+      "out": "Salida registrada",
+      "autoOut": "Salida automática (sin registro de salida)",
+      "confirmed": "Confirmada por {{method}}",
+      "confirmedWith": "Confirmada por {{method}} con {{name}}"
     }
   }
 }

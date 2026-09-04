@@ -312,7 +312,8 @@
     "noteTooLong": "The note cannot exceed 1000 characters.",
     "shareTooHigh": "The share cannot exceed 100%.",
     "personRequired": "Select a person.",
-    "emailRequiredForInvite": "Enter an email to send the invitation."
+    "emailRequiredForInvite": "Enter an email to send the invitation.",
+    "visitorNameRequired": "Enter the visitor's name."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -1058,7 +1059,9 @@
       "confirmDeactivateBody": "{{residents}} resident(s) lose portal access and {{vehicles}} vehicle(s) become inactive. Future reservations are cancelled. The unit stays in the history.",
       "packages": "Packages at reception",
       "packagesHistory": "See history →",
-      "noPackages": "No packages at reception."
+      "noPackages": "No packages at reception.",
+      "visits": "Recent visits",
+      "noVisits": "No visits registered."
     },
     "form": {
       "createTitle": "New unit",
@@ -1224,6 +1227,79 @@
       "reactivateHint": "The person shows as active again.",
       "confirmDeactivate": "Deactivate {{name}}?",
       "confirmDeactivateBody": "They lose portal access. History is kept and you can reactivate them later."
+    }
+  },
+  "visits": {
+    "title": "Visitors",
+    "subtitle": "Reception · {{location}} · today, {{date}}",
+    "subtitleShort": "Reception · {{location}}",
+    "register": "Register visit",
+    "registered": "Check-in registered",
+    "markOut": "Mark out",
+    "checkedOut": "Check-out registered",
+    "searchPlaceholder": "Search visitor, unit or resident…",
+    "allConfirmations": "All",
+    "unitOnly": "Unit {{unit}}",
+    "chips": {
+      "inside": "Inside",
+      "today": "Today",
+      "all": "All"
+    },
+    "columns": {
+      "checkIn": "Check-in",
+      "visitor": "Visitor",
+      "host": "Host",
+      "confirmation": "Confirmation"
+    },
+    "statuses": {
+      "inside": "Inside",
+      "left": "Left"
+    },
+    "confirmations": {
+      "none": "Not confirmed",
+      "intercom": "Intercom",
+      "phone": "Phone",
+      "management": "Management"
+    },
+    "empty": {
+      "inside": "No visitors inside the building.",
+      "today": "No visits today yet.",
+      "all": "No visits registered yet."
+    },
+    "emptyFiltered": "No visit matches.",
+    "duration": {
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min"
+    },
+    "form": {
+      "visitor": "Visitor",
+      "name": "Name",
+      "document": "Document (optional)",
+      "documentShort": "Document",
+      "documentHint": "Number only; no photos or copies are stored.",
+      "phone": "Phone (optional)",
+      "destination": "Destination",
+      "host": "Host",
+      "hostHint": "If you pick nobody, the visit is registered to the unit.",
+      "primaryContact": "Primary contact",
+      "confirmation": "Confirmation",
+      "confirmationHint": "Optional. Wasiy records how it was confirmed; it never blocks check-in.",
+      "submit": "Register check-in"
+    },
+    "detail": {
+      "insideSince": "Visit to unit {{unit}} · Inside since {{time}}",
+      "range": "Visit to unit {{unit}} · {{from}} – {{to}}",
+      "insideBuilding": "inside the building",
+      "duration": "total",
+      "checkoutNotes": "Check-out notes (optional)",
+      "checkoutNotesPlaceholder": "E.g. left with a package from the unit"
+    },
+    "timeline": {
+      "in": "Check-in registered",
+      "out": "Check-out registered",
+      "autoOut": "Automatic check-out (no check-out recorded)",
+      "confirmed": "Confirmed by {{method}}",
+      "confirmedWith": "Confirmed by {{method}} with {{name}}"
     }
   }
 }
