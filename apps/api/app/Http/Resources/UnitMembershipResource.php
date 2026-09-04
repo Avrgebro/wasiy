@@ -22,7 +22,6 @@ class UnitMembershipResource extends JsonResource
             'location_id' => $this->location_id,
             'unit_id' => $this->unit_id,
             'resident_id' => $this->resident_id,
-            'resident_type' => $this->resident_type->value,
             'status' => $this->status->value,
             'is_primary_contact' => $this->is_primary_contact,
             'started_at' => $this->started_at?->toDateString(),

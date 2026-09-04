@@ -2,7 +2,6 @@
 
 use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
-use App\Enums\ResidentType;
 use App\Enums\VehicleType;
 use App\Models\ActivityLog;
 use App\Models\Location;
@@ -103,7 +102,6 @@ test('resident create update and inactivate log activity and no-op update does n
             'email' => 'ana@example.test',
             'memberships' => [[
                 'unit_id' => $unit->id,
-                'resident_type' => ResidentType::Owner->value,
                 'is_primary_contact' => true,
             ]],
         ])
@@ -172,7 +170,6 @@ test('membership changes log activity with resident and unit labels', function (
     $response = $this->actingAs($manager)
         ->postJson("/api/residents/{$resident->id}/memberships", [
             'unit_id' => $unit->id,
-            'resident_type' => ResidentType::Tenant->value,
         ])
         ->assertCreated();
 
@@ -188,7 +185,7 @@ test('membership changes log activity with resident and unit labels', function (
 
     $this->actingAs($manager)
         ->patchJson("/api/unit-memberships/{$membershipId}", [
-            'resident_type' => ResidentType::Occupant->value,
+            'started_at' => '2026-06-01',
         ])
         ->assertOk();
 

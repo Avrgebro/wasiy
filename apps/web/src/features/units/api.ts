@@ -34,7 +34,6 @@ export type UnitSummary = {
     name: string
     phone: string | null
     email: string | null
-    resident_type: string
     resident_id: string
     unit_membership_id: string
   } | null
@@ -88,7 +87,7 @@ export function createResidentInUnit(
   })
 }
 
-export function updateMembership(membershipId: string, payload: Partial<Pick<MembershipPayload, 'resident_type' | 'is_primary_contact'>>) {
+export function updateMembership(membershipId: string, payload: Partial<Pick<MembershipPayload, 'is_primary_contact'>>) {
   return apiRequest<{ data: { id: string } }>(`/api/unit-memberships/${membershipId}`, { method: 'PATCH', data: payload })
 }
 
@@ -96,8 +95,11 @@ export function removeMembership(membershipId: string) {
   return apiRequest<{ data: { id: string } }>(`/api/unit-memberships/${membershipId}`, { method: 'DELETE' })
 }
 
-export function inviteResidentToPortal(residentId: string) {
-  return apiRequest<{ resident: unknown; invitation: unknown }>(`/api/residents/${residentId}/invitations`, { method: 'POST', data: {} })
+export function inviteResidentToPortal(residentId: string, email?: string) {
+  return apiRequest<{ resident: unknown; invitation: unknown }>(`/api/residents/${residentId}/invitations`, {
+    method: 'POST',
+    data: email ? { email } : {},
+  })
 }
 
 export type UnitMember = {
@@ -106,7 +108,6 @@ export type UnitMember = {
   name: string
   email: string | null
   phone: string | null
-  resident_type: 'owner' | 'tenant' | 'occupant' | 'guest_resident'
   is_primary_contact: boolean
   started_at: string | null
   portal_state: 'active' | 'invited' | 'not_invited'

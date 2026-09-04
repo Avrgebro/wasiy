@@ -3,7 +3,6 @@
 use App\Actions\Residents\ClaimResidentInvitation;
 use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
-use App\Enums\ResidentType;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Models\ActivityLog;
@@ -46,7 +45,7 @@ test('manager can invite a resident in an accessible location', function () {
         ->for($unit)
         ->for($location->account)
         ->for($location)
-        ->create(['resident_type' => ResidentType::Owner]);
+        ->create();
     $manager = createResidentInvitationManager($location);
 
     $this->actingAs($manager)

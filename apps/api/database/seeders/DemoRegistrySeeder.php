@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Enums\VehicleType;
 use App\Models\Account;
 use App\Models\Location;
@@ -103,28 +102,24 @@ class DemoRegistrySeeder extends Seeder
         ]);
 
         $this->membership($account, $centralLocation, $central101, $claimedResident, [
-            'resident_type' => ResidentType::Owner,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => true,
             'started_at' => '2026-01-01',
             'ended_at' => null,
         ]);
         $this->membership($account, $centralLocation, $central102, $multiUnitResident, [
-            'resident_type' => ResidentType::Tenant,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => '2026-02-01',
             'ended_at' => null,
         ]);
         $this->membership($account, $northTower, $north501, $multiUnitResident, [
-            'resident_type' => ResidentType::Occupant,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => '2026-03-01',
             'ended_at' => null,
         ]);
         $this->membership($account, $centralLocation, $central201, $invitedResident, [
-            'resident_type' => ResidentType::Tenant,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => '2026-04-01',
@@ -204,7 +199,7 @@ class DemoRegistrySeeder extends Seeder
     }
 
     /**
-     * @param  array{resident_type: ResidentType, status: RegistryStatus, is_primary_contact: bool, started_at: string|null, ended_at: string|null}  $attributes
+     * @param  array{status: RegistryStatus, is_primary_contact: bool, started_at: string|null, ended_at: string|null}  $attributes
      */
     private function membership(Account $account, Location $location, Unit $unit, Resident $resident, array $attributes): UnitMembership
     {
@@ -216,7 +211,6 @@ class DemoRegistrySeeder extends Seeder
             ],
             [
                 'location_id' => $location->id,
-                'resident_type' => $attributes['resident_type'],
                 'status' => $attributes['status'],
                 'is_primary_contact' => false,
                 'started_at' => $attributes['started_at'],

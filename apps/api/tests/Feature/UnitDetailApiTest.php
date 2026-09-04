@@ -5,7 +5,6 @@ use App\Enums\ActivityEventType;
 use App\Enums\BookingMode;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Amenity;
@@ -62,7 +61,6 @@ function liveIn(Unit $unit, array $resident = [], array $membership = []): UnitM
         'location_id' => $unit->location_id,
         'unit_id' => $unit->id,
         'resident_id' => $person->id,
-        'resident_type' => ResidentType::Owner,
         'status' => RegistryStatus::Active,
         'is_primary_contact' => false,
         ...$membership,
@@ -136,7 +134,7 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
     [$account, $location, $admin] = unitWorld();
     $unit = homeUnit($location);
     liveIn($unit, ['first_name' => 'Carlos', 'last_name' => 'Mendoza', 'phone' => '+51 987 654 321'], ['is_primary_contact' => true]);
-    liveIn($unit, ['first_name' => 'Laura', 'last_name' => 'Mendoza'], ['resident_type' => ResidentType::Tenant]);
+    liveIn($unit, ['first_name' => 'Laura', 'last_name' => 'Mendoza']);
     Vehicle::factory()->create(['account_id' => $account->id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'plate' => 'AXB-241']);
 
     $amenity = Amenity::factory()->for($location)->create(['account_id' => $account->id, 'booking_mode' => BookingMode::Instant]);
@@ -169,7 +167,6 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
         ->assertJsonPath('data.members.0.name', 'Carlos Mendoza')
         ->assertJsonPath('data.members.0.phone', '+51 987 654 321')
         ->assertJsonPath('data.members.0.portal_state', 'not_invited')
-        ->assertJsonPath('data.members.1.resident_type', 'tenant')
         ->assertJsonCount(1, 'data.vehicles')
         ->assertJsonPath('data.vehicles.0.plate', 'AXB-241')
         ->assertJsonCount(1, 'reservations')

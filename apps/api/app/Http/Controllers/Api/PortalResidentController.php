@@ -30,7 +30,6 @@ class PortalResidentController extends Controller
             'email' => ['prohibited'],
             'name' => ['prohibited'],
             'status' => ['prohibited'],
-            'resident_type' => ['prohibited'],
             'unit_id' => ['prohibited'],
             'unit_membership_id' => ['prohibited'],
             'is_primary_contact' => ['prohibited'],

@@ -4,7 +4,6 @@ use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Location;
@@ -39,7 +38,7 @@ function memberOf(Unit $unit, array $resident = [], bool $primary = false): Resi
     $person = Resident::factory()->create(['account_id' => $unit->account_id, ...$resident]);
     UnitMembership::factory()->create([
         'account_id' => $unit->account_id, 'location_id' => $unit->location_id, 'unit_id' => $unit->id, 'resident_id' => $person->id,
-        'resident_type' => ResidentType::Owner, 'status' => RegistryStatus::Active, 'is_primary_contact' => $primary,
+        'status' => RegistryStatus::Active, 'is_primary_contact' => $primary,
     ]);
 
     return $person;

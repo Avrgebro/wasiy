@@ -47,7 +47,6 @@ export type ResidentMembership = {
   location_id: string
   unit_id: string
   unit_label: string
-  resident_type: 'owner' | 'tenant' | 'occupant' | 'guest_resident'
   is_primary_contact: boolean
 }
 

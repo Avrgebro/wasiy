@@ -19,7 +19,7 @@ import {
   type UnitDetail,
   type UnitMember,
 } from './api'
-import { memberSchema, RESIDENT_TYPES, type MemberFormValues } from './schemas'
+import { memberSchema, type MemberFormValues } from './schemas'
 import { portalColor } from './unit-presentation'
 
 const EMPTY: MemberFormValues = {
@@ -29,7 +29,6 @@ const EMPTY: MemberFormValues = {
   last_name: '',
   email: '',
   phone: '',
-  resident_type: 'occupant',
   is_primary_contact: false,
   invite: true,
 }
@@ -65,7 +64,7 @@ export function MemberDrawer({
     if (opened) {
       form.reset(
         member
-          ? { ...EMPTY, mode: 'existing', resident_id: member.resident_id, resident_type: member.resident_type, is_primary_contact: member.is_primary_contact, invite: false }
+          ? { ...EMPTY, mode: 'existing', resident_id: member.resident_id, is_primary_contact: member.is_primary_contact, invite: false }
           : EMPTY,
       )
     }
@@ -88,6 +87,8 @@ export function MemberDrawer({
     queryFn: () => getResidents(accountId, { page: 1, per_page: 20, search: personSearch.trim() }),
   })
   const alreadyHere = new Set(unit.members.map((current) => current.resident_id))
+  const residentId = useWatch({ control: form.control, name: 'resident_id' })
+  const selectedPersonEmail = peopleQuery.data?.data.find((person) => person.id === residentId)?.email ?? null
   const peopleOptions = (peopleQuery.data?.data ?? [])
     .filter((person) => !alreadyHere.has(person.id))
     .map((person) => ({
@@ -104,14 +105,15 @@ export function MemberDrawer({
 
   const add = useMutation({
     mutationFn: async (values: MemberFormValues) => {
-      const membership = { unit_id: unit.id, resident_type: values.resident_type, is_primary_contact: values.is_primary_contact }
+      const membership = { unit_id: unit.id, is_primary_contact: values.is_primary_contact }
       let residentId = values.resident_id
-      let email: string | null = values.email || null
+      let email: string | null = null
 
       if (values.mode === 'new') {
+        // Creation never carries an email; the invitation step does.
         const created = await createResidentInUnit(
           accountId,
-          { first_name: values.first_name, last_name: values.last_name, email, phone: values.phone || null },
+          { first_name: values.first_name, last_name: values.last_name, email: null, phone: values.phone || null },
           membership,
         )
         residentId = created.data.id
@@ -121,8 +123,9 @@ export function MemberDrawer({
       }
 
       if (values.invite) {
-        if (email) {
-          await inviteResidentToPortal(residentId)
+        const address = email ?? (values.email || null)
+        if (address) {
+          await inviteResidentToPortal(residentId, address)
         } else {
           notifyWarning(t('units.member.inviteNeedsEmail'))
         }
@@ -137,7 +140,7 @@ export function MemberDrawer({
 
   const save = useMutation({
     mutationFn: (values: MemberFormValues) =>
-      updateMembership(member!.membership_id, { resident_type: values.resident_type, is_primary_contact: values.is_primary_contact }),
+      updateMembership(member!.membership_id, { is_primary_contact: values.is_primary_contact }),
     onSuccess: async () => {
       await invalidate()
       onClose()
@@ -235,7 +238,6 @@ export function MemberDrawer({
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
                   <FormTextInput control={form.control} label={t('registry.residents.firstName')} name="first_name" />
                   <FormTextInput control={form.control} label={t('registry.residents.lastName')} name="last_name" />
-                  <FormTextInput autoComplete="off" control={form.control} label={t('units.member.email')} name="email" />
                   <FormTextInput control={form.control} label={t('registry.residents.phone')} name="phone" placeholder="+51 …" />
                 </div>
               )}
@@ -243,20 +245,6 @@ export function MemberDrawer({
           )}
 
           <DrawerSection label={t('units.member.relation')} />
-          <Controller
-            control={form.control}
-            name="resident_type"
-            render={({ field, fieldState }) => (
-              <Select
-                {...field}
-                allowDeselect={false}
-                data={RESIDENT_TYPES.map((value) => ({ value, label: t(`units.roles.${value}`) }))}
-                error={fieldErrorMessage(fieldState.error)}
-                label={t('units.member.role')}
-                onChange={(value) => field.onChange(value ?? 'occupant')}
-              />
-            )}
-          />
           <Controller
             control={form.control}
             name="is_primary_contact"
@@ -283,10 +271,9 @@ export function MemberDrawer({
               )}
             />
           ) : null}
-          {!member && mode === 'new' && invite ? (
-            <Text c="dimmed" mt={-12} size="xs">
-              {t('units.member.inviteNeedsEmail')}
-            </Text>
+          {/* The email is asked only here, for the invitation (M11). */}
+          {!member && invite && (mode === 'new' || !selectedPersonEmail) ? (
+            <FormTextInput autoComplete="off" control={form.control} label={t('residents.detail.emailLabel')} name="email" placeholder="nombre@correo.com" />
           ) : null}
 
           {member ? (

@@ -100,7 +100,6 @@ class GenerateCsvExport implements ShouldQueue
             'Piso',
             'Estado de unidad',
             'Residente',
-            'Tipo de residente',
             'Contacto principal',
             'Estado de membresia',
             'Telefono',
@@ -129,7 +128,6 @@ class GenerateCsvExport implements ShouldQueue
                     '',
                     '',
                     '',
-                    '',
                 ];
 
                 continue;
@@ -144,7 +142,6 @@ class GenerateCsvExport implements ShouldQueue
                     $unit->floor,
                     $unit->status->value,
                     trim($resident->first_name.' '.$resident->last_name),
-                    $membership->resident_type->value,
                     $membership->is_primary_contact ? 'Si' : 'No',
                     $membership->status->value,
                     $resident->phone,

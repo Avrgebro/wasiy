@@ -46,9 +46,9 @@ function detail(): UnitDetailResponse {
       area_m2: 118, participation_share: 1.18, maintenance_fee: 420, parking_spots: ['E-23'], storage_rooms: ['D-04'], status: 'active', notes: null,
       resident_count: 3, vehicle_count: 2, occupancy: 'occupied', portal_state: 'active', primary_contact: null,
       members: [
-        { membership_id: 'um_1', resident_id: 'rs_1', name: 'Carlos Mendoza', email: 'carlos@x.pe', phone: '+51 987 654 321', resident_type: 'owner', is_primary_contact: true, started_at: null, portal_state: 'active' },
-        { membership_id: 'um_2', resident_id: 'rs_2', name: 'Laura Mendoza', email: 'laura@x.pe', phone: null, resident_type: 'tenant', is_primary_contact: false, started_at: null, portal_state: 'active' },
-        { membership_id: 'um_3', resident_id: 'rs_3', name: 'Tomás Mendoza', email: null, phone: null, resident_type: 'occupant', is_primary_contact: false, started_at: null, portal_state: 'not_invited' },
+        { membership_id: 'um_1', resident_id: 'rs_1', name: 'Carlos Mendoza', email: 'carlos@x.pe', phone: '+51 987 654 321', is_primary_contact: true, started_at: null, portal_state: 'active' },
+        { membership_id: 'um_2', resident_id: 'rs_2', name: 'Laura Mendoza', email: 'laura@x.pe', phone: null, is_primary_contact: false, started_at: null, portal_state: 'active' },
+        { membership_id: 'um_3', resident_id: 'rs_3', name: 'Tomás Mendoza', email: null, phone: null, is_primary_contact: false, started_at: null, portal_state: 'not_invited' },
       ],
       vehicles: [
         { id: 'vh_1', account_id: 'acc_1', location_id: 'loc_1', unit_id: 'un_402', vehicle_type: 'car', plate: 'AXB-241', make: 'Toyota', model: 'RAV4', color: 'gris', status: 'active', notes: null },
@@ -120,9 +120,6 @@ describe('UnitDetailPage', () => {
     // Once in Residentes, once in Portal del residente.
     expect(screen.getAllByText('Carlos Mendoza')).toHaveLength(2)
     expect(screen.getByText('Contacto principal')).toBeInTheDocument()
-    expect(screen.getByText('Propietario')).toBeInTheDocument()
-    expect(screen.getByText('Inquilino')).toBeInTheDocument()
-    expect(screen.getByText('Residente')).toBeInTheDocument()
 
     expect(screen.getByText('Cuotas y cobros · agosto 2026')).toBeInTheDocument()
     expect(screen.getByText('Multa · ruido fuera de horario')).toBeInTheDocument()
@@ -182,15 +179,14 @@ describe('UnitDetailPage', () => {
     await user.click(within(drawer).getByRole('radio', { name: 'Nueva persona' }))
     await user.type(within(drawer).getByLabelText('Nombres'), 'Elena')
     await user.type(within(drawer).getByLabelText('Apellidos'), 'Vargas')
-    await user.type(within(drawer).getByLabelText('Correo'), 'elena@x.pe')
-    await user.click(within(drawer).getByRole('combobox', { name: 'Rol' }))
-    await user.click(await screen.findByRole('option', { name: 'Inquilino' }))
+    await user.type(within(drawer).getByLabelText('Correo del residente'), 'elena@x.pe')
     await user.click(within(drawer).getByRole('button', { name: 'Agregar' }))
 
     await waitFor(() => expect(writes.length).toBeGreaterThanOrEqual(2))
     expect(writes[0].url).toBe('/api/accounts/acc_1/residents')
-    expect(writes[0].body).toMatchObject({ first_name: 'Elena', last_name: 'Vargas', email: 'elena@x.pe', memberships: [{ unit_id: 'un_402', resident_type: 'tenant', is_primary_contact: false }] })
+    expect(writes[0].body).toMatchObject({ first_name: 'Elena', last_name: 'Vargas', email: null, memberships: [{ unit_id: 'un_402', is_primary_contact: false }] })
     expect(writes[1].url).toBe('/api/residents/new/invitations')
+    expect(writes[1].body).toEqual({ email: 'elena@x.pe' })
   })
 
   it('opens the deactivation confirmation from the sensitive zone and cascades', async () => {

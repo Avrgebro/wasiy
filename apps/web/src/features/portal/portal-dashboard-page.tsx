@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { sessionQueryKey } from '../auth/query-options'
-import type { MeResponse, ResidentMembership, Session } from '../auth/types'
+import type { MeResponse, Session } from '../auth/types'
 import { updatePortalResidentPhone } from './api'
 import {
   portalPhoneSchema,
@@ -13,13 +13,6 @@ import {
 } from './schemas'
 import { submitHandlingServerErrors } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
-
-const residentTypeLabelKey: Record<ResidentMembership['resident_type'], string> = {
-  guest_resident: 'portal.residentTypes.guestResident',
-  occupant: 'portal.residentTypes.occupant',
-  owner: 'portal.residentTypes.owner',
-  tenant: 'portal.residentTypes.tenant',
-}
 
 export function PortalDashboardPage() {
   const { t } = useTranslation('common')
@@ -113,9 +106,6 @@ export function PortalDashboardPage() {
                   <div>
                     <p className="font-semibold text-[var(--mantine-color-text)]">
                       {membership.unit_label}
-                    </p>
-                    <p className="text-sm text-[var(--mantine-color-dimmed)]">
-                      {t(residentTypeLabelKey[membership.resident_type])}
                     </p>
                   </div>
                   {membership.is_primary_contact ? (

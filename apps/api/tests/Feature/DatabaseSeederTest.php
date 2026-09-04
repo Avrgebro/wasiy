@@ -9,7 +9,6 @@ use App\Enums\ImportStatus;
 use App\Enums\ImportType;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Enums\VehicleType;
@@ -393,7 +392,6 @@ test('seeded manager can complete m3 registry export and activity acceptance flo
             'email' => 'acceptance.resident@wasiy.test',
             'memberships' => [[
                 'unit_id' => $unit->id,
-                'resident_type' => ResidentType::GuestResident->value,
             ]],
         ])
         ->assertCreated();

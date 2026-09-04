@@ -129,7 +129,6 @@ describe('access helpers', () => {
           is_primary_contact: true,
           location_id: 'loc_1',
           resident_id: 'res_1',
-          resident_type: 'owner',
           unit_id: 'unit_1',
           unit_label: 'Torre A / 301',
           unit_membership_id: 'membership_1',

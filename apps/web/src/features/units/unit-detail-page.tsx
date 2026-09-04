@@ -440,9 +440,6 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void
               {t('units.detail.primaryContact')}
             </Badge>
           ) : null}
-          <span className="rounded-full border border-[var(--mantine-color-default-border)] px-2 py-px text-[11px] font-medium text-[var(--mantine-color-dimmed)]">
-            {t(`units.roles.${member.resident_type}`)}
-          </span>
         </div>
         <Text c="dimmed" className="truncate" size="xs">
           {[member.email, member.phone].filter(Boolean).join(' · ') || '—'}

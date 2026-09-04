@@ -3,7 +3,6 @@
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\Resident;
@@ -148,9 +147,7 @@ test('unit list defaults to active units and supports search filters sort and su
         ->for($account)
         ->for($location)
         ->primaryContact()
-        ->create([
-            'resident_type' => ResidentType::Owner,
-        ]);
+        ->create();
     Vehicle::factory()->for($activeUnit)->for($account)->for($location)->create();
 
     createStaffMembership($account, $admin, AccountRole::AccountAdmin);

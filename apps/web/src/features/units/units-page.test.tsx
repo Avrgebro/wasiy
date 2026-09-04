@@ -62,7 +62,7 @@ function unit(overrides: Partial<UnitSummary> = {}): UnitSummary {
     vehicle_count: 1,
     occupancy: 'occupied',
     portal_state: 'active',
-    primary_contact: { name: 'Carlos Mendoza', phone: null, email: null, resident_type: 'owner', resident_id: 'rs_1', unit_membership_id: 'um_1' },
+    primary_contact: { name: 'Carlos Mendoza', phone: null, email: null, resident_id: 'rs_1', unit_membership_id: 'um_1' },
     ...overrides,
   }
 }

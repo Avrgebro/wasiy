@@ -311,7 +311,6 @@ class AccessContextService
                 'location_id' => $membership->location_id,
                 'unit_id' => $membership->unit_id,
                 'unit_label' => $membership->unit->label(),
-                'resident_type' => $membership->resident_type->value,
                 'is_primary_contact' => $membership->is_primary_contact,
             ])
             ->values()

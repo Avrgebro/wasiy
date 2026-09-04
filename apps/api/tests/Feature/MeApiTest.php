@@ -4,7 +4,6 @@ use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Location;
@@ -242,7 +241,7 @@ test('/api/me returns active memberships for claimed active residents', function
         ->for($location->account)
         ->for($location)
         ->primaryContact()
-        ->create(['resident_type' => ResidentType::Owner]);
+        ->create();
 
     $this->actingAs($user)
         ->getJson('/api/me')
@@ -253,7 +252,6 @@ test('/api/me returns active memberships for claimed active residents', function
         ->assertJsonPath('resident_memberships.0.location_id', $location->id)
         ->assertJsonPath('resident_memberships.0.unit_id', $unit->id)
         ->assertJsonPath('resident_memberships.0.unit_label', 'Torre A / 301')
-        ->assertJsonPath('resident_memberships.0.resident_type', ResidentType::Owner->value)
         ->assertJsonPath('resident_memberships.0.is_primary_contact', true);
 });
 

@@ -50,8 +50,6 @@ export function toUnitPayload(values: UnitFormValues): UnitPayload {
   }
 }
 
-export const RESIDENT_TYPES = ['owner', 'tenant', 'occupant', 'guest_resident'] as const
-
 /** The resident drawer (mockup 12c): an existing person or a new one, plus the relation. */
 export const memberSchema = z
   .object({
@@ -61,7 +59,6 @@ export const memberSchema = z
     last_name: z.string().trim().max(255),
     email: z.string().trim().email('validation.emailInvalid').or(z.literal('')),
     phone: z.string().trim().max(255, 'validation.phoneTooLong'),
-    resident_type: z.enum(RESIDENT_TYPES),
     is_primary_contact: z.boolean(),
     invite: z.boolean(),
   })
@@ -72,7 +69,6 @@ export const memberSchema = z
     if (values.mode === 'new') {
       if (!values.first_name) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'validation.firstNameRequired', path: ['first_name'] })
       if (!values.last_name) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'validation.lastNameRequired', path: ['last_name'] })
-      if (values.invite && !values.email) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'validation.emailRequiredForInvite', path: ['email'] })
     }
   })
 
@@ -80,7 +76,6 @@ export type MemberFormValues = z.infer<typeof memberSchema>
 
 export type MembershipPayload = {
   unit_id: string
-  resident_type: MemberFormValues['resident_type']
   is_primary_contact: boolean
 }
 

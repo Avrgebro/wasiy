@@ -52,7 +52,6 @@ class UnitResource extends JsonResource
                     'name' => $membership->resident->name,
                     'email' => $membership->resident->email,
                     'phone' => $membership->resident->phone,
-                    'resident_type' => $membership->resident_type->value,
                     'is_primary_contact' => $membership->is_primary_contact,
                     'started_at' => $membership->started_at?->toDateString(),
                     'portal_state' => $membership->resident->user_id !== null
@@ -68,7 +67,6 @@ class UnitResource extends JsonResource
                 'name' => $primaryContactMembership->resident->name,
                 'phone' => $primaryContactMembership->resident->phone,
                 'email' => $primaryContactMembership->resident->email,
-                'resident_type' => $primaryContactMembership->resident_type->value,
             ] : null,
             'created_at' => $this->created_at?->toJSON(),
             'updated_at' => $this->updated_at?->toJSON(),

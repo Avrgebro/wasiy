@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -29,7 +28,6 @@ class StoreUnitMembershipRequest extends FormRequest
     {
         return [
             'unit_id' => ['required', ...$this->unitRules()],
-            'resident_type' => ['required', Rule::enum(ResidentType::class)],
             'status' => ['sometimes', Rule::enum(RegistryStatus::class)],
             'is_primary_contact' => ['sometimes', 'boolean'],
             'started_at' => ['sometimes', 'nullable', 'date'],
