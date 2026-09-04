@@ -162,7 +162,7 @@ Mapping used in the product:
 
 Rules:
 
-- Badges are Mantine `Badge` with `variant="light"`, `radius="xl"`, `size="sm"`: soft background, darker text. Where a label must never truncate in a narrow cell, use `TintChip` from `components/ui/chips.tsx`, which shares the same tint variables.
+- Status pills are Mantine `Badge` with `variant="light"` and `size="sm"` (radius `xl` is the theme default). The theme remaps that variant to the design system's pill: **role-colored text on the neutral second surface** (`--wa-surface-2`), never a tinted background — the mockups draw every pill this way. `gray` means dimmed text, `teal` means the interactive token. Where a label must never truncate in a narrow cell, use `TintChip` from `components/ui/chips.tsx`, which follows the same recipe. Filled badges are reserved for counters (the Por aprobar count), not statuses.
 - Colored figures (amounts, KPI values) use the `--wa-*` tokens, not the badge tint variables.
 - Amber is both accent and dark-mode warning, so a warning always carries text; badges never rely on color alone.
 - Presentation rules for a status (label, color, allowed inline action) live in one module per feature (`movement-presentation.ts`, `reservation-modal-parts.tsx`) so a row and its drawer never disagree.

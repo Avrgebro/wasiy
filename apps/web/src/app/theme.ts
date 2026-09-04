@@ -1,4 +1,4 @@
-import { Card, Container, createTheme, Paper, rem, Select } from "@mantine/core";
+import { Badge, Card, Container, createTheme, Paper, rem, Select } from "@mantine/core";
 import type {
   CSSVariablesResolver,
   MantineColorsTuple,
@@ -124,6 +124,17 @@ const dark: MantineColorsTuple = [
   "#081314", // 9
 ];
 
+/** Text color of a `light` Badge per semantic color name. */
+const PILL_TEXT: Record<string, string> = {
+  success: "var(--wa-success)",
+  warning: "var(--wa-warning)",
+  error: "var(--wa-error)",
+  info: "var(--wa-info)",
+  accent: "var(--wa-accent)",
+  teal: "var(--wa-interactive)",
+  gray: "var(--mantine-color-dimmed)",
+};
+
 export const mantineTheme: MantineThemeOverride = createTheme({
   // `lg` is the surface radius (14px, see --radius-surface in index.css) so
   // Modal/Paper/Skeleton radius="lg" match the Tailwind cards; md stays the
@@ -193,6 +204,22 @@ export const mantineTheme: MantineThemeOverride = createTheme({
       defaultProps: {
         checkIconPosition: "right",
       },
+    }),
+    // The design system's status pill: role-colored text on the neutral
+    // second surface (mockups draw every pill this way). Mantine's stock
+    // `light` variant tints the background and pales the text instead, so
+    // the variant is remapped here for all 25+ badges at once.
+    Badge: Badge.extend({
+      defaultProps: { radius: "xl" },
+      vars: (_theme, props) =>
+        props.variant === "light"
+          ? {
+              root: {
+                "--badge-bg": "var(--wa-surface-2)",
+                "--badge-color": PILL_TEXT[props.color ?? "teal"] ?? PILL_TEXT.teal,
+              },
+            }
+          : { root: {} },
     }),
   },
   other: {

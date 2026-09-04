@@ -13,21 +13,26 @@ export function AccessChip({ children }: { children: ReactNode }) {
   )
 }
 
+const PILL_TEXT: Record<string, string> = {
+  success: 'var(--wa-success)',
+  warning: 'var(--wa-warning)',
+  error: 'var(--wa-error)',
+  info: 'var(--wa-info)',
+  accent: 'var(--wa-accent)',
+  teal: 'var(--wa-interactive)',
+  gray: 'var(--mantine-color-dimmed)',
+}
+
 /**
- * The tinted sibling of AccessChip for status and role badges. Unlike
- * Mantine's Badge, the label never truncates to an ellipsis in narrow
- * cells — chips keep their full text and let the row scroll instead.
- * Colors come from Mantine's `-light` variant variables, so tints follow
- * the color scheme.
+ * The status pill for cells where a Badge would truncate: same recipe as the
+ * theme's `light` Badge — role-colored text on the neutral second surface —
+ * but the label never ellipsizes; the row scrolls instead.
  */
 export function TintChip({ color, children }: { color: string; children: ReactNode }) {
   return (
     <span
       className="whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold"
-      style={{
-        backgroundColor: `var(--mantine-color-${color}-light)`,
-        color: `var(--mantine-color-${color}-light-color)`,
-      }}
+      style={{ backgroundColor: 'var(--wa-surface-2)', color: PILL_TEXT[color] ?? PILL_TEXT.teal }}
     >
       {children}
     </span>
