@@ -79,7 +79,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
       accessorKey: 'received_at',
       header: t('packages.columns.received'),
       meta: { className: 'whitespace-nowrap' },
-      cell: ({ row }) => <span className="font-mono text-xs text-[var(--mantine-color-dimmed)]">{shortDateTime(row.original.received_at, timezone)}</span>,
+      cell: ({ row }) => <span className="font-mono text-xs text-[var(--wa-text-3)]">{shortDateTime(row.original.received_at, timezone)}</span>,
     },
     {
       accessorKey: 'unit_number',
@@ -88,7 +88,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
-          {row.original.building_name ? <span className="text-[11.5px] text-[var(--mantine-color-dimmed)]">{row.original.building_name}</span> : null}
+          {row.original.building_name ? <span className="text-[11.5px] text-[var(--wa-text-3)]">{row.original.building_name}</span> : null}
         </div>
       ),
     },
@@ -123,7 +123,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
         </Badge>
       ),
     },
-    { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span> },
+    { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span> },
   ]
 
   return (
@@ -156,9 +156,6 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
             {key === 'pending' && pendingCount !== undefined ? `${t('packages.chips.pending')} · ${pendingCount}` : t(`packages.chips.${key}`)}
           </button>
         ))}
-        <div className="w-full sm:ml-auto sm:w-auto">
-          <SearchInput defaultValue={search.search} placeholder={t('packages.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />
-        </div>
       </div>
 
       {listQuery.isError ? (
@@ -181,6 +178,11 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
         selectedId={current?.id ?? null}
+        toolbar={
+          <div className="flex flex-wrap items-center gap-2.5 p-3.5 sm:px-5">
+            <SearchInput defaultValue={search.search} placeholder={t('packages.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />
+          </div>
+        }
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={setSelected}
       />
