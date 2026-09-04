@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             DemoRegistrySeeder::class,
             DemoInvitationsSeeder::class,
             DemoFinancesSeeder::class,
+            DemoOperationsSeeder::class,
         ]);
     }
 }

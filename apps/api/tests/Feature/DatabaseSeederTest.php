@@ -248,10 +248,9 @@ test('seeded account admin can complete staff workflow and activity logging acce
         ])
         ->assertOk();
 
-    // The demo finances seeder writes its own timeline entries; this test
-    // is about the entries the requests above produced.
-    $requestEntries = ActivityLog::query()->where(fn ($query) => $query
-        ->whereNull('subject_type')->orWhere('subject_type', '!=', 'financial_movement'));
+    // The demo seeders write their own timeline entries; this test is about
+    // the staff entries the requests above produced.
+    $requestEntries = ActivityLog::query()->where('event_type', 'like', 'staff.%');
 
     expect($requestEntries->count())->toBe(4)
         ->and(ActivityLog::query()->where('event_type', ActivityEventType::StaffInvited->value)->sole()->metadata)
