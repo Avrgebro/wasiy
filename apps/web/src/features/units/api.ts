@@ -1,6 +1,9 @@
 import { apiRequest } from '../../app/api-client'
 import { buildParams } from '../../lib/query-params'
+import type { MovementSummary } from '../finances/api'
+import type { ReservationSummary } from '../reservations/api'
 import type { PaginatedApiResponse, RegistrySearch } from '../registry/types'
+import type { VehicleSummary } from '../vehicles/api'
 import type { UnitFormValues } from './schemas'
 
 export type UnitType = 'apartment' | 'house' | 'commercial' | 'office'
@@ -63,4 +66,38 @@ export function updateUnit(unitId: string, values: UnitFormValues) {
     data: values,
     method: 'PATCH',
   })
+}
+
+export type UnitMember = {
+  membership_id: string
+  resident_id: string
+  name: string
+  email: string | null
+  phone: string | null
+  resident_type: 'owner' | 'tenant' | 'occupant' | 'guest_resident'
+  is_primary_contact: boolean
+  started_at: string | null
+  portal_state: 'active' | 'invited' | 'not_invited'
+}
+
+export type UnitDetail = UnitSummary & { members: UnitMember[]; vehicles: VehicleSummary[] }
+
+export type UnitNote = { id: string; body: string; author_name: string | null; created_at: string | null }
+
+/** GET /units/{id}: the unit plus the sections that read other modules. */
+export type UnitDetailResponse = {
+  data: UnitDetail
+  reservations: ReservationSummary[]
+  movements: MovementSummary[]
+  movements_month: string
+  pending_balance: number
+  notes: UnitNote[]
+}
+
+export function getUnit(unitId: string) {
+  return apiRequest<UnitDetailResponse>(`/api/units/${unitId}`)
+}
+
+export function addUnitNote(unitId: string, body: string) {
+  return apiRequest<{ data: UnitNote }>(`/api/units/${unitId}/notes`, { method: 'POST', data: { body } })
 }

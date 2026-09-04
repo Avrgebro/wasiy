@@ -1012,6 +1012,46 @@
     "emptyTitle": "Aún no hay unidades en {{location}}",
     "emptyBody": "Carga el padrón completo desde una hoja de cálculo o crea la primera unidad a mano.",
     "emptyFilteredTitle": "Ninguna unidad coincide",
-    "emptyFilteredBody": "Prueba con otro filtro o búsqueda."
+    "emptyFilteredBody": "Prueba con otro filtro o búsqueda.",
+    "detail": {
+      "title": "{{type}} {{number}}",
+      "notFoundTitle": "Unidad no encontrada",
+      "notFoundBody": "Puede que haya sido eliminada o pertenezca a otra ubicación.",
+      "backToList": "← Volver a Unidades",
+      "monthlyFee": "Cuota mensual",
+      "share": "Participación",
+      "parking": "Estacionamientos",
+      "storage": "Depósitos",
+      "residents": "Residentes",
+      "primaryContact": "Contacto principal",
+      "noResidentsTitle": "Sin residentes registrados",
+      "noResidentsBody": "La unidad figura como vacía y no aparece en el portal hasta que agregues a alguien.",
+      "reservations": "Reservas de la unidad",
+      "seeAll": "Ver todas →",
+      "noReservations": "Sin reservas próximas.",
+      "bookedBy": "Reservó {{name}}",
+      "charges": "Cuotas y cobros",
+      "viewInFinances": "Ver en Finanzas →",
+      "noMovements": "Sin movimientos este mes.",
+      "pendingBalance": "Saldo pendiente: {{amount}}",
+      "noPendingBalance": "Sin saldo pendiente",
+      "vehicles": "Vehículos",
+      "noVehicles": "Sin vehículos registrados.",
+      "portal": "Portal del residente",
+      "noPortal": "Nadie de esta unidad tiene acceso al portal.",
+      "notes": "Notas internas",
+      "addNote": "Agregar nota",
+      "saveNote": "Guardar nota",
+      "notePlaceholder": "Visible solo para el personal…",
+      "noNotes": "Sin notas internas.",
+      "notesHint": "Visibles solo para staff. Quedan en el registro de actividad.",
+      "noteAdded": "Nota agregada"
+    },
+    "roles": {
+      "owner": "Propietario",
+      "tenant": "Inquilino",
+      "occupant": "Residente",
+      "guest_resident": "Otro"
+    }
   }
 }

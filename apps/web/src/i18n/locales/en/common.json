@@ -1012,6 +1012,46 @@
     "emptyTitle": "No units in {{location}} yet",
     "emptyBody": "Import the full roster from a spreadsheet or create the first unit by hand.",
     "emptyFilteredTitle": "No unit matches",
-    "emptyFilteredBody": "Try another filter or search."
+    "emptyFilteredBody": "Try another filter or search.",
+    "detail": {
+      "title": "{{type}} {{number}}",
+      "notFoundTitle": "Unit not found",
+      "notFoundBody": "It may have been removed or belong to another location.",
+      "backToList": "← Back to Units",
+      "monthlyFee": "Monthly fee",
+      "share": "Share",
+      "parking": "Parking",
+      "storage": "Storage",
+      "residents": "Residents",
+      "primaryContact": "Primary contact",
+      "noResidentsTitle": "No residents registered",
+      "noResidentsBody": "The unit shows as vacant and is not on the portal until you add someone.",
+      "reservations": "Unit reservations",
+      "seeAll": "See all →",
+      "noReservations": "No upcoming reservations.",
+      "bookedBy": "Booked by {{name}}",
+      "charges": "Dues and charges",
+      "viewInFinances": "View in Finances →",
+      "noMovements": "No movements this month.",
+      "pendingBalance": "Pending balance: {{amount}}",
+      "noPendingBalance": "No pending balance",
+      "vehicles": "Vehicles",
+      "noVehicles": "No vehicles registered.",
+      "portal": "Resident portal",
+      "noPortal": "Nobody in this unit has portal access.",
+      "notes": "Internal notes",
+      "addNote": "Add note",
+      "saveNote": "Save note",
+      "notePlaceholder": "Visible to staff only…",
+      "noNotes": "No internal notes.",
+      "notesHint": "Staff only. Kept in the activity log.",
+      "noteAdded": "Note added"
+    },
+    "roles": {
+      "owner": "Owner",
+      "tenant": "Tenant",
+      "occupant": "Resident",
+      "guest_resident": "Other"
+    }
   }
 }

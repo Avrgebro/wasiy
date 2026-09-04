@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PagePlaceholder } from '../../../../components/ui/page-placeholder'
+import { UnitDetailPage } from '../../../../features/units/unit-detail-page'
 
-// Slice 3 replaces the placeholder with the unit detail page (mockup 12).
 export const Route = createFileRoute('/_authenticated/admin/registry/units_/$unitId')({
-  component: () => <PagePlaceholder titleKey="units.title" />,
+  component: UnitDetailPage,
 })
