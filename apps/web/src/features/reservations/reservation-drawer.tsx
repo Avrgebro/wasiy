@@ -241,7 +241,7 @@ function Charges({
         return (
           <div
             key={movement.id}
-            className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[10px] border border-[var(--mantine-color-default-border)] px-3 py-2"
+            className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-inner border border-[var(--mantine-color-default-border)] px-3 py-2"
           >
             <span className="min-w-0 flex-1 text-sm font-medium">
               {t(movement.category === 'reservation_deposit' ? 'reservations.detail.deposit' : 'reservations.detail.fee')}
