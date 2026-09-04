@@ -7,10 +7,10 @@ The PRD imagined a simplified operations shell for security staff. In practice t
 ## Decisions
 
 - `canAccessAdmin` includes the Front Desk role; `/front-desk` and its navigation group are deleted. The default route after login for front desk is `/admin`.
-- Visibility is layered: navigation predicates hide manager-only entries (Anuncios, Finanzas, the Administración group); pages hide manage actions behind `canManageRegistry` (create, edit, decide, notes, drawers); the API policies remain the enforcement point and return 403 regardless of the UI.
+- Visibility is layered: navigation predicates hide manager-only entries (Anuncios, Finanzas, the Administración group); pages hide manage actions behind the manage predicate (since ADR 0036, `can(me, capability)`) (create, edit, decide, notes, drawers); the API policies remain the enforcement point and return 403 regardless of the UI.
 - Read-only means read-only, not disabled: a front desk user sees no create buttons, no row edit, no chevrons on rows that would open a manage drawer. `RegistryCrudPage` gained a `readOnly` prop for the older registry pages.
 - The resident portal stays a separate surface: it is a different audience, not a different role.
 
 ## Consequences
 
-Features are built once and mounted once. New surfaces for the desk (Visitantes, Paquetería) land under `/admin` in a Recepción group. The dashboard is still the manager's Panel; a slimmer front-desk landing can come later without touching routing. The `isFrontDesk` helper remains for places that need the role itself rather than a capability.
+Features are built once and mounted once. New surfaces for the desk (Visitantes, Paquetería) land under `/admin` in a Recepción group. The dashboard is still the manager's Panel; a slimmer front-desk landing can come later without touching routing. Visibility predicates later moved from role checks to capabilities (ADR 0036).
