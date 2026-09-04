@@ -187,8 +187,9 @@ describe('access helpers', () => {
     // Vehicles live inside units since M9; no standalone entry.
     expect(serialized).not.toContain('/admin/registry/vehicles')
 
-    // Residents sits inside the People group rather than at the top level.
-    expect(serialized).toContain('nav.reception')
+    // Recepción is its own section, not a collapsible inside Ubicación.
+    expect(serialized).toContain('navGroups.reception')
+    expect(serialized).not.toContain('nav.reception')
     expect(serialized).toContain('/admin/registry/residents')
 
     // Imports is reached from the pages it loads, not from the sidebar.

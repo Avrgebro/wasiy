@@ -112,16 +112,6 @@ const locationNavigationGroup: NavGroupSpec = {
     { icon: UserCheckRounded, labelKey: 'nav.residents', to: '/admin/registry/residents' },
     // The desk finds people through Residentes; Unidades carries the ledger.
     { icon: House, labelKey: 'nav.units', to: '/admin/registry/units', visibleTo: hasCapability('registry.manage') },
-    // The desk's logs: visitors and packages, arrival → resolution.
-    {
-      type: 'collapsible',
-      icon: Box,
-      labelKey: 'nav.reception',
-      children: [
-        { icon: Magnifier, labelKey: 'nav.visitors', to: '/admin/visitors' },
-        { icon: Box, labelKey: 'nav.packages', to: '/admin/packages' },
-      ],
-    },
     {
       badge: PendingReservationsBadge,
       icon: Calendar,
@@ -144,6 +134,19 @@ const locationNavigationGroup: NavGroupSpec = {
 }
 
 /**
+ * The desk's logs: visitors and packages, arrival → resolution. A section of
+ * its own (mockups 15–17) so the desk reaches its tools in one click.
+ */
+const receptionNavigationGroup: NavGroupSpec = {
+  type: 'group',
+  titleKey: 'navGroups.reception',
+  items: [
+    { icon: Magnifier, labelKey: 'nav.visitors', to: '/admin/visitors' },
+    { icon: Box, labelKey: 'nav.packages', to: '/admin/packages' },
+  ],
+}
+
+/**
  * Account-wide administration, scoped above any single Location.
  */
 const administrationNavigationGroup: NavGroupSpec = {
@@ -160,6 +163,7 @@ const administrationNavigationGroup: NavGroupSpec = {
 
 const adminSurfaceNavigation: NavEntrySpec[] = [
   locationNavigationGroup,
+  receptionNavigationGroup,
   administrationNavigationGroup,
 ]
 
