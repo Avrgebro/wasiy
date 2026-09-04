@@ -956,7 +956,13 @@
       "voided": "Voided"
     },
     "searchPlaceholder": "Search concept, detail or vendor…",
-    "allCategories": "All categories"
+    "allCategories": "All categories",
+    "dues": {
+      "action": "Generate month's dues",
+      "confirmTitle": "Generate dues for {{month}}?",
+      "confirmBody": "One pending maintenance dues movement is created for every active unit with a fee. Units already issued this month are skipped, so it is safe to run again.",
+      "done": "{{created}} dues generated · {{skipped}} already existed"
+    }
   },
   "units": {
     "title": "Units",

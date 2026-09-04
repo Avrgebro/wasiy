@@ -1,7 +1,7 @@
 import { ActionIcon, Alert, Badge, Button, Group, Skeleton, Text } from '@mantine/core'
 import { AddCircle, AltArrowLeft, AltArrowRight, ArrowDown, InfoCircle } from '@solar-icons/react'
 import type { TFunction } from 'i18next'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
@@ -11,7 +11,9 @@ import { StatCard } from '../../components/ui/stat-card'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { useMe } from '../auth/hooks'
-import { getFinanceSummary, getMovements, type CategoryTotal, type FinanceSummary, type MovementSummary } from './api'
+import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
+import { notifyError, notifySuccess } from '../../lib/notify'
+import { generateDues, getFinanceSummary, getMovements, type CategoryTotal, type FinanceSummary, type MovementSummary } from './api'
 import { currentMonth, monthLabel, shiftMonth, shortDate } from './month'
 import { FinancesFilters } from './finances-filters'
 import { MovementDrawer } from './movement-drawer'
@@ -79,6 +81,8 @@ function FinancesContent({
     }
   }
   const [drawerOpened, setDrawerOpened] = useState(false)
+  const [confirmingDues, setConfirmingDues] = useState(false)
+  const queryClient = useQueryClient()
 
   const thisMonth = currentMonth(timezone)
   const month = search.month ?? thisMonth
@@ -102,6 +106,16 @@ function FinancesContent({
         ...(search.category ? { category: search.category } : {}),
       }),
     placeholderData: keepPreviousData,
+  })
+
+  const dues = useMutation({
+    mutationFn: () => generateDues(accountId, locationId, month),
+    onSuccess: async ({ data }) => {
+      await queryClient.invalidateQueries({ queryKey: ['finances'] })
+      setConfirmingDues(false)
+      notifySuccess(t('finances.dues.done', { created: data.created, skipped: data.skipped }))
+    },
+    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   function updateSearch(next: Partial<FinancesSearchValues>) {
@@ -198,15 +212,27 @@ function FinancesContent({
             {t('finances.subtitle', { location: locationName, month: monthLabel(month) })}
           </Text>
         </div>
-        <Button
-          className="w-full sm:w-auto"
-          color="accent"
-          leftSection={<AddCircle size={18} />}
-          onClick={() => setDrawerOpened(true)}
-        >
-          {t('finances.record')}
-        </Button>
+        <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
+          <Button className="w-full sm:w-auto" variant="default" onClick={() => setConfirmingDues(true)}>
+            {t('finances.dues.action')}
+          </Button>
+          <Button
+            className="w-full sm:w-auto"
+            color="accent"
+            leftSection={<AddCircle size={18} />}
+            onClick={() => setDrawerOpened(true)}
+          >
+            {t('finances.record')}
+          </Button>
+        </div>
       </div>
+      <ConfirmDialog
+        body={t('finances.dues.confirmBody', { month: monthLabel(month) })}
+        opened={confirmingDues}
+        title={t('finances.dues.confirmTitle', { month: monthLabel(month) })}
+        onCancel={() => setConfirmingDues(false)}
+        onConfirm={() => dues.mutate()}
+      />
 
       <div className="flex items-center gap-2.5 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3">
         <InfoCircle className="shrink-0 text-[var(--wa-interactive)]" size={16} />

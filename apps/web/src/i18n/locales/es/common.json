@@ -956,7 +956,13 @@
       "voided": "Anulado"
     },
     "searchPlaceholder": "Buscar concepto, detalle o proveedor…",
-    "allCategories": "Todas las categorías"
+    "allCategories": "Todas las categorías",
+    "dues": {
+      "action": "Generar cuotas del mes",
+      "confirmTitle": "¿Generar las cuotas de {{month}}?",
+      "confirmBody": "Se creará una cuota de mantenimiento pendiente por cada unidad activa con cuota definida. Las unidades que ya tienen su cuota de este mes se omiten, así que puedes repetirlo sin duplicar.",
+      "done": "{{created}} cuotas generadas · {{skipped}} ya existían"
+    }
   },
   "units": {
     "title": "Unidades",

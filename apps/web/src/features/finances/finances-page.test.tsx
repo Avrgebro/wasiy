@@ -172,6 +172,12 @@ function installAdapter(
       )
     }
 
+    if (config.method === 'post' && url.endsWith('/finances/dues')) {
+      onRecord?.({ dues: JSON.parse(config.data as string) })
+
+      return Promise.resolve(axiosResponse(config, { data: { created: 2, skipped: 1 } }))
+    }
+
     if (config.method === 'post' && url.endsWith('/finances/movements') && onRecord) {
       const result = onRecord(JSON.parse(config.data as string))
 
@@ -543,5 +549,25 @@ describe('FinancesPage', () => {
     await user.click(within(drawer).getByRole('button', { name: 'Marcar recibido' }))
     await waitFor(() => expect(transitions).toHaveLength(2))
     expect(transitions[1].body).toEqual({ status: 'held' })
+  })
+
+  it('generates the month dues behind a confirmation and reports the counts', async () => {
+    currentSearch.month = '2026-08'
+    const posted: unknown[] = []
+    installAdapter([movement()], undefined, (body) => {
+      posted.push(body)
+
+      return { status: 201, data: { data: movement() } }
+    })
+
+    renderPage()
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: 'Generar cuotas del mes' }))
+    expect(await screen.findByText('¿Generar las cuotas de agosto 2026?')).toBeInTheDocument()
+    expect(posted).toHaveLength(0)
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }))
+
+    await waitFor(() => expect(posted).toEqual([{ dues: { month: '2026-08' } }]))
+    expect(await screen.findByText('2 cuotas generadas · 1 ya existían')).toBeInTheDocument()
   })
 })

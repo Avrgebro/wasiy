@@ -162,3 +162,11 @@ export function transitionMovement(
     { method: 'POST', data: note === undefined ? { status } : { status, note } },
   )
 }
+
+/** "Generar cuotas del mes": one pending dues movement per unit with a fee; idempotent per month. */
+export function generateDues(accountId: string, locationId: string, month: string) {
+  return apiRequest<{ data: { created: number; skipped: number } }>(`${base(accountId, locationId)}/dues`, {
+    method: 'POST',
+    data: { month },
+  })
+}
