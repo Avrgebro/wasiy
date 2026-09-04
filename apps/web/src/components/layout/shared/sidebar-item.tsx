@@ -58,7 +58,7 @@ function SidebarLink({
       onClick={onNavigate}
     >
       {nested ? null : (
-        <Icon aria-hidden="true" className="hidden sm:block" size={20} />
+        <Icon aria-hidden="true" className="hidden sm:block" size={20} weight={item.iconWeight} />
       )}
       <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
       {item.badge ? <item.badge /> : null}
@@ -108,7 +108,7 @@ function SidebarCollapsibleItem({
         onClick={() => setOpened((current) => !current)}
         type="button"
       >
-        <Icon aria-hidden="true" className="hidden sm:block" size={20} />
+        <Icon aria-hidden="true" className="hidden sm:block" size={20} weight={item.iconWeight} />
         <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
         <AltArrowDown
           aria-hidden="true"

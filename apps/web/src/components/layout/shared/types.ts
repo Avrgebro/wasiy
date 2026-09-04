@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { IconProps } from '@solar-icons/react'
+import type { IconProps, IconWeight } from '@solar-icons/react'
 import type { FileRouteTypes } from '../../../routeTree.gen'
 
 export type LayoutIcon = ComponentType<IconProps>
@@ -17,6 +17,8 @@ export type LayoutNavLeaf = {
   /** Optional live counter rendered after the label (e.g. pending reservations). */
   badge?: ComponentType
   icon: LayoutIcon
+  /** Solar weight; the sidebar defaults to Linear. */
+  iconWeight?: IconWeight
   labelKey: string
   to: LayoutNavTarget
 }
@@ -26,6 +28,7 @@ export type LayoutNavCollapsible = {
   children: LayoutNavLeaf[]
   defaultOpen?: boolean
   icon: LayoutIcon
+  iconWeight?: IconWeight
   labelKey: string
 }
 
