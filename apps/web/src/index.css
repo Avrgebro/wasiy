@@ -114,6 +114,34 @@
   --wa-teal-text: var(--mantine-color-teal-3);
 }
 
+/* Touch targets. On a coarse pointer (finger) every Mantine control below
+   the default size grows to a 44px minimum (Apple HIG; Material uses 48),
+   with matching horizontal padding. Keyed on the pointer, not the viewport:
+   a touch laptop gets big targets, a tablet with a mouse does not. Desktop
+   with a mouse is untouched. Unlayered so it beats Mantine's layered vars. */
+@media (pointer: coarse) {
+  .mantine-Button-root {
+    --button-height-xs: 2.75rem;
+    --button-height-sm: 2.75rem;
+    --button-height-compact-xs: 2.75rem;
+    --button-height-compact-sm: 2.75rem;
+    --button-height-compact-md: 2.75rem;
+    --button-padding-x-xs: 1rem;
+    --button-padding-x-compact-xs: 0.75rem;
+    --button-padding-x-compact-sm: 0.75rem;
+    --button-padding-x-compact-md: 0.75rem;
+  }
+
+  .mantine-ActionIcon-root {
+    --ai-size-xs: 2.75rem;
+    --ai-size-sm: 2.75rem;
+    --ai-size-md: 2.75rem;
+    --ai-size-lg: 2.75rem;
+    --ai-size-input-xs: 2.75rem;
+    --ai-size-input-sm: 2.75rem;
+  }
+}
+
 /* Pinned rail width. Must match Tailwind's `xl` breakpoint (80rem) — the
    same seam as the xl classes in app-shell/sidebar/topbar. */
 @media (min-width: 80rem) {

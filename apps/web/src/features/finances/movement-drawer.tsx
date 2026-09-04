@@ -249,11 +249,6 @@ function Actions({
             </Button>
           ))}
         </div>
-        {destructive.includes('retained') ? (
-          <Text c="dimmed" size="xs">
-            {t('finances.detail.retainHint')}
-          </Text>
-        ) : null}
         {reverts.map((status) => (
           <Button
             key={status}

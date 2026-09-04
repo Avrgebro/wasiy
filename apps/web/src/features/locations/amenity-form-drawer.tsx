@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { ApiError } from '../../app/api-client'
 import { getErrorMessage } from '../../lib/errors'
 import { getLocationSettings } from './api'
@@ -99,9 +100,9 @@ function toPayload(form: FormState): AmenityPayload {
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <Text c="dimmed" fw={700} mt="sm" size="xs" tt="uppercase">
-      {children}
-    </Text>
+    <div className="pt-1">
+      <DrawerSection label={children} />
+    </div>
   )
 }
 

@@ -901,8 +901,7 @@
       "confirmRetainBody": "El depósito no se devolverá al residente por daños o incumplimiento. Puedes revertirlo después desde este mismo panel.",
       "confirmVoid": "¿Anular el movimiento?",
       "confirmVoidBody": "El movimiento dejará de contar en los totales. Esta acción no se puede deshacer.",
-      "confirm": "Confirmar",
-      "retainHint": "Se retiene por daños o incumplimiento."
+      "confirm": "Confirmar"
     },
     "record": "Registrar movimiento",
     "form": {

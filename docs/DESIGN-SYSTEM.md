@@ -206,6 +206,12 @@ Color:
 
 Action rows in drawers: one row of stretched `md` buttons (primary accent, the rest default), tertiaries below as text buttons. Both detail drawers follow this.
 
+Touch targets:
+
+- On a coarse pointer (`@media (pointer: coarse)`, a finger regardless of screen size) every Mantine button and icon button below the default size grows to a `44px` minimum with wider padding. This is one rule in `index.css` on `.mantine-Button-root` and `.mantine-ActionIcon-root`; nothing per page.
+- Custom controls (chip rows, sort headers, filter-chip remove, text links that act) carry Tailwind's `pointer-coarse:min-h-11` and get more gap between neighbours with `pointer-coarse:gap-3`.
+- Desktop with a mouse is unchanged. Verify in the browser with device emulation; jsdom cannot evaluate media queries.
+
 ## Forms
 
 Forms should be clear, predictable, and resistant to data-entry mistakes.

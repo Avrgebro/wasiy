@@ -200,7 +200,7 @@ function DataTableFooter({
       <Text c="dimmed" size="sm">
         {t('table.showing', { from, to, total: meta.total })}
       </Text>
-      <Group gap={6}>
+      <Group className="pointer-coarse:gap-3" gap={6}>
         <ActionIcon
           aria-label={t('table.previousPage')}
           disabled={meta.current_page <= 1}
@@ -245,7 +245,7 @@ function SortHeader({
     <button
       aria-label={t(active ? (active.desc ? 'table.sortedDesc' : 'table.sortedAsc') : 'table.sortBy')}
       aria-sort={active ? (active.desc ? 'descending' : 'ascending') : undefined}
-      className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 font-inherit text-inherit uppercase tracking-wider hover:text-[var(--mantine-color-text)]"
+      className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 font-inherit text-inherit uppercase tracking-wider hover:text-[var(--mantine-color-text)] pointer-coarse:min-h-11"
       type="button"
       onClick={onClick}
     >

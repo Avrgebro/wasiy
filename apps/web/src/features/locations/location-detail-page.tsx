@@ -2,6 +2,7 @@ import { Alert, Button, Skeleton, Tabs, Text } from '@mantine/core'
 import { notifySuccess, notifyError } from '../../lib/notify'
 import { Buildings2, CameraMinimalistic, DangerTriangle } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMediaQuery } from '@mantine/hooks'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -50,6 +51,9 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
   const { tab } = routeApi.useSearch()
   const queryClient = useQueryClient()
   const [drawerOpened, setDrawerOpened] = useState(false)
+  // One button, rendered once; the breakpoint only decides where. Matches
+  // Tailwind's `sm` (40rem). Read synchronously so phones do not flash.
+  const wide = useMediaQuery('(min-width: 40rem)', true, { getInitialValueInEffect: false })
   const [deactivating, setDeactivating] = useState<LocationSummary | null>(null)
 
   const detailQuery = useQuery({
@@ -105,6 +109,20 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
 
   const location = detailQuery.data!.data
   const deactivated = location.status === 'deactivated'
+  const primaryAction = deactivated ? (
+    <Button
+      color="accent"
+      fullWidth={!wide}
+      loading={reactivateMutation.isPending}
+      onClick={() => reactivateMutation.mutate()}
+    >
+      {t('locations.detail.reactivateLocation')}
+    </Button>
+  ) : (
+    <Button color="accent" fullWidth={!wide} onClick={() => setDrawerOpened(true)}>
+      {t('locations.editTitle')}
+    </Button>
+  )
 
   return (
     <div className="@container flex flex-col gap-5">
@@ -125,7 +143,8 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.55)] via-transparent to-transparent" />
         {!deactivated && (
           <button
-            className="absolute right-4 top-4 flex cursor-pointer items-center gap-[7px] rounded-lg border border-[#2A3F40] bg-[rgba(16,29,30,0.85)] px-[13px] py-2 text-[12.5px] font-semibold text-[#E9ECE8]"
+            aria-label={t('locations.detail.changeCover')}
+            className="absolute right-4 top-4 flex size-11 cursor-pointer items-center justify-center gap-[7px] rounded-lg border border-[#2A3F40] bg-[rgba(16,29,30,0.85)] text-[12.5px] font-semibold text-[#E9ECE8] sm:size-auto sm:px-[13px] sm:py-2"
             type="button"
             onClick={() => {
               void navigate({
@@ -140,8 +159,8 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
               })
             }}
           >
-            <CameraMinimalistic size={15} />
-            {t('locations.detail.changeCover')}
+            <CameraMinimalistic size={17} />
+            <span className="hidden sm:inline">{t('locations.detail.changeCover')}</span>
           </button>
         )}
         {/* In flow (not absolute) so on narrow screens the actions wrap
@@ -149,12 +168,12 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         <div className="relative flex flex-wrap items-end justify-between gap-3 px-4 pb-[18px] pt-8 sm:px-6">
           <div className="flex min-w-0 items-end gap-4">
             {/* Brand tile stands in for the location avatar for now (mockup 03). */}
-            <div className="grid size-16 shrink-0 place-items-center rounded-surface border border-[#2A3F40] bg-[#124E52] text-[#F7F5F0]">
-              <WasiyLogo size={34} />
+            <div className="grid size-12 shrink-0 place-items-center rounded-inner border border-[#2A3F40] bg-[#124E52] text-[#F7F5F0] sm:size-16 sm:rounded-surface">
+              <WasiyLogo size={28} />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="text-[26px] font-semibold tracking-tight text-white">
+                <span className="text-xl font-semibold tracking-tight text-white sm:text-[26px]">
                   {location.name}
                 </span>
                 {/* The header always sits on a photo/dark cover, so the pill keeps
@@ -172,21 +191,12 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
               </Text>
             </div>
           </div>
-          {deactivated ? (
-            <Button
-              color="accent"
-              loading={reactivateMutation.isPending}
-              onClick={() => reactivateMutation.mutate()}
-            >
-              {t('locations.detail.reactivateLocation')}
-            </Button>
-          ) : (
-            <Button color="accent" onClick={() => setDrawerOpened(true)}>
-              {t('locations.editTitle')}
-            </Button>
-          )}
+          {wide ? primaryAction : null}
         </div>
       </header>
+
+      {/* Phones: the primary action leaves the cover so identity has room. */}
+      {!wide ? primaryAction : null}
 
       {deactivated ? (
         <div className="flex flex-wrap items-center gap-3.5 rounded-surface border border-[var(--wa-warning)]/50 bg-[var(--wa-warning)]/10 px-[18px] py-3.5">

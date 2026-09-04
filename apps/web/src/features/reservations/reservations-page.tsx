@@ -167,18 +167,17 @@ function ReservationsContent({
           className="w-full sm:w-auto"
           color="accent"
           leftSection={<AddCircle size={18} />}
-          size="sm"
           onClick={() => setDrawerOpened(true)}
         >
           {t('reservations.newReservation')}
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
         {chips.map((entry) => (
           <button
             key={entry.key}
-            className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors ${
+            className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
               chip === entry.key
                 ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
                 : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'
@@ -220,23 +219,19 @@ function ReservationsContent({
               <ActionIcon
                 aria-label={t('reservations.previousWeek')}
                 radius="md"
-                size="input-sm"
+                size="input-md"
                 variant="default"
                 onClick={() => updateSearch({ date: addDays(weekStart, -7) })}
               >
                 <AltArrowLeft size={16} />
               </ActionIcon>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => updateSearch({ date: undefined })}
-              >
+              <Button variant="default" onClick={() => updateSearch({ date: undefined })}>
                 {t('reservations.today')}
               </Button>
               <ActionIcon
                 aria-label={t('reservations.nextWeek')}
                 radius="md"
-                size="input-sm"
+                size="input-md"
                 variant="default"
                 onClick={() => updateSearch({ date: addDays(weekStart, 7) })}
               >

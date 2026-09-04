@@ -901,8 +901,7 @@
       "confirmRetainBody": "The deposit will not be returned to the resident, for damages or a breach. You can revert it later from this panel.",
       "confirmVoid": "Void the movement?",
       "confirmVoidBody": "The movement will stop counting in the totals. This cannot be undone.",
-      "confirm": "Confirm",
-      "retainHint": "Kept for damages or a breach."
+      "confirm": "Confirm"
     },
     "record": "Record movement",
     "form": {

@@ -202,7 +202,6 @@ function FinancesContent({
           className="w-full sm:w-auto"
           color="accent"
           leftSection={<AddCircle size={18} />}
-          size="sm"
           onClick={() => setDrawerOpened(true)}
         >
           {t('finances.record')}
@@ -232,7 +231,7 @@ function FinancesContent({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
         <ChipButton active={chip === undefined} label={t('finances.chips.all')} onClick={() => updateSearch({ chip: undefined })} />
         {FINANCE_CHIPS.map((key) => (
           <ChipButton
@@ -250,7 +249,7 @@ function FinancesContent({
           <ActionIcon
             aria-label={t('finances.previousMonth')}
             radius="md"
-            size="input-sm"
+            size="input-md"
             variant="default"
             onClick={() => updateSearch({ month: shiftMonth(month, -1) })}
           >
@@ -258,7 +257,6 @@ function FinancesContent({
           </ActionIcon>
           <Button
             className="min-w-36 capitalize"
-            size="sm"
             variant="default"
             onClick={() => updateSearch({ month: undefined })}
           >
@@ -268,7 +266,7 @@ function FinancesContent({
             aria-label={t('finances.nextMonth')}
             disabled={month >= thisMonth}
             radius="md"
-            size="input-sm"
+            size="input-md"
             variant="default"
             onClick={() => updateSearch({ month: shiftMonth(month, 1) })}
           >
@@ -325,7 +323,7 @@ function ChipButton({ active, label, onClick }: { active: boolean; label: string
   return (
     <button
       aria-pressed={active}
-      className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors ${
+      className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
         active
           ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
           : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'

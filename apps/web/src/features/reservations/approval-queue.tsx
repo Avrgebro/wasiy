@@ -155,7 +155,7 @@ export function ApprovalQueue({
                   </Text>
                 ) : null}
                 {canDecide ? (
-                  <Group gap={8} grow mt={11} onClick={(event) => event.stopPropagation()}>
+                  <Group className="pointer-coarse:gap-3" gap={8} grow mt={11} onClick={(event) => event.stopPropagation()}>
                     <Button
                       color="accent"
                       loading={approveMutation.isPending && approveMutation.variables === request.id}
@@ -186,7 +186,7 @@ export function ApprovalQueue({
         )}
         {requests.length > QUEUE_PREVIEW_COUNT ? (
           <button
-            className="cursor-pointer border-0 bg-transparent p-0 text-left text-[13px] font-medium text-[var(--wa-interactive)]"
+            className="cursor-pointer border-0 bg-transparent p-0 text-left text-[13px] font-medium text-[var(--wa-interactive)] pointer-coarse:min-h-11"
             type="button"
             onClick={() => setExpanded((current) => !current)}
           >

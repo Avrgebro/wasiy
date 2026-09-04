@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { createLocation, updateLocation, type LocationPayload, type LocationSummary } from './api'
@@ -66,9 +67,9 @@ function toPayload(values: LocationFormValues): LocationPayload {
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <Text c="dimmed" fw={700} mt="sm" size="xs" tt="uppercase">
-      {children}
-    </Text>
+    <div className="pt-1">
+      <DrawerSection label={children} />
+    </div>
   )
 }
 
@@ -135,7 +136,6 @@ export function LocationFormDrawer({
     >
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => void submit(event)}>
         <AppDrawerBody>
-          <div className="flex flex-col gap-3">
             {formState.errors.root ? (
               <Alert color="error">{formState.errors.root.message}</Alert>
             ) : null}
@@ -191,7 +191,7 @@ export function LocationFormDrawer({
               name="address_line2"
               placeholder={t('locations.form.addressLine2Placeholder')}
             />
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
               <FormTextInput control={control} label={t('locations.form.district')} name="district" />
               <FormTextInput control={control} label={t('locations.form.city')} name="city" />
               <FormTextInput control={control} label={t('locations.form.state')} name="state" />
@@ -231,7 +231,7 @@ export function LocationFormDrawer({
               )}
             />
             {editing && onDeactivate ? (
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
+              <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <Text fw={600} size="sm">
                     {t('locations.form.sensitiveZone')}
@@ -240,12 +240,11 @@ export function LocationFormDrawer({
                     {t('locations.form.sensitiveZoneHint')}
                   </Text>
                 </div>
-                <Button color="error" size="xs" variant="light" onClick={onDeactivate}>
+                <Button className="w-full sm:w-auto" color="error" variant="light" onClick={onDeactivate}>
                   {t('locations.deactivate')}
                 </Button>
               </div>
             ) : null}
-          </div>
         </AppDrawerBody>
         <AppDrawerFooter>
           <Button variant="default" onClick={onClose}>
