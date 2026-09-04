@@ -226,7 +226,7 @@ function Actions({
       <Textarea
         label={t('finances.detail.actionNote')}
         placeholder={t('finances.detail.actionNoteHint')}
-        rows={2}
+        rows={3}
         value={note}
         onChange={(event) => onNote(event.currentTarget.value)}
       />
@@ -259,7 +259,7 @@ function Actions({
             key={status}
             c="dimmed"
             disabled={loading}
-            size="compact-sm"
+            size="sm"
             variant="subtle"
             onClick={() => onTransition(status)}
           >

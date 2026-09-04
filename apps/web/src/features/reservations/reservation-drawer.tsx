@@ -370,35 +370,32 @@ function Decisions({
       <Textarea
         description={t(open ? 'reservations.detail.noteRequiredHint' : 'reservations.detail.noteHint')}
         label={t('finances.detail.actionNote')}
-        rows={2}
+        rows={3}
         value={note}
         onChange={(event) => onNote(event.currentTarget.value)}
       />
-      {open ? (
-        <div className="flex w-full gap-2.5">
-          <Button className="flex-1" color="accent" loading={loading} onClick={() => onDecide('approve')}>
-            {t('reservations.actions.approve')}
+      {/* One row of stretched md buttons, like the movement drawer: the
+          primary in accent, the rest default. Open requests are rejected,
+          never cancelled, so cancel only appears once a booking is approved. */}
+      <div className="flex w-full gap-2.5">
+        {open ? (
+          <>
+            <Button className="flex-1" color="accent" loading={loading} onClick={() => onDecide('approve')}>
+              {t('reservations.actions.approve')}
+            </Button>
+            <Button className="flex-1" disabled={!hasNote || loading} variant="default" onClick={() => onDecide('observe')}>
+              {t('reservations.actions.observe')}
+            </Button>
+            <Button className="flex-1" disabled={!hasNote || loading} variant="default" onClick={() => onDecide('reject')}>
+              {t('reservations.actions.reject')}
+            </Button>
+          </>
+        ) : (
+          <Button className="flex-1" disabled={loading} variant="default" onClick={onCancel}>
+            {t('reservations.actions.cancel')}
           </Button>
-          <Button className="flex-1" disabled={!hasNote || loading} variant="default" onClick={() => onDecide('observe')}>
-            {t('reservations.actions.observe')}
-          </Button>
-          <Button className="flex-1" disabled={!hasNote || loading} variant="default" onClick={() => onDecide('reject')}>
-            {t('reservations.actions.reject')}
-          </Button>
-        </div>
-      ) : null}
-      {cancellable ? (
-        <Button
-          className={open ? 'self-start' : undefined}
-          disabled={loading}
-          size={open ? 'compact-sm' : 'sm'}
-          variant={open ? 'subtle' : 'default'}
-          c={open ? 'dimmed' : undefined}
-          onClick={onCancel}
-        >
-          {t('reservations.actions.cancel')}
-        </Button>
-      ) : null}
+        )}
+      </div>
     </>
   )
 }
