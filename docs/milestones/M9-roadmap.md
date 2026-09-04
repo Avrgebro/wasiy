@@ -53,3 +53,12 @@ Derived on the unit resource: `occupancy` (`occupied` | `vacant` | `attention` �
 4. **Drawers and confirmations** (unit, resident, vehicle).
 5. **Wrap-up** — remove Vehículos nav and route, deep links from reservations and finances, seeder with fees, docs.
 6. **Generar cuotas del mes** on the finances page.
+
+## Post-ship revision (2026-09-03)
+
+Slices 1–5 shipped the same day. Notes against the plan:
+
+- Vehicles: the `/admin/registry/vehicles` route now redirects to the units list and the nav entry is gone; `features/vehicles/api.ts` stays for the vehicle drawer. The mockup's per-vehicle parking spot has no field behind it and was left out.
+- "Nueva persona" reuses `POST /accounts/{account}/residents` with `memberships[]`; the portal invitation is a second call and is skipped with a warning when the person has no email.
+- Deep links: movement and reservation drawers link the unit; the unit page links the month in Finanzas and the reservations page.
+- Demo units carry fees, areas, shares and labels so the list and dues generation have data.

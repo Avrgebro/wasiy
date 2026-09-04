@@ -108,7 +108,7 @@ A file or record shared inside the system, such as rules, bylaws, policies, form
 
 ### Vehicle
 
-A car, motorcycle, bicycle, or other transport asset associated with a Unit in the initial product, and potentially with Visitors, Residents, or parking permissions in later phases.
+A car, motorcycle, bicycle, or other transport asset registered to a Unit. Vehicles are managed from the Unit (there is no separate vehicles surface); staff find a vehicle by plate from the Units list. Parking spots are labels on the Unit, not records of their own. Visitor vehicles and parking permissions belong to later phases.
 
 ### Package
 

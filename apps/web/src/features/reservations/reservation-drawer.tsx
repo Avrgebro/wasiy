@@ -137,7 +137,22 @@ export function ReservationDrawer({
             <ReservationSlotBand reservation={reservation} timezone={timezone} />
 
             <DrawerFacts>
-              <DrawerFact label={t('reservations.columns.unit')} value={reservation.unit_number ?? '—'} />
+              <DrawerFact
+                label={t('reservations.columns.unit')}
+                value={
+                  reservation.unit_number ? (
+                    <Link
+                      className="text-[var(--wa-interactive)] no-underline hover:underline"
+                      params={{ unitId: reservation.unit_id }}
+                      to="/admin/registry/units/$unitId"
+                    >
+                      {reservation.unit_number} →
+                    </Link>
+                  ) : (
+                    '—'
+                  )
+                }
+              />
               <DrawerFact
                 label={t('reservations.columns.resident')}
                 value={[reservation.resident_name, reservation.resident_phone].filter(Boolean).join(' · ') || '—'}

@@ -2,7 +2,6 @@ import {
   Buildings2,
   Calendar,
   ClipboardList,
-  KeySquare,
   Magnifier,
   Settings,
   Speaker,
@@ -121,7 +120,6 @@ const locationNavigationGroup: NavGroupSpec = {
       ],
     },
     { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units' },
-    { icon: KeySquare, labelKey: 'nav.vehicles', to: '/admin/registry/vehicles' },
     {
       badge: PendingReservationsBadge,
       icon: Calendar,

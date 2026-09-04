@@ -111,7 +111,19 @@ export function MovementDrawer({
               ) : null}
               <DrawerFact
                 label={t(movement.unit_number ? 'finances.columns.unit' : 'finances.form.counterparty')}
-                value={movement.unit_number ?? movement.counterparty ?? '—'}
+                value={
+                  movement.unit_id && movement.unit_number ? (
+                    <Link
+                      className="text-[var(--wa-interactive)] no-underline hover:underline"
+                      params={{ unitId: movement.unit_id }}
+                      to="/admin/registry/units/$unitId"
+                    >
+                      {movement.unit_number} →
+                    </Link>
+                  ) : (
+                    (movement.counterparty ?? '—')
+                  )
+                }
               />
               {movement.reservation ? (
                 <DrawerFact

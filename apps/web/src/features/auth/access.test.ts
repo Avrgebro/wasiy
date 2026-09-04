@@ -159,7 +159,8 @@ describe('access helpers', () => {
     expect(serialized).toContain('navGroups.location')
     expect(serialized).toContain('/admin')
     expect(serialized).toContain('/admin/registry/units')
-    expect(serialized).toContain('/admin/registry/vehicles')
+    // Vehicles live inside units since M9; no standalone entry.
+    expect(serialized).not.toContain('/admin/registry/vehicles')
 
     // Residents sits inside the People group rather than at the top level.
     expect(serialized).toContain('nav.people')
@@ -194,7 +195,8 @@ describe('access helpers', () => {
     const serialized = JSON.stringify(navItems)
 
     expect(serialized).toContain('navGroups.location')
-    expect(serialized).toContain('/admin/registry/vehicles')
+    // Vehicles live inside units since M9; no standalone entry.
+    expect(serialized).not.toContain('/admin/registry/vehicles')
 
     // A manager manages the registry, so the manage-only entries stay.
     expect(canManageRegistry(me)).toBe(true)
