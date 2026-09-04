@@ -13,6 +13,7 @@ use App\Http\Resources\FinancialMovementResource;
 use App\Http\Resources\PackageResource;
 use App\Http\Resources\ReservationResource;
 use App\Http\Resources\UnitResource;
+use App\Http\Resources\VisitResource;
 use App\Models\ActivityLog;
 use App\Models\FinancialMovement;
 use App\Models\Location;
@@ -20,6 +21,7 @@ use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Unit;
 use App\Models\User;
+use App\Models\Visit;
 use App\Services\ActivityLogger;
 use App\Support\SortParser;
 use Carbon\CarbonImmutable;
@@ -189,7 +191,15 @@ class UnitController extends Controller
             ->orderByDesc('received_at')
             ->get();
 
+        $visits = Visit::query()
+            ->where('unit_id', $unit->id)
+            ->with(['resident', 'checkedInBy'])
+            ->orderByDesc('checked_in_at')
+            ->limit(5)
+            ->get();
+
         return (new UnitResource($unit))->additional([
+            'visits' => VisitResource::collection($visits)->resolve(),
             'packages' => PackageResource::collection($packages)->resolve(),
             'reservations' => ReservationResource::collection($reservations)->resolve(),
             'movements' => FinancialMovementResource::collection($movements)->resolve(),

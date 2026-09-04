@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\StaffInvitationController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UnitMembershipController;
 use App\Http\Controllers\Api\VehicleController;
+use App\Http\Controllers\Api\VisitController;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
@@ -110,6 +111,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::get('/locations/{location}/packages', [PackageController::class, 'index']);
     Route::post('/locations/{location}/packages', [PackageController::class, 'store']);
     Route::post('/packages/{package}/deliver', [PackageController::class, 'deliver']);
+    Route::get('/locations/{location}/visits', [VisitController::class, 'index']);
+    Route::post('/locations/{location}/visits', [VisitController::class, 'store']);
+    Route::post('/visits/{visit}/check-out', [VisitController::class, 'checkOut']);
     Route::get('/units/{unit}', [UnitController::class, 'show']);
     Route::post('/units/{unit}/notes', [UnitController::class, 'storeNote']);
     Route::post('/units/{unit}/deactivate', [UnitController::class, 'deactivate']);

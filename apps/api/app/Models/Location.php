@@ -144,9 +144,13 @@ class Location extends Model
         return $this->hasMany(StaffLocationRole::class);
     }
 
-    /**
-     * @return HasMany<Unit, $this>
-     */
+    /** @return HasMany<Visit, $this> */
+    public function visits(): HasMany
+    {
+        return $this->hasMany(Visit::class);
+    }
+
+    /** @return HasMany<Unit, $this> */
     public function units(): HasMany
     {
         return $this->hasMany(Unit::class);
