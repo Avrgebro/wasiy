@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Finances\GenerateMonthlyDues;
 use App\Actions\Finances\RecordMovement;
 use App\Actions\Finances\TransitionMovement;
 use App\Enums\MovementCategory;
@@ -51,6 +52,7 @@ class FinancialMovementController extends Controller
             'direction' => ['sometimes', 'nullable', Rule::enum(MovementDirection::class)],
             'status' => ['sometimes', 'nullable', 'string', 'max:255'],
             'category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'unit_id' => ['sometimes', 'nullable', 'string', 'ulid'],
             'search' => ['sometimes', 'nullable', 'string', 'max:255'],
             'sort' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
@@ -65,6 +67,7 @@ class FinancialMovementController extends Controller
                 ->where('direction', $direction))
             ->when($statuses !== [], fn (Builder $query) => $query->whereIn('status', $statuses))
             ->when($categories !== [], fn (Builder $query) => $query->whereIn('category', $categories))
+            ->when($validated['unit_id'] ?? null, fn (Builder $query, string $unitId) => $query->where('unit_id', $unitId))
             ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query
                 ->searchLike(['concept', 'detail', 'counterparty'], $search))
             ->with(self::RELATIONS);
@@ -218,6 +221,23 @@ class FinancialMovementController extends Controller
 
         return (new FinancialMovementResource($movement->load(self::RELATIONS)))
             ->response()->setStatusCode(201);
+    }
+
+    /**
+     * "Generar cuotas del mes": one pending dues row per active unit with a
+     * fee; rerunning only fills the gaps.
+     */
+    public function generateDues(Request $request, Account $account, Location $location, GenerateMonthlyDues $generate): JsonResponse
+    {
+        $this->authorizeAccount($request, $account);
+        Gate::authorize('create', [FinancialMovement::class, $location]);
+
+        $validated = $request->validate(['month' => ['sometimes', 'nullable', 'date_format:Y-m']]);
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        return response()->json(['data' => $generate->handle($location, $actor, $this->month($validated, $location))]);
     }
 
     public function transition(

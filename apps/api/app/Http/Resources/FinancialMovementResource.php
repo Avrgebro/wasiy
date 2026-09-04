@@ -43,6 +43,7 @@ class FinancialMovementResource extends JsonResource
                 'status' => $this->reservation->status->value,
             ]),
             'occurred_on' => $this->occurred_on->toDateString(),
+            'period' => $this->period,
             'due_on' => $this->due_on?->toDateString(),
             'note' => $this->note,
             'created_by' => $this->created_by,

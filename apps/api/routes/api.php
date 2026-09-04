@@ -86,6 +86,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::get('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'index']);
         Route::get('/accounts/{account}/locations/{location}/finances/summary', [FinancialMovementController::class, 'summary']);
         Route::post('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'store']);
+        Route::post('/accounts/{account}/locations/{location}/finances/dues', [FinancialMovementController::class, 'generateDues']);
         Route::get('/accounts/{account}/finances/movements/{financialMovement}', [FinancialMovementController::class, 'show']);
         Route::post('/accounts/{account}/finances/movements/{financialMovement}/status', [FinancialMovementController::class, 'transition']);
         Route::get('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'show']);
@@ -106,6 +107,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::post('/locations/{location}/vehicles', [VehicleController::class, 'store']);
     Route::post('/locations/{location}/registry-imports', [RegistryImportController::class, 'store']);
     Route::get('/units/{unit}', [UnitController::class, 'show']);
+    Route::post('/units/{unit}/notes', [UnitController::class, 'storeNote']);
+    Route::post('/units/{unit}/deactivate', [UnitController::class, 'deactivate']);
+    Route::post('/units/{unit}/reactivate', [UnitController::class, 'reactivate']);
     Route::patch('/units/{unit}', [UnitController::class, 'update']);
     Route::delete('/units/{unit}', [UnitController::class, 'destroy']);
     Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']);

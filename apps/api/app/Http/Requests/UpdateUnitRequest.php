@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\RegistryStatus;
+use App\Enums\UnitType;
 use App\Models\Unit;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
@@ -19,6 +20,12 @@ class UpdateUnitRequest extends StoreUnitRequest
             'unit_number' => ['sometimes', 'required', 'string', 'max:255'],
             'building_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'type' => ['sometimes', Rule::enum(UnitType::class)],
+            'area_m2' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999'],
+            'participation_share' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'maintenance_fee' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000000'],
+            'parking_spots' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'storage_rooms' => ['sometimes', 'nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'required', Rule::enum(RegistryStatus::class)],
             'notes' => ['sometimes', 'nullable', 'string', 'max:5000'],
         ];

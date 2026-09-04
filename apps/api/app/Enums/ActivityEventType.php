@@ -16,6 +16,8 @@ enum ActivityEventType: string
     case UnitCreated = 'unit.created';
     case UnitUpdated = 'unit.updated';
     case UnitInactivated = 'unit.inactivated';
+    case UnitReactivated = 'unit.reactivated';
+    case UnitNoteAdded = 'unit.note_added';
     case ResidentCreated = 'resident.created';
     case ResidentUpdated = 'resident.updated';
     case ResidentInactivated = 'resident.inactivated';
@@ -40,6 +42,7 @@ enum ActivityEventType: string
     case ReservationCancelled = 'reservation.cancelled';
     case MovementRecorded = 'movement.recorded';
     case MovementStatusChanged = 'movement.status_changed';
+    case DuesGenerated = 'dues.generated';
     case AmenityCreated = 'amenity.created';
     case AmenityUpdated = 'amenity.updated';
     case AmenityDeactivated = 'amenity.deactivated';

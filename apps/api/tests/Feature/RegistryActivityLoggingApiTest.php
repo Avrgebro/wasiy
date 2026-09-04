@@ -87,7 +87,8 @@ test('unit create update and inactivate log activity and no-op update does not',
         ->sole();
 
     expect($log->summary)->toContain('Unidad')
-        ->and($log->metadata['unit_label'])->toBe('302');
+        // A partial PATCH must not wipe the building (it used to).
+        ->and($log->metadata['unit_label'])->toBe('Torre A / 302');
 });
 
 test('resident create update and inactivate log activity and no-op update does not', function () {

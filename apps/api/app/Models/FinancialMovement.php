@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'unit_id',
     'reservation_id',
     'occurred_on',
+    'period',
     'due_on',
     'note',
 ])]

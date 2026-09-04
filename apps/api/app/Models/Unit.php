@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RegistryStatus;
+use App\Enums\UnitType;
 use Database\Factories\UnitFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -14,7 +15,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
-#[Fillable(['account_id', 'location_id', 'unit_number', 'building_name', 'floor', 'status', 'notes'])]
+#[Fillable([
+    'account_id',
+    'location_id',
+    'unit_number',
+    'type',
+    'building_name',
+    'floor',
+    'area_m2',
+    'participation_share',
+    'maintenance_fee',
+    'parking_spots',
+    'storage_rooms',
+    'status',
+    'notes',
+])]
 class Unit extends Model
 {
     /** @use HasFactory<UnitFactory> */
@@ -27,6 +42,10 @@ class Unit extends Model
     {
         return [
             'status' => RegistryStatus::class,
+            'type' => UnitType::class,
+            'area_m2' => 'decimal:2',
+            'participation_share' => 'decimal:3',
+            'maintenance_fee' => 'integer',
         ];
     }
 
@@ -113,6 +132,44 @@ class Unit extends Model
     }
 
     /**
+     * Active residents who already have a portal user.
+     *
+     * @return HasMany<UnitMembership, $this>
+     */
+    public function portalMemberships(): HasMany
+    {
+        return $this->unitMemberships()->active()
+            ->whereHas('resident', fn (Builder $query) => $query->whereNotNull('user_id'));
+    }
+
+    /**
+     * Active residents with a pending portal invitation and no user yet.
+     *
+     * @return HasMany<UnitMembership, $this>
+     */
+    public function invitedMemberships(): HasMany
+    {
+        return $this->unitMemberships()->active()
+            ->whereHas('resident', fn (Builder $query) => $query
+                ->whereNull('user_id')
+                ->whereHas('userInvitations', fn (Builder $invitation) => $invitation->where('status', 'pending')));
+    }
+
+    /**
+     * Comma-separated labels ("E-12, E-13") as a clean list.
+     *
+     * @return list<string>
+     */
+    public static function labels(?string $raw): array
+    {
+        return collect(explode(',', (string) $raw))
+            ->map(fn (string $label): string => trim($label))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return array<string, callable>
      */
     public static function summaryRelations(): array
@@ -130,6 +187,8 @@ class Unit extends Model
         return [
             'activeUnitMemberships',
             'vehicles',
+            'portalMemberships',
+            'invitedMemberships',
         ];
     }
 

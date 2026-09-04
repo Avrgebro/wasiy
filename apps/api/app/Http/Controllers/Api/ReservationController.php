@@ -46,6 +46,7 @@ class ReservationController extends Controller
             'to' => ['sometimes', 'date_format:Y-m-d'],
             'status' => ['sometimes', 'string'],
             'amenity_id' => ['sometimes', 'string', 'ulid'],
+            'unit_id' => ['sometimes', 'string', 'ulid'],
         ]);
 
         $statuses = collect(explode(',', $validated['status'] ?? ''))
@@ -65,6 +66,8 @@ class ReservationController extends Controller
             ->when($statuses->isNotEmpty(), fn ($query) => $query->whereIn('status', $statuses))
             ->when($validated['amenity_id'] ?? null, fn ($query, string $amenityId) => $query
                 ->where('amenity_id', $amenityId))
+            ->when($validated['unit_id'] ?? null, fn ($query, string $unitId) => $query
+                ->where('unit_id', $unitId))
             ->orderBy('starts_at')
             ->get();
 

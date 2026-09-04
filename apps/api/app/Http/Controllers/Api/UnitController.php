@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Units\DeactivateUnit;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
+use App\Enums\UnitType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUnitRequest;
 use App\Http\Requests\UpdateUnitRequest;
+use App\Http\Resources\FinancialMovementResource;
+use App\Http\Resources\ReservationResource;
 use App\Http\Resources\UnitResource;
+use App\Models\ActivityLog;
+use App\Models\FinancialMovement;
 use App\Models\Location;
+use App\Models\Reservation;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Support\SortParser;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,6 +44,10 @@ class UnitController extends Controller
             ...$this->paginationRules(),
             'search' => ['sometimes', 'nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'nullable', Rule::enum(RegistryStatus::class)],
+            'occupancy' => ['sometimes', 'nullable', Rule::in(['occupied', 'vacant', 'attention'])],
+            'portal' => ['sometimes', 'nullable', Rule::in(['active', 'invited', 'not_invited', 'none'])],
+            'fee' => ['sometimes', 'nullable', Rule::in(['missing'])],
+            'type' => ['sometimes', 'nullable', Rule::enum(UnitType::class)],
             'sort' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
 
@@ -45,7 +57,25 @@ class UnitController extends Controller
             ->where('account_id', $location->account_id)
             ->where('location_id', $location->id)
             ->when($status, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->searchLike(['unit_number', 'building_name'], $search))
+            // One box finds a home by number, by who lives there, or by plate.
+            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->where(fn (Builder $group) => $group
+                ->searchLike(['unit_number', 'building_name'], $search)
+                ->orWhereHas('activeUnitMemberships.resident', fn (Builder $resident) => $resident
+                    ->searchLike(["CONCAT(first_name, ' ', last_name)"], $search))
+                ->orWhereHas('vehicles', fn (Builder $vehicle) => $vehicle->searchLike(['plate'], $search))))
+            ->when($validated['type'] ?? null, fn (Builder $query, string $type) => $query->where('type', $type))
+            ->when(($validated['fee'] ?? null) === 'missing', fn (Builder $query) => $query->whereNull('maintenance_fee'))
+            ->when($validated['occupancy'] ?? null, fn (Builder $query, string $occupancy) => match ($occupancy) {
+                'occupied' => $query->whereHas('activeUnitMemberships'),
+                'vacant' => $query->whereDoesntHave('activeUnitMemberships'),
+                default => $query->whereHas('activeUnitMemberships')->whereDoesntHave('primaryContactMembership'),
+            })
+            ->when($validated['portal'] ?? null, fn (Builder $query, string $portal) => match ($portal) {
+                'active' => $query->whereHas('portalMemberships'),
+                'invited' => $query->whereDoesntHave('portalMemberships')->whereHas('invitedMemberships'),
+                // "Sin portal": residents, but nobody in and nobody invited.
+                default => $query->whereHas('activeUnitMemberships')->whereDoesntHave('portalMemberships')->whereDoesntHave('invitedMemberships'),
+            })
             ->with(Unit::summaryRelations())
             ->withCount(Unit::summaryCounts());
 
@@ -56,6 +86,7 @@ class UnitController extends Controller
                 ->orderBy('floor', $direction),
             'unit_number' => 'unit_number',
             'status' => 'status',
+            'maintenance_fee' => 'maintenance_fee',
             'resident_count' => 'active_unit_memberships_count',
             'created_at' => 'created_at',
         ], default: 'building_name,floor,unit_number');
@@ -76,9 +107,10 @@ class UnitController extends Controller
 
         $unit = DB::transaction(function () use ($request, $location, $actor): Unit {
             $unit = Unit::query()->create([
-                ...$request->safe()->only(['unit_number', 'building_name', 'floor', 'notes']),
+                ...$request->safe()->only(['unit_number', 'type', 'building_name', 'floor', 'area_m2', 'participation_share', 'maintenance_fee', 'parking_spots', 'storage_rooms', 'notes']),
                 'account_id' => $location->account_id,
                 'location_id' => $location->id,
+                'type' => $request->safe()->enum('type', UnitType::class) ?? UnitType::Apartment,
                 'status' => RegistryStatus::Active,
             ]);
 
@@ -95,11 +127,114 @@ class UnitController extends Controller
         return (new UnitResource($unit->loadSummary()))->response()->setStatusCode(201);
     }
 
+    /**
+     * The detail page (mockup 12): the unit with its people and vehicles,
+     * plus the sections that read other modules — upcoming bookings, this
+     * month's charges and the pending balance, and the internal notes.
+     */
     public function show(Unit $unit): UnitResource
     {
         Gate::authorize('view', $unit);
 
-        return new UnitResource($unit->loadSummary());
+        $unit->loadSummary()->load([
+            'activeUnitMemberships.resident.userInvitations',
+            'vehicles' => fn ($query) => $query->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END")->orderBy('plate'),
+        ]);
+
+        $timezone = $unit->location->timezone;
+        $month = CarbonImmutable::now($timezone)->format('Y-m');
+
+        $reservations = Reservation::query()
+            ->where('unit_id', $unit->id)
+            ->whereIn('status', ['pending', 'observed', 'approved'])
+            ->where('ends_at', '>', now())
+            ->with(['amenity', 'resident'])
+            ->orderBy('starts_at')
+            ->limit(5)
+            ->get();
+
+        $movements = FinancialMovement::query()
+            ->where('unit_id', $unit->id)
+            ->inMonth($month)
+            ->orderByDesc('occurred_on')->orderByDesc('created_at')
+            ->get();
+
+        $pendingBalance = (int) FinancialMovement::query()
+            ->where('unit_id', $unit->id)
+            ->where('direction', 'income')
+            ->where('status', 'pending')
+            ->sum('amount');
+
+        $notes = ActivityLog::query()
+            ->where('subject_type', Unit::class)
+            ->where('subject_id', $unit->id)
+            ->where('event_type', ActivityEventType::UnitNoteAdded->value)
+            ->with('actor')
+            ->orderByDesc('created_at')->orderByDesc('id')
+            ->get()
+            ->map(fn (ActivityLog $entry): array => [
+                'id' => $entry->id,
+                'body' => $entry->metadata['body'] ?? '',
+                'author_name' => $entry->actor?->name,
+                'created_at' => $entry->created_at?->toJSON(),
+            ])
+            ->all();
+
+        return (new UnitResource($unit))->additional([
+            'reservations' => ReservationResource::collection($reservations)->resolve(),
+            'movements' => FinancialMovementResource::collection($movements)->resolve(),
+            'movements_month' => $month,
+            'pending_balance' => $pendingBalance,
+            'notes' => $notes,
+        ]);
+    }
+
+    public function storeNote(Request $request, Unit $unit): JsonResponse
+    {
+        Gate::authorize('update', $unit);
+
+        $validated = $request->validate(['body' => ['required', 'string', 'max:2000']]);
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        $entry = $this->activityLogger->log(
+            account: $unit->account,
+            eventType: ActivityEventType::UnitNoteAdded,
+            summary: "Nota interna en la unidad {$unit->label()}.",
+            metadata: ['unit_id' => $unit->id, 'unit_label' => $unit->label(), 'body' => $validated['body']],
+            location: $unit->location,
+            actor: $actor,
+            subjectType: Unit::class,
+            subjectId: $unit->id,
+        );
+
+        return response()->json(['data' => [
+            'id' => $entry->id,
+            'body' => $validated['body'],
+            'author_name' => $actor->name,
+            'created_at' => $entry->created_at?->toJSON(),
+        ]], 201);
+    }
+
+    public function deactivate(Request $request, Unit $unit, DeactivateUnit $deactivate): UnitResource
+    {
+        Gate::authorize('update', $unit);
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        return new UnitResource($deactivate->handle($unit, $actor)->loadSummary());
+    }
+
+    public function reactivate(Request $request, Unit $unit, DeactivateUnit $deactivate): UnitResource
+    {
+        Gate::authorize('update', $unit);
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        return new UnitResource($deactivate->reactivate($unit, $actor)->loadSummary());
     }
 
     public function update(UpdateUnitRequest $request, Unit $unit): UnitResource
@@ -111,11 +246,8 @@ class UnitController extends Controller
 
         DB::transaction(function () use ($request, $unit, $actor): void {
             $unit->fill($request->safe()->only([
-                'unit_number',
-                'building_name',
-                'floor',
-                'status',
-                'notes',
+                'unit_number', 'type', 'building_name', 'floor', 'area_m2', 'participation_share',
+                'maintenance_fee', 'parking_spots', 'storage_rooms', 'status', 'notes',
             ]));
 
             if (! $unit->isDirty()) {
