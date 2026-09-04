@@ -21,6 +21,11 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
       useNavigate: () => navigateSpy,
       useSearch: () => currentSearch,
     }),
+    Link: ({ children, to, search }: { children: React.ReactNode; to: string; search?: Record<string, unknown> }) => (
+      <a href={`${to}?${new URLSearchParams(Object.entries(search ?? {}).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)])).toString()}`}>
+        {children}
+      </a>
+    ),
   }
 })
 
@@ -145,6 +150,21 @@ function installAdapter(
       onTransition?.(url)
 
       return Promise.resolve(axiosResponse(config, { data: reservation({ status: 'approved' }) }))
+    }
+
+    if (config.method === 'get' && /\/reservations\/[^/?]+$/.test(url)) {
+      const id = url.split('/').pop()
+      const found = reservations.find((candidate) => candidate.id === id) ?? reservations[0]
+
+      return Promise.resolve(
+        axiosResponse(config, {
+          data: found,
+          history: [
+            { id: 'al_2', subject: 'reservation', event_type: 'reservation.approved', status: 'approved', previous_status: 'pending', note: null, category: null, amount: null, actor_name: 'Alejandra Admin', created_at: '2026-08-09T22:45:00Z' },
+            { id: 'al_1', subject: 'reservation', event_type: 'reservation.created', status: 'pending', previous_status: null, note: null, category: null, amount: null, actor_name: 'A. Quispe', created_at: '2026-08-08T16:20:00Z' },
+          ],
+        }),
+      )
     }
 
     if (url.includes('/reservations')) {
@@ -362,22 +382,27 @@ describe('ReservationsPage', () => {
     expect(screen.getByText('Ver menos')).toBeInTheDocument()
   })
 
-  it('opens the detail modal from a list row', async () => {
-    installAdapter([reservation({ starts_at: tomorrowAt(19), ends_at: tomorrowAt(21) })])
+  it('opens the detail drawer from a list row with facts, history and the cancel action', async () => {
+    installAdapter([reservation({ starts_at: tomorrowAt(19), ends_at: tomorrowAt(21), created_by_name: 'A. Quispe' })])
 
     renderPage()
 
-    // Click the list row (the queue card has no unit·time line like this).
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: /Parrilla \/ terraza/ }))
 
-    const modal = await screen.findByRole('dialog')
-    expect(within(modal).getByText('Confirmada')).toBeInTheDocument()
-    expect(within(modal).getByText(/19:00–21:00/)).toBeInTheDocument()
-    expect(within(modal).getByRole('button', { name: 'Cancelar reserva' })).toBeInTheDocument()
+    const drawer = await screen.findByRole('dialog')
+    expect(await within(drawer).findByText('Reserva · Depto. 704 · A. Torres')).toBeInTheDocument()
+    expect(within(drawer).getByText('Confirmada')).toBeInTheDocument()
+    expect(within(drawer).getByText(/19:00–21:00/)).toBeInTheDocument()
+    expect(within(drawer).getByText('Reserva aprobada')).toBeInTheDocument()
+    expect(within(drawer).getByText('Reserva registrada')).toBeInTheDocument()
+    // Approved bookings only offer cancel, behind a confirm step.
+    expect(within(drawer).queryByRole('button', { name: 'Aprobar' })).not.toBeInTheDocument()
+    await user.click(within(drawer).getByRole('button', { name: 'Cancelar reserva' }))
+    expect(await screen.findByText('¿Cancelar la reserva?')).toBeInTheDocument()
   })
 
-  it('shows the linked ledger rows in the detail modal with their forward action', async () => {
+  it('shows the linked ledger rows in the drawer with their forward action', async () => {
     installAdapter([
       reservation({
         starts_at: tomorrowAt(19),
@@ -391,8 +416,8 @@ describe('ReservationsPage', () => {
             location_id: 'loc_1',
             direction: 'income',
             category: 'reservation_fee',
-            status: 'pending',
-            allowed_transitions: ['paid', 'voided'],
+            status: 'paid',
+            allowed_transitions: ['pending'],
             amount: 50,
             concept: 'Cuota · Parrilla / terraza',
             detail: null,
@@ -403,7 +428,7 @@ describe('ReservationsPage', () => {
             due_on: null,
             note: null,
             created_by: 'usr_1',
-            settled_by: null,
+            settled_by: 'usr_1',
             settled_at: null,
             created_at: null,
           },
@@ -437,11 +462,15 @@ describe('ReservationsPage', () => {
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: /Parrilla \/ terraza/ }))
 
-    const modal = await screen.findByRole('dialog')
-    expect(within(modal).getByText('Cobros')).toBeInTheDocument()
-    expect(within(modal).getByText('Pendiente')).toBeInTheDocument()
-    expect(within(modal).getByText('En garantía')).toBeInTheDocument()
-    expect(within(modal).getByRole('button', { name: 'Marcar pagado' })).toBeInTheDocument()
-    expect(within(modal).getByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
+    const drawer = await screen.findByRole('dialog')
+    expect(await within(drawer).findByText('Cobros')).toBeInTheDocument()
+    expect(within(drawer).getByText('Pagado')).toBeInTheDocument()
+    expect(within(drawer).getByText('En garantía')).toBeInTheDocument()
+    // A settled fee links to Finanzas; a held deposit offers its forward move.
+    expect(within(drawer).getByRole('link', { name: 'Ver en Finanzas →' })).toHaveAttribute(
+      'href',
+      '/admin/finances?month=2026-09&movement=mv_fee&page=1',
+    )
+    expect(within(drawer).getByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
   })
 })

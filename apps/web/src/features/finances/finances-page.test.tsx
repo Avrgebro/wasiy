@@ -338,14 +338,14 @@ describe('FinancesPage', () => {
     expect(within(drawer).getByText('Sistema · al aprobar la reserva')).toBeInTheDocument()
     expect(within(drawer).getByRole('link', { name: /Salón de eventos/ })).toHaveAttribute(
       'href',
-      '/admin/reservations?date=2026-08-10',
+      '/admin/reservations?date=2026-08-10&reservation=res_9',
     )
     // History newest first, generated row attributed to the system.
     expect(await within(drawer).findByText('Marcado por devolver')).toBeInTheDocument()
     expect(within(drawer).getByText('Generado al aprobar la reserva')).toBeInTheDocument()
     expect(within(drawer).getByText('Sistema')).toBeInTheDocument()
     // Forward as primary, retain as secondary, revert as a text link.
-    expect(within(drawer).getByRole('button', { name: 'Retener depósito' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'No devolver' })).toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: 'Marcar recibido' })).toBeInTheDocument()
 
     await user.type(within(drawer).getByLabelText('Nota (opcional)'), 'Devuelto en efectivo')
@@ -461,5 +461,87 @@ describe('FinancesPage', () => {
     // Removing a chip drops only that category.
     await user.click(screen.getByRole('button', { name: 'Quitar filtro Categoría: Agua' }))
     expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ category: 'fine' })
+  })
+
+  it('offers every allowed move for a held deposit: release, retain, and revert', async () => {
+    currentSearch.month = '2026-08'
+    installAdapter([
+      movement({
+        id: 'mv_held',
+        direction: 'income',
+        category: 'reservation_deposit',
+        status: 'held',
+        allowed_transitions: ['to_refund', 'retained', 'pending'],
+        amount: 300,
+        concept: 'Depósito · Salón de eventos',
+        counterparty: null,
+        unit_id: 'un_1',
+        unit_number: 'Depto. 201',
+      }),
+    ])
+
+    renderPage()
+    const user = userEvent.setup()
+    await user.click(await screen.findByText('Depósito · Salón de eventos'))
+    const drawer = await screen.findByRole('dialog')
+
+    expect(await within(drawer).findByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'No devolver' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Marcar pendiente' })).toBeInTheDocument()
+  })
+
+  it('asks before retaining a deposit and lets a retained one go back to held', async () => {
+    currentSearch.month = '2026-08'
+    const transitions: { url: string; body: unknown }[] = []
+    installAdapter(
+      [
+        movement({
+          id: 'mv_held',
+          direction: 'income',
+          category: 'reservation_deposit',
+          status: 'held',
+          allowed_transitions: ['to_refund', 'retained', 'pending'],
+          amount: 300,
+          concept: 'Depósito · Salón de eventos',
+          counterparty: null,
+          unit_id: 'un_1',
+          unit_number: 'Depto. 201',
+        }),
+        movement({
+          id: 'mv_kept',
+          direction: 'income',
+          category: 'reservation_deposit',
+          status: 'retained',
+          allowed_transitions: ['held'],
+          amount: 300,
+          concept: 'Depósito · Parrilla',
+          counterparty: null,
+          unit_id: 'un_1',
+          unit_number: 'Depto. 101',
+        }),
+      ],
+      (url, body) => transitions.push({ url, body }),
+    )
+
+    renderPage()
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByText('Depósito · Salón de eventos'))
+    let drawer = await screen.findByRole('dialog')
+    await user.click(await within(drawer).findByRole('button', { name: 'No devolver' }))
+    // Nothing is sent until the confirm step.
+    expect(transitions).toHaveLength(0)
+    await user.click(await screen.findByRole('button', { name: 'Confirmar' }))
+    await waitFor(() => expect(transitions).toHaveLength(1))
+    expect(transitions[0].body).toEqual({ status: 'retained' })
+    await user.click(within(drawer).getByRole('button', { name: 'Cerrar' }))
+
+    await user.click(await screen.findByText('Depósito · Parrilla'))
+    drawer = await screen.findByRole('dialog')
+    // Badge and history both carry the label.
+    expect(await within(drawer).findAllByText('Retenido por daños')).not.toHaveLength(0)
+    await user.click(within(drawer).getByRole('button', { name: 'Marcar recibido' }))
+    await waitFor(() => expect(transitions).toHaveLength(2))
+    expect(transitions[1].body).toEqual({ status: 'held' })
   })
 })

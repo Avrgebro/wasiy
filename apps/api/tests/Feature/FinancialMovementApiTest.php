@@ -13,8 +13,10 @@ use App\Models\Amenity;
 use App\Models\FinancialMovement;
 use App\Models\Location;
 use App\Models\Reservation;
+use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -290,6 +292,24 @@ test('deposits follow their own lifecycle', function () {
     $this->actingAs($admin)->postJson(statusUrl($account, $deposit), ['status' => 'held'])->assertUnprocessable();
 });
 
+test('a retained deposit can go back to held, refunded cannot', function () {
+    [$account, $location, $unit, $admin] = financeWorld();
+    $deposit = seedMovement($location, $admin, [
+        'direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'retained', 'counterparty' => null, 'unit_id' => $unit->id,
+    ]);
+
+    $this->actingAs($admin)
+        ->postJson(statusUrl($account, $deposit), ['status' => 'held'])
+        ->assertOk()
+        ->assertJsonPath('data.status', 'held')
+        ->assertJsonPath('data.allowed_transitions', ['to_refund', 'retained', 'pending']);
+
+    $refunded = seedMovement($location, $admin, [
+        'direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'refunded', 'counterparty' => null, 'unit_id' => $unit->id,
+    ]);
+    $this->actingAs($admin)->postJson(statusUrl($account, $refunded), ['status' => 'held'])->assertUnprocessable();
+});
+
 test('the month list filters by month, direction, status, category and search', function () {
     [$account, $location, $unit, $admin] = financeWorld();
 
@@ -444,6 +464,44 @@ test('approving a reservation opens a fee and a deposit row once', function () {
     // Re-running the sync is a no-op thanks to the unique index guard.
     app(SyncReservationMovements::class)->openFor($reservation->fresh(), $admin);
     expect(FinancialMovement::query()->where('reservation_id', $reservation->id)->count())->toBe(2);
+});
+
+test('a reservation show merges its own history with its movements', function () {
+    [$account, $location, $unit, $admin] = financeWorld();
+    $resident = Resident::factory()->create(['account_id' => $account->id, 'phone' => '+51 987 654 321']);
+    [, $reservation] = pendingReservationWithCharges($account, $location, $unit, $admin);
+    $reservation->forceFill(['resident_id' => $resident->id])->save();
+    // The factory row has no created event; log one so the story starts.
+    app(ActivityLogger::class)->log(
+        account: $account, eventType: ActivityEventType::ReservationCreated, summary: 'x',
+        metadata: ['status' => 'pending'], location: $location, actor: $admin,
+        subjectType: 'reservation', subjectId: $reservation->id,
+    );
+
+    $this->actingAs($admin)->postJson("/api/accounts/{$account->id}/reservations/{$reservation->id}/approve")->assertOk();
+    $fee = FinancialMovement::query()->where('reservation_id', $reservation->id)->where('category', 'reservation_fee')->firstOrFail();
+    $this->actingAs($admin)->postJson(statusUrl($account, $fee), ['status' => 'paid'])->assertOk();
+
+    $response = $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/reservations/{$reservation->id}")
+        ->assertOk()
+        ->assertJsonPath('data.resident_phone', '+51 987 654 321')
+        ->assertJsonCount(2, 'data.movements')
+        ->assertJsonCount(5, 'history')
+        ->assertJsonPath('history.0.subject', 'movement')
+        ->assertJsonPath('history.0.event_type', 'movement.status_changed')
+        ->assertJsonPath('history.0.category', 'reservation_fee')
+        ->assertJsonPath('history.0.amount', 150)
+        ->assertJsonPath('history.4.event_type', 'reservation.created');
+
+    // Approval and the two generated rows share a second; the approval
+    // entry was written first, so it sits below the movement entries.
+    expect(collect($response->json('history'))->pluck('event_type')->all())->toBe([
+        'movement.status_changed', 'movement.recorded', 'movement.recorded', 'reservation.approved', 'reservation.created',
+    ]);
+
+    $outsider = User::factory()->create();
+    $this->actingAs($outsider)->getJson("/api/accounts/{$account->id}/reservations/{$reservation->id}")->assertNotFound();
 });
 
 test('an instant booking opens its rows at creation and a rejection opens none', function () {

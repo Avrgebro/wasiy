@@ -51,12 +51,15 @@ export function ApprovalQueue({
   canDecide,
   requests,
   timezone,
+  onSelect,
 }: {
   accountId: string
   approvedPool: ReservationSummary[]
   canDecide: boolean
   requests: ReservationSummary[]
   timezone: string
+  /** Opens the booking's drawer; the inline buttons stay the fast path. */
+  onSelect?: (reservation: ReservationSummary) => void
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -123,7 +126,11 @@ export function ApprovalQueue({
             const days = waitingDays(request)
 
             return (
-              <div key={request.id} className="rounded-xl bg-[var(--wa-surface-2)] px-4 py-3.5">
+              <div
+                key={request.id}
+                className={`rounded-xl bg-[var(--wa-surface-2)] px-4 py-3.5 ${onSelect ? 'cursor-pointer hover:bg-[var(--mantine-color-default-hover)]' : ''}`}
+                onClick={onSelect ? () => onSelect(request) : undefined}
+              >
                 <div className="flex items-baseline justify-between gap-2.5">
                   <Text fw={600} size="sm" truncate>
                     {request.amenity_name}
@@ -148,7 +155,7 @@ export function ApprovalQueue({
                   </Text>
                 ) : null}
                 {canDecide ? (
-                  <Group gap={8} grow mt={11}>
+                  <Group gap={8} grow mt={11} onClick={(event) => event.stopPropagation()}>
                     <Button
                       color="accent"
                       loading={approveMutation.isPending && approveMutation.variables === request.id}

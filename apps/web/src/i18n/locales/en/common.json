@@ -6,7 +6,8 @@
     "save": "Save",
     "search": "Search",
     "import": "Import",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   },
   "common": {
     "loading": "Loading",
@@ -624,14 +625,38 @@
     "detail": {
       "fee": "Fee",
       "deposit": "Deposit",
-      "feeHint": "Prices as of booking time — payment is recorded manually.",
       "note": "Note",
-      "createdBy": "Created by {{name}} · {{date}}",
-      "decidedBy": "by {{name}} · {{date}}",
       "charges": "Charges",
-      "chargesOnApproval": "Charges are created in Finances when the reservation is approved."
+      "chargesOnApproval": "Charges are created in Finances when the reservation is approved.",
+      "title": "Reservation",
+      "kind": "Reservation",
+      "registeredBy": "Registered by",
+      "decisionNote": "Decision note",
+      "viewInFinances": "View in Finances →",
+      "noteHint": "Visible to the resident.",
+      "noteRequiredHint": "Required to observe or reject.",
+      "confirmCancel": "Cancel the reservation?",
+      "confirmCancelBody": "The slot is released and pending charges are voided; a held deposit becomes due for refund. This cannot be undone.",
+      "decidedLabel": {
+        "approved": "Approved by",
+        "rejected": "Rejected by",
+        "observed": "Observed by",
+        "cancelled": "Cancelled by",
+        "pending": "Decided by"
+      }
     },
-    "weekOf": "Week of {{range}}"
+    "weekOf": "Week of {{range}}",
+    "history": {
+      "created": "Reservation registered",
+      "approved": "Reservation approved",
+      "observed": "Reservation observed",
+      "rejected": "Reservation rejected",
+      "cancelled": "Reservation cancelled",
+      "updated": "Reservation updated",
+      "chargeGenerated": "Charge generated: {{charge}}",
+      "completed": "Reservation completed",
+      "derived": "derived from the schedule"
+    }
   },
   "settings": {
     "intro": "Each group saves separately. The values shown are the ones in effect, including those inherited from the account.",
@@ -827,7 +852,7 @@
       "held": "Held",
       "to_refund": "To refund",
       "refunded": "Refunded",
-      "retained": "Retained",
+      "retained": "Retained for damages",
       "voided": "Voided"
     },
     "transitions": {
@@ -836,7 +861,7 @@
       "held": "Mark received",
       "to_refund": "Release deposit",
       "refunded": "Mark refunded",
-      "retained": "Retain deposit",
+      "retained": "Do not refund",
       "voided": "Void"
     },
     "categories": {
@@ -871,7 +896,13 @@
       "actions": "Actions",
       "actionNote": "Note (optional)",
       "actionNoteHint": "Reason for the refund or retention, visible to the resident.",
-      "close": "Close"
+      "close": "Close",
+      "confirmRetain": "Retain the deposit?",
+      "confirmRetainBody": "The deposit will not be returned to the resident, for damages or a breach. You can revert it later from this panel.",
+      "confirmVoid": "Void the movement?",
+      "confirmVoidBody": "The movement will stop counting in the totals. This cannot be undone.",
+      "confirm": "Confirm",
+      "retainHint": "Kept for damages or a breach."
     },
     "record": "Record movement",
     "form": {
@@ -920,7 +951,7 @@
       "held": "Deposit received (held)",
       "to_refund": "Marked to refund",
       "refunded": "Marked refunded",
-      "retained": "Deposit retained",
+      "retained": "Retained for damages",
       "voided": "Voided"
     },
     "searchPlaceholder": "Search concept, detail or vendor…",

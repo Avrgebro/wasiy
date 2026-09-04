@@ -21,6 +21,8 @@ export const financesSearchSchema = z.object({
   /** Comma-separated category set from the Filtros popover. */
   category: z.string().catch(''),
   sort: z.string().catch(''),
+  /** Opens the drawer for this row; deep-linked from a reservation. */
+  movement: z.string().optional().catch(undefined),
   page: z.coerce.number().int().positive().catch(1),
 })
 

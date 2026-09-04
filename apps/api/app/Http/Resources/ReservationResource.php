@@ -27,6 +27,8 @@ class ReservationResource extends JsonResource
             'unit_number' => $this->whenLoaded('unit', fn () => $this->unit->unit_number),
             'resident_id' => $this->resident_id,
             'resident_name' => $this->whenLoaded('resident', fn () => $this->resident?->name),
+            'resident_phone' => $this->whenLoaded('resident', fn () => $this->resident?->phone),
+            'resident_email' => $this->whenLoaded('resident', fn () => $this->resident?->email),
             'starts_at' => $this->starts_at->toJSON(),
             'ends_at' => $this->ends_at->toJSON(),
             'status' => $this->status->value,

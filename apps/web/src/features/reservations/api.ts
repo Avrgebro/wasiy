@@ -19,6 +19,8 @@ export type ReservationSummary = {
   unit_number?: string
   resident_id: string | null
   resident_name?: string | null
+  resident_phone?: string | null
+  resident_email?: string | null
   starts_at: string
   ends_at: string
   status: ReservationStatusValue
@@ -51,6 +53,25 @@ export function getReservations(accountId: string, locationId: string, search: R
   const params = buildParams(search)
 
   return apiRequest<ReservationListResponse>(`${base(accountId, locationId)}?${params.toString()}`)
+}
+
+export type ReservationHistoryEntry = {
+  id: string
+  subject: 'reservation' | 'movement'
+  event_type: string
+  status: string | null
+  previous_status: string | null
+  note: string | null
+  category: string | null
+  amount: number | null
+  actor_name: string | null
+  created_at: string | null
+}
+
+export type ReservationDetailResponse = { data: ReservationSummary; history: ReservationHistoryEntry[] }
+
+export function getReservation(accountId: string, reservationId: string) {
+  return apiRequest<ReservationDetailResponse>(`/api/accounts/${accountId}/reservations/${reservationId}`)
 }
 
 export type ReservationPayload = {

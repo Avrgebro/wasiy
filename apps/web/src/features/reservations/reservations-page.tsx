@@ -10,7 +10,7 @@ import { useMe } from '../auth/hooks'
 import { getAmenities } from '../locations/amenities-api'
 import { getReservations, type ReservationSummary } from './api'
 import { ApprovalQueue } from './approval-queue'
-import { ReservationDetailModal } from './reservation-detail-modal'
+import { ReservationDrawer } from './reservation-drawer'
 import { ReservationFormDrawer } from './reservation-form-drawer'
 import { ReservationWeekList } from './reservation-week-list'
 import type { ReservationsSearchValues } from './schemas'
@@ -84,7 +84,17 @@ function ReservationsContent({
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
   const [drawerOpened, setDrawerOpened] = useState(false)
-  const [selected, setSelected] = useState<ReservationSummary | null>(null)
+  // A row or queue card selects locally; the URL param (deep link from
+  // Finanzas) seeds it. Closing clears both.
+  const [localSelected, setLocalSelected] = useState<string | null>(null)
+  const selectedId = localSelected ?? search.reservation ?? null
+  const select = (reservation: ReservationSummary) => setLocalSelected(reservation.id)
+  const closeDrawer = () => {
+    setLocalSelected(null)
+    if (search.reservation) {
+      void navigate({ search: (current) => ({ ...current, reservation: undefined }) })
+    }
+  }
 
   const today = localDateString(new Date(), timezone)
   const anchor = search.date ?? today
@@ -242,7 +252,7 @@ function ReservationsContent({
                 reservations={weekReservations}
                 timezone={timezone}
                 today={today}
-                onSelect={setSelected}
+                onSelect={select}
               />
             </div>
           )}
@@ -256,16 +266,17 @@ function ReservationsContent({
             canDecide={canDecide}
             requests={requests}
             timezone={timezone}
+            onSelect={select}
           />
         )}
       </div>
 
-      <ReservationDetailModal
+      <ReservationDrawer
         accountId={accountId}
         canDecide={canDecide}
-        reservation={selected}
+        reservationId={selectedId}
         timezone={timezone}
-        onClose={() => setSelected(null)}
+        onClose={closeDrawer}
       />
       <ReservationFormDrawer
         accountId={accountId}

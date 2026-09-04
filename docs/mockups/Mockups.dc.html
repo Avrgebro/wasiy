@@ -1922,10 +1922,11 @@ a { color:#7FB5B0; } a:hover { color:#A9CFCB; }
 </div>
 </div>
 
+<div style="display:flex;gap:20px;align-items:flex-start">
 <!-- 08 · RESERVAS -->
 <div>
 <div style="font:600 13px 'Instrument Sans';color:#3E7C80;margin-bottom:10px">08 · Reservas — ubicación seleccionada</div>
-<div style="width:1440px;display:grid;grid-template-columns:288px minmax(0,1fr);background:#101D1E;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.35)">
+<div style="position:relative;width:1440px;min-height:1120px;display:grid;grid-template-columns:288px minmax(0,1fr);background:#101D1E;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.35)">
   <aside style="padding:12px;box-sizing:border-box">
     <div style="display:flex;flex-direction:column;height:100%;box-sizing:border-box;border-radius:16px;border:1px solid #2A3F40;background:#16282A;padding:20px 12px 16px">
       <div style="display:flex;align-items:center;gap:9px;padding:0 12px 18px">
@@ -1988,44 +1989,51 @@ a { color:#7FB5B0; } a:hover { color:#A9CFCB; }
       </div>
 
       <div style="display:flex;align-items:center;gap:8px">
-        <span style="font:600 12.5px 'Instrument Sans';color:#1C2B2C;background:#E0A438;border:1px solid #E0A438;border-radius:99px;padding:7px 15px;cursor:pointer">Todas</span><span style="font:600 12.5px 'Instrument Sans';color:#9FB0AE;background:#16282A;border:1px solid #2A3F40;border-radius:99px;padding:7px 15px;cursor:pointer">Pendientes · 4</span><span style="font:600 12.5px 'Instrument Sans';color:#9FB0AE;background:#16282A;border:1px solid #2A3F40;border-radius:99px;padding:7px 15px;cursor:pointer">Confirmadas</span><span style="font:600 12.5px 'Instrument Sans';color:#9FB0AE;background:#16282A;border:1px solid #2A3F40;border-radius:99px;padding:7px 15px;cursor:pointer">Depósito pendiente · 1</span><span style="font:600 12.5px 'Instrument Sans';color:#9FB0AE;background:#16282A;border:1px solid #2A3F40;border-radius:99px;padding:7px 15px;cursor:pointer">Completadas</span>
+        <span style="font:600 12.5px 'Instrument Sans';color:#1C2B2C;background:#E0A438;border:1px solid #E0A438;border-radius:99px;padding:7px 15px;cursor:pointer">Todas</span><span style="font:600 12.5px 'Instrument Sans';color:#9FB0AE;background:#16282A;border:1px solid #2A3F40;border-radius:99px;padding:7px 15px;cursor:pointer">Pendientes · 4</span><span style="font:600 12.5px 'Instrument Sans';color:#9FB0AE;background:#16282A;border:1px solid #2A3F40;border-radius:99px;padding:7px 15px;cursor:pointer">Confirmadas</span><span style="font:600 12.5px 'Instrument Sans';color:#9FB0AE;background:#16282A;border:1px solid #2A3F40;border-radius:99px;padding:7px 15px;cursor:pointer">Completadas</span>
         <span style="margin-left:auto;display:flex;align-items:center;gap:7px;font:500 13px 'Instrument Sans';color:#E9ECE8;border:1px solid #2A3F40;background:#16282A;border-radius:8px;padding:8px 14px;cursor:pointer">Todas las amenidades<svg viewBox="0 0 12 12" width="11" height="11" fill="none"><path d="M3 4.5 L6 7.5 L9 4.5" stroke="#9FB0AE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
       </div>
 
       <div style="display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start">
         <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
           <div style="background:#16282A;border:1px solid #2A3F40;border-radius:14px;overflow:hidden">
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;padding:11px 20px;border-bottom:1px solid #2A3F40;font:600 11.5px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371"><span>Amenidad</span><span>Unidad</span><span>Residente</span><span>Fecha</span><span>Horario</span><span>Estado</span></div>
+            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;padding:11px 20px;border-bottom:1px solid #2A3F40;font:600 11.5px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371"><span>Amenidad</span><span>Unidad</span><span>Residente</span><span>Fecha</span><span>Horario</span><span>Estado</span><span></span></div>
             <div style="font:600 12px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371;padding:10px 20px;border-bottom:1px solid #2A3F40;background:#1D3335">Hoy · viernes 15</div>
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8">
+            <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8;cursor:pointer;" style-hover="background:#1B2F31">
         <span style="display:flex;align-items:center;gap:10px"><span style="width:3px;height:26px;border-radius:99px;background:#7FB5B0"></span><span style="font-weight:600">Gimnasio</span></span>
         <span style="color:#9FB0AE">Depto. 210</span><span style="color:#9FB0AE">S. Gutiérrez</span><span style="color:#9FB0AE">vie 15</span><span style="color:#9FB0AE">09:00–11:00</span><span style="font:600 11.5px 'Instrument Sans';color:#9FB0AE;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Completada</span>
+      <span style="font:400 15px 'Instrument Sans';color:#5F7371;text-align:right">›</span>
       </div>
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8">
+            <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8;cursor:pointer;background:#1B2F31;" style-hover="background:#1B2F31"><span style="position:absolute;left:0;top:0;bottom:0;width:2.5px;background:#7FB5B0"></span>
         <span style="display:flex;align-items:center;gap:10px"><span style="width:3px;height:26px;border-radius:99px;background:#E0A438"></span><span style="font-weight:600">Salón de eventos</span></span>
-        <span style="color:#9FB0AE">Depto. 501</span><span style="color:#9FB0AE">M. Paredes</span><span style="color:#9FB0AE">vie 15</span><span style="color:#9FB0AE">15:00–18:00</span><span style="font:600 11.5px 'Instrument Sans';color:#D9A64C;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Depósito pendiente</span>
+        <span style="color:#9FB0AE">Depto. 501</span><span style="color:#9FB0AE">M. Paredes</span><span style="color:#9FB0AE">vie 15</span><span style="color:#9FB0AE">15:00–18:00</span><span style="font:600 11.5px 'Instrument Sans';color:#6FBF97;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Confirmada</span>
+      <span style="font:400 15px 'Instrument Sans';color:#5F7371;text-align:right">›</span>
       </div>
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8">
+            <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8;cursor:pointer;" style-hover="background:#1B2F31">
         <span style="display:flex;align-items:center;gap:10px"><span style="width:3px;height:26px;border-radius:99px;background:#7FB5B0"></span><span style="font-weight:600">Parrilla / terraza</span></span>
         <span style="color:#9FB0AE">Depto. 704</span><span style="color:#9FB0AE">A. Torres</span><span style="color:#9FB0AE">vie 15</span><span style="color:#9FB0AE">19:00–21:00</span><span style="font:600 11.5px 'Instrument Sans';color:#6FBF97;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Confirmada</span>
+      <span style="font:400 15px 'Instrument Sans';color:#5F7371;text-align:right">›</span>
       </div>
             <div style="font:600 12px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371;padding:10px 20px;border-bottom:1px solid #2A3F40;background:#1D3335">Mañana · sábado 16</div>
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8">
+            <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8;cursor:pointer;" style-hover="background:#1B2F31">
         <span style="display:flex;align-items:center;gap:10px"><span style="width:3px;height:26px;border-radius:99px;background:#E0A438"></span><span style="font-weight:600">Salón de eventos</span></span>
         <span style="color:#9FB0AE">Depto. 501</span><span style="color:#9FB0AE">M. Paredes</span><span style="color:#9FB0AE">sáb 16</span><span style="color:#9FB0AE">18:00–23:00</span><span style="font:600 11.5px 'Instrument Sans';color:#D9A64C;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Pendiente</span>
+      <span style="font:400 15px 'Instrument Sans';color:#5F7371;text-align:right">›</span>
       </div>
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8">
+            <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8;cursor:pointer;" style-hover="background:#1B2F31">
         <span style="display:flex;align-items:center;gap:10px"><span style="width:3px;height:26px;border-radius:99px;background:#7FB5B0"></span><span style="font-weight:600">Gimnasio</span></span>
         <span style="color:#9FB0AE">Depto. 118</span><span style="color:#9FB0AE">L. Ramírez</span><span style="color:#9FB0AE">sáb 16</span><span style="color:#9FB0AE">08:00–09:00</span><span style="font:600 11.5px 'Instrument Sans';color:#6FBF97;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Confirmada</span>
+      <span style="font:400 15px 'Instrument Sans';color:#5F7371;text-align:right">›</span>
       </div>
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8">
+            <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8;cursor:pointer;" style-hover="background:#1B2F31">
         <span style="display:flex;align-items:center;gap:10px"><span style="width:3px;height:26px;border-radius:99px;background:#7FB5B0"></span><span style="font-weight:600">Parrilla / terraza</span></span>
         <span style="color:#9FB0AE">Depto. 402</span><span style="color:#9FB0AE">C. Vega</span><span style="color:#9FB0AE">sáb 16</span><span style="color:#9FB0AE">13:00–16:00</span><span style="font:600 11.5px 'Instrument Sans';color:#6FBF97;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Confirmada</span>
+      <span style="font:400 15px 'Instrument Sans';color:#5F7371;text-align:right">›</span>
       </div>
             <div style="font:600 12px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371;padding:10px 20px;border-bottom:1px solid #2A3F40;background:#1D3335">Domingo 17</div>
-            <div style="display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8">
+            <div style="position:relative;display:grid;grid-template-columns:1.4fr 1fr 1.1fr 0.9fr 170px 120px 22px;gap:14px;align-items:center;padding:13px 20px;border-bottom:1px solid #22383A;font:400 13.5px 'Instrument Sans';color:#E9ECE8;cursor:pointer;" style-hover="background:#1B2F31">
         <span style="display:flex;align-items:center;gap:10px"><span style="width:3px;height:26px;border-radius:99px;background:#7FB5B0"></span><span style="font-weight:600">Cancha de squash</span></span>
         <span style="color:#9FB0AE">Depto. 118</span><span style="color:#9FB0AE">L. Ramírez</span><span style="color:#9FB0AE">dom 17</span><span style="color:#9FB0AE">09:00–10:00</span><span style="font:600 11.5px 'Instrument Sans';color:#D9A64C;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Pendiente</span>
+      <span style="font:400 15px 'Instrument Sans';color:#5F7371;text-align:right">›</span>
       </div>
             <div style="display:flex;justify-content:center;padding:13px"><span style="font:500 13px 'Instrument Sans';color:#7FB5B0;cursor:pointer">Ver semana siguiente →</span></div>
           </div>
@@ -2058,13 +2066,6 @@ a { color:#7FB5B0; } a:hover { color:#A9CFCB; }
           </div>
 
           <div style="background:#16282A;border:1px solid #2A3F40;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:12px">
-            <span style="font:600 16px 'Sora';color:#E9ECE8">Cuotas y depósitos</span>
-            <div style="display:flex;justify-content:space-between;align-items:center;font:400 13px 'Instrument Sans';color:#9FB0AE"><span>Salón de eventos · Depto. 501</span><span style="font:600 11.5px 'Instrument Sans';color:#D9A64C;background:#1D3335;border-radius:99px;padding:4px 10px">S/ 300 pendiente</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;font:400 13px 'Instrument Sans';color:#9FB0AE"><span>Parrilla · Depto. 704</span><span style="font:600 11.5px 'Instrument Sans';color:#6FBF97;background:#1D3335;border-radius:99px;padding:4px 10px">S/ 50 pagado</span></div>
-            <div style="font:400 12px 'Instrument Sans';color:#5F7371">Los pagos se marcan manualmente — Wasiy no procesa cobros en v1.</div>
-          </div>
-
-          <div style="background:#16282A;border:1px solid #2A3F40;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:12px">
             <span style="font:600 16px 'Sora';color:#E9ECE8">Uso de la semana</span>
             <div style="display:flex;flex-direction:column;gap:10px">
               <div><div style="display:flex;justify-content:space-between;font:400 12.5px 'Instrument Sans';color:#9FB0AE"><span>Gimnasio</span><span>18 reservas</span></div><div style="height:5px;border-radius:99px;background:#1D3335;overflow:hidden;margin-top:5px"><div style="width:82%;height:100%;background:#7FB5B0"></div></div></div>
@@ -2075,6 +2076,98 @@ a { color:#7FB5B0; } a:hover { color:#A9CFCB; }
         </div>
       </div>
     </main>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(8,17,18,0.45)"></div>
+  <div style="position:absolute;top:0;right:0;bottom:0;width:520px;box-sizing:border-box;display:flex;flex-direction:column;background:#16282A;border-left:1px solid #2A3F40;box-shadow:-16px 0 48px rgba(0,0,0,0.45)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid #2A3F40">
+        <div><div style="font:600 18px 'Sora';color:#E9ECE8">Salón de eventos</div><div style="font:400 12.5px 'Instrument Sans';color:#9FB0AE;margin-top:3px">Reserva · Depto. 501 · M. Paredes</div></div>
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="none" style="cursor:pointer;flex-shrink:0;margin-top:4px"><path d="M4 4 L12 12 M12 4 L4 12" stroke="#9FB0AE" stroke-width="1.6" stroke-linecap="round"></path></svg>
+      </div>
+      <div style="flex:1;padding:20px 22px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;align-items:center;gap:12px"><span style="font:600 26px 'Sora';letter-spacing:-0.01em;color:#E9ECE8">vie 15 ago · 15:00–18:00</span><span style="font:600 11.5px 'Instrument Sans';color:#6FBF97;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content;flex-shrink:0">Confirmada</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 20px">
+          <div><div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 11px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371">Unidad</span><span style="font:400 13.5px/1.5 'Instrument Sans';color:#E9ECE8">Depto. 501</span></div></div>
+          <div><div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 11px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371">Residente</span><span style="font:400 13.5px/1.5 'Instrument Sans';color:#E9ECE8">M. Paredes · +51 987 654 321</span></div></div>
+          <div><div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 11px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371">Registrada por</span><span style="font:400 13.5px/1.5 'Instrument Sans';color:#E9ECE8">Recepción · A. Quispe · 08 ago</span></div></div>
+          <div><div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 11px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371">Aprobada por</span><span style="font:400 13.5px/1.5 'Instrument Sans';color:#E9ECE8">Alejandra Admin · 09 ago</span></div></div>
+          <div style="grid-column:1 / -1"><div style="display:flex;flex-direction:column;gap:4px"><span style="font:600 11px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371">Nota de decisión</span><span style="font:400 13.5px/1.5 'Instrument Sans';color:#E9ECE8">Confirmar limpieza al terminar el evento</span></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="font:700 11px 'Instrument Sans';letter-spacing:0.08em;text-transform:uppercase;color:#7FB5B0">Cobros</span><span style="flex:1;height:1px;background:#22383A"></span></div>
+        <div style="display:flex;flex-direction:column">
+        <div style="display:grid;grid-template-columns:1fr 90px 120px auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #22383A">
+          <span style="font:500 13.5px 'Instrument Sans';color:#E9ECE8">Cuota</span>
+          <span style="font:600 14px ui-monospace,monospace;color:#6FBF97">S/ 150</span>
+          <span style="font:600 11.5px 'Instrument Sans';color:#6FBF97;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">Pagado</span>
+          <span style="font:500 12.5px 'Instrument Sans';color:#7FB5B0;cursor:pointer;text-align:right">Ver en Finanzas →</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 90px 120px auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #22383A">
+          <span style="font:500 13.5px 'Instrument Sans';color:#E9ECE8">Depósito</span>
+          <span style="font:600 14px ui-monospace,monospace;color:#7FB5B0">S/ 300</span>
+          <span style="font:600 11.5px 'Instrument Sans';color:#7FB5B0;background:#1D3335;border-radius:99px;padding:4px 11px;width:max-content">En garantía</span>
+          <span style="font:500 12.5px 'Instrument Sans';color:#7FB5B0;cursor:pointer;text-align:right">Liberar depósito</span>
+        </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="font:700 11px 'Instrument Sans';letter-spacing:0.08em;text-transform:uppercase;color:#7FB5B0">Historial</span><span style="flex:1;height:1px;background:#22383A"></span></div>
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:4px"><span style="width:8px;height:8px;border-radius:99px;background:#7FB5B0;flex-shrink:0"></span><span style="flex:1;width:1px;background:#2A3F40;margin:4px 0 -4px"></span></div>
+            <div style="padding-bottom:14px"><div style="font:400 12px ui-monospace,monospace;color:#5F7371">12 ago · 10:14</div><div style="font:500 13px 'Instrument Sans';color:#E9ECE8;margin-top:2px">Depósito recibido (en garantía)</div><div style="font:400 12px 'Instrument Sans';color:#9FB0AE;margin-top:1px">Alejandra Admin</div></div>
+          </div>
+          <div style="display:flex;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:4px"><span style="width:8px;height:8px;border-radius:99px;background:#7FB5B0;flex-shrink:0"></span><span style="flex:1;width:1px;background:#2A3F40;margin:4px 0 -4px"></span></div>
+            <div style="padding-bottom:14px"><div style="font:400 12px ui-monospace,monospace;color:#5F7371">10 ago · 09:02</div><div style="font:500 13px 'Instrument Sans';color:#E9ECE8;margin-top:2px">Cuota marcada pagada</div><div style="font:400 12px 'Instrument Sans';color:#9FB0AE;margin-top:1px">Alejandra Admin</div></div>
+          </div>
+          <div style="display:flex;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:4px"><span style="width:8px;height:8px;border-radius:99px;background:#7FB5B0;flex-shrink:0"></span><span style="flex:1;width:1px;background:#2A3F40;margin:4px 0 -4px"></span></div>
+            <div style="padding-bottom:14px"><div style="font:400 12px ui-monospace,monospace;color:#5F7371">09 ago · 17:45</div><div style="font:500 13px 'Instrument Sans';color:#E9ECE8;margin-top:2px">Reserva aprobada</div><div style="font:400 12px 'Instrument Sans';color:#9FB0AE;margin-top:1px">Alejandra Admin</div></div>
+          </div>
+          <div style="display:flex;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:4px"><span style="width:8px;height:8px;border-radius:99px;background:#7FB5B0;flex-shrink:0"></span><span style="flex:1;width:1px;background:#2A3F40;margin:4px 0 -4px"></span></div>
+            <div style="padding-bottom:14px"><div style="font:400 12px ui-monospace,monospace;color:#5F7371">09 ago · 17:45</div><div style="font:500 13px 'Instrument Sans';color:#E9ECE8;margin-top:2px">Cobros generados: cuota S/ 150 · depósito S/ 300</div><div style="font:400 12px 'Instrument Sans';color:#9FB0AE;margin-top:1px">Sistema</div></div>
+          </div>
+          <div style="display:flex;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:4px"><span style="width:8px;height:8px;border-radius:99px;background:#2A3F40;flex-shrink:0"></span></div>
+            <div style="padding-bottom:0"><div style="font:400 12px ui-monospace,monospace;color:#5F7371">08 ago · 11:20</div><div style="font:500 13px 'Instrument Sans';color:#E9ECE8;margin-top:2px">Reserva registrada</div><div style="font:400 12px 'Instrument Sans';color:#9FB0AE;margin-top:1px">A. Quispe (Recepción)</div></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="font:700 11px 'Instrument Sans';letter-spacing:0.08em;text-transform:uppercase;color:#7FB5B0">Acciones</span><span style="flex:1;height:1px;background:#22383A"></span></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font:600 11px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371">Nota (opcional)</span>
+          <div style="border:1px solid #2A3F40;background:#101D1E;border-radius:8px;padding:10px 12px;min-height:58px;font:400 13.5px/1.55 'Instrument Sans';color:#5F7371">Visible para el residente.</div>
+        </div>
+        <span style="font:600 13.5px 'Instrument Sans';color:#E9ECE8;border:1px solid #2A3F40;background:#16282A;border-radius:8px;padding:11px 16px;text-align:center;cursor:pointer;width:max-content">Cancelar reserva</span>
+      </div>
+      <div style="display:flex;align-items:center;padding:14px 22px;border-top:1px solid #2A3F40;background:#131F20">
+        <span style="font:500 13px 'Instrument Sans';color:#9FB0AE;cursor:pointer">Cerrar</span>
+      </div>
+    </div>
+</div>
+</div>
+<div style="width:300px;flex-shrink:0;align-self:flex-start;margin-top:29px;display:flex;flex-direction:column;gap:16px">
+  <div style="background:#16282A;border:1px solid #2A3F40;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+    <div><div style="font:600 15px 'Sora';color:#E9ECE8">Drawer · reserva pendiente</div><div style="font:400 12px/1.5 'Instrument Sans';color:#5F7371;margin-top:3px">Bloque Acciones cuando la reserva aún no está aprobada.</div></div>
+    <div style="display:flex;align-items:center;gap:12px"><span style="font:700 11px 'Instrument Sans';letter-spacing:0.08em;text-transform:uppercase;color:#7FB5B0">Acciones</span><span style="flex:1;height:1px;background:#22383A"></span></div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font:600 11px 'Instrument Sans';letter-spacing:0.06em;text-transform:uppercase;color:#5F7371">Nota (opcional)</span>
+      <div style="border:1px solid #2A3F40;background:#101D1E;border-radius:8px;padding:10px 12px;min-height:48px;font:400 13px/1.5 'Instrument Sans';color:#5F7371">Requerida para observar o rechazar.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="text-align:center;font:600 13.5px 'Instrument Sans';color:#1C2B2C;background:#E0A438;border-radius:8px;padding:10px 16px;cursor:pointer">Aprobar</span>
+      <div style="display:flex;gap:8px">
+        <span style="flex:1;text-align:center;font:600 13px 'Instrument Sans';color:#E9ECE8;border:1px solid #2A3F40;background:#16282A;border-radius:8px;padding:10px 8px;cursor:pointer">Observar</span>
+        <span style="flex:1;text-align:center;font:600 13px 'Instrument Sans';color:#E9ECE8;border:1px solid #2A3F40;background:#16282A;border-radius:8px;padding:10px 8px;cursor:pointer">Rechazar</span>
+      </div>
+    </div>
+    <div style="font:400 12px/1.5 'Instrument Sans';color:#5F7371">Cobros: se generan en Finanzas al aprobar la reserva.</div>
+  </div>
+  <div style="background:#16282A;border:1px solid #2A3F40;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+    <div><div style="font:600 15px 'Sora';color:#E9ECE8">Drawer · reserva completada</div><div style="font:400 12px/1.5 'Instrument Sans';color:#5F7371;margin-top:3px">Evento derivado del horario, no una acción registrada: punto hueco y texto atenuado.</div></div>
+    <div style="display:flex;flex-direction:column">
+          <div style="display:flex;gap:12px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-top:4px"><span style="width:8px;height:8px;border-radius:99px;border:1.5px solid #2A3F40;box-sizing:border-box;flex-shrink:0"></span></div>
+            <div style="padding-bottom:0"><div style="font:400 12px ui-monospace,monospace;color:#5F7371">vie 15 · 18:00</div><div style="font:500 13px 'Instrument Sans';color:#5F7371;margin-top:2px">Reserva completada</div><div style="font:400 12px 'Instrument Sans';color:#5F7371;margin-top:1px">derivado del horario</div></div>
+          </div>
+    </div>
   </div>
 </div>
 </div>

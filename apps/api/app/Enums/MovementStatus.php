@@ -16,8 +16,8 @@ enum MovementStatus: string
      * The whole status machine in one place. Fees and expenses go
      * pending → paid (reversible for mistakes); deposits go
      * pending → held → to_refund → refunded, with retained (kept for
-     * damages) reachable once the money is in hand. Any pending row can be
-     * voided.
+     * damages) reachable once the money is in hand and reversible back to
+     * held. Any pending row can be voided.
      *
      * @return list<self>
      */
@@ -28,6 +28,10 @@ enum MovementStatus: string
                 self::Pending => [self::Held, self::Voided],
                 self::Held => [self::ToRefund, self::Retained, self::Pending],
                 self::ToRefund => [self::Refunded, self::Retained, self::Held],
+                // Kept for damages is a judgment call, so it stays reversible;
+                // refunded and voided are not, because money moved or the row
+                // never counted.
+                self::Retained => [self::Held],
                 default => [],
             };
         }

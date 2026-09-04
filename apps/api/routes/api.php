@@ -78,6 +78,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/photos/{photo}/cover', [AmenityPhotoController::class, 'cover']);
         Route::get('/accounts/{account}/locations/{location}/reservations', [ReservationController::class, 'index']);
         Route::post('/accounts/{account}/locations/{location}/reservations', [ReservationController::class, 'store']);
+        Route::get('/accounts/{account}/reservations/{reservation}', [ReservationController::class, 'show']);
         Route::post('/accounts/{account}/reservations/{reservation}/approve', [ReservationController::class, 'approve']);
         Route::post('/accounts/{account}/reservations/{reservation}/reject', [ReservationController::class, 'reject']);
         Route::post('/accounts/{account}/reservations/{reservation}/observe', [ReservationController::class, 'observe']);

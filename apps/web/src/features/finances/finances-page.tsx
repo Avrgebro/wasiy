@@ -68,7 +68,16 @@ function FinancesContent({
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  // A row click selects locally; the URL param (deep link from a booking)
+  // seeds it. Closing clears both so the link does not reopen the drawer.
+  const [localSelected, setLocalSelected] = useState<string | null>(null)
+  const selectedId = localSelected ?? search.movement ?? null
+  const setSelectedId = (id: string | null) => {
+    setLocalSelected(id)
+    if (id === null && search.movement) {
+      void navigate({ search: (current) => ({ ...current, movement: undefined }) })
+    }
+  }
   const [drawerOpened, setDrawerOpened] = useState(false)
 
   const thisMonth = currentMonth(timezone)
@@ -120,7 +129,7 @@ function FinancesContent({
         <div className="flex min-w-0 flex-col">
           <span className="flex items-center gap-2 font-semibold">
             {row.original.direction === 'expense' ? (
-              <span className="grid size-4 shrink-0 place-items-center rounded-[5px] bg-[var(--mantine-color-error-light)] text-[var(--mantine-color-error-light-color)]">
+              <span className="grid size-4 shrink-0 place-items-center rounded-[5px] bg-[var(--mantine-color-error-light)] text-[var(--wa-error)]">
                 <ArrowDown size={10} />
               </span>
             ) : null}
@@ -201,7 +210,7 @@ function FinancesContent({
       </div>
 
       <div className="flex items-center gap-2.5 rounded-xl border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3">
-        <InfoCircle className="shrink-0 text-[var(--mantine-color-info-light-color)]" size={16} />
+        <InfoCircle className="shrink-0 text-[var(--wa-interactive)]" size={16} />
         <Text c="dimmed" size="sm">
           {t('finances.disclaimer')}
         </Text>

@@ -6,7 +6,8 @@
     "save": "Guardar",
     "search": "Buscar",
     "import": "Importar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
   },
   "common": {
     "loading": "Cargando",
@@ -624,14 +625,38 @@
     "detail": {
       "fee": "Cuota",
       "deposit": "Depósito",
-      "feeHint": "Precios al momento de la reserva — el cobro se registra manualmente.",
       "note": "Nota",
-      "createdBy": "Registrada por {{name}} · {{date}}",
-      "decidedBy": "por {{name}} · {{date}}",
       "charges": "Cobros",
-      "chargesOnApproval": "Los cobros se generan en Finanzas al aprobar la reserva."
+      "chargesOnApproval": "Los cobros se generan en Finanzas al aprobar la reserva.",
+      "title": "Reserva",
+      "kind": "Reserva",
+      "registeredBy": "Registrada por",
+      "decisionNote": "Nota de decisión",
+      "viewInFinances": "Ver en Finanzas →",
+      "noteHint": "Visible para el residente.",
+      "noteRequiredHint": "Requerida para observar o rechazar.",
+      "confirmCancel": "¿Cancelar la reserva?",
+      "confirmCancelBody": "El espacio queda libre y los cobros pendientes se anulan; un depósito en garantía pasa a por devolver. Esta acción no se puede deshacer.",
+      "decidedLabel": {
+        "approved": "Aprobada por",
+        "rejected": "Rechazada por",
+        "observed": "Observada por",
+        "cancelled": "Cancelada por",
+        "pending": "Decidida por"
+      }
     },
-    "weekOf": "Semana del {{range}}"
+    "weekOf": "Semana del {{range}}",
+    "history": {
+      "created": "Reserva registrada",
+      "approved": "Reserva aprobada",
+      "observed": "Reserva observada",
+      "rejected": "Reserva rechazada",
+      "cancelled": "Reserva cancelada",
+      "updated": "Reserva modificada",
+      "chargeGenerated": "Cobro generado: {{charge}}",
+      "completed": "Reserva completada",
+      "derived": "derivado del horario"
+    }
   },
   "settings": {
     "intro": "Cada grupo se guarda por separado. Los valores mostrados son los que están en vigencia, incluidos los heredados de la cuenta.",
@@ -827,7 +852,7 @@
       "held": "En garantía",
       "to_refund": "Por devolver",
       "refunded": "Devuelto",
-      "retained": "Retenido",
+      "retained": "Retenido por daños",
       "voided": "Anulado"
     },
     "transitions": {
@@ -836,7 +861,7 @@
       "held": "Marcar recibido",
       "to_refund": "Liberar depósito",
       "refunded": "Marcar devuelto",
-      "retained": "Retener depósito",
+      "retained": "No devolver",
       "voided": "Anular"
     },
     "categories": {
@@ -871,7 +896,13 @@
       "actions": "Acciones",
       "actionNote": "Nota (opcional)",
       "actionNoteHint": "Motivo de la devolución o retención, visible para el residente.",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "confirmRetain": "¿Retener el depósito?",
+      "confirmRetainBody": "El depósito no se devolverá al residente por daños o incumplimiento. Puedes revertirlo después desde este mismo panel.",
+      "confirmVoid": "¿Anular el movimiento?",
+      "confirmVoidBody": "El movimiento dejará de contar en los totales. Esta acción no se puede deshacer.",
+      "confirm": "Confirmar",
+      "retainHint": "Se retiene por daños o incumplimiento."
     },
     "record": "Registrar movimiento",
     "form": {
@@ -920,7 +951,7 @@
       "held": "Depósito recibido (en garantía)",
       "to_refund": "Marcado por devolver",
       "refunded": "Marcado devuelto",
-      "retained": "Depósito retenido",
+      "retained": "Retenido por daños",
       "voided": "Anulado"
     },
     "searchPlaceholder": "Buscar concepto, detalle o proveedor…",

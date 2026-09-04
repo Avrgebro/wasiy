@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReservationRequest;
 use App\Http\Resources\ReservationResource;
 use App\Models\Account;
+use App\Models\ActivityLog;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\Reservation;
@@ -102,6 +103,46 @@ class ReservationController extends Controller
 
         return (new ReservationResource($reservation->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements'])))
             ->response()->setStatusCode(201);
+    }
+
+    /**
+     * One booking with its ledger rows and a merged history: the
+     * reservation's own events plus the events of the movements it opened,
+     * newest first, so the drawer's timeline tells the whole story.
+     */
+    public function show(Request $request, Account $account, Reservation $reservation): JsonResource
+    {
+        $this->authorizeAccount($request, $account);
+        abort_unless($reservation->account_id === $account->id, 404);
+        Gate::authorize('view', $reservation);
+
+        $reservation->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements']);
+        $movementIds = $reservation->movements->pluck('id')->all();
+
+        $history = ActivityLog::query()
+            ->where(fn ($query) => $query
+                ->where(fn ($own) => $own->where('subject_type', 'reservation')->where('subject_id', $reservation->id))
+                ->orWhere(fn ($money) => $money->where('subject_type', 'financial_movement')->whereIn('subject_id', $movementIds)))
+            ->with('actor')
+            // ULIDs are time-ordered: they break same-second ties.
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (ActivityLog $entry): array => [
+                'id' => $entry->id,
+                'subject' => $entry->subject_type === 'reservation' ? 'reservation' : 'movement',
+                'event_type' => $entry->event_type->value,
+                'status' => $entry->metadata['status'] ?? null,
+                'previous_status' => $entry->metadata['previous_status'] ?? null,
+                'note' => $entry->metadata['status_note'] ?? null,
+                'category' => $entry->metadata['category'] ?? null,
+                'amount' => $entry->metadata['amount'] ?? null,
+                'actor_name' => $entry->actor?->name,
+                'created_at' => $entry->created_at?->toJSON(),
+            ])
+            ->all();
+
+        return (new ReservationResource($reservation))->additional(['history' => $history]);
     }
 
     public function approve(Request $request, Account $account, Reservation $reservation, DecideReservation $decide): JsonResource
