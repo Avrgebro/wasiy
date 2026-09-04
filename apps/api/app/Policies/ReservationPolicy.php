@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Models\Location;
 use App\Models\Reservation;
 use App\Models\User;
@@ -15,14 +15,12 @@ class ReservationPolicy
     ) {}
 
     /**
-     * Mirrors AmenityPolicy: admins and assigned staff see the surface;
-     * Front Desk may view but only managers (and admins) create and decide.
-     * canManageRegistry() already refuses deactivated Locations.
+     * Capabilities decide who sees, requests and decides (ADR 0036); the
+     * access service already refuses deactivated Locations.
      */
     public function viewAny(User $user, Location $location): bool
     {
-        return $this->isAccountAdmin($user, $location)
-            || $this->access->canViewRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ViewReservations);
     }
 
     public function view(User $user, Reservation $reservation): bool
@@ -32,23 +30,16 @@ class ReservationPolicy
 
     public function create(User $user, Location $location): bool
     {
-        // Front desk registers bookings for residents at the counter, so
-        // create follows view access, not manage.
-        return $this->access->canViewRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::CreateReservations);
     }
 
     public function decide(User $user, Reservation $reservation): bool
     {
-        return $this->access->canManageRegistry($user, $reservation->location);
+        return $this->access->can($user, $reservation->location, Capability::DecideReservations);
     }
 
     public function cancel(User $user, Reservation $reservation): bool
     {
-        return $this->access->canViewRegistry($user, $reservation->location);
-    }
-
-    private function isAccountAdmin(User $user, Location $location): bool
-    {
-        return $this->access->hasAccountRole($user, $location->account, AccountRole::AccountAdmin);
+        return $this->access->can($user, $reservation->location, Capability::CreateReservations);
     }
 }

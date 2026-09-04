@@ -179,7 +179,13 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
     $frontDesk = User::factory()->create();
     createStaffMembership($account, $frontDesk);
     grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
-    $this->actingAs($frontDesk)->getJson("/api/units/{$unit->id}")->assertOk();
+    // The desk gets the unit without the ledger sections (ADR 0036).
+    $this->actingAs($frontDesk)->getJson("/api/units/{$unit->id}")
+        ->assertOk()
+        ->assertJsonCount(2, 'data.members')
+        ->assertJsonMissingPath('movements')
+        ->assertJsonMissingPath('movements_month')
+        ->assertJsonMissingPath('pending_balance');
     $this->actingAs($frontDesk)->postJson("/api/units/{$unit->id}/notes", ['body' => 'x'])->assertForbidden();
 });
 

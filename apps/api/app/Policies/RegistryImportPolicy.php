@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\RegistryImport;
@@ -23,7 +24,7 @@ class RegistryImportPolicy
 
         if ($location !== null) {
             return $location->account_id === $account->id
-                && $this->access->canManageRegistry($user, $location);
+                && $this->access->can($user, $location, Capability::ManageRegistry);
         }
 
         return $this->access->canManageAnyRegistryInAccount($user, $account);
@@ -31,12 +32,12 @@ class RegistryImportPolicy
 
     public function create(User $user, Location $location): bool
     {
-        return $this->access->canManageRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ManageRegistry);
     }
 
     public function view(User $user, RegistryImport $import): bool
     {
-        return $this->access->canManageRegistry($user, $import->location);
+        return $this->access->can($user, $import->location, Capability::ManageRegistry);
     }
 
     public function confirm(User $user, RegistryImport $import): bool

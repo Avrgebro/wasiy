@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Data\AccessContext;
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\StaffMembership;
@@ -276,6 +277,10 @@ class AccessContextService
             $roles[] = $locationRole->role->value;
         }
 
+        // The matrix row for this Location; the SPA gates its UI on this
+        // list and never re-derives permissions from roles (ADR 0036).
+        $capabilities = Capability::valuesForRoles($isAccountAdmin, $locationRole?->role);
+
         $accessSource = match (true) {
             $isAccountAdmin && $locationRole !== null => 'both',
             $isAccountAdmin => 'account_role',
@@ -290,6 +295,7 @@ class AccessContextService
             'timezone' => $location->timezone,
             'address' => $location->formattedAddress(),
             'roles' => array_values(array_unique($roles)),
+            'capabilities' => $capabilities,
             'access_source' => $accessSource,
         ];
     }

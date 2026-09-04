@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Capability;
 use App\Models\FinancialMovement;
 use App\Models\Location;
 use App\Models\User;
@@ -15,11 +16,11 @@ class FinancialMovementPolicy
 
     /**
      * Finances are a manager surface: Front Desk never sees the ledger.
-     * canManageRegistry() covers admins and refuses deactivated Locations.
+     * ManageFinances covers admins and managers; deactivated Locations grant nothing.
      */
     public function viewAny(User $user, Location $location): bool
     {
-        return $this->access->canManageRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ManageFinances);
     }
 
     public function view(User $user, FinancialMovement $movement): bool
@@ -29,11 +30,11 @@ class FinancialMovementPolicy
 
     public function create(User $user, Location $location): bool
     {
-        return $this->access->canManageRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ManageFinances);
     }
 
     public function manage(User $user, FinancialMovement $movement): bool
     {
-        return $this->access->canManageRegistry($user, $movement->location);
+        return $this->access->can($user, $movement->location, Capability::ManageFinances);
     }
 }

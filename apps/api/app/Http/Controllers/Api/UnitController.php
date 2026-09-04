@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Units\DeactivateUnit;
 use App\Enums\ActivityEventType;
+use App\Enums\Capability;
 use App\Enums\RegistryStatus;
 use App\Enums\UnitType;
 use App\Http\Controllers\Controller;
@@ -22,6 +23,7 @@ use App\Models\Reservation;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Visit;
+use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
 use App\Support\SortParser;
 use Carbon\CarbonImmutable;
@@ -38,6 +40,7 @@ class UnitController extends Controller
 {
     public function __construct(
         private readonly ActivityLogger $activityLogger,
+        private readonly AccessAuthorizationService $access,
     ) {}
 
     public function index(Request $request, Location $location): AnonymousResourceCollection
@@ -136,7 +139,7 @@ class UnitController extends Controller
      * plus the sections that read other modules — upcoming bookings, this
      * month's charges and the pending balance, and the internal notes.
      */
-    public function show(Unit $unit): UnitResource
+    public function show(Request $request, Unit $unit): UnitResource
     {
         Gate::authorize('view', $unit);
 
@@ -157,17 +160,25 @@ class UnitController extends Controller
             ->limit(5)
             ->get();
 
-        $movements = FinancialMovement::query()
-            ->where('unit_id', $unit->id)
-            ->inMonth($month)
-            ->orderByDesc('occurred_on')->orderByDesc('created_at')
-            ->get();
+        // The ledger sections are for managers; the desk gets the unit
+        // without them (ADR 0036), so the keys are absent, not empty.
+        $seesFinances = $this->access->can($request->user(), $unit->location, Capability::ManageFinances);
 
-        $pendingBalance = (int) FinancialMovement::query()
-            ->where('unit_id', $unit->id)
-            ->where('direction', 'income')
-            ->where('status', 'pending')
-            ->sum('amount');
+        $movements = $seesFinances
+            ? FinancialMovement::query()
+                ->where('unit_id', $unit->id)
+                ->inMonth($month)
+                ->orderByDesc('occurred_on')->orderByDesc('created_at')
+                ->get()
+            : null;
+
+        $pendingBalance = $seesFinances
+            ? (int) FinancialMovement::query()
+                ->where('unit_id', $unit->id)
+                ->where('direction', 'income')
+                ->where('status', 'pending')
+                ->sum('amount')
+            : null;
 
         $notes = ActivityLog::query()
             ->where('subject_type', Unit::class)
@@ -198,15 +209,15 @@ class UnitController extends Controller
             ->limit(5)
             ->get();
 
-        return (new UnitResource($unit))->additional([
+        return (new UnitResource($unit))->additional(array_filter([
             'visits' => VisitResource::collection($visits)->resolve(),
             'packages' => PackageResource::collection($packages)->resolve(),
             'reservations' => ReservationResource::collection($reservations)->resolve(),
-            'movements' => FinancialMovementResource::collection($movements)->resolve(),
-            'movements_month' => $month,
+            'movements' => $movements !== null ? FinancialMovementResource::collection($movements)->resolve() : null,
+            'movements_month' => $seesFinances ? $month : null,
             'pending_balance' => $pendingBalance,
             'notes' => $notes,
-        ]);
+        ], fn ($value): bool => $value !== null));
     }
 
     public function storeNote(Request $request, Unit $unit): JsonResponse

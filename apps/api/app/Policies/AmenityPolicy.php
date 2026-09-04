@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\User;
@@ -16,14 +17,13 @@ class AmenityPolicy
 
     /**
      * An Account Admin or a Location Manager assigned to the Location may
-     * manage Amenities; Front Desk may only view. canManageRegistry()
-     * already refuses deactivated Locations, so a retired property's
-     * Amenities are read-only for everyone.
+     * manage Amenities; Front Desk may only view. The access service
+     * refuses deactivated Locations, so a retired property's Amenities are
+     * read-only for everyone.
      */
     public function viewAny(User $user, Location $location): bool
     {
-        return $this->isAccountAdmin($user, $location)
-            || $this->access->canViewRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ViewReservations);
     }
 
     public function view(User $user, Amenity $amenity): bool
@@ -33,25 +33,25 @@ class AmenityPolicy
 
     public function create(User $user, Location $location): bool
     {
-        return $this->access->canManageRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::DecideReservations);
     }
 
     public function update(User $user, Amenity $amenity): bool
     {
         return ! $amenity->isDeactivated()
-            && $this->access->canManageRegistry($user, $amenity->location);
+            && $this->access->can($user, $amenity->location, Capability::DecideReservations);
     }
 
     public function deactivate(User $user, Amenity $amenity): bool
     {
         return ! $amenity->isDeactivated()
-            && $this->access->canManageRegistry($user, $amenity->location);
+            && $this->access->can($user, $amenity->location, Capability::DecideReservations);
     }
 
     public function reactivate(User $user, Amenity $amenity): bool
     {
         return $amenity->isDeactivated()
-            && $this->access->canManageRegistry($user, $amenity->location);
+            && $this->access->can($user, $amenity->location, Capability::DecideReservations);
     }
 
     /**

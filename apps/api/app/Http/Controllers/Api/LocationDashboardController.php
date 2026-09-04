@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\Capability;
 use App\Enums\MovementCategory;
 use App\Enums\MovementDirection;
 use App\Enums\MovementStatus;
@@ -59,7 +60,7 @@ class LocationDashboardController extends Controller
             'today' => $this->today($location),
         ];
 
-        if ($user !== null && $this->access->canManageRegistry($user, $location)) {
+        if ($user !== null && $this->access->can($user, $location, Capability::ManageFinances)) {
             $payload['management'] = $this->management($location);
         }
 

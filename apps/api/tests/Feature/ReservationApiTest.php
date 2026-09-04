@@ -333,7 +333,7 @@ test('the list filters by local date range and status set', function () {
         ->assertJsonCount(2, 'data');
 });
 
-test('front desk can create but only managers decide', function () {
+test('front desk reads reservations but neither creates nor decides', function () {
     [$account, $location, $amenity, $unit] = reservationWorld([
         'booking_mode' => BookingMode::Approval,
     ]);
@@ -343,7 +343,15 @@ test('front desk can create but only managers decide', function () {
     $manager = User::factory()->create();
     grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
 
-    $id = $this->actingAs($frontDesk)
+    $this->actingAs($frontDesk)
+        ->getJson(reservationsBase($account, $location))
+        ->assertOk();
+
+    $this->actingAs($frontDesk)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
+        ->assertForbidden();
+
+    $id = $this->actingAs($manager)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
         ->assertCreated()
         ->json('data.id');

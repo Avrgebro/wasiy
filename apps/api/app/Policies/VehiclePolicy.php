@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Capability;
 use App\Models\Location;
 use App\Models\Unit;
 use App\Models\User;
@@ -16,18 +17,18 @@ class VehiclePolicy
 
     public function view(User $user, Vehicle $vehicle): bool
     {
-        return $this->access->canViewRegistry($user, $vehicle->location)
+        return $this->access->can($user, $vehicle->location, Capability::ViewRegistry)
             || $this->access->canResidentManageVehicle($user, $vehicle);
     }
 
     public function viewAny(User $user, Location $location): bool
     {
-        return $this->access->canViewRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ViewRegistry);
     }
 
     public function create(User $user, Location $location): bool
     {
-        return $this->access->canManageRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ManageRegistry);
     }
 
     public function update(User $user, Vehicle $vehicle): bool
