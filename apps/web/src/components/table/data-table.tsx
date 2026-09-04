@@ -53,7 +53,9 @@ export function DataTable<TRow extends { id: string }>({
   loading = false,
   meta,
   onPageChange,
+  onRowClick,
   rowClassName,
+  selectedId,
   toolbar,
 }: {
   columns: ColumnDef<TRow>[]
@@ -67,7 +69,11 @@ export function DataTable<TRow extends { id: string }>({
   /** Laravel pagination meta; the footer pager renders only when present. */
   meta?: DataTablePaginationMeta
   onPageChange?: (page: number) => void
+  /** Makes rows clickable (pointer, hover) and reports the clicked row. */
+  onRowClick?: (row: TRow) => void
   rowClassName?: (row: TRow) => string | undefined
+  /** Row rendered as selected (accent left bar) while a detail surface is open. */
+  selectedId?: string | null
   /** Filter controls; the card header strip and border come from here. */
   toolbar?: ReactNode
 }) {
@@ -116,7 +122,20 @@ export function DataTable<TRow extends { id: string }>({
               </Table.Thead>
               <Table.Tbody>
                 {table.getRowModel().rows.map((row) => (
-                  <Table.Tr key={row.id} className={rowClassName?.(row.original)}>
+                  <Table.Tr
+                    key={row.id}
+                    aria-selected={selectedId === row.id || undefined}
+                    className={[
+                      rowClassName?.(row.original),
+                      onRowClick ? 'cursor-pointer' : undefined,
+                      selectedId === row.id
+                        ? 'bg-[var(--mantine-color-default-hover)] shadow-[inset_2.5px_0_0_var(--wa-info)]'
+                        : undefined,
+                    ]
+                      .filter(Boolean)
+                      .join(' ') || undefined}
+                    onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <Table.Td
                         key={cell.id}

@@ -1,6 +1,7 @@
 import { ActionIcon, Alert, Badge, Button, Group, Skeleton, Text } from '@mantine/core'
 import { AddCircle, AltArrowLeft, AltArrowRight, ArrowDown, InfoCircle } from '@solar-icons/react'
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { TFunction } from 'i18next'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
@@ -9,26 +10,12 @@ import { DataTable } from '../../components/table/data-table'
 import { StatCard } from '../../components/ui/stat-card'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { notifyError, notifySuccess } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
-import {
-  getFinanceSummary,
-  getMovements,
-  transitionMovement,
-  type FinanceSummary,
-  type MovementStatus,
-  type MovementSummary,
-} from './api'
+import { getFinanceSummary, getMovements, type CategoryTotal, type FinanceSummary, type MovementSummary } from './api'
 import { currentMonth, monthLabel, shiftMonth, shortDate } from './month'
-import { MovementDetailModal } from './movement-detail-modal'
+import { MovementDrawer } from './movement-drawer'
 import { MovementFormDrawer } from './movement-form-drawer'
-import {
-  amountClassName,
-  primaryTransition,
-  statusColor,
-  statusLabel,
-  transitionLabel,
-} from './movement-presentation'
+import { amountClassName, statusColor, statusLabel } from './movement-presentation'
 import { chipParams, FINANCE_CHIPS, type FinancesSearchValues } from './schemas'
 
 const routeApi = getRouteApi('/_authenticated/admin/finances')
@@ -80,8 +67,7 @@ function FinancesContent({
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
-  const queryClient = useQueryClient()
-  const [selected, setSelected] = useState<MovementSummary | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [drawerOpened, setDrawerOpened] = useState(false)
 
   const thisMonth = currentMonth(timezone)
@@ -98,16 +84,6 @@ function FinancesContent({
     queryFn: () =>
       getMovements(accountId, locationId, { month, page: search.page, ...chipParams(chip) }),
     placeholderData: keepPreviousData,
-  })
-
-  const transition = useMutation({
-    mutationFn: ({ movement, status }: { movement: MovementSummary; status: MovementStatus }) =>
-      transitionMovement(accountId, movement.id, status),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['finances'] })
-      notifySuccess(t('finances.updated'))
-    },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   function updateSearch(next: Partial<FinancesSearchValues>) {
@@ -148,6 +124,16 @@ function FinancesContent({
       ),
     },
     {
+      accessorKey: 'category',
+      header: t('finances.columns.category'),
+      meta: { hideBelow: 'lg' },
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] px-2.5 py-[3px] text-[11.5px] font-medium text-[var(--mantine-color-dimmed)]">
+          {t(`finances.categories.${row.original.category}`)}
+        </span>
+      ),
+    },
+    {
       id: 'unit',
       header: t('finances.columns.unit'),
       meta: { hideBelow: 'md' },
@@ -177,27 +163,10 @@ function FinancesContent({
       ),
     },
     {
-      id: 'actions',
-      header: t('finances.columns.action'),
-      meta: { className: 'text-right whitespace-nowrap' },
-      cell: ({ row }) => {
-        const next = primaryTransition(row.original)
-
-        return next ? (
-          <Button
-            loading={transition.isPending && transition.variables?.movement.id === row.original.id}
-            size="compact-xs"
-            variant="subtle"
-            onClick={() => transition.mutate({ movement: row.original, status: next })}
-          >
-            {transitionLabel(next, t)}
-          </Button>
-        ) : (
-          <Button c="dimmed" size="compact-xs" variant="subtle" onClick={() => setSelected(row.original)}>
-            {t('finances.detail.open')}
-          </Button>
-        )
-      },
+      id: 'open',
+      header: '',
+      meta: { className: 'w-6 text-right' },
+      cell: () => <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>,
     },
   ]
 
@@ -308,10 +277,17 @@ function FinancesContent({
         fetching={listQuery.isPlaceholderData}
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
+        selectedId={selectedId}
         onPageChange={(page) => updateSearch({ page })}
+        onRowClick={(movement) => setSelectedId(movement.id)}
       />
 
-      <MovementDetailModal accountId={accountId} movement={selected} onClose={() => setSelected(null)} />
+      <MovementDrawer
+        accountId={accountId}
+        movementId={selectedId}
+        timezone={timezone}
+        onClose={() => setSelectedId(null)}
+      />
       <MovementFormDrawer
         accountId={accountId}
         locationId={locationId}
@@ -340,25 +316,45 @@ function ChipButton({ active, label, onClick }: { active: boolean; label: string
   )
 }
 
+/** Sublines are statistics only: breakdowns and comparisons, never claims. */
+function byCategoryLine(rows: CategoryTotal[], t: TFunction, withAmount: boolean, limit = 3): string {
+  if (rows.length === 0) {
+    return t('finances.tiles.none')
+  }
+
+  return rows
+    .slice(0, limit)
+    .map((row) =>
+      withAmount
+        ? `${t(`finances.categories.${row.category}`)} ${formatMoney(row.total)}`
+        : `${row.count} ${t(`finances.categoriesPlural.${row.category}`, { count: row.count })}`,
+    )
+    .join(' · ')
+}
+
 function SummaryTiles({ summary }: { summary: FinanceSummary }) {
   const { t } = useTranslation('common')
+  const delta = summary.balance - summary.previous_balance
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 @4xl:grid-cols-4">
       <StatCard
-        detail={t('finances.tiles.incomeDetail', { count: summary.income_count })}
+        detail={byCategoryLine(summary.income_by_category, t, false)}
         label={t('finances.tiles.income')}
         tone="success"
         value={formatMoney(summary.income_total)}
       />
       <StatCard
-        detail={t('finances.tiles.expenseDetail', { count: summary.expense_count })}
+        detail={byCategoryLine(summary.expense_by_category, t, true)}
         label={t('finances.tiles.expense')}
         tone="error"
         value={formatMoney(summary.expense_total, { negative: summary.expense_total > 0 })}
       />
       <StatCard
-        detail={t(summary.balance < 0 ? 'finances.tiles.balanceNegative' : 'finances.tiles.balancePositive')}
+        detail={t('finances.tiles.balanceVsPrevious', {
+          month: monthLabel(summary.previous_month).split(' ')[0],
+          delta: `${delta > 0 ? '+ ' : ''}${formatMoney(delta)}`,
+        })}
         label={t('finances.tiles.balance')}
         value={formatMoney(summary.balance)}
       />

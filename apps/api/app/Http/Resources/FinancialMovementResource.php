@@ -36,6 +36,12 @@ class FinancialMovementResource extends JsonResource
             'unit_id' => $this->unit_id,
             'unit_number' => $this->whenLoaded('unit', fn () => $this->unit?->unit_number),
             'reservation_id' => $this->reservation_id,
+            'reservation' => $this->whenLoaded('reservation', fn () => $this->reservation === null ? null : [
+                'id' => $this->reservation->id,
+                'amenity_name' => $this->reservation->amenity?->name,
+                'starts_at' => $this->reservation->starts_at->toJSON(),
+                'status' => $this->reservation->status->value,
+            ]),
             'occurred_on' => $this->occurred_on->toDateString(),
             'due_on' => $this->due_on?->toDateString(),
             'note' => $this->note,

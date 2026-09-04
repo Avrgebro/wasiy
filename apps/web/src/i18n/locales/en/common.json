@@ -800,17 +800,13 @@
     },
     "tiles": {
       "income": "Income this month",
-      "incomeDetail_one": "{{count}} fee collected",
-      "incomeDetail_other": "{{count}} fees collected",
       "expense": "Expenses this month",
-      "expenseDetail_one": "{{count}} expense paid",
-      "expenseDetail_other": "{{count}} expenses paid",
       "balance": "Balance this month",
-      "balancePositive": "Income covers expenses",
-      "balanceNegative": "Covered by maintenance dues",
       "receivable": "Receivable · deposits held",
       "heldAside": "· {{amount}} held",
-      "receivableDetail": "{{pending}} pending · {{refunds}} to refund"
+      "receivableDetail": "{{pending}} pending · {{refunds}} to refund",
+      "none": "No movements",
+      "balanceVsPrevious": "vs. {{month}}: {{delta}}"
     },
     "columns": {
       "date": "Date",
@@ -818,7 +814,8 @@
       "unit": "Unit",
       "amount": "Amount",
       "status": "Status",
-      "action": "Action"
+      "action": "Action",
+      "category": "Category"
     },
     "statuses": {
       "pending": "Pending",
@@ -844,16 +841,34 @@
       "reservation_deposit": "Reservation deposit",
       "utility": "Utilities",
       "cleaning": "Cleaning",
-      "maintenance": "Maintenance",
-      "other": "Other"
+      "maintenance": "Maintenance and repairs",
+      "other": "Other",
+      "maintenance_dues": "Maintenance dues",
+      "fine": "Fine",
+      "other_income": "Other income",
+      "water": "Water",
+      "electricity": "Electricity",
+      "gas": "Gas",
+      "telecom": "Internet and phone",
+      "security": "Security",
+      "staff": "Staff",
+      "supplies": "Supplies",
+      "gardening": "Gardening",
+      "insurance_taxes": "Insurance and taxes",
+      "administration": "Administration",
+      "other_expense": "Other expense"
     },
     "detail": {
       "open": "Details",
       "dueOn": "Due",
-      "category": "Category",
       "recordedBy": "Recorded by",
-      "settledBy": "Last handled by",
-      "note": "Note"
+      "note": "Note",
+      "reservation": "Reservation",
+      "recordedBySystem": "System · on reservation approval",
+      "actions": "Actions",
+      "actionNote": "Note (optional)",
+      "actionNoteHint": "Reason for the refund or retention, visible to the resident.",
+      "close": "Close"
     },
     "record": "Record movement",
     "form": {
@@ -879,6 +894,31 @@
       "note": "Note",
       "submit": "Record",
       "recorded": "Movement recorded"
+    },
+    "categoriesPlural": {
+      "reservation_fee_one": "reservation fee",
+      "reservation_deposit_one": "deposit",
+      "maintenance_dues_one": "dues payment",
+      "fine_one": "fine",
+      "other_income_one": "other income",
+      "reservation_fee_other": "reservation fees",
+      "reservation_deposit_other": "deposits",
+      "maintenance_dues_other": "dues payments",
+      "fine_other": "fines",
+      "other_income_other": "other income"
+    },
+    "history": {
+      "title": "History",
+      "recorded": "Recorded",
+      "generatedOnApproval": "Generated on reservation approval",
+      "system": "System",
+      "paid": "Marked paid",
+      "pending": "Back to pending",
+      "held": "Deposit received (held)",
+      "to_refund": "Marked to refund",
+      "refunded": "Marked refunded",
+      "retained": "Deposit retained",
+      "voided": "Voided"
     }
   }
 }

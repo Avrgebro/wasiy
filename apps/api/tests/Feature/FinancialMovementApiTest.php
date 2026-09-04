@@ -49,7 +49,7 @@ function expensePayload(array $overrides = []): array
 {
     return [
         'direction' => 'expense',
-        'category' => 'utility',
+        'category' => 'water',
         'amount' => 600,
         'concept' => 'Agua · áreas comunes',
         'detail' => 'Recibo Sedapal · vence 20 ago',
@@ -160,6 +160,23 @@ test('the initial status must fit the category', function () {
         ->assertCreated()
         ->assertJsonPath('data.unit_number', $unit->unit_number)
         ->assertJsonPath('data.status', 'held');
+});
+
+test('the category must belong to the direction', function () {
+    [$account, $location, $unit, $admin] = financeWorld();
+
+    $this->actingAs($admin)
+        ->postJson(movementsBase($account, $location), expensePayload(['category' => 'fine']))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('category');
+
+    $this->actingAs($admin)
+        ->postJson(movementsBase($account, $location), expensePayload([
+            'direction' => 'income', 'category' => 'fine', 'counterparty' => null, 'unit_id' => $unit->id,
+            'concept' => 'Multa · ruido fuera de horario', 'amount' => 80,
+        ]))
+        ->assertCreated()
+        ->assertJsonPath('data.category', 'fine');
 });
 
 test('a unit from another location is rejected', function () {
@@ -354,7 +371,43 @@ test('the summary totals the month and the outstanding balances', function () {
             'deposits_held_total' => 300,
             'deposits_to_refund_total' => 300,
             'deposits_to_refund_count' => 1,
+            'previous_month' => '2026-07',
+            // July: no paid income, one paid expense of 999.
+            'previous_balance' => -999,
+            'income_by_category' => [
+                ['category' => 'reservation_fee', 'total' => 100, 'count' => 2],
+            ],
+            'expense_by_category' => [
+                ['category' => 'water', 'total' => 2580, 'count' => 2],
+            ],
         ]]);
+});
+
+test('show returns the movement with its history newest first', function () {
+    [$account, $location, $unit, $admin] = financeWorld();
+
+    $id = $this->actingAs($admin)
+        ->postJson(movementsBase($account, $location), expensePayload())
+        ->assertCreated()->json('data.id');
+    $movement = FinancialMovement::query()->findOrFail($id);
+    $this->actingAs($admin)->postJson(statusUrl($account, $movement), ['status' => 'paid'])->assertOk();
+
+    $this->actingAs($admin)
+        ->getJson("/api/accounts/{$account->id}/finances/movements/{$id}")
+        ->assertOk()
+        ->assertJsonPath('data.status', 'paid')
+        ->assertJsonPath('data.reservation', null)
+        ->assertJsonCount(2, 'history')
+        ->assertJsonPath('history.0.event_type', 'movement.status_changed')
+        ->assertJsonPath('history.0.previous_status', 'pending')
+        ->assertJsonPath('history.0.status', 'paid')
+        ->assertJsonPath('history.0.actor_name', $admin->name)
+        ->assertJsonPath('history.1.event_type', 'movement.recorded');
+
+    $frontDesk = User::factory()->create();
+    createStaffMembership($account, $frontDesk);
+    grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
+    $this->actingAs($frontDesk)->getJson("/api/accounts/{$account->id}/finances/movements/{$id}")->assertForbidden();
 });
 
 test('approving a reservation opens a fee and a deposit row once', function () {

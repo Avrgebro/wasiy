@@ -35,9 +35,9 @@ class DemoFinancesSeeder extends Seeder
 
         $rows = [
             // [direction, category, status, amount, concept, detail, counterparty, unit, occurred, due]
-            [MovementDirection::Expense, MovementCategory::Utility, MovementStatus::Pending, 600,
+            [MovementDirection::Expense, MovementCategory::Water, MovementStatus::Pending, 600,
                 'Agua · áreas comunes', 'Recibo Sedapal', 'Sedapal', null, $day(16), $day(20)],
-            [MovementDirection::Expense, MovementCategory::Utility, MovementStatus::Paid, 1180,
+            [MovementDirection::Expense, MovementCategory::Electricity, MovementStatus::Paid, 1180,
                 'Luz · áreas comunes', 'Recibo Luz del Sur', 'Luz del Sur', null, $day(14), null],
             [MovementDirection::Expense, MovementCategory::Cleaning, MovementStatus::Paid, 1400,
                 'Limpieza · quincena 1', 'Factura F001-2210', 'Limpieza Total SAC', null, $day(13), null],
@@ -47,6 +47,10 @@ class DemoFinancesSeeder extends Seeder
                 'Cuota · Parrilla / terraza', 'Reserva del vie, 19:00', null, '101', $day(14), null],
             [MovementDirection::Income, MovementCategory::ReservationFee, MovementStatus::Paid, 50,
                 'Cuota · Parrilla / terraza', 'Reserva del lun, 13:00', null, '201', $day(11), null],
+            [MovementDirection::Income, MovementCategory::Fine, MovementStatus::Pending, 80,
+                'Multa · ruido fuera de horario', 'Reporte del lun, 23:40', null, '301', $day(11), null],
+            [MovementDirection::Income, MovementCategory::MaintenanceDues, MovementStatus::Paid, 420,
+                'Cuota de mantenimiento · agosto', 'Pago en efectivo', null, '101', $day(5), null],
             [MovementDirection::Income, MovementCategory::ReservationFee, MovementStatus::Pending, 150,
                 'Cuota · Salón de eventos', 'Reserva del sáb, 18:00', null, '102', $day(15), null],
             [MovementDirection::Income, MovementCategory::ReservationDeposit, MovementStatus::Pending, 300,

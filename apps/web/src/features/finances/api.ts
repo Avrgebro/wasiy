@@ -7,10 +7,22 @@ export type MovementDirection = 'income' | 'expense'
 export type MovementCategory =
   | 'reservation_fee'
   | 'reservation_deposit'
-  | 'utility'
+  | 'maintenance_dues'
+  | 'fine'
+  | 'other_income'
+  | 'water'
+  | 'electricity'
+  | 'gas'
+  | 'telecom'
   | 'cleaning'
   | 'maintenance'
-  | 'other'
+  | 'security'
+  | 'staff'
+  | 'supplies'
+  | 'gardening'
+  | 'insurance_taxes'
+  | 'administration'
+  | 'other_expense'
 
 export type MovementStatus =
   | 'pending'
@@ -36,6 +48,13 @@ export type MovementSummary = {
   unit_id: string | null
   unit_number?: string | null
   reservation_id: string | null
+  /** Present on the show endpoint when the row was opened by a booking. */
+  reservation?: {
+    id: string
+    amenity_name: string | null
+    starts_at: string
+    status: string
+  } | null
   occurred_on: string
   due_on: string | null
   note: string | null
@@ -47,13 +66,19 @@ export type MovementSummary = {
   created_at: string | null
 }
 
+export type CategoryTotal = { category: MovementCategory; total: number; count: number }
+
 export type FinanceSummary = {
   month: string
   income_total: number
   income_count: number
+  income_by_category: CategoryTotal[]
   expense_total: number
   expense_count: number
+  expense_by_category: CategoryTotal[]
   balance: number
+  previous_month: string
+  previous_balance: number
   receivable_total: number
   receivable_count: number
   payable_total: number
@@ -88,6 +113,21 @@ export function getMovements(accountId: string, locationId: string, search: Move
 
 export function getFinanceSummary(accountId: string, locationId: string, month: string) {
   return apiRequest<{ data: FinanceSummary }>(`${base(accountId, locationId)}/summary?month=${month}`)
+}
+
+export type MovementHistoryEntry = {
+  id: string
+  event_type: 'movement.recorded' | 'movement.status_changed'
+  status: MovementStatus | null
+  previous_status: MovementStatus | null
+  actor_name: string | null
+  created_at: string | null
+}
+
+export type MovementDetailResponse = { data: MovementSummary; history: MovementHistoryEntry[] }
+
+export function getMovement(accountId: string, movementId: string) {
+  return apiRequest<MovementDetailResponse>(`/api/accounts/${accountId}/finances/movements/${movementId}`)
 }
 
 export type MovementPayload = {

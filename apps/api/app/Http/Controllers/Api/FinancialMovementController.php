@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFinancialMovementRequest;
 use App\Http\Resources\FinancialMovementResource;
 use App\Models\Account;
+use App\Models\ActivityLog;
 use App\Models\FinancialMovement;
 use App\Models\Location;
 use App\Models\Unit;
@@ -116,13 +117,40 @@ class FinancialMovementController extends Controller
         $incomeTotal = (int) $income->clone()->sum('amount');
         $expenseTotal = (int) $expense->clone()->sum('amount');
 
+        // Tiles are statistics only: breakdowns by category and a
+        // month-over-month comparison, never interpretive copy.
+        $byCategory = fn (Builder $query): array => $query->clone()
+            ->selectRaw('category, SUM(amount) AS total, COUNT(*) AS count')
+            ->groupBy('category')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($row): array => [
+                'category' => $row->category->value,
+                'total' => (int) $row->total,
+                'count' => (int) $row->count,
+            ])
+            ->all();
+
+        $previousMonth = CarbonImmutable::createFromFormat('Y-m-d', "{$month}-01")->subMonth()->format('Y-m');
+        $previousIncome = (int) $base()->inMonth($previousMonth)
+            ->where('direction', MovementDirection::Income->value)
+            ->where('category', '!=', MovementCategory::ReservationDeposit->value)
+            ->where('status', MovementStatus::Paid->value)->sum('amount');
+        $previousExpense = (int) $base()->inMonth($previousMonth)
+            ->where('direction', MovementDirection::Expense->value)
+            ->where('status', MovementStatus::Paid->value)->sum('amount');
+
         return response()->json(['data' => [
             'month' => $month,
             'income_total' => $incomeTotal,
             'income_count' => $income->count(),
+            'income_by_category' => $byCategory($income),
             'expense_total' => $expenseTotal,
             'expense_count' => $expense->count(),
+            'expense_by_category' => $byCategory($expense),
             'balance' => $incomeTotal - $expenseTotal,
+            'previous_month' => $previousMonth,
+            'previous_balance' => $previousIncome - $previousExpense,
             'receivable_total' => (int) $receivable->clone()->sum('amount'),
             'receivable_count' => $receivable->count(),
             'payable_total' => (int) $payable->clone()->sum('amount'),
@@ -131,6 +159,38 @@ class FinancialMovementController extends Controller
             'deposits_to_refund_total' => (int) $toRefund->clone()->sum('amount'),
             'deposits_to_refund_count' => $toRefund->count(),
         ]]);
+    }
+
+    /**
+     * One movement with its history: the activity entries recorded against
+     * it, newest first, so the drawer's timeline needs no second endpoint.
+     */
+    public function show(Request $request, Account $account, FinancialMovement $financialMovement): JsonResource
+    {
+        $this->authorizeAccount($request, $account);
+        abort_unless($financialMovement->account_id === $account->id, 404);
+        Gate::authorize('view', $financialMovement);
+
+        $history = ActivityLog::query()
+            ->where('subject_type', 'financial_movement')
+            ->where('subject_id', $financialMovement->id)
+            ->with('actor')
+            // ULIDs are time-ordered: they break same-second ties.
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (ActivityLog $entry): array => [
+                'id' => $entry->id,
+                'event_type' => $entry->event_type->value,
+                'status' => $entry->metadata['status'] ?? null,
+                'previous_status' => $entry->metadata['previous_status'] ?? null,
+                'actor_name' => $entry->actor?->name,
+                'created_at' => $entry->created_at?->toJSON(),
+            ])
+            ->all();
+
+        return (new FinancialMovementResource($financialMovement->load([...self::RELATIONS, 'reservation.amenity'])))
+            ->additional(['history' => $history]);
     }
 
     public function store(

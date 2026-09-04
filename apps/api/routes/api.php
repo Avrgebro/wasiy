@@ -85,6 +85,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::get('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'index']);
         Route::get('/accounts/{account}/locations/{location}/finances/summary', [FinancialMovementController::class, 'summary']);
         Route::post('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'store']);
+        Route::get('/accounts/{account}/finances/movements/{financialMovement}', [FinancialMovementController::class, 'show']);
         Route::post('/accounts/{account}/finances/movements/{financialMovement}/status', [FinancialMovementController::class, 'transition']);
         Route::get('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'show']);
         Route::put('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'update']);

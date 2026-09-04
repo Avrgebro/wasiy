@@ -46,3 +46,21 @@ export function todayIn(timezone: string, now: Date = new Date()): string {
     day: '2-digit',
   }).format(now)
 }
+
+/** "12 ago 2026" for a YYYY-MM-DD ledger date. */
+export function longDate(date: string, locale = 'es-PE'): string {
+  return new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(`${date}T00:00:00Z`))
+    .replace('.', '')
+}
+
+/** "12 ago · 10:14" for an instant, in the location's timezone. */
+export function shortDateTime(iso: string, timezone: string, locale = 'es-PE'): string {
+  const date = new Date(iso)
+  const day = new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', timeZone: timezone })
+    .format(date)
+    .replace('.', '')
+  const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: timezone }).format(date)
+
+  return `${day} · ${time}`
+}

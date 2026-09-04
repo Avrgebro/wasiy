@@ -23,6 +23,9 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
       useNavigate: () => navigateSpy,
       useSearch: () => currentSearch,
     }),
+    Link: ({ children, to, search }: { children: React.ReactNode; to: string; search?: Record<string, string> }) => (
+      <a href={`${to}?${new URLSearchParams(search).toString()}`}>{children}</a>
+    ),
   }
 })
 
@@ -53,10 +56,22 @@ function summary(overrides: Partial<FinanceSummary> = {}): FinanceSummary {
   return {
     month: '2026-08',
     income_total: 1240,
-    income_count: 14,
+    income_count: 17,
+    income_by_category: [
+      { category: 'reservation_fee', total: 1000, count: 14 },
+      { category: 'fine', total: 160, count: 2 },
+      { category: 'other_income', total: 80, count: 1 },
+    ],
     expense_total: 3180,
     expense_count: 3,
+    expense_by_category: [
+      { category: 'cleaning', total: 1400, count: 1 },
+      { category: 'electricity', total: 1180, count: 1 },
+      { category: 'water', total: 600, count: 1 },
+    ],
     balance: -1940,
+    previous_month: '2026-07',
+    previous_balance: -1520,
     receivable_total: 450,
     receivable_count: 3,
     payable_total: 600,
@@ -74,7 +89,7 @@ function movement(overrides: Partial<MovementSummary> = {}): MovementSummary {
     account_id: 'acc_1',
     location_id: 'loc_1',
     direction: 'expense',
-    category: 'utility',
+    category: 'water',
     status: 'pending',
     allowed_transitions: ['paid', 'voided'],
     amount: 600,
@@ -114,6 +129,35 @@ function installAdapter(
 
     if (url.includes('/finances/summary')) {
       return Promise.resolve(axiosResponse(config, { data: summary() }))
+    }
+
+    if (config.method === 'get' && /\/finances\/movements\/[^/]+$/.test(url)) {
+      const id = url.split('/').pop()
+      const row = rows.find((candidate) => candidate.id === id) ?? movement()
+
+      return Promise.resolve(
+        axiosResponse(config, {
+          data: row,
+          history: [
+            {
+              id: 'al_2',
+              event_type: 'movement.status_changed',
+              status: row.status,
+              previous_status: 'pending',
+              actor_name: 'Alejandra Admin',
+              created_at: '2026-08-12T15:14:00Z',
+            },
+            {
+              id: 'al_1',
+              event_type: 'movement.recorded',
+              status: 'pending',
+              previous_status: null,
+              actor_name: 'Alejandra Admin',
+              created_at: '2026-08-08T22:45:00Z',
+            },
+          ],
+        }),
+      )
     }
 
     if (/\/finances\/movements\/[^/]+\/status$/.test(url)) {
@@ -226,10 +270,16 @@ describe('FinancesPage', () => {
     expect(screen.getByText('Por pagar')).toBeInTheDocument()
     expect(screen.getByText('− S/ 600')).toBeInTheDocument()
     expect(screen.getByText('Depto. 302')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Marcar devuelto' })).toBeInTheDocument()
-    // A settled row offers the detail modal instead of a transition.
-    expect(screen.getByRole('button', { name: 'Detalle' })).toBeInTheDocument()
+    // No action column: the row itself is the way in.
+    expect(screen.queryByRole('button', { name: 'Marcar devuelto' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Detalle' })).not.toBeInTheDocument()
+    expect(screen.getAllByText('Depósito de reserva').length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: 'agosto 2026' })).toBeInTheDocument()
+    // Tile sublines are statistics, never claims.
+    expect(screen.getByText('14 cuotas de reserva · 2 multas · 1 otro ingreso')).toBeInTheDocument()
+    expect(screen.getByText(`Limpieza ${money(1400)} · Luz ${money(1180)} · Agua ${money(600)}`)).toBeInTheDocument()
+    expect(screen.getByText(`vs. julio: ${money(-420)}`)).toBeInTheDocument()
+    expect(screen.queryByText(/Se cubre con/)).not.toBeInTheDocument()
   })
 
   it('translates chips and month navigation into URL search params', async () => {
@@ -252,17 +302,58 @@ describe('FinancesPage', () => {
     expect(requests.some((url) => url.includes('/finances/summary?month=2026-08'))).toBe(true)
   })
 
-  it('marks a pending row paid from the inline action', async () => {
+  it('opens the row drawer with facts, history and actions, and applies the note to the action', async () => {
     currentSearch.month = '2026-08'
     const transitions: { url: string; body: unknown }[] = []
-    installAdapter([movement()], (url, body) => transitions.push({ url, body }))
+    installAdapter(
+      [
+        movement({
+          id: 'mv_dep',
+          direction: 'income',
+          category: 'reservation_deposit',
+          status: 'to_refund',
+          allowed_transitions: ['refunded', 'retained', 'held'],
+          amount: 300,
+          concept: 'Depósito · Salón de eventos',
+          detail: 'Evento del dom 10 · sin incidencias · J. Ríos',
+          counterparty: null,
+          unit_id: 'un_1',
+          unit_number: 'Depto. 302',
+          reservation_id: 'res_9',
+          reservation: { id: 'res_9', amenity_name: 'Salón de eventos', starts_at: '2026-08-10T23:00:00Z', status: 'approved' },
+          occurred_on: '2026-08-12',
+          note: 'Sin incidencias durante el evento',
+        }),
+      ],
+      (url, body) => transitions.push({ url, body }),
+    )
 
     renderPage()
-    await userEvent.click(await screen.findByRole('button', { name: 'Marcar pagado' }))
+    const user = userEvent.setup()
+    await user.click(await screen.findByText('Depósito · Salón de eventos'))
+
+    const drawer = await screen.findByRole('dialog')
+    expect(within(drawer).getByText('Ingreso · Depósito de reserva')).toBeInTheDocument()
+    expect(within(drawer).getByText('12 ago 2026')).toBeInTheDocument()
+    expect(within(drawer).getByText('Sistema · al aprobar la reserva')).toBeInTheDocument()
+    expect(within(drawer).getByRole('link', { name: /Salón de eventos/ })).toHaveAttribute(
+      'href',
+      '/admin/reservations?date=2026-08-10',
+    )
+    // History newest first, generated row attributed to the system.
+    expect(await within(drawer).findByText('Marcado por devolver')).toBeInTheDocument()
+    expect(within(drawer).getByText('Generado al aprobar la reserva')).toBeInTheDocument()
+    expect(within(drawer).getByText('Sistema')).toBeInTheDocument()
+    // Forward as primary, retain as secondary, revert as a text link.
+    expect(within(drawer).getByRole('button', { name: 'Retener depósito' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Marcar recibido' })).toBeInTheDocument()
+
+    await user.type(within(drawer).getByLabelText('Nota (opcional)'), 'Devuelto en efectivo')
+    await user.click(within(drawer).getByRole('button', { name: 'Marcar devuelto' }))
 
     await waitFor(() => expect(transitions).toHaveLength(1))
-    expect(transitions[0].url).toBe('/api/accounts/acc_1/finances/movements/mv_1/status')
-    expect(transitions[0].body).toEqual({ status: 'paid' })
+    expect(transitions[0].url).toBe('/api/accounts/acc_1/finances/movements/mv_dep/status')
+    expect(transitions[0].body).toEqual({ status: 'refunded', note: 'Devuelto en efectivo' })
     expect(await screen.findByText('Movimiento actualizado')).toBeInTheDocument()
   })
 
@@ -282,7 +373,7 @@ describe('FinancesPage', () => {
     const drawer = await screen.findByRole('dialog')
 
     await user.click(within(drawer).getByRole('combobox', { name: 'Categoría' }))
-    await user.click(await screen.findByRole('option', { name: 'Servicios' }))
+    await user.click(await screen.findByRole('option', { name: 'Agua' }))
     await user.type(within(drawer).getByLabelText('Monto'), '600')
     await user.type(within(drawer).getByLabelText('Concepto'), 'Agua · áreas comunes')
     await user.type(within(drawer).getByLabelText('Detalle'), 'Recibo Sedapal')
@@ -297,7 +388,7 @@ describe('FinancesPage', () => {
       expect(recorded).toEqual([
         {
           direction: 'expense',
-          category: 'utility',
+          category: 'water',
           status: 'pending',
           amount: 600,
           concept: 'Agua · áreas comunes',

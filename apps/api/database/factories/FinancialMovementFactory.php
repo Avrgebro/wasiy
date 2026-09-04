@@ -25,7 +25,7 @@ class FinancialMovementFactory extends Factory
         return [
             'location_id' => Location::factory(),
             'direction' => MovementDirection::Expense,
-            'category' => MovementCategory::Utility,
+            'category' => MovementCategory::Water,
             'status' => MovementStatus::Pending,
             'amount' => fake()->numberBetween(50, 2000),
             'concept' => 'Agua · áreas comunes',
@@ -57,7 +57,7 @@ class FinancialMovementFactory extends Factory
     {
         return $this->state([
             'direction' => MovementDirection::Income,
-            'category' => MovementCategory::Other,
+            'category' => MovementCategory::OtherIncome,
             'concept' => 'Ingreso',
             'counterparty' => null,
         ]);
