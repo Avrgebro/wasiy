@@ -24,6 +24,7 @@ import { Route as AuthenticatedAdminVisitorsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated/admin/staff'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminReservationsRouteImport } from './routes/_authenticated/admin/reservations'
+import { Route as AuthenticatedAdminPackagesRouteImport } from './routes/_authenticated/admin/packages'
 import { Route as AuthenticatedAdminLocationsRouteImport } from './routes/_authenticated/admin/locations'
 import { Route as AuthenticatedAdminFinancesRouteImport } from './routes/_authenticated/admin/finances'
 import { Route as AuthenticatedAdminAnnouncementsRouteImport } from './routes/_authenticated/admin/announcements'
@@ -116,6 +117,12 @@ const AuthenticatedAdminReservationsRoute =
     path: '/reservations',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminPackagesRoute =
+  AuthenticatedAdminPackagesRouteImport.update({
+    id: '/packages',
+    path: '/packages',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminLocationsRoute =
   AuthenticatedAdminLocationsRouteImport.update({
     id: '/locations',
@@ -188,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
   '/admin/finances': typeof AuthenticatedAdminFinancesRoute
   '/admin/locations': typeof AuthenticatedAdminLocationsRoute
+  '/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/admin/reservations': typeof AuthenticatedAdminReservationsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
@@ -212,6 +220,7 @@ export interface FileRoutesByTo {
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
   '/admin/finances': typeof AuthenticatedAdminFinancesRoute
   '/admin/locations': typeof AuthenticatedAdminLocationsRoute
+  '/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/admin/reservations': typeof AuthenticatedAdminReservationsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
@@ -240,6 +249,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
   '/_authenticated/admin/finances': typeof AuthenticatedAdminFinancesRoute
   '/_authenticated/admin/locations': typeof AuthenticatedAdminLocationsRoute
+  '/_authenticated/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/_authenticated/admin/reservations': typeof AuthenticatedAdminReservationsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
@@ -268,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/finances'
     | '/admin/locations'
+    | '/admin/packages'
     | '/admin/reservations'
     | '/admin/settings'
     | '/admin/staff'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/finances'
     | '/admin/locations'
+    | '/admin/packages'
     | '/admin/reservations'
     | '/admin/settings'
     | '/admin/staff'
@@ -319,6 +331,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/announcements'
     | '/_authenticated/admin/finances'
     | '/_authenticated/admin/locations'
+    | '/_authenticated/admin/packages'
     | '/_authenticated/admin/reservations'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/staff'
@@ -451,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminReservationsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/packages': {
+      id: '/_authenticated/admin/packages'
+      path: '/packages'
+      fullPath: '/admin/packages'
+      preLoaderRoute: typeof AuthenticatedAdminPackagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/locations': {
       id: '/_authenticated/admin/locations'
       path: '/locations'
@@ -529,6 +549,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminAnnouncementsRoute: typeof AuthenticatedAdminAnnouncementsRoute
   AuthenticatedAdminFinancesRoute: typeof AuthenticatedAdminFinancesRoute
   AuthenticatedAdminLocationsRoute: typeof AuthenticatedAdminLocationsRoute
+  AuthenticatedAdminPackagesRoute: typeof AuthenticatedAdminPackagesRoute
   AuthenticatedAdminReservationsRoute: typeof AuthenticatedAdminReservationsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminStaffRoute: typeof AuthenticatedAdminStaffRoute
@@ -548,6 +569,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminAnnouncementsRoute: AuthenticatedAdminAnnouncementsRoute,
     AuthenticatedAdminFinancesRoute: AuthenticatedAdminFinancesRoute,
     AuthenticatedAdminLocationsRoute: AuthenticatedAdminLocationsRoute,
+    AuthenticatedAdminPackagesRoute: AuthenticatedAdminPackagesRoute,
     AuthenticatedAdminReservationsRoute: AuthenticatedAdminReservationsRoute,
     AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
     AuthenticatedAdminStaffRoute: AuthenticatedAdminStaffRoute,

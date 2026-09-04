@@ -55,6 +55,7 @@ function detail(): UnitDetailResponse {
         { id: 'vh_2', account_id: 'acc_1', location_id: 'loc_1', unit_id: 'un_402', vehicle_type: 'car', plate: 'BQT-702', make: 'Nissan', model: 'Versa', color: 'blanco', status: 'inactive', notes: null },
       ],
     },
+    packages: [],
     reservations: [],
     movements: [
       { id: 'mv_1', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'maintenance_dues', status: 'paid', allowed_transitions: ['pending'], amount: 420, concept: 'Cuota de mantenimiento · agosto 2026', detail: 'Emitida el 01 ago · Torre A / 402', counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-01', due_on: null, note: null, created_by: 'usr_1', settled_by: 'usr_1', settled_at: null, created_at: null },

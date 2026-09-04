@@ -1,4 +1,5 @@
 import {
+  Box,
   Buildings2,
   Calendar,
   ClipboardList,
@@ -106,20 +107,18 @@ const locationNavigationGroup: NavGroupSpec = {
   titleKey: 'navGroups.location',
   items: [
     { icon: Widget, labelKey: 'nav.dashboard', to: '/admin' },
+    { icon: UserCheckRounded, labelKey: 'nav.residents', to: '/admin/registry/residents' },
+    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units' },
+    // The desk's logs: visitors and packages, arrival → resolution.
     {
       type: 'collapsible',
-      icon: UsersGroupRounded,
-      labelKey: 'nav.people',
+      icon: Box,
+      labelKey: 'nav.reception',
       children: [
-        {
-          icon: UserCheckRounded,
-          labelKey: 'nav.residents',
-          to: '/admin/registry/residents',
-        },
         { icon: Magnifier, labelKey: 'nav.visitors', to: '/admin/visitors' },
+        { icon: Box, labelKey: 'nav.packages', to: '/admin/packages' },
       ],
     },
-    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units' },
     {
       badge: PendingReservationsBadge,
       icon: Calendar,

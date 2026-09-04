@@ -115,7 +115,6 @@
     "dashboard": "Panel",
     "home": "Inicio",
     "locations": "Ubicaciones",
-    "people": "Personas",
     "imports": "Importaciones",
     "residents": "Residentes",
     "reservations": "Reservas",
@@ -125,7 +124,9 @@
     "units": "Unidades",
     "visitors": "Visitantes",
     "finances": "Finanzas",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "reception": "Recepción",
+    "packages": "Paquetería"
   },
   "notifications": {
     "label": "Ver notificaciones"
@@ -138,7 +139,8 @@
     "portal": "Portal",
     "registry": "Registro",
     "location": "Ubicación",
-    "administration": "Administración"
+    "administration": "Administración",
+    "reception": "Recepción"
   },
   "registry": {
     "imports": {
@@ -1059,7 +1061,10 @@
       "deactivated": "Unidad desactivada",
       "reactivated": "Unidad reactivada",
       "confirmDeactivate": "¿Desactivar la unidad {{number}}?",
-      "confirmDeactivateBody": "{{residents}} residente(s) perderán el acceso al portal y {{vehicles}} vehículo(s) quedarán inactivos. Las reservas futuras se cancelarán. La unidad queda en el historial."
+      "confirmDeactivateBody": "{{residents}} residente(s) perderán el acceso al portal y {{vehicles}} vehículo(s) quedarán inactivos. Las reservas futuras se cancelarán. La unidad queda en el historial.",
+      "packages": "Paquetes en recepción",
+      "packagesHistory": "Ver historial →",
+      "noPackages": "Sin paquetes en recepción."
     },
     "roles": {
       "owner": "Propietario",
@@ -1129,6 +1134,59 @@
       "deactivateHint": "Un vehículo inactivo deja de aparecer en recepción y en la búsqueda por placa. Su historial se conserva.",
       "confirmDeactivate": "¿Desactivar el vehículo {{plate}}?",
       "confirmDeactivateBody": "Dejará de aparecer en recepción y en la búsqueda por placa. Puedes reactivarlo después."
+    }
+  },
+  "packages": {
+    "title": "Paquetería",
+    "subtitle": "Recepción · {{location}}",
+    "register": "Registrar paquete",
+    "markDelivered": "Marcar entregado",
+    "delivered": "Paquete entregado",
+    "registeredNotified": "Paquete registrado · aviso enviado a {{email}}",
+    "registeredSilent": "Paquete registrado · sin aviso (nadie tiene correo)",
+    "searchPlaceholder": "Buscar unidad o residente…",
+    "primaryContact": "Contacto principal",
+    "chips": {
+      "pending": "En recepción",
+      "delivered": "Entregados",
+      "all": "Todos"
+    },
+    "columns": {
+      "received": "Recibido",
+      "unit": "Unidad",
+      "for": "Para",
+      "status": "Estado"
+    },
+    "statuses": {
+      "pending": "En recepción",
+      "delivered": "Entregado"
+    },
+    "empty": {
+      "pending": "No hay paquetes en recepción.",
+      "delivered": "Aún no hay paquetes entregados.",
+      "all": "Aún no hay paquetes registrados."
+    },
+    "emptyFiltered": "Ningún paquete coincide con la búsqueda.",
+    "form": {
+      "unit": "Unidad",
+      "resident": "Para",
+      "anyResident": "Cualquier residente de la unidad",
+      "residentHint": "Si no eliges a nadie, se avisa al contacto principal de la unidad.",
+      "notesPlaceholder": "Caja mediana, frágil…",
+      "submit": "Registrar"
+    },
+    "detail": {
+      "title": "Paquete · {{unit}}",
+      "pendingSince": "En recepción desde el {{date}}",
+      "deliveredOn": "Entregado el {{date}}",
+      "notice": "Aviso",
+      "noticeSent": "Correo enviado a {{email}}",
+      "noticeSkipped": "Sin aviso · nadie tiene correo",
+      "deliveredTo": "a {{name}}",
+      "deliveredBy": "por {{name}}",
+      "deliveredToLabel": "Entregado a (opcional)",
+      "deliveredToPlaceholder": "Nombre de quien retira",
+      "noActions": "Sin acciones pendientes."
     }
   }
 }

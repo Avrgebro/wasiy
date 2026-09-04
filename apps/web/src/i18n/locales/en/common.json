@@ -115,7 +115,6 @@
     "dashboard": "Dashboard",
     "home": "Home",
     "locations": "Locations",
-    "people": "People",
     "imports": "Imports",
     "residents": "Residents",
     "reservations": "Reservations",
@@ -125,7 +124,9 @@
     "units": "Units",
     "visitors": "Visitors",
     "finances": "Finances",
-    "settings": "Settings"
+    "settings": "Settings",
+    "reception": "Reception",
+    "packages": "Packages"
   },
   "notifications": {
     "label": "View notifications"
@@ -138,7 +139,8 @@
     "portal": "Portal",
     "registry": "Registry",
     "location": "Location",
-    "administration": "Administration"
+    "administration": "Administration",
+    "reception": "Reception"
   },
   "registry": {
     "imports": {
@@ -1059,7 +1061,10 @@
       "deactivated": "Unit deactivated",
       "reactivated": "Unit reactivated",
       "confirmDeactivate": "Deactivate unit {{number}}?",
-      "confirmDeactivateBody": "{{residents}} resident(s) lose portal access and {{vehicles}} vehicle(s) become inactive. Future reservations are cancelled. The unit stays in the history."
+      "confirmDeactivateBody": "{{residents}} resident(s) lose portal access and {{vehicles}} vehicle(s) become inactive. Future reservations are cancelled. The unit stays in the history.",
+      "packages": "Packages at reception",
+      "packagesHistory": "See history →",
+      "noPackages": "No packages at reception."
     },
     "roles": {
       "owner": "Owner",
@@ -1129,6 +1134,59 @@
       "deactivateHint": "An inactive vehicle disappears from the front desk and plate search. History is kept.",
       "confirmDeactivate": "Deactivate vehicle {{plate}}?",
       "confirmDeactivateBody": "It disappears from the front desk and plate search. You can reactivate it later."
+    }
+  },
+  "packages": {
+    "title": "Packages",
+    "subtitle": "Reception · {{location}}",
+    "register": "Register package",
+    "markDelivered": "Mark delivered",
+    "delivered": "Package delivered",
+    "registeredNotified": "Package registered · notice sent to {{email}}",
+    "registeredSilent": "Package registered · no notice (nobody has an email)",
+    "searchPlaceholder": "Search unit or resident…",
+    "primaryContact": "Primary contact",
+    "chips": {
+      "pending": "At reception",
+      "delivered": "Delivered",
+      "all": "All"
+    },
+    "columns": {
+      "received": "Received",
+      "unit": "Unit",
+      "for": "For",
+      "status": "Status"
+    },
+    "statuses": {
+      "pending": "At reception",
+      "delivered": "Delivered"
+    },
+    "empty": {
+      "pending": "No packages at reception.",
+      "delivered": "No delivered packages yet.",
+      "all": "No packages registered yet."
+    },
+    "emptyFiltered": "No package matches the search.",
+    "form": {
+      "unit": "Unit",
+      "resident": "For",
+      "anyResident": "Any resident of the unit",
+      "residentHint": "If you pick nobody, the unit's primary contact is notified.",
+      "notesPlaceholder": "Medium box, fragile…",
+      "submit": "Register"
+    },
+    "detail": {
+      "title": "Package · {{unit}}",
+      "pendingSince": "At reception since {{date}}",
+      "deliveredOn": "Delivered on {{date}}",
+      "notice": "Notice",
+      "noticeSent": "Email sent to {{email}}",
+      "noticeSkipped": "No notice · nobody has an email",
+      "deliveredTo": "to {{name}}",
+      "deliveredBy": "by {{name}}",
+      "deliveredToLabel": "Delivered to (optional)",
+      "deliveredToPlaceholder": "Name of the person picking up",
+      "noActions": "No pending actions."
     }
   }
 }

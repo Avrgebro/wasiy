@@ -13,7 +13,8 @@ import { notifyError, notifySuccess } from '../../lib/notify'
 import { canManageRegistry } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import type { MovementSummary } from '../finances/api'
-import { monthLabel, shortDate } from '../finances/month'
+import { monthLabel, shortDate, shortDateTime } from '../finances/month'
+import type { PackageSummary } from '../packages/api'
 import { amountClassName, statusColor, statusLabel } from '../finances/movement-presentation'
 import type { ReservationSummary } from '../reservations/api'
 import { formatTimeRange, localDateString, shortDayLabel } from '../reservations/week'
@@ -133,7 +134,7 @@ function UnitDetailContent({
     )
   }
 
-  const { data: unit, reservations, movements, movements_month: month, pending_balance: balance, notes } = detailQuery.data
+  const { data: unit, packages, reservations, movements, movements_month: month, pending_balance: balance, notes } = detailQuery.data
   const primaryAction =
     unit.status === 'inactive' ? (
       <Button color="accent" fullWidth={!wide} loading={reactivate.isPending} onClick={() => reactivate.mutate()}>
@@ -286,6 +287,25 @@ function UnitDetailContent({
                   onOpen={canManage ? () => setVehicle({ open: true, current }) : undefined}
                 />
               ))
+            )}
+          </Section>
+
+          <Section
+            action={
+              <Link
+                className="text-[13px] font-medium text-[var(--wa-interactive)] no-underline hover:underline"
+                search={{ page: 1, search: unit.unit_number, chip: 'all' }}
+                to="/admin/packages"
+              >
+                {t('units.detail.packagesHistory')}
+              </Link>
+            }
+            title={`${t('units.detail.packages')} · ${packages.length}`}
+          >
+            {packages.length === 0 ? (
+              <Empty body={t('units.detail.noPackages')} />
+            ) : (
+              packages.map((pkg) => <PackageRow key={pkg.id} pkg={pkg} timezone={timezone} />)
             )}
           </Section>
 
@@ -483,6 +503,27 @@ function MovementRow({ movement }: { movement: MovementSummary }) {
       </span>
       <Badge color={statusColor(movement.status)} radius="xl" size="sm" variant="light">
         {statusLabel(movement, t)}
+      </Badge>
+    </div>
+  )
+}
+
+function PackageRow({ pkg, timezone }: { pkg: PackageSummary; timezone: string }) {
+  const { t } = useTranslation('common')
+
+  return (
+    <div className="flex items-center gap-3.5 px-5 py-3">
+      <span className="w-24 shrink-0 font-mono text-xs text-[var(--mantine-color-dimmed)]">{shortDateTime(pkg.received_at, timezone)}</span>
+      <div className="min-w-0 flex-1">
+        <Text fw={600} size="sm">
+          {pkg.resident_name ?? t('packages.primaryContact')}
+        </Text>
+        <Text c="dimmed" className="truncate" size="xs">
+          {pkg.notes ?? '—'}
+        </Text>
+      </div>
+      <Badge color="warning" radius="xl" size="sm" variant="light">
+        {t('packages.statuses.pending')}
       </Badge>
     </div>
   )

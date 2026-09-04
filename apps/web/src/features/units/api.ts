@@ -1,6 +1,7 @@
 import { apiRequest } from '../../app/api-client'
 import { buildParams } from '../../lib/query-params'
 import type { MovementSummary } from '../finances/api'
+import type { PackageSummary } from '../packages/api'
 import type { ReservationSummary } from '../reservations/api'
 import type { PaginatedApiResponse, RegistrySearch } from '../registry/types'
 import type { VehicleSummary } from '../vehicles/api'
@@ -118,6 +119,7 @@ export type UnitNote = { id: string; body: string; author_name: string | null; c
 /** GET /units/{id}: the unit plus the sections that read other modules. */
 export type UnitDetailResponse = {
   data: UnitDetail
+  packages: PackageSummary[]
   reservations: ReservationSummary[]
   movements: MovementSummary[]
   movements_month: string

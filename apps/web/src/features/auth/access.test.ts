@@ -164,7 +164,7 @@ describe('access helpers', () => {
     expect(serialized).not.toContain('/admin/registry/vehicles')
 
     // Residents sits inside the People group rather than at the top level.
-    expect(serialized).toContain('nav.people')
+    expect(serialized).toContain('nav.reception')
     expect(serialized).toContain('/admin/registry/residents')
 
     // Imports is reached from the pages it loads, not from the sidebar.
