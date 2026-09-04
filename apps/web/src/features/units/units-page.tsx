@@ -1,4 +1,6 @@
-import { Alert, Badge, Text } from '@mantine/core'
+import { Alert, Badge, Button, Text } from '@mantine/core'
+import { AddCircle } from '@solar-icons/react'
+import { useState } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -11,6 +13,7 @@ import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
 import { chipParams, UNIT_CHIPS, type UnitsSearchValues } from './schemas'
 import { occupancyColor, portalColor, unitDescriptor, unitLabelsLine } from './unit-presentation'
+import { UnitFormDrawer } from './unit-form-drawer'
 import { UnitsFilters } from './units-filters'
 
 const routeApi = getRouteApi('/_authenticated/admin/registry/units')
@@ -44,6 +47,7 @@ function UnitsContent({ locationId, locationName }: { locationId: string; locati
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
+  const [creating, setCreating] = useState(false)
 
   const listQuery = useQuery({
     queryKey: ['registry', 'units', locationId, search],
@@ -163,6 +167,9 @@ function UnitsContent({ locationId, locationName }: { locationId: string; locati
         </div>
         <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
           <ImportRegistryButton />
+          <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setCreating(true)}>
+            {t('units.form.createTitle')}
+          </Button>
         </div>
       </div>
 
@@ -212,6 +219,14 @@ function UnitsContent({ locationId, locationName }: { locationId: string; locati
           void navigate({ to: '/admin/registry/units/$unitId', params: { unitId: unit.id } })
         }
         onSortChange={(sort) => updateSearch({ sort })}
+      />
+
+      <UnitFormDrawer
+        editing={null}
+        locationId={locationId}
+        locationName={locationName}
+        opened={creating}
+        onClose={() => setCreating(false)}
       />
     </div>
   )

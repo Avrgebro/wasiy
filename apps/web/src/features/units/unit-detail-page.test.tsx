@@ -66,9 +66,17 @@ function detail(): UnitDetailResponse {
   }
 }
 
-function installAdapter(onNote?: (body: unknown) => void) {
+function installAdapter(onNote?: (body: unknown) => void, onWrite?: (method: string, url: string, body: unknown) => void) {
   apiClient.defaults.adapter = vi.fn<AxiosAdapter>((config) => {
     const url = config.url ?? ''
+    if (config.method && config.method !== 'get' && !url.endsWith('/notes')) {
+      onWrite?.(config.method, url, config.data ? JSON.parse(config.data as string) : null)
+      if (url.includes('/residents?')) return Promise.resolve(axiosResponse(config, { data: [] }))
+      return Promise.resolve(axiosResponse(config, { data: { id: 'new', email: null } }, 201))
+    }
+    if (url.includes('/residents?')) {
+      return Promise.resolve(axiosResponse(config, { data: [{ id: 'rs_9', name: 'Laura Mendoza', email: 'laura.mz@gmail.com', memberships: [] }], meta: { current_page: 1, last_page: 1, per_page: 20, total: 1 } }))
+    }
     if (url === '/api/me') return Promise.resolve(axiosResponse(config, meResponse()))
     if (config.method === 'post' && url.endsWith('/notes')) {
       onNote?.(JSON.parse(config.data as string))
@@ -141,5 +149,60 @@ describe('UnitDetailPage', () => {
 
     await waitFor(() => expect(posted).toEqual([{ body: 'Llave de repuesto en recepción.' }]))
     expect(await screen.findByText('Nota agregada')).toBeInTheDocument()
+  })
+
+  it('edits the unit from the header drawer and sends the condo fields', async () => {
+    const writes: { method: string; url: string; body: unknown }[] = []
+    installAdapter(undefined, (method, url, body) => writes.push({ method, url, body }))
+    renderPage()
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByRole('button', { name: 'Editar unidad' }))
+    const drawer = await screen.findByRole('dialog')
+    const fee = within(drawer).getByLabelText('Cuota mensual')
+    await user.clear(fee)
+    await user.type(fee, '450')
+    await user.click(within(drawer).getByRole('button', { name: 'Guardar cambios' }))
+
+    await waitFor(() => expect(writes).toHaveLength(1))
+    expect(writes[0].method).toBe('patch')
+    expect(writes[0].url).toBe('/api/units/un_402')
+    expect(writes[0].body).toMatchObject({ unit_number: '402', type: 'apartment', building_name: 'Torre A', area_m2: 118, participation_share: 1.18, maintenance_fee: 450, parking_spots: 'E-23', storage_rooms: 'D-04' })
+  })
+
+  it('adds a new person to the unit with role, primary contact and invitation', async () => {
+    const writes: { method: string; url: string; body: unknown }[] = []
+    installAdapter(undefined, (method, url, body) => writes.push({ method, url, body }))
+    renderPage()
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByRole('button', { name: 'Agregar residente' }))
+    const drawer = await screen.findByRole('dialog')
+    await user.click(within(drawer).getByRole('radio', { name: 'Nueva persona' }))
+    await user.type(within(drawer).getByLabelText('Nombres'), 'Elena')
+    await user.type(within(drawer).getByLabelText('Apellidos'), 'Vargas')
+    await user.type(within(drawer).getByLabelText('Correo'), 'elena@x.pe')
+    await user.click(within(drawer).getByRole('combobox', { name: 'Rol' }))
+    await user.click(await screen.findByRole('option', { name: 'Inquilino' }))
+    await user.click(within(drawer).getByRole('button', { name: 'Agregar' }))
+
+    await waitFor(() => expect(writes.length).toBeGreaterThanOrEqual(2))
+    expect(writes[0].url).toBe('/api/accounts/acc_1/residents')
+    expect(writes[0].body).toMatchObject({ first_name: 'Elena', last_name: 'Vargas', email: 'elena@x.pe', memberships: [{ unit_id: 'un_402', resident_type: 'tenant', is_primary_contact: false }] })
+    expect(writes[1].url).toBe('/api/residents/new/invitations')
+  })
+
+  it('opens the deactivation confirmation from the sensitive zone and cascades', async () => {
+    const writes: { method: string; url: string; body: unknown }[] = []
+    installAdapter(undefined, (method, url, body) => writes.push({ method, url, body }))
+    renderPage()
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByRole('button', { name: 'Editar unidad' }))
+    await user.click(await screen.findByRole('button', { name: 'Desactivar unidad' }))
+    expect(await screen.findByText('¿Desactivar la unidad 402?')).toBeInTheDocument()
+    expect(screen.getByText(/3 residente\(s\) perderán el acceso al portal y 1 vehículo/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Confirmar' }))
+    await waitFor(() => expect(writes.some((write) => write.url === '/api/units/un_402/deactivate')).toBe(true))
   })
 })

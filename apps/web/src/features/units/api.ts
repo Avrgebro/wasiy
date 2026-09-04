@@ -4,7 +4,7 @@ import type { MovementSummary } from '../finances/api'
 import type { ReservationSummary } from '../reservations/api'
 import type { PaginatedApiResponse, RegistrySearch } from '../registry/types'
 import type { VehicleSummary } from '../vehicles/api'
-import type { UnitFormValues } from './schemas'
+import type { MembershipPayload, UnitPayload } from './schemas'
 
 export type UnitType = 'apartment' | 'house' | 'commercial' | 'office'
 export type UnitOccupancy = 'occupied' | 'vacant' | 'attention'
@@ -54,18 +54,49 @@ export function getUnits(locationId: string, search: UnitsSearch) {
   )
 }
 
-export function createUnit(locationId: string, values: UnitFormValues) {
-  return apiRequest<{ data: UnitSummary }>(`/api/locations/${locationId}/units`, {
-    data: values,
+export function createUnit(locationId: string, payload: UnitPayload) {
+  return apiRequest<{ data: UnitSummary }>(`/api/locations/${locationId}/units`, { data: payload, method: 'POST' })
+}
+
+export function updateUnit(unitId: string, payload: Partial<UnitPayload> & { status?: 'active' | 'inactive' }) {
+  return apiRequest<{ data: UnitSummary }>(`/api/units/${unitId}`, { data: payload, method: 'PATCH' })
+}
+
+export function deactivateUnit(unitId: string) {
+  return apiRequest<{ data: UnitSummary }>(`/api/units/${unitId}/deactivate`, { method: 'POST', data: {} })
+}
+
+export function reactivateUnit(unitId: string) {
+  return apiRequest<{ data: UnitSummary }>(`/api/units/${unitId}/reactivate`, { method: 'POST', data: {} })
+}
+
+/** Existing person → new membership in this unit. */
+export function createMembership(residentId: string, payload: MembershipPayload) {
+  return apiRequest<{ data: { id: string } }>(`/api/residents/${residentId}/memberships`, { method: 'POST', data: payload })
+}
+
+/** New person and their membership in one call (ResidentController::store accepts memberships[]). */
+export function createResidentInUnit(
+  accountId: string,
+  person: { first_name: string; last_name: string; email: string | null; phone: string | null },
+  membership: MembershipPayload,
+) {
+  return apiRequest<{ data: { id: string; email: string | null } }>(`/api/accounts/${accountId}/residents`, {
     method: 'POST',
+    data: { ...person, memberships: [membership] },
   })
 }
 
-export function updateUnit(unitId: string, values: UnitFormValues) {
-  return apiRequest<{ data: UnitSummary }>(`/api/units/${unitId}`, {
-    data: values,
-    method: 'PATCH',
-  })
+export function updateMembership(membershipId: string, payload: Partial<Pick<MembershipPayload, 'resident_type' | 'is_primary_contact'>>) {
+  return apiRequest<{ data: { id: string } }>(`/api/unit-memberships/${membershipId}`, { method: 'PATCH', data: payload })
+}
+
+export function removeMembership(membershipId: string) {
+  return apiRequest<{ data: { id: string } }>(`/api/unit-memberships/${membershipId}`, { method: 'DELETE' })
+}
+
+export function inviteResidentToPortal(residentId: string) {
+  return apiRequest<{ resident: unknown; invitation: unknown }>(`/api/residents/${residentId}/invitations`, { method: 'POST', data: {} })
 }
 
 export type UnitMember = {

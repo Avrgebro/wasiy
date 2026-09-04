@@ -1,4 +1,5 @@
 import { Alert, Badge, Button, Skeleton, Text, Textarea } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import { KeySquare } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
@@ -16,7 +17,11 @@ import { amountClassName, statusColor, statusLabel } from '../finances/movement-
 import type { ReservationSummary } from '../reservations/api'
 import { formatTimeRange, localDateString, shortDayLabel } from '../reservations/week'
 import type { VehicleSummary } from '../vehicles/api'
-import { addUnitNote, getUnit, type UnitMember, type UnitNote } from './api'
+import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
+import { addUnitNote, deactivateUnit, getUnit, reactivateUnit, type UnitMember, type UnitNote } from './api'
+import { MemberDrawer } from './member-drawer'
+import { UnitFormDrawer } from './unit-form-drawer'
+import { VehicleDrawer } from './vehicle-drawer'
 import { occupancyColor, portalColor, typeLabel } from './unit-presentation'
 
 const routeApi = getRouteApi('/_authenticated/admin/registry/units_/$unitId')
@@ -37,12 +42,49 @@ export function UnitDetailPage() {
     )
   }
 
-  return <UnitDetailContent timezone={location?.timezone ?? 'America/Lima'} />
+  return (
+    <UnitDetailContent
+      accountId={me.active_account.id}
+      locationName={location?.name ?? ''}
+      timezone={location?.timezone ?? 'America/Lima'}
+    />
+  )
 }
 
-function UnitDetailContent({ timezone }: { timezone: string }) {
+function UnitDetailContent({ accountId, locationName, timezone }: { accountId: string; locationName: string; timezone: string }) {
   const { t } = useTranslation('common')
   const { unitId } = routeApi.useParams()
+  const queryClient = useQueryClient()
+  const wide = useMediaQuery('(min-width: 40rem)', true, { getInitialValueInEffect: false })
+  const [editing, setEditing] = useState(false)
+  const [member, setMember] = useState<{ open: boolean; current: UnitMember | null }>({ open: false, current: null })
+  const [vehicle, setVehicle] = useState<{ open: boolean; current: VehicleSummary | null }>({ open: false, current: null })
+  const [confirmingDeactivate, setConfirmingDeactivate] = useState(false)
+
+  const invalidate = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['registry', 'units'] }),
+      queryClient.invalidateQueries({ queryKey: ['reservations'] }),
+      queryClient.invalidateQueries({ queryKey: ['finances'] }),
+    ])
+  const deactivate = useMutation({
+    mutationFn: () => deactivateUnit(unitId),
+    onSuccess: async () => {
+      await invalidate()
+      setConfirmingDeactivate(false)
+      setEditing(false)
+      notifySuccess(t('units.detail.deactivated'))
+    },
+    onError: (error) => notifyError(getErrorMessage(error)),
+  })
+  const reactivate = useMutation({
+    mutationFn: () => reactivateUnit(unitId),
+    onSuccess: async () => {
+      await invalidate()
+      notifySuccess(t('units.detail.reactivated'))
+    },
+    onError: (error) => notifyError(getErrorMessage(error)),
+  })
 
   const detailQuery = useQuery({
     queryKey: ['registry', 'units', 'detail', unitId],
@@ -80,6 +122,16 @@ function UnitDetailContent({ timezone }: { timezone: string }) {
   }
 
   const { data: unit, reservations, movements, movements_month: month, pending_balance: balance, notes } = detailQuery.data
+  const primaryAction =
+    unit.status === 'inactive' ? (
+      <Button color="accent" fullWidth={!wide} loading={reactivate.isPending} onClick={() => reactivate.mutate()}>
+        {t('units.detail.reactivate')}
+      </Button>
+    ) : (
+      <Button color="accent" fullWidth={!wide} onClick={() => setEditing(true)}>
+        {t('units.detail.edit')}
+      </Button>
+    )
   const title = t('units.detail.title', { type: typeLabel(unit.type, t, true), number: unit.unit_number })
   const descriptor = [
     unit.building_name,
@@ -134,15 +186,26 @@ function UnitDetailContent({ timezone }: { timezone: string }) {
             </div>
           </div>
         </div>
+        {wide ? <div className="shrink-0">{primaryAction}</div> : null}
       </header>
+      {!wide ? primaryAction : null}
 
       <div className="grid grid-cols-1 items-start gap-4 @4xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-4">
-          <Section title={`${t('units.detail.residents')} · ${unit.members.length}`}>
+          <Section
+            action={
+              unit.status === 'active' ? (
+                <SectionAction label={t('units.detail.addResident')} onClick={() => setMember({ open: true, current: null })} />
+              ) : null
+            }
+            title={`${t('units.detail.residents')} · ${unit.members.length}`}
+          >
             {unit.members.length === 0 ? (
               <Empty title={t('units.detail.noResidentsTitle')} body={t('units.detail.noResidentsBody')} />
             ) : (
-              unit.members.map((member) => <MemberRow key={member.membership_id} member={member} />)
+              unit.members.map((current) => (
+                <MemberRow key={current.membership_id} member={current} onOpen={() => setMember({ open: true, current })} />
+              ))
             )}
           </Section>
 
@@ -187,11 +250,20 @@ function UnitDetailContent({ timezone }: { timezone: string }) {
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <Section title={`${t('units.detail.vehicles')} · ${unit.vehicles.length}`}>
+          <Section
+            action={
+              unit.status === 'active' ? (
+                <SectionAction label={t('units.detail.addVehicle')} onClick={() => setVehicle({ open: true, current: null })} />
+              ) : null
+            }
+            title={`${t('units.detail.vehicles')} · ${unit.vehicles.length}`}
+          >
             {unit.vehicles.length === 0 ? (
               <Empty body={t('units.detail.noVehicles')} />
             ) : (
-              unit.vehicles.map((vehicle) => <VehicleRow key={vehicle.id} vehicle={vehicle} />)
+              unit.vehicles.map((current) => (
+                <VehicleRow key={current.id} vehicle={current} onOpen={() => setVehicle({ open: true, current })} />
+              ))
             )}
           </Section>
 
@@ -215,7 +287,53 @@ function UnitDetailContent({ timezone }: { timezone: string }) {
           <NotesSection notes={notes} unitId={unit.id} />
         </div>
       </div>
+
+      <UnitFormDrawer
+        editing={unit}
+        locationId={unit.location_id}
+        locationName={locationName}
+        opened={editing}
+        onClose={() => setEditing(false)}
+        onDeactivate={() => setConfirmingDeactivate(true)}
+      />
+      <MemberDrawer
+        accountId={accountId}
+        member={member.current}
+        opened={member.open}
+        unit={unit}
+        onClose={() => setMember((current) => ({ ...current, open: false }))}
+      />
+      <VehicleDrawer
+        editing={vehicle.current}
+        locationId={unit.location_id}
+        opened={vehicle.open}
+        unitId={unit.id}
+        unitNumber={title}
+        onClose={() => setVehicle((current) => ({ ...current, open: false }))}
+      />
+      <ConfirmDialog
+        body={t('units.detail.confirmDeactivateBody', {
+          residents: unit.members.length,
+          vehicles: unit.vehicles.filter((current) => current.status === 'active').length,
+        })}
+        opened={confirmingDeactivate}
+        title={t('units.detail.confirmDeactivate', { number: unit.unit_number })}
+        onCancel={() => setConfirmingDeactivate(false)}
+        onConfirm={() => deactivate.mutate()}
+      />
     </div>
+  )
+}
+
+function SectionAction({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-medium text-[var(--wa-interactive)] pointer-coarse:min-h-11"
+      type="button"
+      onClick={onClick}
+    >
+      {label}
+    </button>
   )
 }
 
@@ -256,11 +374,17 @@ function monogram(name: string): string {
   return name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('')
 }
 
-function MemberRow({ member }: { member: UnitMember }) {
+function MemberRow({ member, onOpen }: { member: UnitMember; onOpen: () => void }) {
   const { t } = useTranslation('common')
 
   return (
-    <div className="flex items-center gap-3 px-5 py-3">
+    <div
+      className="flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-[var(--mantine-color-default-hover)]"
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(event) => (event.key === 'Enter' ? onOpen() : undefined)}
+    >
       <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--wa-secondary)] text-xs font-semibold text-[#F7F5F0]">
         {monogram(member.name)}
       </span>
@@ -285,6 +409,7 @@ function MemberRow({ member }: { member: UnitMember }) {
       <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="light">
         {t(`units.portal.${member.portal_state}`)}
       </Badge>
+      <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>
     </div>
   )
 }
@@ -341,12 +466,18 @@ function MovementRow({ movement }: { movement: MovementSummary }) {
   )
 }
 
-function VehicleRow({ vehicle }: { vehicle: VehicleSummary }) {
+function VehicleRow({ onOpen, vehicle }: { onOpen: () => void; vehicle: VehicleSummary }) {
   const { t } = useTranslation('common')
   const inactive = vehicle.status === 'inactive'
 
   return (
-    <div className={`flex items-center gap-3.5 px-5 py-3 ${inactive ? 'opacity-60' : ''}`}>
+    <div
+      className={`flex cursor-pointer items-center gap-3.5 px-5 py-3 transition-colors hover:bg-[var(--mantine-color-default-hover)] ${inactive ? 'opacity-60' : ''}`}
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(event) => (event.key === 'Enter' ? onOpen() : undefined)}
+    >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm font-semibold">{vehicle.plate ?? t(`registry.vehicleTypes.${vehicle.vehicle_type}`)}</span>
@@ -360,6 +491,7 @@ function VehicleRow({ vehicle }: { vehicle: VehicleSummary }) {
           {[[vehicle.make, vehicle.model].filter(Boolean).join(' '), vehicle.color].filter(Boolean).join(' · ') || t(`registry.vehicleTypes.${vehicle.vehicle_type}`)}
         </Text>
       </div>
+      <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>
     </div>
   )
 }
