@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\LocationDashboardController;
 use App\Http\Controllers\Api\LocationPhotoController;
 use App\Http\Controllers\Api\LocationSettingsController;
 use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PhotoController;
 use App\Http\Controllers\Api\PortalResidentController;
 use App\Http\Controllers\Api\PortalVehicleController;
@@ -106,6 +107,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::get('/locations/{location}/vehicles', [VehicleController::class, 'index']);
     Route::post('/locations/{location}/vehicles', [VehicleController::class, 'store']);
     Route::post('/locations/{location}/registry-imports', [RegistryImportController::class, 'store']);
+    Route::get('/locations/{location}/packages', [PackageController::class, 'index']);
+    Route::post('/locations/{location}/packages', [PackageController::class, 'store']);
+    Route::post('/packages/{package}/deliver', [PackageController::class, 'deliver']);
     Route::get('/units/{unit}', [UnitController::class, 'show']);
     Route::post('/units/{unit}/notes', [UnitController::class, 'storeNote']);
     Route::post('/units/{unit}/deactivate', [UnitController::class, 'deactivate']);

@@ -43,6 +43,8 @@ enum ActivityEventType: string
     case MovementRecorded = 'movement.recorded';
     case MovementStatusChanged = 'movement.status_changed';
     case DuesGenerated = 'dues.generated';
+    case PackageReceived = 'package.received';
+    case PackageDelivered = 'package.delivered';
     case AmenityCreated = 'amenity.created';
     case AmenityUpdated = 'amenity.updated';
     case AmenityDeactivated = 'amenity.deactivated';

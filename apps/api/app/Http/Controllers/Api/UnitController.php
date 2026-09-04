@@ -10,11 +10,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUnitRequest;
 use App\Http\Requests\UpdateUnitRequest;
 use App\Http\Resources\FinancialMovementResource;
+use App\Http\Resources\PackageResource;
 use App\Http\Resources\ReservationResource;
 use App\Http\Resources\UnitResource;
 use App\Models\ActivityLog;
 use App\Models\FinancialMovement;
 use App\Models\Location;
+use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Unit;
 use App\Models\User;
@@ -180,7 +182,15 @@ class UnitController extends Controller
             ])
             ->all();
 
+        $packages = Package::query()
+            ->where('unit_id', $unit->id)
+            ->where('status', 'pending')
+            ->with(['resident', 'receivedBy'])
+            ->orderByDesc('received_at')
+            ->get();
+
         return (new UnitResource($unit))->additional([
+            'packages' => PackageResource::collection($packages)->resolve(),
             'reservations' => ReservationResource::collection($reservations)->resolve(),
             'movements' => FinancialMovementResource::collection($movements)->resolve(),
             'movements_month' => $month,
