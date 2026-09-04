@@ -36,3 +36,10 @@ Un rol, dos valores. Cada token existe en claro y en oscuro: nada aparece solo e
 - **Escalas Mantine** (`apps/web/src/app/theme.ts`): `teal` (marca), `accent`, `success`, `warning`, `error`, `info`, `dark` (petróleo). Los tuples de rol llevan el valor claro en el índice 6 y el oscuro en el 5; `primaryShade: { light: 6, dark: 5 }` hace que `color="success"` etc. resuelvan el valor correcto por esquema.
 - **Tokens CSS** (`apps/web/src/index.css`): los 14 roles como variables `--wa-*` (claro en `:root`, oscuro en `:root[data-mantine-color-scheme='dark']`). Nunca `light-dark()` — no está soportado en navegadores móviles antiguos.
 - **En componentes**: props Mantine con nombres semánticos (`color="error"`, `color="accent"`) o `var(--wa-...)` en clases Tailwind. No usar `red`/`yellow`/`green`/`blue` ni hex sueltos.
+
+## Trampas conocidas
+
+- **`--mantine-color-<rol>-light-color` no es un color de texto.** Es el color del texto del `Badge` variante `light`; en oscuro resuelve al tono 3 de la escala (un tinte pálido) y lava el color. Para cifras, montos e íconos con color usar siempre `var(--wa-<rol>)`.
+- **Teal en movimiento.** Los depósitos en garantía o por devolver usan `--wa-interactive` (el teal de los mockups), no `info`.
+- **Primario en oscuro** (`#1A6B70`) no alcanza contraste como texto de enlace; por eso *Interactivo* tiene su propio valor en ambos esquemas.
+- Los tokens de radio (`--radius-surface`, `--radius-inner`) viven junto a estos en `index.css`, pero son escala, no color: ver `DESIGN-SYSTEM.md` → Radius and Elevation.
