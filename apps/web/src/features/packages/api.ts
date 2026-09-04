@@ -19,7 +19,7 @@ export type PackageSummary = {
   received_by_name?: string | null
   delivered_at: string | null
   delivered_by_name?: string | null
-  delivered_to: string | null
+  delivery_notes: string | null
   notified_email: string | null
 }
 
@@ -38,9 +38,9 @@ export function registerPackage(
   return apiRequest<{ data: PackageSummary }>(`/api/locations/${locationId}/packages`, { method: 'POST', data: payload })
 }
 
-export function deliverPackage(packageId: string, deliveredTo: string | null) {
+export function deliverPackage(packageId: string, deliveryNotes: string | null) {
   return apiRequest<{ data: PackageSummary }>(`/api/packages/${packageId}/deliver`, {
     method: 'POST',
-    data: { delivered_to: deliveredTo },
+    data: { delivery_notes: deliveryNotes },
   })
 }

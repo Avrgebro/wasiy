@@ -109,10 +109,10 @@ test('delivery is one way and recorded', function () {
     $package = Package::factory()->create(['account_id' => $account->id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'received_by' => $frontDesk->id]);
 
     $this->actingAs($frontDesk)
-        ->postJson("/api/packages/{$package->id}/deliver", ['delivered_to' => 'Laura Mendoza'])
+        ->postJson("/api/packages/{$package->id}/deliver", ['delivery_notes' => 'Lo retiró Laura Mendoza'])
         ->assertOk()
         ->assertJsonPath('data.status', 'delivered')
-        ->assertJsonPath('data.delivered_to', 'Laura Mendoza')
+        ->assertJsonPath('data.delivery_notes', 'Lo retiró Laura Mendoza')
         ->assertJsonPath('data.delivered_by_name', $frontDesk->name);
 
     $this->actingAs($frontDesk)

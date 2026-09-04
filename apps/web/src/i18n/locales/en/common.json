@@ -1179,14 +1179,15 @@
       "title": "Package · {{unit}}",
       "pendingSince": "At reception since {{date}}",
       "deliveredOn": "Delivered on {{date}}",
-      "notice": "Notice",
-      "noticeSent": "Email sent to {{email}}",
-      "noticeSkipped": "No notice · nobody has an email",
-      "deliveredTo": "to {{name}}",
-      "deliveredBy": "by {{name}}",
-      "deliveredToLabel": "Delivered to (optional)",
-      "deliveredToPlaceholder": "Name of the person picking up",
-      "noActions": "No pending actions."
+      "noActions": "No pending actions.",
+      "deliveryNotesLabel": "Delivery notes (optional)",
+      "deliveryNotesPlaceholder": "Who picked it up, where it was left…"
+    },
+    "timeline": {
+      "received": "Package received",
+      "notified": "Notice sent to {{email}}",
+      "notNotified": "No notice · nobody has an email",
+      "delivered": "Delivered"
     }
   }
 }

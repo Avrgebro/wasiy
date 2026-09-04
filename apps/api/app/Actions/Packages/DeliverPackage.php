@@ -16,7 +16,7 @@ class DeliverPackage
         private readonly ActivityLogger $activityLogger,
     ) {}
 
-    public function handle(Package $package, User $actor, ?string $deliveredTo): Package
+    public function handle(Package $package, User $actor, ?string $deliveryNotes): Package
     {
         if ($package->status !== PackageStatus::Pending) {
             throw ValidationException::withMessages([
@@ -28,7 +28,7 @@ class DeliverPackage
             'status' => PackageStatus::Delivered,
             'delivered_by' => $actor->id,
             'delivered_at' => now(),
-            'delivered_to' => $deliveredTo,
+            'delivery_notes' => $deliveryNotes,
         ])->save();
 
         $package->loadMissing(['unit', 'location', 'account']);
@@ -36,12 +36,12 @@ class DeliverPackage
         $this->activityLogger->log(
             account: $package->account,
             eventType: ActivityEventType::PackageDelivered,
-            summary: "Paquete de la unidad {$package->unit->label()} entregado".($deliveredTo ? " a {$deliveredTo}" : '').'.',
+            summary: "Paquete de la unidad {$package->unit->label()} entregado.",
             metadata: [
                 'package_id' => $package->id,
                 'unit_id' => $package->unit_id,
                 'unit_label' => $package->unit->label(),
-                'delivered_to' => $deliveredTo,
+                'delivery_notes' => $deliveryNotes,
             ],
             location: $package->location,
             actor: $actor,

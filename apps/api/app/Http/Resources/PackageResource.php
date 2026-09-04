@@ -27,7 +27,7 @@ class PackageResource extends JsonResource
             'received_by_name' => $this->whenLoaded('receivedBy', fn () => $this->receivedBy?->name),
             'delivered_at' => $this->delivered_at?->toJSON(),
             'delivered_by_name' => $this->whenLoaded('deliveredBy', fn () => $this->deliveredBy?->name),
-            'delivered_to' => $this->delivered_to,
+            'delivery_notes' => $this->delivery_notes,
             'notified_email' => $this->notified_email,
         ];
     }

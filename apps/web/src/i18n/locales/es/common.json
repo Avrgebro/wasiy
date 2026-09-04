@@ -1179,14 +1179,15 @@
       "title": "Paquete · {{unit}}",
       "pendingSince": "En recepción desde el {{date}}",
       "deliveredOn": "Entregado el {{date}}",
-      "notice": "Aviso",
-      "noticeSent": "Correo enviado a {{email}}",
-      "noticeSkipped": "Sin aviso · nadie tiene correo",
-      "deliveredTo": "a {{name}}",
-      "deliveredBy": "por {{name}}",
-      "deliveredToLabel": "Entregado a (opcional)",
-      "deliveredToPlaceholder": "Nombre de quien retira",
-      "noActions": "Sin acciones pendientes."
+      "noActions": "Sin acciones pendientes.",
+      "deliveryNotesLabel": "Notas de entrega (opcional)",
+      "deliveryNotesPlaceholder": "Quién lo retiró, dónde quedó…"
+    },
+    "timeline": {
+      "received": "Paquete recibido",
+      "notified": "Aviso enviado a {{email}}",
+      "notNotified": "Sin aviso · nadie tiene correo",
+      "delivered": "Entregado"
     }
   }
 }

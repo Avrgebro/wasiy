@@ -1,10 +1,10 @@
-import { Badge, Button, Text, TextInput } from '@mantine/core'
+import { Badge, Button, Text, Textarea } from '@mantine/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { DrawerFact, DrawerFacts, DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { DrawerFact, DrawerFacts, DrawerSection, DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
 import { getErrorMessage } from '../../lib/errors'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { shortDate, shortDateTime } from '../finances/month'
@@ -22,15 +22,15 @@ export function PackageDrawer({
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
-  const [deliveredTo, setDeliveredTo] = useState('')
+  const [deliveryNotes, setDeliveryNotes] = useState('')
 
   const close = () => {
-    setDeliveredTo('')
+    setDeliveryNotes('')
     onClose()
   }
 
   const deliver = useMutation({
-    mutationFn: () => deliverPackage(pkg!.id, deliveredTo.trim() || null),
+    mutationFn: () => deliverPackage(pkg!.id, deliveryNotes.trim() || null),
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['packages'] }),
@@ -73,38 +73,21 @@ export function PackageDrawer({
                 }
               />
               <DrawerFact label={t('packages.columns.for')} value={pkg.resident_name ?? t('packages.primaryContact')} />
-              <DrawerFact
-                label={t('packages.columns.received')}
-                value={[shortDateTime(pkg.received_at, timezone), pkg.received_by_name].filter(Boolean).join(' · ')}
-              />
-              <DrawerFact
-                label={t('packages.detail.notice')}
-                value={pkg.notified_email ? t('packages.detail.noticeSent', { email: pkg.notified_email }) : t('packages.detail.noticeSkipped')}
-              />
-              {pkg.delivered_at ? (
-                <DrawerFact
-                  wide
-                  label={t('packages.statuses.delivered')}
-                  value={[
-                    shortDateTime(pkg.delivered_at, timezone),
-                    pkg.delivered_to ? t('packages.detail.deliveredTo', { name: pkg.delivered_to }) : null,
-                    pkg.delivered_by_name ? t('packages.detail.deliveredBy', { name: pkg.delivered_by_name }) : null,
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')}
-                />
-              ) : null}
               {pkg.notes ? <DrawerFact wide label={t('registry.notes')} value={pkg.notes} /> : null}
             </DrawerFacts>
+
+            <DrawerSection label={t('finances.history.title')} />
+            <DrawerTimeline items={timeline(pkg, timezone, t)} />
 
             <DrawerSection label={t('finances.detail.actions')} />
             {pending ? (
               <>
-                <TextInput
-                  label={t('packages.detail.deliveredToLabel')}
-                  placeholder={t('packages.detail.deliveredToPlaceholder')}
-                  value={deliveredTo}
-                  onChange={(event) => setDeliveredTo(event.currentTarget.value)}
+                <Textarea
+                  label={t('packages.detail.deliveryNotesLabel')}
+                  placeholder={t('packages.detail.deliveryNotesPlaceholder')}
+                  rows={3}
+                  value={deliveryNotes}
+                  onChange={(event) => setDeliveryNotes(event.currentTarget.value)}
                 />
                 <Button color="accent" fullWidth loading={deliver.isPending} onClick={() => deliver.mutate()}>
                   {t('packages.markDelivered')}
@@ -125,4 +108,36 @@ export function PackageDrawer({
       </AppDrawerFooter>
     </AppDrawer>
   )
+}
+
+/** Received → notified → delivered, newest first, from the record itself. */
+function timeline(pkg: PackageSummary, timezone: string, t: (key: string, options?: Record<string, unknown>) => string): TimelineItem[] {
+  const items: TimelineItem[] = []
+
+  if (pkg.delivered_at) {
+    items.push({
+      id: 'delivered',
+      when: shortDateTime(pkg.delivered_at, timezone),
+      label: pkg.delivery_notes ? `${t('packages.timeline.delivered')}: ${pkg.delivery_notes}` : t('packages.timeline.delivered'),
+      actor: pkg.delivered_by_name ?? '—',
+    })
+  }
+
+  items.push({
+    id: 'notice',
+    when: shortDateTime(pkg.received_at, timezone),
+    label: pkg.notified_email
+      ? t('packages.timeline.notified', { email: pkg.notified_email })
+      : t('packages.timeline.notNotified'),
+    actor: t('finances.history.system'),
+  })
+
+  items.push({
+    id: 'received',
+    when: shortDateTime(pkg.received_at, timezone),
+    label: t('packages.timeline.received'),
+    actor: pkg.received_by_name ?? '—',
+  })
+
+  return items
 }

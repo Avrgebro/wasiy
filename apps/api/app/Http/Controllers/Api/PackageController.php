@@ -91,11 +91,11 @@ class PackageController extends Controller
     {
         Gate::authorize('deliver', $package);
 
-        $validated = $request->validate(['delivered_to' => ['sometimes', 'nullable', 'string', 'max:255']]);
+        $validated = $request->validate(['delivery_notes' => ['sometimes', 'nullable', 'string', 'max:1000']]);
 
         /** @var User $actor */
         $actor = $request->user();
 
-        return new PackageResource($deliver->handle($package, $actor, $validated['delivered_to'] ?? null)->load(self::RELATIONS));
+        return new PackageResource($deliver->handle($package, $actor, $validated['delivery_notes'] ?? null)->load(self::RELATIONS));
     }
 }

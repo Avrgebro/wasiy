@@ -46,7 +46,7 @@ function pkg(overrides: Partial<PackageSummary> = {}): PackageSummary {
   return {
     id: 'pk_1', account_id: 'acc_1', location_id: 'loc_1', unit_id: 'un_402', unit_number: '402', building_name: 'Torre A',
     resident_id: 'rs_1', resident_name: 'Carlos Mendoza', notes: 'Caja mediana, frágil', status: 'pending',
-    received_at: '2026-08-15T15:24:00Z', received_by_name: 'A. Quispe', delivered_at: null, delivered_by_name: null, delivered_to: null,
+    received_at: '2026-08-15T15:24:00Z', received_by_name: 'A. Quispe', delivered_at: null, delivered_by_name: null, delivery_notes: null,
     notified_email: 'carlos@x.pe', ...overrides,
   }
 }
@@ -104,11 +104,12 @@ describe('PackagesPage', () => {
 
     await user.click(screen.getByText('Caja mediana, frágil'))
     const drawer = await screen.findByRole('dialog')
-    expect(within(drawer).getByText('Correo enviado a carlos@x.pe')).toBeInTheDocument()
-    await user.type(within(drawer).getByLabelText('Entregado a (opcional)'), 'Laura Mendoza')
+    expect(within(drawer).getByText('Aviso enviado a carlos@x.pe')).toBeInTheDocument()
+    expect(within(drawer).getByText('Paquete recibido')).toBeInTheDocument()
+    await user.type(within(drawer).getByLabelText('Notas de entrega (opcional)'), 'Lo retiró Laura Mendoza')
     await user.click(within(drawer).getByRole('button', { name: 'Marcar entregado' }))
 
-    await waitFor(() => expect(writes).toEqual([{ url: '/api/packages/pk_1/deliver', body: { delivered_to: 'Laura Mendoza' } }]))
+    await waitFor(() => expect(writes).toEqual([{ url: '/api/packages/pk_1/deliver', body: { delivery_notes: 'Lo retiró Laura Mendoza' } }]))
     expect(await screen.findByText('Paquete entregado')).toBeInTheDocument()
   })
 
