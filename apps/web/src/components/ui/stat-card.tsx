@@ -11,9 +11,11 @@ type StatCardProps = {
 }
 
 const toneClasses: Record<NonNullable<StatCardProps['tone']>, string> = {
-  success: 'text-[var(--mantine-color-success-light-color)]',
-  error: 'text-[var(--mantine-color-error-light-color)]',
-  accent: 'text-[var(--mantine-color-accent-light-color)]',
+  // Semantic tokens, not Mantine's `-light-color` tints: those resolve to
+  // the pale shade 3 in dark mode and washed the mockup's colors out.
+  success: 'text-[var(--wa-success)]',
+  error: 'text-[var(--wa-error)]',
+  accent: 'text-[var(--wa-accent)]',
 }
 
 export function StatCard({ label, value, detail, tone, aside, highlighted = false }: StatCardProps) {

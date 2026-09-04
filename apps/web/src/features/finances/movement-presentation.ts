@@ -33,16 +33,17 @@ export function amountClassName(movement: Pick<MovementSummary, 'status' | 'dire
     return 'text-[var(--mantine-color-dimmed)] line-through'
   }
   if (movement.direction === 'expense') {
-    return 'text-[var(--mantine-color-error-light-color)]'
+    return 'text-[var(--wa-error)]'
   }
   switch (movement.status) {
     case 'pending':
-      return 'text-[var(--mantine-color-accent-light-color)]'
+      return 'text-[var(--wa-accent)]'
     case 'held':
     case 'to_refund':
-      return 'text-[var(--mantine-color-info-light-color)]'
+      // Deposits in motion use the mockup's teal (interactive), not info blue.
+      return 'text-[var(--wa-interactive)]'
     default:
-      return 'text-[var(--mantine-color-success-light-color)]'
+      return 'text-[var(--wa-success)]'
   }
 }
 
