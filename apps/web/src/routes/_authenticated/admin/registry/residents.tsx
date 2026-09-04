@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { registrySearchSchema } from '../../../../features/registry/search'
-import { ResidentsRegistryPage } from '../../../../features/residents/residents-registry-page'
+import { ResidentsPage } from '../../../../features/residents/residents-page'
+import { residentsSearchSchema } from '../../../../features/residents/schemas'
 
 export const Route = createFileRoute('/_authenticated/admin/registry/residents')({
-  component: ResidentsRegistryPage,
-  validateSearch: registrySearchSchema,
+  component: ResidentsPage,
+  validateSearch: residentsSearchSchema,
 })

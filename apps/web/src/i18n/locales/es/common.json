@@ -99,12 +99,6 @@
     "phoneTitle": "Teléfono de contacto",
     "primaryContact": "Contacto principal",
     "primaryUnit": "Acceso activo para {{unit}}",
-    "residentTypes": {
-      "guestResident": "Residente invitado",
-      "occupant": "Ocupante",
-      "owner": "Propietario",
-      "tenant": "Inquilino"
-    },
     "savePhone": "Guardar teléfono",
     "summary": "Resumen de tus unidades y datos de contacto.",
     "title": "Portal de residentes"
@@ -1066,12 +1060,6 @@
       "packagesHistory": "Ver historial →",
       "noPackages": "Sin paquetes en recepción."
     },
-    "roles": {
-      "owner": "Propietario",
-      "tenant": "Inquilino",
-      "occupant": "Residente",
-      "guest_resident": "Otro"
-    },
     "form": {
       "createTitle": "Nueva unidad",
       "editTitle": "Editar unidad",
@@ -1106,10 +1094,9 @@
       "noPeople": "Sin coincidencias.",
       "email": "Correo",
       "relation": "Relación con la unidad",
-      "role": "Rol",
       "primaryHint": "Recibe avisos y es el contacto para recepción.",
       "invite": "Invitar al portal del residente",
-      "inviteHint": "Se envía un correo con el enlace de acceso.",
+      "inviteHint": "Se pedirá el correo al enviar la invitación.",
       "inviteNeedsEmail": "La invitación al portal requiere un correo.",
       "add": "Agregar",
       "added": "Residente agregado",
@@ -1188,6 +1175,55 @@
       "notified": "Aviso enviado a {{email}}",
       "notNotified": "Sin aviso · nadie tiene correo",
       "delivered": "Entregado"
+    }
+  },
+  "residents": {
+    "subtitle_one": "{{count}} persona · {{location}}",
+    "subtitle_other": "{{count}} personas · {{location}}",
+    "searchPlaceholder": "Buscar por nombre, teléfono o unidad…",
+    "allPortalStates": "Todos",
+    "allStatuses": "Todos",
+    "primaryContactShort": "contacto principal",
+    "deactivated": "Persona desactivada",
+    "reactivated": "Persona reactivada",
+    "chips": {
+      "all": "Todos",
+      "no_unit": "Sin unidad"
+    },
+    "columns": {
+      "person": "Persona"
+    },
+    "empty": "Aún no hay personas en {{location}}.",
+    "emptyFiltered": "Ninguna persona coincide.",
+    "form": {
+      "createTitle": "Nueva persona",
+      "editTitle": "Editar datos",
+      "create": "Crear persona",
+      "created": "Persona creada",
+      "saved": "Cambios guardados",
+      "phone": "Teléfono (opcional)",
+      "unitSection": "Unidad",
+      "unitHint": "Opcional al crear; sin unidad la persona aparece en «Sin unidad»."
+    },
+    "detail": {
+      "since": "Desde",
+      "sinceValue": "En Wasiy desde el {{date}}",
+      "noUnits": "No vive en ninguna unidad de esta ubicación.",
+      "membershipsHint": "Las membresías se gestionan desde la unidad.",
+      "invite": "Invitar al portal",
+      "sendInvite": "Enviar invitación",
+      "emailLabel": "Correo del residente",
+      "emailHint": "Solo se pide aquí; se guarda para enviar la invitación.",
+      "willSendTo": "Se enviará a {{email}}.",
+      "noHistory": "Sin actividad registrada.",
+      "edit": "Editar datos",
+      "deactivate": "Desactivar persona",
+      "reactivate": "Reactivar persona",
+      "deactivateHint": "Quita el acceso al portal; el historial se conserva.",
+      "deactivateBlocked": "Solo disponible cuando no vive en ninguna unidad. Quítalo primero de sus unidades.",
+      "reactivateHint": "La persona vuelve a aparecer como activa.",
+      "confirmDeactivate": "¿Desactivar a {{name}}?",
+      "confirmDeactivateBody": "Pierde el acceso al portal. Su historial se conserva y puedes reactivarla después."
     }
   }
 }

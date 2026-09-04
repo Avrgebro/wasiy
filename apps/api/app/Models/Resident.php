@@ -83,7 +83,7 @@ class Resident extends Model
     public function units(): BelongsToMany
     {
         return $this->belongsToMany(Unit::class, 'unit_memberships')
-            ->withPivot(['account_id', 'location_id', 'resident_type', 'status', 'is_primary_contact', 'started_at', 'ended_at'])
+            ->withPivot(['account_id', 'location_id', 'status', 'is_primary_contact', 'started_at', 'ended_at'])
             ->withTimestamps();
     }
 
@@ -94,6 +94,8 @@ class Resident extends Model
     {
         return [
             'unitMemberships.unit',
+            'userInvitations',
+            'account',
         ];
     }
 

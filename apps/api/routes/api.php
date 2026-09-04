@@ -124,6 +124,8 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::get('/residents/{resident}', [ResidentController::class, 'show']);
     Route::patch('/residents/{resident}', [ResidentController::class, 'update']);
     Route::delete('/residents/{resident}', [ResidentController::class, 'destroy']);
+    Route::post('/residents/{resident}/deactivate', [ResidentController::class, 'deactivate']);
+    Route::post('/residents/{resident}/reactivate', [ResidentController::class, 'reactivate']);
     Route::post('/residents/{resident}/invitations', [ResidentInvitationController::class, 'store']);
     Route::delete('/residents/{resident}/invitations/{invitation}', [ResidentInvitationController::class, 'destroy']);
     Route::post('/residents/{resident}/invitations/{invitation}/resend', [ResidentInvitationController::class, 'resend']);

@@ -424,7 +424,6 @@ What exists today, and where:
 | `FormTextInput`, `FormPasswordInput`, `NullableTextInput` | `components/ui/form-fields.tsx`, `features/registry/` | react-hook-form wired inputs |
 | Toasts (`notifySuccess`, `notifyError`, `notifyWarning`) | `lib/notify.tsx` + `.wa-toast` in `index.css` | card chrome, tinted icon chip |
 | `PagePlaceholder` | `components/ui/page-placeholder.tsx` | route stubs |
-| `RegistryCrudPage`, `RegistryTable` | `features/registry/` | older list wrapper over `DataTable`, being phased out |
 
 Not built, and not currently planned: breadcrumbs, a date range picker, a calendar or schedule grid (the day view was removed from M7; the week agenda list is the reservations view).
 

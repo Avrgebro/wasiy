@@ -99,12 +99,6 @@
     "phoneTitle": "Contact phone",
     "primaryContact": "Primary contact",
     "primaryUnit": "Active access for {{unit}}",
-    "residentTypes": {
-      "guestResident": "Guest resident",
-      "occupant": "Occupant",
-      "owner": "Owner",
-      "tenant": "Tenant"
-    },
     "savePhone": "Save phone",
     "summary": "Summary of your units and contact details.",
     "title": "Resident portal"
@@ -1066,12 +1060,6 @@
       "packagesHistory": "See history →",
       "noPackages": "No packages at reception."
     },
-    "roles": {
-      "owner": "Owner",
-      "tenant": "Tenant",
-      "occupant": "Resident",
-      "guest_resident": "Other"
-    },
     "form": {
       "createTitle": "New unit",
       "editTitle": "Edit unit",
@@ -1106,10 +1094,9 @@
       "noPeople": "No matches.",
       "email": "Email",
       "relation": "Relation to the unit",
-      "role": "Role",
       "primaryHint": "Receives notices and is the contact for the front desk.",
       "invite": "Invite to the resident portal",
-      "inviteHint": "An email with the access link is sent.",
+      "inviteHint": "The email is asked when sending the invitation.",
       "inviteNeedsEmail": "The portal invitation needs an email.",
       "add": "Add",
       "added": "Resident added",
@@ -1188,6 +1175,55 @@
       "notified": "Notice sent to {{email}}",
       "notNotified": "No notice · nobody has an email",
       "delivered": "Delivered"
+    }
+  },
+  "residents": {
+    "subtitle_one": "{{count}} person · {{location}}",
+    "subtitle_other": "{{count}} people · {{location}}",
+    "searchPlaceholder": "Search by name, phone or unit…",
+    "allPortalStates": "All",
+    "allStatuses": "All",
+    "primaryContactShort": "primary contact",
+    "deactivated": "Person deactivated",
+    "reactivated": "Person reactivated",
+    "chips": {
+      "all": "All",
+      "no_unit": "No unit"
+    },
+    "columns": {
+      "person": "Person"
+    },
+    "empty": "No people in {{location}} yet.",
+    "emptyFiltered": "Nobody matches.",
+    "form": {
+      "createTitle": "New person",
+      "editTitle": "Edit details",
+      "create": "Create person",
+      "created": "Person created",
+      "saved": "Changes saved",
+      "phone": "Phone (optional)",
+      "unitSection": "Unit",
+      "unitHint": "Optional when creating; without a unit the person shows under \"No unit\"."
+    },
+    "detail": {
+      "since": "Since",
+      "sinceValue": "In Wasiy since {{date}}",
+      "noUnits": "Does not live in any unit of this location.",
+      "membershipsHint": "Memberships are managed from the unit.",
+      "invite": "Invite to the portal",
+      "sendInvite": "Send invitation",
+      "emailLabel": "Resident's email",
+      "emailHint": "Asked only here; stored to send the invitation.",
+      "willSendTo": "It will be sent to {{email}}.",
+      "noHistory": "No activity recorded.",
+      "edit": "Edit details",
+      "deactivate": "Deactivate person",
+      "reactivate": "Reactivate person",
+      "deactivateHint": "Removes portal access; history is kept.",
+      "deactivateBlocked": "Only available when they live in no unit. Remove them from their units first.",
+      "reactivateHint": "The person shows as active again.",
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "confirmDeactivateBody": "They lose portal access. History is kept and you can reactivate them later."
     }
   }
 }

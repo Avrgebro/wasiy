@@ -63,6 +63,12 @@ class InviteResidentUser
 
             $email = Str::lower(trim($email));
 
+            // The directory never asks for an email at creation (M11): the
+            // address given here is the person's, so keep it on the record.
+            if ($resident->email === null) {
+                $resident->forceFill(['email' => $email])->save();
+            }
+
             [$invitation, $token] = $this->issueInvitation->handle(
                 purpose: UserInvitationPurpose::Resident,
                 account: $resident->account,
