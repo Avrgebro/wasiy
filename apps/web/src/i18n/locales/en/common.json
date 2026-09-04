@@ -67,7 +67,7 @@
   "dashboard": {
     "heading": "{{location}} panel",
     "today": "Today, {{date}}",
-    "overdue": "Past the time limit",
+    "overdue": "Check-out to confirm",
     "primaryContact": "Primary contact",
     "sections": {
       "today": "Today",
@@ -78,8 +78,8 @@
     },
     "tiles": {
       "visitorsInside": "Visitors inside",
-      "visitorsOverdue_one": "{{count}} past the time limit",
-      "visitorsOverdue_other": "{{count}} past the time limit",
+      "visitorsOverdue_one": "{{count}} check-out to confirm",
+      "visitorsOverdue_other": "{{count}} check-outs to confirm",
       "packagesPending": "Packages to deliver",
       "packagesOldest": "oldest, {{age}}",
       "reservationsToday": "Reservations today",

@@ -67,7 +67,7 @@
   "dashboard": {
     "heading": "Panel de {{location}}",
     "today": "Hoy, {{date}}",
-    "overdue": "Excede el tiempo límite",
+    "overdue": "Salida por confirmar",
     "primaryContact": "Contacto principal",
     "sections": {
       "today": "Hoy",
@@ -78,8 +78,8 @@
     },
     "tiles": {
       "visitorsInside": "Visitantes dentro",
-      "visitorsOverdue_one": "{{count}} excede el tiempo límite",
-      "visitorsOverdue_other": "{{count}} exceden el tiempo límite",
+      "visitorsOverdue_one": "{{count}} salida por confirmar",
+      "visitorsOverdue_other": "{{count}} salidas por confirmar",
       "packagesPending": "Paquetes por entregar",
       "packagesOldest": "el más antiguo, {{age}}",
       "reservationsToday": "Reservas hoy",
