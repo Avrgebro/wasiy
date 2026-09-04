@@ -23,9 +23,8 @@ export function ReservationSlotBand({
   const badgeKey = reservation.is_completed ? 'completed' : reservation.status
 
   return (
-    // Bordered, not surface-2: the status pill is drawn on surface-2 and would
-    // vanish against a band of the same color.
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-inner border border-[var(--mantine-color-default-border)] px-3.5 py-2.5">
+    // Surface-2 band; the pill uses the `surface` variant so it stays visible.
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-inner bg-[var(--wa-surface-2)] px-3.5 py-2.5">
       <Text fw={600} size="sm">
         {shortDayLabel(localDateString(new Date(reservation.starts_at), timezone))} ·{' '}
         {formatTimeRange(reservation, timezone)}
@@ -34,7 +33,7 @@ export function ReservationSlotBand({
         color={reservation.is_completed ? 'gray' : RESERVATION_STATUS_COLORS[reservation.status]}
         radius="xl"
         size="sm"
-        variant="light"
+        variant="surface"
       >
         {t(`reservations.statuses.${badgeKey}`)}
       </Badge>

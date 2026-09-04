@@ -83,7 +83,7 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
         return (
           <div className="flex flex-col">
             <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
-            {labels ? <span className="text-[11.5px] text-[var(--mantine-color-dimmed)]">{labels}</span> : null}
+            {labels ? <span className="text-[11.5px] text-[var(--wa-text-3)]">{labels}</span> : null}
           </div>
         )
       },
@@ -151,7 +151,7 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
       id: 'open',
       header: '',
       meta: { className: 'w-6 text-right' },
-      cell: () => <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>,
+      cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span>,
     },
   ]
 

@@ -24,7 +24,7 @@ Roles, in the words the code uses:
 - `secondary` (teal, mid): icons, avatars, supporting emphasis.
 - `interactive` (teal, link tone): links, actionable text, section rules and timeline dots in drawers, the selected-row bar.
 - `accent` (amber): **one main action per screen** (`Registrar movimiento`, `Nueva reserva`, `Invitar`), highlighted figures such as receivables. Always dark text, never white.
-- `bg`, `surface`, `surface-2`, `text`, `text-2`, `border`: canvas, cards and tables, fields and rails, primary and secondary text, separators.
+- `bg`, `surface`, `surface-2`, `text`, `text-2`, `text-3`, `border`, `divider`, `hover`: canvas, cards and tables, fields and pills, three text levels (body, metadata, hints/chevrons/timestamps), card and control outlines, row separators inside a surface, and the paper fill for hovered or selected rows and default controls.
 - `success`, `warning`, `error`, `info`: status roles; see Status Colors.
 
 Rules:
@@ -39,6 +39,7 @@ Rules:
 - **Mantine props** use the semantic scale names: `color="accent"`, `color="error"`, `color="success"`, `color="warning"`, `color="info"`, plus `gray` for neutral. Never `red`, `yellow`, `green`, `blue`.
 - **Colored text and figures** (KPI values, amounts, icon marks) use the `--wa-*` tokens. Do not use Mantine's `--mantine-color-<role>-light-color` variables for text: in dark mode they resolve to the pale shade 3 of the scale and wash the intended color out. They exist for the `light` Badge variant, which is where they belong.
 - Deposits in motion (held, to refund) use `--wa-interactive`, the teal the mockups use, not `info` blue.
+- Mantine's `gray` scale is remapped to the palette's paper neutrals in `theme.ts`, and `--mantine-color-default-hover`, `--table-border-color` and `--table-hover-color` point at the `hover` and `divider` tokens. Never use Mantine's stock gray hex values or `gray-0..9` directly; in light mode they read cool and blue against the paper canvas.
 
 ## Interface Density
 
@@ -159,7 +160,7 @@ Mapping used in the product:
 
 Rules:
 
-- Status pills are Mantine `Badge` with `variant="light"` and `size="sm"` (radius `xl` is the theme default). The theme remaps that variant to the design system's pill: **role-colored text on the neutral second surface** (`--wa-surface-2`), never a tinted background — the mockups draw every pill this way. `gray` means dimmed text, `teal` means the interactive token. Where a label must never truncate in a narrow cell, use `TintChip` from `components/ui/chips.tsx`, which follows the same recipe. Filled badges are reserved for counters (the Por aprobar count), not statuses.
+- Status pills are Mantine `Badge` with `variant="light"` and `size="sm"` (radius `xl` is the theme default). The theme remaps that variant to the design system's pill: **role-colored text on the neutral second surface** (`--wa-surface-2`), never a tinted background — the mockups draw every pill this way. `gray` means dimmed text, `teal` means the interactive token. On a surface-2 box (drawer inner cards, bands) use `variant="surface"`: same text, background flips to the card color so the pill does not vanish. Where a label must never truncate in a narrow cell, use `TintChip` from `components/ui/chips.tsx`, which follows the same recipe. Filled badges are reserved for counters (the Por aprobar count), not statuses.
 - Colored figures (amounts, KPI values) use the `--wa-*` tokens, not the badge tint variables.
 - Amber is both accent and dark-mode warning, so a warning always carries text; badges never rely on color alone.
 - Presentation rules for a status (label, color, allowed inline action) live in one module per feature (`movement-presentation.ts`, `reservation-modal-parts.tsx`) so a row and its drawer never disagree.
@@ -197,7 +198,7 @@ Sizes (Mantine scale, unchanged):
 Color:
 
 - Primary: `color="accent"` (amber, dark text). One per screen or overlay.
-- Secondary: `variant="default"` (bordered, surface).
+- Secondary: `variant="default"` (bordered, surface; hovers to surface 2° so it stays visible on the paper canvas). Secondary buttons stay neutral in both schemes — the mockups never fill them with teal; amber is the only filled button color, one per screen.
 - Tertiary: `variant="subtle"`, usually `size="compact-sm"` and dimmed, for reverts and low-emphasis links.
 - Destructive: `color="error"` only inside a confirmation dialog; in the action row a destructive move is a `default` button that opens the confirmation.
 
@@ -292,7 +293,7 @@ Patterns:
 Patterns in use:
 
 - **Form drawer** (`AppDrawer` + `AppDrawerBody` + `AppDrawerFooter`, `520px`): create and edit flows — staff access, location, amenity (`620px`), new reservation, record movement. Footer: `Cancelar` (default) and the accent submit.
-- **Detail drawer** (same `AppDrawer`, pieces from `components/ui/detail-drawer-parts.tsx`): the row's home. Sections in order: header value and status badge, `DrawerFacts` (uppercase label over value, two columns), `DrawerSection` rules, `DrawerTimeline` (Historial, newest first; derived events drawn with a hollow dot and dimmed), Acciones with one optional note field and the action row. Footer: only `Cerrar`. Used for movements and reservations; deep-linked by a URL param (`movement`, `reservation`).
+- **Detail drawer** (same `AppDrawer`, pieces from `components/ui/detail-drawer-parts.tsx`): the row's home. Inner cards inside a drawer (unit list, portal block, member header, slot band) are filled with `--wa-surface-2` and bordered, never border-only on the drawer surface. Sections in order: header value and status badge, `DrawerFacts` (uppercase label over value, two columns), `DrawerSection` rules, `DrawerTimeline` (Historial, newest first; derived events drawn with a hollow dot and dimmed), Acciones with one optional note field and the action row. Footer: only `Cerrar`. Used for movements and reservations; deep-linked by a URL param (`movement`, `reservation`).
 - **Confirmation** (`ConfirmDialog`): irreversible moves only — void, retain, cancel a reservation. Names the consequence, `Cancelar` + `Confirmar` in `error`.
 - **Small modal**: a prompt that needs one field before acting (the queue's observe/reject note).
 - **Full page**: CSV import preview, location detail with tabs.

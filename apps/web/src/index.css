@@ -35,10 +35,18 @@
   --wa-accent: #e0a438;
   --wa-bg: #f7f5f0;
   --wa-surface: #ffffff;
-  --wa-surface-2: #efebe2;
+  --wa-surface-2: #f2efe9;
   --wa-text: #1c2b2c;
   --wa-text-2: #5a6b6b;
+  /* Third text level (mockups): hints, chevrons, timestamps, second lines. */
+  --wa-text-3: #9aa6a4;
   --wa-border: #dde4e1;
+  /* Row separators inside a surface are one step lighter than the border. */
+  --wa-divider: #eaeeea;
+  /* Control outlines that must read on a white card (default buttons). */
+  --wa-border-strong: #c5cfcc;
+  /* Hover/selected fill for rows and default controls: paper, not cool gray. */
+  --wa-hover: #f7f5f0;
   --wa-success: #2e7d5b;
   --wa-warning: #b97f24;
   --wa-error: #c0442e;
@@ -92,7 +100,11 @@
   --wa-surface-2: #1d3335;
   --wa-text: #e9ece8;
   --wa-text-2: #9fb0ae;
+  --wa-text-3: #5f7371;
   --wa-border: #2a3f40;
+  --wa-divider: #22383a;
+  --wa-border-strong: #365052;
+  --wa-hover: #1b2f31;
   --wa-success: #4fa97c;
   --wa-warning: #e0a438;
   --wa-error: #e0705c;
@@ -191,6 +203,28 @@
    in src/app/theme.ts — a stylesheet override here would lose to the
    provider's runtime-injected style tag. The dark body comes from the
    petroleum dark scale (dark-7). */
+
+/* Tables and default-variant hovers use the palette's warm neutrals instead
+   of Mantine's cool gray scale (see also the remapped `gray` in theme.ts). */
+.mantine-Table-table {
+  --table-border-color: var(--wa-divider);
+  --table-hover-color: var(--wa-hover);
+}
+
+/* Default-variant buttons and icon buttons: a firmer outline so the button
+   has an edge on a white card (Mantine's default border is 1.3:1 on white),
+   and a hover that changes both fill and border. Unlayered to beat Mantine. */
+.mantine-Button-root[data-variant='default'],
+.mantine-ActionIcon-root[data-variant='default'] {
+  /* Mantine sets its border via an inline variable; the property itself is
+     the only reliable override. */
+  border-color: var(--wa-border-strong);
+}
+
+.mantine-Button-root[data-variant='default']:hover,
+.mantine-ActionIcon-root[data-variant='default']:hover {
+  border-color: var(--wa-text-3);
+}
 
 /* Jerarquía por elevación en oscuro: no shadows, borders delimit. */
 :root[data-mantine-color-scheme='dark'] .mantine-Paper-root {

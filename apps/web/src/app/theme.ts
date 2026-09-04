@@ -105,6 +105,24 @@ const info: MantineColorsTuple = [
 ];
 
 /**
+ * Mantine's stock gray is a cool blue-gray that shows through Skeleton,
+ * dividers, hovers and anything using `gray`. Replaced with the paper
+ * neutrals of the palette so light mode stays warm (colorschema.md).
+ */
+const gray: MantineColorsTuple = [
+  "#F7F5F0", // 0  ← bg / hover
+  "#F2EFE9", // 1  ← surface 2°
+  "#EAEEEA", // 2  ← divider
+  "#DDE4E1", // 3  ← border
+  "#C5CFCC", // 4
+  "#9AA6A4", // 5  ← text 3° / placeholder
+  "#5A6B6B", // 6  ← text 2° / dimmed
+  "#3E4F4F", // 7
+  "#2A3A3B", // 8
+  "#1C2B2C", // 9  ← text
+];
+
+/**
  * Replaces Mantine's neutral-gray dark scale so dark mode keeps the
  * petroleum background instead of gray. Mapped to Mantine's dark-mode
  * conventions: 7 = body, 6 = surfaces (Paper/Card/inputs), 5 = surface 2°
@@ -164,7 +182,7 @@ export const mantineTheme: MantineThemeOverride = createTheme({
   },
   primaryColor: "teal",
   primaryShade: { light: 6, dark: 5 },
-  colors: { teal, accent, success, warning, error, info, dark },
+  colors: { teal, accent, success, warning, error, info, gray, dark },
   white: "#FFFFFF",
   black: "#1C2B2C",
   // Accent CTAs (`color="accent"`) must carry dark text (#1C2B2C), never
@@ -211,11 +229,15 @@ export const mantineTheme: MantineThemeOverride = createTheme({
     // the variant is remapped here for all 25+ badges at once.
     Badge: Badge.extend({
       defaultProps: { radius: "xl" },
+      // `light`: the pill on a card. `surface`: the same pill placed on a
+      // surface-2 box (drawer inner cards, bands), where it inverts to the
+      // card color so it does not vanish — exactly as the mockups draw it.
       vars: (_theme, props) =>
-        props.variant === "light"
+        props.variant === "light" || props.variant === "surface"
           ? {
               root: {
-                "--badge-bg": "var(--wa-surface-2)",
+                "--badge-bg":
+                  props.variant === "surface" ? "var(--mantine-color-default)" : "var(--wa-surface-2)",
                 "--badge-color": PILL_TEXT[props.color ?? "teal"] ?? PILL_TEXT.teal,
               },
             }
@@ -243,6 +265,10 @@ export const cssVariablesResolver: CSSVariablesResolver = () => ({
     "--mantine-color-default-border": "#DDE4E1",
     "--mantine-color-dimmed": "#5A6B6B",
     "--mantine-color-placeholder": "#9AA6A4",
+    // Default-variant hover (buttons, options): surface 2°, distinct from both
+    // white cards and the paper canvas so a hovered button never blends in.
+    // Table rows hover on --wa-hover (paper) instead; see index.css.
+    "--mantine-color-default-hover": "#F2EFE9",
     // «Interactivo» role: links get their own color (≈6.2:1 on paper)
     // instead of reusing the primary, which read as plain text.
     "--mantine-color-anchor": "#106E74",
@@ -250,5 +276,6 @@ export const cssVariablesResolver: CSSVariablesResolver = () => ({
   dark: {
     // «Interactivo» (dark): petroleum has insufficient contrast for links.
     "--mantine-color-anchor": "#7FB5B0",
+    "--mantine-color-default-hover": "#1D3335",
   },
 });

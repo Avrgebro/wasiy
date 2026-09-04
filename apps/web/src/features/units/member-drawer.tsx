@@ -189,7 +189,7 @@ export function MemberDrawer({
           ) : null}
 
           {member ? (
-            <div className="flex items-center gap-3 rounded-inner border border-[var(--mantine-color-default-border)] px-3.5 py-3">
+            <div className="flex items-center gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
               <div className="min-w-0">
                 <Text fw={600} size="sm">
                   {member.name}
@@ -279,8 +279,8 @@ export function MemberDrawer({
           {member ? (
             <>
               <DrawerSection label={t('units.detail.portal')} />
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] px-3.5 py-3">
-                <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="light">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
+                <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="surface">
                   {t(`units.portal.${member.portal_state}`)}
                 </Badge>
                 {member.portal_state !== 'active' ? (

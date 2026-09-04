@@ -131,7 +131,7 @@ function FinancesContent({
       header: t('finances.columns.date'),
       meta: { className: 'w-24 whitespace-nowrap', sortKey: 'occurred_on' },
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-medium text-[var(--mantine-color-dimmed)]">
+        <span className="font-mono text-xs font-medium text-[var(--wa-text-3)]">
           {shortDate(row.original.occurred_on)}
         </span>
       ),
@@ -150,7 +150,7 @@ function FinancesContent({
             {row.original.concept}
           </span>
           {row.original.detail ? (
-            <span className="text-xs text-[var(--mantine-color-dimmed)]">{row.original.detail}</span>
+            <span className="text-xs text-[var(--wa-text-3)]">{row.original.detail}</span>
           ) : null}
         </div>
       ),
@@ -199,7 +199,7 @@ function FinancesContent({
       id: 'open',
       header: '',
       meta: { className: 'w-6 text-right' },
-      cell: () => <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>,
+      cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span>,
     },
   ]
 

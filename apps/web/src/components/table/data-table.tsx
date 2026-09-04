@@ -216,7 +216,7 @@ function DataTableFooter({
       justify="space-between"
       className="flex-wrap gap-2 border-t border-[var(--mantine-color-default-border)] px-4 py-3 sm:px-5"
     >
-      <Text c="dimmed" size="sm">
+      <Text className="text-[var(--wa-text-3)]" size="sm">
         {t('table.showing', { from, to, total: meta.total })}
       </Text>
       <Group className="pointer-coarse:gap-3" gap={6}>

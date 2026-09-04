@@ -156,7 +156,7 @@ function ResidentsContent({
         </Badge>
       ),
     },
-    { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span> },
+    { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span> },
   ]
 
   return (
@@ -281,13 +281,17 @@ function monogram(name: string): string {
 function PersonCell({ person }: { person: ResidentSummary }) {
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--wa-secondary)] text-[11px] font-semibold text-[#F7F5F0]">
+      <span
+        className={`grid size-8 shrink-0 place-items-center rounded-full text-[11px] font-semibold ${
+          person.status === 'inactive' ? 'bg-[var(--wa-surface-2)] text-[var(--wa-text-3)]' : 'bg-[var(--wa-secondary)] text-[#F7F5F0]'
+        }`}
+      >
         {monogram(person.name)}
       </span>
       <div className="min-w-0">
         <div className="truncate text-sm font-semibold">{person.name}</div>
         {/* Email exists in the payload only for managers; front desk never gets it. */}
-        {person.email ? <div className="truncate text-xs text-[var(--mantine-color-dimmed)]">{person.email}</div> : null}
+        {person.email ? <div className="truncate text-xs text-[var(--wa-text-3)]">{person.email}</div> : null}
       </div>
     </div>
   )

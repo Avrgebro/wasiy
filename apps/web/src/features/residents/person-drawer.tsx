@@ -152,7 +152,7 @@ export function PersonDrawer({
                 {t('residents.detail.noUnits')}
               </Text>
             ) : (
-              <div className="flex flex-col divide-y divide-[var(--mantine-color-default-border)] rounded-inner border border-[var(--mantine-color-default-border)]">
+              <div className="flex flex-col divide-y divide-[var(--mantine-color-default-border)] overflow-hidden rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)]">
                 {inLocation.map((membership) => (
                   <Link
                     key={membership.id}
@@ -168,7 +168,7 @@ export function PersonDrawer({
                         .filter(Boolean)
                         .join(' · ')}
                     </span>
-                    <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>
+                    <span className="text-[15px] text-[var(--wa-text-3)]">›</span>
                   </Link>
                 ))}
               </div>
@@ -178,9 +178,9 @@ export function PersonDrawer({
             </Text>
 
             <DrawerSection label={t('units.detail.portal')} />
-            <div className="flex flex-col gap-3 rounded-inner border border-[var(--mantine-color-default-border)] px-3.5 py-3">
+            <div className="flex flex-col gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <Badge color={portalColor(person.portal_state)} radius="xl" size="sm" variant="light">
+                <Badge color={portalColor(person.portal_state)} radius="xl" size="sm" variant="surface">
                   {t(`units.portal.${person.portal_state}`)}
                 </Badge>
                 {canManage && person.portal_state !== 'active' && !inviting ? (

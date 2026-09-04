@@ -448,7 +448,7 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void
       <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="light">
         {t(`units.portal.${member.portal_state}`)}
       </Badge>
-      {onOpen ? <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span> : null}
+      {onOpen ? <span className="text-[15px] text-[var(--wa-text-3)]">›</span> : null}
     </div>
   )
 }
@@ -551,7 +551,7 @@ function VehicleRow({ onOpen, vehicle }: { onOpen?: () => void; vehicle: Vehicle
           {[[vehicle.make, vehicle.model].filter(Boolean).join(' '), vehicle.color].filter(Boolean).join(' · ') || t(`registry.vehicleTypes.${vehicle.vehicle_type}`)}
         </Text>
       </div>
-      {onOpen ? <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span> : null}
+      {onOpen ? <span className="text-[15px] text-[var(--wa-text-3)]">›</span> : null}
     </div>
   )
 }

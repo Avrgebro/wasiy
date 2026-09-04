@@ -63,7 +63,7 @@ export function DrawerTimeline({ items }: { items: TimelineItem[] }) {
               {!last ? <span className="mt-1 -mb-1 w-px flex-1 bg-[var(--mantine-color-default-border)]" /> : null}
             </div>
             <div className={`${last ? '' : 'pb-3.5'} ${item.derived ? 'text-[var(--mantine-color-dimmed)]' : ''}`}>
-              <div className="font-mono text-xs text-[var(--mantine-color-dimmed)]">{item.when}</div>
+              <div className="font-mono text-xs text-[var(--wa-text-3)]">{item.when}</div>
               <div className="mt-0.5 text-[13px] font-medium">{item.label}</div>
               <div className="text-xs text-[var(--mantine-color-dimmed)]">{item.actor}</div>
             </div>
