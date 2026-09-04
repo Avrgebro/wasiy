@@ -47,14 +47,21 @@ export function canManageRegistry(me: MeResponse) {
   )
 }
 
+/**
+ * Every staff role shares the admin surface; front desk sees the read-only
+ * subset through the navigation predicates and the pages' manage checks, and
+ * the API policies enforce the same line. There is no separate front-desk
+ * shell.
+ */
 export function canAccessAdmin(me: MeResponse) {
   return (
     hasAccountRole(me, accountRoles.accountAdmin) ||
-    hasLocationRole(me, locationRoles.locationManager)
+    hasLocationRole(me, locationRoles.locationManager) ||
+    hasLocationRole(me, locationRoles.frontDesk)
   )
 }
 
-export function canAccessFrontDesk(me: MeResponse) {
+export function isFrontDesk(me: MeResponse) {
   return hasLocationRole(me, locationRoles.frontDesk)
 }
 
@@ -63,7 +70,7 @@ export function canAccessPortal(me: MeResponse) {
 }
 
 export function canAccessAnySurface(me: MeResponse) {
-  return canAccessAdmin(me) || canAccessFrontDesk(me) || canAccessPortal(me)
+  return canAccessAdmin(me) || canAccessPortal(me)
 }
 
 export function getDefaultLocation(me: MeResponse) {
@@ -83,10 +90,6 @@ export function getDefaultAuthenticatedRoute(me: MeResponse) {
     return '/admin' as const
   }
 
-  if (canAccessFrontDesk(me)) {
-    return '/front-desk' as const
-  }
-
   if (canAccessPortal(me)) {
     return '/portal' as const
   }
@@ -103,7 +106,7 @@ export function isAccountAdmin(me: MeResponse) {
   return hasAccountRole(me, accountRoles.accountAdmin)
 }
 
-export type Surface = 'admin' | 'front-desk' | 'portal'
+export type Surface = 'admin' | 'portal'
 
 /**
  * The single map from surface to its access predicate. Route guards are the
@@ -112,6 +115,5 @@ export type Surface = 'admin' | 'front-desk' | 'portal'
  */
 export const surfaceAccess: Record<Surface, (me: MeResponse) => boolean> = {
   admin: canAccessAdmin,
-  'front-desk': canAccessFrontDesk,
   portal: canAccessPortal,
 }

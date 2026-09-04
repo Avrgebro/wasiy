@@ -10,9 +10,9 @@ export function RegistryHeader({
   onAction,
   title,
 }: {
-  actionLabel: string
+  actionLabel?: string
   extra?: ReactNode
-  onAction: () => void
+  onAction?: () => void
   title: string
 }) {
   return (
@@ -20,9 +20,11 @@ export function RegistryHeader({
       <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">{title}</h1>
       <Group gap="sm">
         {extra}
-        <Button leftSection={<AddCircle size={16} />} onClick={onAction}>
-          {actionLabel}
-        </Button>
+        {actionLabel && onAction ? (
+          <Button leftSection={<AddCircle size={16} />} onClick={onAction}>
+            {actionLabel}
+          </Button>
+        ) : null}
       </Group>
     </Group>
   )

@@ -112,7 +112,6 @@
   "nav": {
     "activity": "Activity",
     "announcements": "Announcements",
-    "checkIn": "Check-in",
     "dashboard": "Dashboard",
     "home": "Home",
     "locations": "Locations",
@@ -134,7 +133,6 @@
   "navGroups": {
     "account": "Account",
     "communication": "Communication",
-    "frontDesk": "Front desk",
     "operations": "Operations",
     "overview": "Overview",
     "portal": "Portal",

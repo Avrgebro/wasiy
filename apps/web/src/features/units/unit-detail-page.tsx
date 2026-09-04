@@ -10,6 +10,7 @@ import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { notifyError, notifySuccess } from '../../lib/notify'
+import { canManageRegistry } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import type { MovementSummary } from '../finances/api'
 import { monthLabel, shortDate } from '../finances/month'
@@ -45,13 +46,24 @@ export function UnitDetailPage() {
   return (
     <UnitDetailContent
       accountId={me.active_account.id}
+      canManage={canManageRegistry(me)}
       locationName={location?.name ?? ''}
       timezone={location?.timezone ?? 'America/Lima'}
     />
   )
 }
 
-function UnitDetailContent({ accountId, locationName, timezone }: { accountId: string; locationName: string; timezone: string }) {
+function UnitDetailContent({
+  accountId,
+  canManage,
+  locationName,
+  timezone,
+}: {
+  accountId: string
+  canManage: boolean
+  locationName: string
+  timezone: string
+}) {
   const { t } = useTranslation('common')
   const { unitId } = routeApi.useParams()
   const queryClient = useQueryClient()
@@ -181,7 +193,7 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
             </Text>
           </div>
         </div>
-        {wide ? <div className="shrink-0">{primaryAction}</div> : null}
+        {wide && canManage ? <div className="shrink-0">{primaryAction}</div> : null}
         </div>
         <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap">
           <Fact label={t('units.detail.monthlyFee')} value={unit.maintenance_fee !== null ? formatMoney(unit.maintenance_fee) : '—'} />
@@ -190,13 +202,13 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
           <Fact label={t('units.detail.storage')} value={unit.storage_rooms.join(', ') || '—'} />
         </div>
       </header>
-      {!wide ? primaryAction : null}
+      {!wide && canManage ? primaryAction : null}
 
       <div className="grid grid-cols-1 items-start gap-4 @4xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-4">
           <Section
             action={
-              unit.status === 'active' ? (
+              unit.status === 'active' && canManage ? (
                 <SectionAction label={t('units.detail.addResident')} onClick={() => setMember({ open: true, current: null })} />
               ) : null
             }
@@ -206,7 +218,11 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
               <Empty title={t('units.detail.noResidentsTitle')} body={t('units.detail.noResidentsBody')} />
             ) : (
               unit.members.map((current) => (
-                <MemberRow key={current.membership_id} member={current} onOpen={() => setMember({ open: true, current })} />
+                <MemberRow
+                  key={current.membership_id}
+                  member={current}
+                  onOpen={canManage ? () => setMember({ open: true, current }) : undefined}
+                />
               ))
             )}
           </Section>
@@ -254,7 +270,7 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
         <div className="flex min-w-0 flex-col gap-4">
           <Section
             action={
-              unit.status === 'active' ? (
+              unit.status === 'active' && canManage ? (
                 <SectionAction label={t('units.detail.addVehicle')} onClick={() => setVehicle({ open: true, current: null })} />
               ) : null
             }
@@ -264,7 +280,11 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
               <Empty body={t('units.detail.noVehicles')} />
             ) : (
               unit.vehicles.map((current) => (
-                <VehicleRow key={current.id} vehicle={current} onOpen={() => setVehicle({ open: true, current })} />
+                <VehicleRow
+                  key={current.id}
+                  vehicle={current}
+                  onOpen={canManage ? () => setVehicle({ open: true, current }) : undefined}
+                />
               ))
             )}
           </Section>
@@ -286,7 +306,7 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
             )}
           </Section>
 
-          <NotesSection notes={notes} unitId={unit.id} />
+          <NotesSection canManage={canManage} notes={notes} unitId={unit.id} />
         </div>
       </div>
 
@@ -376,16 +396,16 @@ function monogram(name: string): string {
   return name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('')
 }
 
-function MemberRow({ member, onOpen }: { member: UnitMember; onOpen: () => void }) {
+function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void }) {
   const { t } = useTranslation('common')
 
   return (
     <div
-      className="flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors hover:bg-[var(--mantine-color-default-hover)]"
-      role="button"
-      tabIndex={0}
+      className={`flex items-center gap-3 px-5 py-3 ${onOpen ? 'cursor-pointer transition-colors hover:bg-[var(--mantine-color-default-hover)]' : ''}`}
+      role={onOpen ? 'button' : undefined}
+      tabIndex={onOpen ? 0 : undefined}
       onClick={onOpen}
-      onKeyDown={(event) => (event.key === 'Enter' ? onOpen() : undefined)}
+      onKeyDown={(event) => (onOpen && event.key === 'Enter' ? onOpen() : undefined)}
     >
       <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--wa-secondary)] text-xs font-semibold text-[#F7F5F0]">
         {monogram(member.name)}
@@ -411,7 +431,7 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen: () => void 
       <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="light">
         {t(`units.portal.${member.portal_state}`)}
       </Badge>
-      <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>
+      {onOpen ? <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span> : null}
     </div>
   )
 }
@@ -468,17 +488,17 @@ function MovementRow({ movement }: { movement: MovementSummary }) {
   )
 }
 
-function VehicleRow({ onOpen, vehicle }: { onOpen: () => void; vehicle: VehicleSummary }) {
+function VehicleRow({ onOpen, vehicle }: { onOpen?: () => void; vehicle: VehicleSummary }) {
   const { t } = useTranslation('common')
   const inactive = vehicle.status === 'inactive'
 
   return (
     <div
-      className={`flex cursor-pointer items-center gap-3.5 px-5 py-3 transition-colors hover:bg-[var(--mantine-color-default-hover)] ${inactive ? 'opacity-60' : ''}`}
-      role="button"
-      tabIndex={0}
+      className={`flex items-center gap-3.5 px-5 py-3 ${onOpen ? 'cursor-pointer transition-colors hover:bg-[var(--mantine-color-default-hover)]' : ''} ${inactive ? 'opacity-60' : ''}`}
+      role={onOpen ? 'button' : undefined}
+      tabIndex={onOpen ? 0 : undefined}
       onClick={onOpen}
-      onKeyDown={(event) => (event.key === 'Enter' ? onOpen() : undefined)}
+      onKeyDown={(event) => (onOpen && event.key === 'Enter' ? onOpen() : undefined)}
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -493,12 +513,12 @@ function VehicleRow({ onOpen, vehicle }: { onOpen: () => void; vehicle: VehicleS
           {[[vehicle.make, vehicle.model].filter(Boolean).join(' '), vehicle.color].filter(Boolean).join(' · ') || t(`registry.vehicleTypes.${vehicle.vehicle_type}`)}
         </Text>
       </div>
-      <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span>
+      {onOpen ? <span className="text-[15px] text-[var(--mantine-color-dimmed)]">›</span> : null}
     </div>
   )
 }
 
-function NotesSection({ notes, unitId }: { notes: UnitNote[]; unitId: string }) {
+function NotesSection({ canManage, notes, unitId }: { canManage: boolean; notes: UnitNote[]; unitId: string }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
   const [writing, setWriting] = useState(false)
@@ -518,7 +538,7 @@ function NotesSection({ notes, unitId }: { notes: UnitNote[]; unitId: string }) 
   return (
     <Section
       action={
-        !writing ? (
+        canManage && !writing ? (
           <button
             className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-medium text-[var(--wa-interactive)] pointer-coarse:min-h-11"
             type="button"

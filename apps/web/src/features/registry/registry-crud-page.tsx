@@ -20,7 +20,9 @@ import type { PaginatedApiResponse } from './types'
 export type { RegistrySearchValues }
 
 type RegistryCrudPageProps<TRow extends { id: string }, TForm extends FieldValues> = {
-  columns: (openEdit: (row: TRow) => void) => ColumnDef<TRow>[]
+  columns: (openEdit: (row: TRow) => void, readOnly: boolean) => ColumnDef<TRow>[]
+  /** Front desk: no create button, no edit; the API forbids both anyway. */
+  readOnly?: boolean
   title: string
   newLabel: string
   editLabel: string
@@ -61,6 +63,7 @@ export function RegistryCrudPage<TRow extends { id: string }, TForm extends Fiel
   resolver,
   defaults,
   manualSorting = false,
+  readOnly = false,
   renderFormFields,
 }: RegistryCrudPageProps<TRow, TForm>) {
   const { t } = useTranslation('common')
@@ -98,7 +101,7 @@ export function RegistryCrudPage<TRow extends { id: string }, TForm extends Fiel
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    columns: columns(openEdit),
+    columns: columns(openEdit, readOnly),
     data: listQuery.data?.data ?? [],
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
@@ -107,7 +110,7 @@ export function RegistryCrudPage<TRow extends { id: string }, TForm extends Fiel
 
   return (
     <div className="flex flex-col gap-5">
-        <RegistryHeader actionLabel={newLabel} extra={headerExtra} onAction={openCreate} title={title} />
+        <RegistryHeader actionLabel={readOnly ? undefined : newLabel} extra={readOnly ? undefined : headerExtra} onAction={readOnly ? undefined : openCreate} title={title} />
         <RegistryFilters
           extraFilters={extraFilters}
           onSearch={(value) => onSearchChange({ search: value })}

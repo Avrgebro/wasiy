@@ -1,7 +1,7 @@
 import { Widget } from '@solar-icons/react'
 import { describe, expect, it } from 'vitest'
 import {
-  canAccessFrontDesk,
+  isFrontDesk,
   canAccessPortal,
   canManageRegistry,
   getDefaultAuthenticatedRoute,
@@ -111,8 +111,9 @@ describe('access helpers', () => {
       },
     })
 
-    expect(canAccessFrontDesk(me)).toBe(true)
-    expect(getDefaultAuthenticatedRoute(me)).toBe('/front-desk')
+    expect(isFrontDesk(me)).toBe(true)
+    // Front desk shares the admin surface (read-only subset).
+    expect(getDefaultAuthenticatedRoute(me)).toBe('/admin')
   })
 
   it('keeps portal guarded until resident memberships exist', () => {
@@ -224,7 +225,7 @@ describe('access helpers', () => {
     // Front desk reaches no staff surface yet, and must never be treated as
     // able to write to the registry once it does.
     expect(canManageRegistry(frontDeskMe)).toBe(false)
-    expect(canAccessFrontDesk(frontDeskMe)).toBe(true)
+    expect(isFrontDesk(frontDeskMe)).toBe(true)
   })
 
 })
@@ -315,7 +316,7 @@ describe('navigation filtering', () => {
     expect(serialized).not.toContain('nav.hidden')
   })
 
-  it('does not expose admin navigation to front desk users', () => {
+  it('gives front desk the read-only subset of the admin navigation', () => {
     const me = makeMe({
       roles: {
         account: [],
@@ -329,10 +330,12 @@ describe('navigation filtering', () => {
       },
     })
 
-    expect(surfaceAccess.admin(me)).toBe(false)
-    expect(surfaceAccess['front-desk'](me)).toBe(true)
-    expect(JSON.stringify(getSurfaceNavigation(me, 'front-desk'))).toContain(
-      'nav.checkIn',
-    )
+    expect(surfaceAccess.admin(me)).toBe(true)
+    const serialized = JSON.stringify(getSurfaceNavigation(me, 'admin'))
+    expect(serialized).toContain('/admin/reservations')
+    expect(serialized).toContain('/admin/registry/units')
+    expect(serialized).not.toContain('/admin/finances')
+    expect(serialized).not.toContain('/admin/announcements')
+    expect(serialized).not.toContain('/admin/staff')
   })
 })

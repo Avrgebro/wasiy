@@ -4,7 +4,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Controller } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
-import { getDefaultLocation } from '../auth/access'
+import { canManageRegistry, getDefaultLocation } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { RegistryCrudPage } from '../registry/registry-crud-page'
@@ -51,13 +51,15 @@ export function ResidentsRegistryPage() {
     )
   }
 
-  return <ResidentsRegistryContent account={account} location={location} />
+  return <ResidentsRegistryContent account={account} location={location} readOnly={!canManageRegistry(meQuery.data!)} />
 }
 
 function ResidentsRegistryContent({
   account,
   location,
+  readOnly,
 }: {
+  readOnly: boolean
   account: { id: string }
   location: { id: string } | null
 }) {
@@ -76,7 +78,7 @@ function ResidentsRegistryContent({
     })
   }
 
-  const columns = (openEdit: (resident: ResidentSummary) => void): ColumnDef<ResidentSummary>[] => [
+  const columns = (openEdit: (resident: ResidentSummary) => void, readOnly: boolean): ColumnDef<ResidentSummary>[] => [
     { accessorKey: 'name', header: t('registry.residents.name') },
     { accessorKey: 'phone', header: t('registry.residents.phone') },
     {
@@ -94,11 +96,12 @@ function ResidentsRegistryContent({
     {
       id: 'actions',
       header: '',
-      cell: ({ row }) => (
-        <Button size="xs" variant="subtle" onClick={() => openEdit(row.original)}>
-          {t('actions.edit')}
-        </Button>
-      ),
+      cell: ({ row }) =>
+        readOnly ? null : (
+          <Button size="xs" variant="subtle" onClick={() => openEdit(row.original)}>
+            {t('actions.edit')}
+          </Button>
+        ),
     },
   ]
 
@@ -109,6 +112,7 @@ function ResidentsRegistryContent({
       newLabel={t('registry.residents.new')}
       editLabel={t('registry.residents.edit')}
       headerExtra={<ImportRegistryButton />}
+      readOnly={readOnly}
       search={search}
       onSearchChange={updateSearch}
       queryKey={['registry', 'residents', account.id, location?.id, search]}

@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
+import { canManageRegistry } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
@@ -40,10 +41,10 @@ export function UnitsPage() {
     )
   }
 
-  return <UnitsContent locationId={location.id} locationName={location.name} />
+  return <UnitsContent canManage={canManageRegistry(me)} locationId={location.id} locationName={location.name} />
 }
 
-function UnitsContent({ locationId, locationName }: { locationId: string; locationName: string }) {
+function UnitsContent({ canManage, locationId, locationName }: { canManage: boolean; locationId: string; locationName: string }) {
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
@@ -165,12 +166,14 @@ function UnitsContent({ locationId, locationName }: { locationId: string; locati
               : locationName}
           </Text>
         </div>
-        <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
-          <ImportRegistryButton />
-          <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setCreating(true)}>
-            {t('units.form.createTitle')}
-          </Button>
-        </div>
+        {canManage ? (
+          <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
+            <ImportRegistryButton />
+            <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setCreating(true)}>
+              {t('units.form.createTitle')}
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">

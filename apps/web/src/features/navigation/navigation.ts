@@ -161,14 +161,6 @@ const adminSurfaceNavigation: NavEntrySpec[] = [
   administrationNavigationGroup,
 ]
 
-const frontDeskNavigation: NavEntrySpec[] = [
-  {
-    type: 'group',
-    titleKey: 'navGroups.frontDesk',
-    items: [{ icon: UserCheckRounded, labelKey: 'nav.checkIn', to: '/front-desk' }],
-  },
-]
-
 const portalNavigation: NavEntrySpec[] = [
   {
     type: 'group',
@@ -179,7 +171,6 @@ const portalNavigation: NavEntrySpec[] = [
 
 const surfaceNavigation: Record<Surface, NavEntrySpec[]> = {
   admin: adminSurfaceNavigation,
-  'front-desk': frontDeskNavigation,
   portal: portalNavigation,
 }
 

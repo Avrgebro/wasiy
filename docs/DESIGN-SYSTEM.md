@@ -76,10 +76,7 @@ Use different shells for staff operations and resident self-service while keepin
 
 ### Front Desk / Security
 
-- Use a simplified operations shell.
-- Prioritize quick search, expected visitors, recent check-ins, and check-in actions.
-- Navigation may use a narrower sidebar or rail if the workflow stays small.
-- Avoid burying visitor check-in behind deep navigation.
+Front desk uses the same admin shell with a reduced navigation and no manage actions (ADR 0035). There is no separate operations shell. Recepción (Visitantes, Paquetería) is a group inside the admin sidebar; the front desk landing is the admin Panel until a slimmer variant is needed.
 
 ### Resident Portal
 

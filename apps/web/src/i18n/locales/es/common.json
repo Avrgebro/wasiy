@@ -112,7 +112,6 @@
   "nav": {
     "activity": "Actividad",
     "announcements": "Anuncios",
-    "checkIn": "Registro",
     "dashboard": "Panel",
     "home": "Inicio",
     "locations": "Ubicaciones",
@@ -134,7 +133,6 @@
   "navGroups": {
     "account": "Cuenta",
     "communication": "Comunicación",
-    "frontDesk": "Portería",
     "operations": "Operación",
     "overview": "Resumen",
     "portal": "Portal",
