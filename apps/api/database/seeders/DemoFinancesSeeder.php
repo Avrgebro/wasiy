@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Finances\MovementMetadata;
+use App\Enums\ActivityEventType;
 use App\Enums\MovementCategory;
 use App\Enums\MovementDirection;
 use App\Enums\MovementStatus;
+use App\Models\ActivityLog;
 use App\Models\FinancialMovement;
 use App\Models\Location;
 use App\Models\Unit;
@@ -66,7 +69,7 @@ class DemoFinancesSeeder extends Seeder
         foreach ($rows as [$direction, $category, $status, $amount, $concept, $detail, $counterparty, $unitNumber, $occurredOn, $dueOn]) {
             $settled = $status !== MovementStatus::Pending;
 
-            FinancialMovement::query()->updateOrCreate(
+            $movement = FinancialMovement::query()->updateOrCreate(
                 ['location_id' => $central->id, 'concept' => $concept, 'occurred_on' => $occurredOn, 'detail' => $detail],
                 [
                     'account_id' => $central->account_id,
@@ -82,6 +85,55 @@ class DemoFinancesSeeder extends Seeder
                     'settled_at' => $settled ? now() : null,
                 ],
             );
+
+            $this->history($movement, $admin);
+        }
+    }
+
+    /**
+     * The drawer's timeline reads the activity log, which direct inserts
+     * skip. Write the steps a real row would have gone through: recorded,
+     * then (for deposits past pending) received, then the final status.
+     */
+    private function history(FinancialMovement $movement, User $actor): void
+    {
+        if (ActivityLog::query()->where('subject_type', 'financial_movement')->where('subject_id', $movement->id)->exists()) {
+            return;
+        }
+
+        $at = $movement->occurred_on->setTimezone($movement->location->timezone)->setTime(9, 0);
+        $fromReservation = $movement->category->isDeposit() || $movement->category === MovementCategory::ReservationFee;
+
+        $steps = [[ActivityEventType::MovementRecorded, MovementStatus::Pending, null,
+            $fromReservation ? "Se generó el movimiento {$movement->concept} al aprobar la reserva." : "Se registró un movimiento: {$movement->concept} (S/ {$movement->amount})."]];
+
+        $path = match ($movement->status) {
+            MovementStatus::Pending => [],
+            MovementStatus::ToRefund, MovementStatus::Refunded, MovementStatus::Retained => [MovementStatus::Held, $movement->status],
+            default => [$movement->status],
+        };
+        $previous = MovementStatus::Pending;
+        foreach (array_unique($path, SORT_REGULAR) as $status) {
+            $steps[] = [ActivityEventType::MovementStatusChanged, $status, $previous,
+                "El movimiento {$movement->concept} pasó de {$previous->value} a {$status->value}."];
+            $previous = $status;
+        }
+
+        foreach ($steps as $index => [$eventType, $status, $previousStatus, $summary]) {
+            $snapshot = clone $movement;
+            $snapshot->status = $status;
+
+            ActivityLog::query()->create([
+                'account_id' => $movement->account_id,
+                'location_id' => $movement->location_id,
+                'actor_user_id' => $actor->id,
+                'subject_type' => 'financial_movement',
+                'subject_id' => $movement->id,
+                'event_type' => $eventType,
+                'summary' => $summary,
+                'metadata' => MovementMetadata::for($snapshot, $previousStatus?->value),
+                'created_at' => $at->addDays($index)->addMinutes(14 * $index)->utc(),
+            ]);
         }
     }
 }
