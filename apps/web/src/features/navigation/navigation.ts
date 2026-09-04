@@ -4,10 +4,10 @@ import {
   Calendar,
   ClipboardList,
   House,
-  Magnifier,
   Settings,
   Speaker,
   UserCheckRounded,
+  UserPlusRounded,
   UsersGroupRounded,
   Wallet,
   Widget,
@@ -141,7 +141,7 @@ const receptionNavigationGroup: NavGroupSpec = {
   type: 'group',
   titleKey: 'navGroups.reception',
   items: [
-    { icon: Magnifier, labelKey: 'nav.visitors', to: '/admin/visitors' },
+    { icon: UserPlusRounded, labelKey: 'nav.visitors', to: '/admin/visitors' },
     { icon: Box, labelKey: 'nav.packages', to: '/admin/packages' },
   ],
 }
