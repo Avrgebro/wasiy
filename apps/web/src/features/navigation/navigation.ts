@@ -1,8 +1,9 @@
 import {
   Box,
-  Buildings2,
+  Buildings,
   Calendar,
   ClipboardList,
+  House,
   Magnifier,
   Settings,
   Speaker,
@@ -109,7 +110,7 @@ const locationNavigationGroup: NavGroupSpec = {
     { icon: Widget, labelKey: 'nav.dashboard', to: '/admin' },
     { icon: UserCheckRounded, labelKey: 'nav.residents', to: '/admin/registry/residents' },
     // The desk finds people through Residentes; Unidades carries the ledger.
-    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units', visibleTo: hasCapability('registry.manage') },
+    { icon: House, labelKey: 'nav.units', to: '/admin/registry/units', visibleTo: hasCapability('registry.manage') },
     // The desk's logs: visitors and packages, arrival → resolution.
     {
       type: 'collapsible',
@@ -149,7 +150,7 @@ const administrationNavigationGroup: NavGroupSpec = {
   titleKey: 'navGroups.administration',
   visibleTo: isAccountAdmin,
   items: [
-    { icon: Buildings2, labelKey: 'nav.locations', to: '/admin/locations' },
+    { icon: Buildings, labelKey: 'nav.locations', to: '/admin/locations' },
     { icon: UsersGroupRounded, labelKey: 'nav.staff', to: '/admin/staff' },
     { icon: ClipboardList, labelKey: 'nav.activity', to: '/admin/activity' },
     { icon: Settings, labelKey: 'nav.settings', to: '/admin/settings' },
