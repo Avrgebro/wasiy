@@ -13,6 +13,7 @@ import { formatMoney } from '../../lib/money'
 import { useMe } from '../auth/hooks'
 import { getFinanceSummary, getMovements, type CategoryTotal, type FinanceSummary, type MovementSummary } from './api'
 import { currentMonth, monthLabel, shiftMonth, shortDate } from './month'
+import { FinancesFilters } from './finances-filters'
 import { MovementDrawer } from './movement-drawer'
 import { MovementFormDrawer } from './movement-form-drawer'
 import { amountClassName, statusColor, statusLabel } from './movement-presentation'
@@ -80,9 +81,17 @@ function FinancesContent({
     placeholderData: keepPreviousData,
   })
   const listQuery = useQuery({
-    queryKey: ['finances', 'movements', accountId, locationId, month, chip ?? 'all', search.page],
+    queryKey: ['finances', 'movements', accountId, locationId, month, chip ?? 'all', search.search, search.category, search.sort, search.page],
     queryFn: () =>
-      getMovements(accountId, locationId, { month, page: search.page, ...chipParams(chip) }),
+      getMovements(accountId, locationId, {
+        month,
+        page: search.page,
+        search: search.search,
+        sort: search.sort,
+        ...chipParams(chip),
+        // An explicit category filter wins over the Depósitos chip.
+        ...(search.category ? { category: search.category } : {}),
+      }),
     placeholderData: keepPreviousData,
   })
 
@@ -97,7 +106,7 @@ function FinancesContent({
     {
       accessorKey: 'occurred_on',
       header: t('finances.columns.date'),
-      meta: { className: 'w-24 whitespace-nowrap' },
+      meta: { className: 'w-24 whitespace-nowrap', sortKey: 'occurred_on' },
       cell: ({ row }) => (
         <span className="font-mono text-xs font-medium text-[var(--mantine-color-dimmed)]">
           {shortDate(row.original.occurred_on)}
@@ -146,7 +155,7 @@ function FinancesContent({
     {
       accessorKey: 'amount',
       header: t('finances.columns.amount'),
-      meta: { className: 'whitespace-nowrap' },
+      meta: { className: 'whitespace-nowrap', sortKey: 'amount' },
       cell: ({ row }) => (
         <span className={`font-mono text-sm font-semibold ${amountClassName(row.original)}`}>
           {formatMoney(row.original.amount, { negative: row.original.direction === 'expense' })}
@@ -156,6 +165,7 @@ function FinancesContent({
     {
       accessorKey: 'status',
       header: t('finances.columns.status'),
+      meta: { sortKey: 'status' },
       cell: ({ row }) => (
         <Badge color={statusColor(row.original.status)} radius="xl" size="sm" variant="light">
           {statusLabel(row.original, t)}
@@ -270,7 +280,7 @@ function FinancesContent({
         emptyState={
           <div className="grid min-h-40 place-items-center px-6 text-center">
             <Text c="dimmed" size="sm">
-              {t(chip ? 'finances.emptyFiltered' : 'finances.emptyMonth', { month: monthLabel(month) })}
+              {t(chip || search.search || search.category ? 'finances.emptyFiltered' : 'finances.emptyMonth', { month: monthLabel(month) })}
             </Text>
           </div>
         }
@@ -278,8 +288,11 @@ function FinancesContent({
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
         selectedId={selectedId}
+        sort={search.sort}
+        toolbar={<FinancesFilters search={search} onChange={updateSearch} />}
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={(movement) => setSelectedId(movement.id)}
+        onSortChange={(sort) => updateSearch({ sort })}
       />
 
       <MovementDrawer

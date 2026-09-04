@@ -410,7 +410,10 @@
     "nextPage": "Página siguiente",
     "filters": "Filtros",
     "clearFilters": "Limpiar filtros",
-    "removeFilter": "Quitar filtro {{filter}}"
+    "removeFilter": "Quitar filtro {{filter}}",
+    "sortBy": "Ordenar por esta columna",
+    "sortedAsc": "Ordenado ascendente, clic para descendente",
+    "sortedDesc": "Ordenado descendente, clic para quitar el orden"
   },
   "locations": {
     "title": "Ubicaciones",
@@ -919,6 +922,8 @@
       "refunded": "Marcado devuelto",
       "retained": "Depósito retenido",
       "voided": "Anulado"
-    }
+    },
+    "searchPlaceholder": "Buscar concepto, detalle o proveedor…",
+    "allCategories": "Todas las categorías"
   }
 }

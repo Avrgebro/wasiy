@@ -1,5 +1,5 @@
 import { ActionIcon, Group, Loader, Table, Text } from '@mantine/core'
-import { AltArrowLeft, AltArrowRight } from '@solar-icons/react'
+import { AltArrowDown, AltArrowLeft, AltArrowRight, AltArrowUp } from '@solar-icons/react'
 import {
   flexRender,
   getCoreRowModel,
@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
+import { nextSort, parseSort } from './sort'
 
 declare module '@tanstack/react-table' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,6 +18,8 @@ declare module '@tanstack/react-table' {
     className?: string
     /** Drop the column below this breakpoint; mobile cards cover phones. */
     hideBelow?: 'sm' | 'md' | 'lg'
+    /** Server sort field this header toggles; omit for unsortable columns. */
+    sortKey?: string
   }
 }
 
@@ -54,8 +57,10 @@ export function DataTable<TRow extends { id: string }>({
   meta,
   onPageChange,
   onRowClick,
+  onSortChange,
   rowClassName,
   selectedId,
+  sort,
   toolbar,
 }: {
   columns: ColumnDef<TRow>[]
@@ -71,7 +76,11 @@ export function DataTable<TRow extends { id: string }>({
   onPageChange?: (page: number) => void
   /** Makes rows clickable (pointer, hover) and reports the clicked row. */
   onRowClick?: (row: TRow) => void
+  /** Receives the next sort string when a sortable header is clicked. */
+  onSortChange?: (sort: string) => void
   rowClassName?: (row: TRow) => string | undefined
+  /** Current server sort string; drives the header indicators. */
+  sort?: string
   /** Row rendered as selected (accent left bar) while a detail surface is open. */
   selectedId?: string | null
   /** Filter controls; the card header strip and border come from here. */
@@ -89,6 +98,7 @@ export function DataTable<TRow extends { id: string }>({
   })
 
   const isEmpty = !loading && data.length === 0
+  const activeSort = parseSort(sort)
 
   return (
     <section className="overflow-hidden rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
@@ -114,7 +124,18 @@ export function DataTable<TRow extends { id: string }>({
                         key={header.id}
                         className={`text-xs uppercase tracking-wider ${columnClasses(header.column.columnDef.meta)}`}
                       >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.column.columnDef.meta?.sortKey && onSortChange ? (
+                          <SortHeader
+                            active={activeSort?.key === header.column.columnDef.meta.sortKey ? activeSort : null}
+                            onClick={() =>
+                              onSortChange(nextSort(sort, header.column.columnDef.meta!.sortKey!))
+                            }
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </SortHeader>
+                        ) : (
+                          flexRender(header.column.columnDef.header, header.getContext())
+                        )}
                       </Table.Th>
                     ))}
                   </Table.Tr>
@@ -202,5 +223,34 @@ function DataTableFooter({
         </ActionIcon>
       </Group>
     </Group>
+  )
+}
+
+/**
+ * A header that sorts: same typography as its siblings, an arrow only while
+ * active so unsorted headers stay quiet.
+ */
+function SortHeader({
+  active,
+  children,
+  onClick,
+}: {
+  active: { desc: boolean } | null
+  children: ReactNode
+  onClick: () => void
+}) {
+  const { t } = useTranslation('common')
+
+  return (
+    <button
+      aria-label={t(active ? (active.desc ? 'table.sortedDesc' : 'table.sortedAsc') : 'table.sortBy')}
+      aria-sort={active ? (active.desc ? 'descending' : 'ascending') : undefined}
+      className="inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 font-inherit text-inherit uppercase tracking-wider hover:text-[var(--mantine-color-text)]"
+      type="button"
+      onClick={onClick}
+    >
+      {children}
+      {active ? active.desc ? <AltArrowDown size={12} /> : <AltArrowUp size={12} /> : null}
+    </button>
   )
 }

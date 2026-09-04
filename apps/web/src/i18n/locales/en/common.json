@@ -410,7 +410,10 @@
     "nextPage": "Next page",
     "filters": "Filters",
     "clearFilters": "Clear filters",
-    "removeFilter": "Remove filter {{filter}}"
+    "removeFilter": "Remove filter {{filter}}",
+    "sortBy": "Sort by this column",
+    "sortedAsc": "Sorted ascending, click for descending",
+    "sortedDesc": "Sorted descending, click to clear sorting"
   },
   "locations": {
     "title": "Locations",
@@ -919,6 +922,8 @@
       "refunded": "Marked refunded",
       "retained": "Deposit retained",
       "voided": "Voided"
-    }
+    },
+    "searchPlaceholder": "Search concept, detail or vendor…",
+    "allCategories": "All categories"
   }
 }

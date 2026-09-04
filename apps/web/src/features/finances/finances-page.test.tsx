@@ -12,7 +12,7 @@ import { formatMoney } from '../../lib/money'
 import { shiftMonth } from './month'
 
 const navigateSpy = vi.fn()
-const currentSearch: Record<string, unknown> = { page: 1 }
+const currentSearch: Record<string, unknown> = { page: 1, search: '', category: '', sort: '' }
 
 vi.mock('@tanstack/react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@tanstack/react-router')>()
@@ -223,7 +223,7 @@ afterEach(() => {
   for (const key of Object.keys(currentSearch)) {
     delete currentSearch[key]
   }
-  currentSearch.page = 1
+  Object.assign(currentSearch, { page: 1, search: '', category: '', sort: '' })
 })
 
 describe('FinancesPage', () => {
@@ -431,5 +431,35 @@ describe('FinancesPage', () => {
     await user.click(within(drawer).getByRole('button', { name: 'Registrar' }))
 
     expect(await screen.findByText('Ese estado no aplica a este movimiento.')).toBeInTheDocument()
+  })
+
+  it('puts search, category filter and header sorting on the URL and the request', async () => {
+    currentSearch.month = '2026-08'
+    currentSearch.category = 'water,fine'
+    currentSearch.sort = '-amount'
+    const requests = installAdapter([movement()])
+
+    renderPage()
+    await screen.findByText('Agua · áreas comunes')
+    const user = userEvent.setup()
+
+    // Applied categories echo as chips; the request carries them.
+    expect(screen.getByText('Categoría: Agua')).toBeInTheDocument()
+    expect(screen.getByText('Categoría: Multa')).toBeInTheDocument()
+    expect(requests.some((url) => url.includes('category=water%2Cfine') && url.includes('sort=-amount'))).toBe(true)
+
+    await user.type(screen.getByPlaceholderText('Buscar concepto, detalle o proveedor…'), 'sedapal{Enter}')
+    expect(navigateSpy.mock.calls.at(-1)![0].search({ month: '2026-08', page: 2 })).toMatchObject({ search: 'sedapal', page: 1 })
+
+    // Monto is sorted desc: one more click clears it; Fecha starts ascending.
+    await user.click(screen.getByRole('button', { name: 'Ordenado descendente, clic para quitar el orden' }))
+    expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ sort: '' })
+    // Fecha is the first unsorted sortable header.
+    await user.click(screen.getAllByRole('button', { name: 'Ordenar por esta columna' })[0])
+    expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ sort: 'occurred_on' })
+
+    // Removing a chip drops only that category.
+    await user.click(screen.getByRole('button', { name: 'Quitar filtro Categoría: Agua' }))
+    expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ category: 'fine' })
   })
 })

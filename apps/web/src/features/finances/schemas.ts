@@ -17,6 +17,10 @@ export const financesSearchSchema = z.object({
     .optional()
     .catch(undefined),
   chip: z.enum(FINANCE_CHIPS).optional().catch(undefined),
+  search: z.string().catch(''),
+  /** Comma-separated category set from the Filtros popover. */
+  category: z.string().catch(''),
+  sort: z.string().catch(''),
   page: z.coerce.number().int().positive().catch(1),
 })
 
