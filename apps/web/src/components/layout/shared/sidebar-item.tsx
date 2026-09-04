@@ -5,6 +5,11 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { LayoutNavCollapsible, LayoutNavItem, LayoutNavLeaf } from './types'
 
+/** Duotone icons get the amber second tone (see .wa-duotone-accent in index.css). */
+function iconClassName(item: { iconWeight?: string }) {
+  return item.iconWeight?.includes('Duotone') ? 'hidden sm:block wa-duotone-accent' : 'hidden sm:block'
+}
+
 type SidebarItemProps = {
   active: (item: LayoutNavLeaf) => boolean
   item: LayoutNavItem
@@ -58,7 +63,7 @@ function SidebarLink({
       onClick={onNavigate}
     >
       {nested ? null : (
-        <Icon aria-hidden="true" className="hidden sm:block" size={20} weight={item.iconWeight} />
+        <Icon aria-hidden="true" className={iconClassName(item)} size={20} weight={item.iconWeight} />
       )}
       <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
       {item.badge ? <item.badge /> : null}
@@ -108,7 +113,7 @@ function SidebarCollapsibleItem({
         onClick={() => setOpened((current) => !current)}
         type="button"
       >
-        <Icon aria-hidden="true" className="hidden sm:block" size={20} weight={item.iconWeight} />
+        <Icon aria-hidden="true" className={iconClassName(item)} size={20} weight={item.iconWeight} />
         <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
         <AltArrowDown
           aria-hidden="true"
