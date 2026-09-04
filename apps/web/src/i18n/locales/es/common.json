@@ -1083,7 +1083,7 @@
       "area": "Área",
       "parking": "Estacionamientos",
       "storage": "Depósitos",
-      "labelsHint": "Etiquetas separadas por coma.",
+      "labelsHint": "Escribe una etiqueta y presiona Enter.",
       "feeSection": "Cuota y participación",
       "feeHint": "Monto mensual; se usa al generar las cuotas del mes.",
       "share": "Porcentaje de participación",

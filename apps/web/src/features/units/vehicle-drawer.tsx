@@ -123,7 +123,7 @@ export function VehicleDrawer({
             )}
           />
           {editing ? (
-            <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
               <div className="min-w-0">
                 <Text fw={600} size="sm">
                   {t('units.form.sensitiveZone')}
@@ -133,7 +133,7 @@ export function VehicleDrawer({
                 </Text>
               </div>
               <Button
-                className="w-full sm:w-auto"
+                className="w-full"
                 color={editing.status === 'active' ? 'error' : undefined}
                 variant={editing.status === 'active' ? 'light' : 'default'}
                 onClick={() => (editing.status === 'active' ? setConfirming(true) : toggleStatus.mutate())}

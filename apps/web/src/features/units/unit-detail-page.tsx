@@ -153,7 +153,8 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
         <span className="font-semibold text-[var(--mantine-color-text)]">{title}</span>
       </nav>
 
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <header className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-3.5">
           <div className="grid size-14 shrink-0 place-items-center rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] font-display text-lg font-semibold text-[var(--wa-interactive)]">
             {unit.unit_number}
@@ -178,15 +179,16 @@ function UnitDetailContent({ accountId, locationName, timezone }: { accountId: s
             <Text c="dimmed" mt={4} size="sm">
               {descriptor}
             </Text>
-            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap">
-              <Fact label={t('units.detail.monthlyFee')} value={unit.maintenance_fee !== null ? formatMoney(unit.maintenance_fee) : '—'} />
-              <Fact label={t('units.detail.share')} value={unit.participation_share !== null ? `${unit.participation_share} %` : '—'} />
-              <Fact label={t('units.detail.parking')} value={unit.parking_spots.join(', ') || '—'} />
-              <Fact label={t('units.detail.storage')} value={unit.storage_rooms.join(', ') || '—'} />
-            </div>
           </div>
         </div>
         {wide ? <div className="shrink-0">{primaryAction}</div> : null}
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap">
+          <Fact label={t('units.detail.monthlyFee')} value={unit.maintenance_fee !== null ? formatMoney(unit.maintenance_fee) : '—'} />
+          <Fact label={t('units.detail.share')} value={unit.participation_share !== null ? `${unit.participation_share} %` : '—'} />
+          <Fact label={t('units.detail.parking')} value={unit.parking_spots.join(', ') || '—'} />
+          <Fact label={t('units.detail.storage')} value={unit.storage_rooms.join(', ') || '—'} />
+        </div>
       </header>
       {!wide ? primaryAction : null}
 

@@ -231,7 +231,7 @@ export function LocationFormDrawer({
               )}
             />
             {editing && onDeactivate ? (
-              <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
                 <div className="min-w-0">
                   <Text fw={600} size="sm">
                     {t('locations.form.sensitiveZone')}
@@ -240,7 +240,7 @@ export function LocationFormDrawer({
                     {t('locations.form.sensitiveZoneHint')}
                   </Text>
                 </div>
-                <Button className="w-full sm:w-auto" color="error" variant="light" onClick={onDeactivate}>
+                <Button className="w-full" color="error" variant="light" onClick={onDeactivate}>
                   {t('locations.deactivate')}
                 </Button>
               </div>

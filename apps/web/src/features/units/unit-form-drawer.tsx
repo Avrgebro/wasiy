@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, NumberInput, Select, Text, Textarea } from '@mantine/core'
+import { Alert, Button, NumberInput, Select, TagsInput, Text, Textarea } from '@mantine/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -14,6 +14,12 @@ import { toUnitPayload, unitSchema, type UnitFormValues } from './schemas'
 
 const TYPES = ['apartment', 'house', 'commercial', 'office'] as const
 
+/**
+ * Hints go under the input, not between label and input: side-by-side fields
+ * with hints of different lengths would otherwise misalign their inputs.
+ */
+const HINT_BELOW: Array<'label' | 'input' | 'description' | 'error'> = ['label', 'input', 'description', 'error']
+
 function defaults(unit?: UnitSummary | null): UnitFormValues {
   return {
     unit_number: unit?.unit_number ?? '',
@@ -23,8 +29,8 @@ function defaults(unit?: UnitSummary | null): UnitFormValues {
     area_m2: unit?.area_m2 ?? '',
     participation_share: unit?.participation_share ?? '',
     maintenance_fee: unit?.maintenance_fee ?? '',
-    parking_spots: unit?.parking_spots.join(', ') ?? '',
-    storage_rooms: unit?.storage_rooms.join(', ') ?? '',
+    parking_spots: unit?.parking_spots ?? [],
+    storage_rooms: unit?.storage_rooms ?? [],
     notes: unit?.notes ?? '',
   }
 }
@@ -123,11 +129,41 @@ export function UnitFormDrawer({
               )}
             />
           </div>
-          <FormTextInput control={form.control} label={t('units.form.parking')} name="parking_spots" placeholder="E-12, E-13" />
-          <Text c="dimmed" mt={-16} size="xs">
-            {t('units.form.labelsHint')}
-          </Text>
-          <FormTextInput control={form.control} label={t('units.form.storage')} name="storage_rooms" placeholder="D-04" />
+          {/* One chip per label; Enter or a comma adds the next. */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
+            <Controller
+              control={form.control}
+              name="parking_spots"
+              render={({ field, fieldState }) => (
+                <TagsInput
+                  inputWrapperOrder={HINT_BELOW}
+                  {...field}
+                  description={t('units.form.labelsHint')}
+                  error={fieldErrorMessage(fieldState.error)}
+                  label={t('units.form.parking')}
+                  placeholder="E-12"
+                  splitChars={[',', ' ']}
+                  onChange={(value) => field.onChange(value.map((label) => label.trim().toUpperCase()).filter(Boolean))}
+                />
+              )}
+            />
+            <Controller
+              control={form.control}
+              name="storage_rooms"
+              render={({ field, fieldState }) => (
+                <TagsInput
+                  inputWrapperOrder={HINT_BELOW}
+                  {...field}
+                  description={t('units.form.labelsHint')}
+                  error={fieldErrorMessage(fieldState.error)}
+                  label={t('units.form.storage')}
+                  placeholder="D-04"
+                  splitChars={[',', ' ']}
+                  onChange={(value) => field.onChange(value.map((label) => label.trim().toUpperCase()).filter(Boolean))}
+                />
+              )}
+            />
+          </div>
           <Controller
             control={form.control}
             name="notes"
@@ -143,6 +179,7 @@ export function UnitFormDrawer({
               name="maintenance_fee"
               render={({ field, fieldState }) => (
                 <NumberInput
+                  inputWrapperOrder={HINT_BELOW}
                   {...field}
                   allowDecimal={false}
                   allowNegative={false}
@@ -160,6 +197,7 @@ export function UnitFormDrawer({
               name="participation_share"
               render={({ field, fieldState }) => (
                 <NumberInput
+                  inputWrapperOrder={HINT_BELOW}
                   {...field}
                   allowNegative={false}
                   decimalScale={3}
@@ -174,7 +212,7 @@ export function UnitFormDrawer({
           </div>
 
           {editing && onDeactivate && editing.status === 'active' ? (
-            <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
               <div className="min-w-0">
                 <Text fw={600} size="sm">
                   {t('units.form.sensitiveZone')}
@@ -183,7 +221,7 @@ export function UnitFormDrawer({
                   {t('units.form.sensitiveZoneHint')}
                 </Text>
               </div>
-              <Button className="w-full sm:w-auto" color="error" variant="light" onClick={onDeactivate}>
+              <Button className="w-full" color="error" variant="light" onClick={onDeactivate}>
                 {t('units.form.deactivate')}
               </Button>
             </div>

@@ -314,7 +314,7 @@ export function MemberDrawer({
                 </Text>
               ) : null}
 
-              <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
                 <div className="min-w-0">
                   <Text fw={600} size="sm">
                     {t('units.form.sensitiveZone')}
@@ -323,7 +323,7 @@ export function MemberDrawer({
                     {t('units.member.removeHint', { unit: unit.unit_number })}
                   </Text>
                 </div>
-                <Button className="w-full sm:w-auto" color="error" variant="light" onClick={() => setConfirmingRemove(true)}>
+                <Button className="w-full" color="error" variant="light" onClick={() => setConfirmingRemove(true)}>
                   {t('units.member.remove')}
                 </Button>
               </div>

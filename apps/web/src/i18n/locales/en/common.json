@@ -1083,7 +1083,7 @@
       "area": "Area",
       "parking": "Parking spots",
       "storage": "Storage rooms",
-      "labelsHint": "Comma-separated labels.",
+      "labelsHint": "Type a label and press Enter.",
       "feeSection": "Fee and share",
       "feeHint": "Monthly amount; used when generating the month's dues.",
       "share": "Participation share",
