@@ -1,4 +1,4 @@
-import type { LocationRole, MeResponse } from './types'
+import type { Capability, LocationRole, MeResponse } from './types'
 
 export const accountRoles = {
   accountAdmin: 'account_admin',
@@ -35,17 +35,32 @@ export function getRoleLabelKey(role: string) {
 }
 
 /**
- * Manager and above: every staff role except front desk. Gates the
- * registry-mutating actions and the location entries front desk must not see.
- * Currently identical to canAccessAdmin, and will diverge from it the moment
- * front desk joins this surface.
+ * The one location-scoped permission check. Reads the capabilities the API
+ * computed for the active Location (ADR 0036), so a manager of Torre Norte
+ * browsing Edificio Central as front desk sees the desk's UI, not the
+ * manager's. No active Location means no location capability.
  */
-export function canManageRegistry(me: MeResponse) {
-  return (
-    hasAccountRole(me, accountRoles.accountAdmin) ||
-    hasLocationRole(me, locationRoles.locationManager)
-  )
+export function can(me: MeResponse, capability: Capability) {
+  return me.active_location?.capabilities.includes(capability) ?? false
 }
+
+/** A predicate for nav `visibleTo` and route guards: `hasCapability('finances.manage')`. */
+export function hasCapability(capability: Capability) {
+  return (me: MeResponse) => can(me, capability)
+}
+
+/** The matrix rows, mirrored from the API's Capability::forRoles() for fixtures and stories. */
+export const FRONT_DESK_CAPABILITIES: Capability[] = ['registry.view', 'reception.manage', 'reservations.view']
+export const MANAGER_CAPABILITIES: Capability[] = [
+  ...FRONT_DESK_CAPABILITIES,
+  'registry.manage',
+  'reservations.create',
+  'reservations.decide',
+  'finances.manage',
+  'announcements.manage',
+  'location.settings',
+]
+export const ADMIN_CAPABILITIES: Capability[] = [...MANAGER_CAPABILITIES, 'account.manage']
 
 /**
  * Every staff role shares the admin surface; front desk sees the read-only
@@ -59,10 +74,6 @@ export function canAccessAdmin(me: MeResponse) {
     hasLocationRole(me, locationRoles.locationManager) ||
     hasLocationRole(me, locationRoles.frontDesk)
   )
-}
-
-export function isFrontDesk(me: MeResponse) {
-  return hasLocationRole(me, locationRoles.frontDesk)
 }
 
 export function canAccessPortal(me: MeResponse) {

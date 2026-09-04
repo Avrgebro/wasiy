@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { canManageRegistry } from '../auth/access'
+import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
@@ -41,7 +41,7 @@ export function UnitsPage() {
     )
   }
 
-  return <UnitsContent canManage={canManageRegistry(me)} locationId={location.id} locationName={location.name} />
+  return <UnitsContent canManage={can(me, 'registry.manage')} locationId={location.id} locationName={location.name} />
 }
 
 function UnitsContent({ canManage, locationId, locationName }: { canManage: boolean; locationId: string; locationName: string }) {

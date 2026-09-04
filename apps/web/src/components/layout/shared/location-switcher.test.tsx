@@ -4,12 +4,17 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import '../../../i18n'
 import { mantineTheme } from '../../../app/theme'
+import type { Capability } from '../../../features/auth/types'
 import {
   LocationSwitcher,
   MobileLocationSheet,
 } from './location-switcher'
 
-const mocks = vi.hoisted(() => ({
+const mocks = vi.hoisted(() => {
+  // Inlined: the hoisted fixture runs before imported consts initialize.
+  const MANAGER_CAPABILITIES: Capability[] = ['registry.view', 'reception.manage', 'reservations.view', 'registry.manage', 'reservations.create', 'reservations.decide', 'finances.manage', 'announcements.manage', 'location.settings']
+
+  return {
   mutate: vi.fn(),
   me: {
     user: {
@@ -43,6 +48,7 @@ const mocks = vi.hoisted(() => ({
       timezone: 'America/Lima',
       address: 'Lima',
       roles: ['location_manager'],
+      capabilities: MANAGER_CAPABILITIES,
       access_source: 'location_role',
     },
     roles: {
@@ -64,6 +70,7 @@ const mocks = vi.hoisted(() => ({
         timezone: 'America/Lima',
         address: 'Lima',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
       {
@@ -74,6 +81,7 @@ const mocks = vi.hoisted(() => ({
         timezone: 'America/Lima',
         address: 'Lima',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
       {
@@ -84,6 +92,7 @@ const mocks = vi.hoisted(() => ({
         timezone: 'America/Lima',
         address: 'Miraflores',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
       {
@@ -94,6 +103,7 @@ const mocks = vi.hoisted(() => ({
         timezone: 'America/Lima',
         address: 'Surco',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
       {
@@ -104,6 +114,7 @@ const mocks = vi.hoisted(() => ({
         timezone: 'America/Lima',
         address: 'San Isidro',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
       {
@@ -114,6 +125,7 @@ const mocks = vi.hoisted(() => ({
         timezone: 'America/Lima',
         address: 'San Borja',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
       {
@@ -124,12 +136,14 @@ const mocks = vi.hoisted(() => ({
         timezone: 'America/Lima',
         address: 'Barranco',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
     ],
     resident_memberships: [],
   },
-}))
+  }
+})
 
 vi.mock('../../../features/auth/hooks', () => ({
   useLocationContext: () => ({

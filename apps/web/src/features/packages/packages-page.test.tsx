@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { FRONT_DESK_CAPABILITIES } from '../auth/access'
 import '../../i18n'
 import type { PackageSummary } from './api'
 
@@ -35,7 +36,7 @@ function meResponse() {
     user: { id: 'usr_1', first_name: 'Ana', last_name: 'Quispe', name: 'Ana Quispe', email: 'desk@wasiy.test' },
     accounts: [{ id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' }],
     active_account: { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' },
-    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima' },
+    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', capabilities: FRONT_DESK_CAPABILITIES },
     roles: { account: [], location: [{ account_id: 'acc_1', location_id: 'loc_1', role: 'front_desk' }] },
     accessible_locations: [],
     resident_memberships: [],

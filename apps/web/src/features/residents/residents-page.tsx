@@ -11,7 +11,7 @@ import { FilterButton } from '../../components/table/filter-button'
 import { FilterChips } from '../../components/table/filter-chips'
 import { SearchInput } from '../../components/table/search-input'
 import { getErrorMessage } from '../../lib/errors'
-import { canManageRegistry } from '../auth/access'
+import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { portalColor } from '../units/unit-presentation'
 import { getResidents, type ResidentSummary } from './api'
@@ -45,7 +45,7 @@ export function ResidentsPage() {
   return (
     <ResidentsContent
       accountId={me.active_account.id}
-      canManage={canManageRegistry(me)}
+      canManage={can(me, 'registry.manage')}
       locationId={location.id}
       locationName={location.name}
       timezone={location.timezone}

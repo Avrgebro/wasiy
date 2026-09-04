@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
 import '../../i18n'
 import { ImportsRegistryPage } from './imports-registry-page'
+import { MANAGER_CAPABILITIES } from '../auth/access'
 
 const originalAdapter = apiClient.defaults.adapter
 
@@ -71,6 +72,7 @@ function meResponse() {
       slug: 'edificio-central',
       timezone: 'America/Lima',
       roles: ['location_manager'],
+      capabilities: MANAGER_CAPABILITIES,
       access_source: 'location_role',
     },
     roles: {
@@ -91,6 +93,7 @@ function meResponse() {
         slug: 'edificio-central',
         timezone: 'America/Lima',
         roles: ['location_manager'],
+        capabilities: MANAGER_CAPABILITIES,
         access_source: 'location_role',
       },
     ],

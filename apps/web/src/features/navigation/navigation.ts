@@ -18,7 +18,7 @@ import type {
   LayoutNavItem,
   LayoutNavLeaf,
 } from '../../components/layout/shared/types'
-import { canManageRegistry, isAccountAdmin, type Surface } from '../auth/access'
+import { hasCapability, isAccountAdmin, type Surface } from '../auth/access'
 import { PendingReservationsBadge } from '../reservations/pending-reservations-badge'
 import type { MeResponse } from '../auth/types'
 
@@ -99,8 +99,8 @@ export function filterNavigationEntries(
 
 /**
  * Everything scoped to the currently selected Location. Visible to any staff
- * role that reaches this surface; the manage-only entries carry their own
- * predicate so front desk keeps the read-only subset when it joins here.
+ * role that reaches this surface; entries carry the capability they need
+ * (ADR 0036) so front desk keeps its subset.
  */
 const locationNavigationGroup: NavGroupSpec = {
   type: 'group',
@@ -108,7 +108,8 @@ const locationNavigationGroup: NavGroupSpec = {
   items: [
     { icon: Widget, labelKey: 'nav.dashboard', to: '/admin' },
     { icon: UserCheckRounded, labelKey: 'nav.residents', to: '/admin/registry/residents' },
-    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units' },
+    // The desk finds people through Residentes; Unidades carries the ledger.
+    { icon: Buildings2, labelKey: 'nav.units', to: '/admin/registry/units', visibleTo: hasCapability('registry.manage') },
     // The desk's logs: visitors and packages, arrival → resolution.
     {
       type: 'collapsible',
@@ -129,13 +130,13 @@ const locationNavigationGroup: NavGroupSpec = {
       icon: Speaker,
       labelKey: 'nav.announcements',
       to: '/admin/announcements',
-      visibleTo: canManageRegistry,
+      visibleTo: hasCapability('announcements.manage'),
     },
     {
       icon: Wallet,
       labelKey: 'nav.finances',
       to: '/admin/finances',
-      visibleTo: canManageRegistry,
+      visibleTo: hasCapability('finances.manage'),
     },
   ],
 }

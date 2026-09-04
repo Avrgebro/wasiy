@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { ADMIN_CAPABILITIES } from '../auth/access'
 import '../../i18n'
 import type { UnitDetailResponse } from './api'
 
@@ -32,7 +33,7 @@ function meResponse() {
     user: { id: 'usr_1', first_name: 'Alejandra', last_name: 'Admin', name: 'Alejandra Admin', email: 'admin@wasiy.test' },
     accounts: [{ id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' }],
     active_account: { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' },
-    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima' },
+    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', capabilities: ADMIN_CAPABILITIES },
     roles: { account: [{ account_id: 'acc_1', role: 'account_admin' }], location: [] },
     accessible_locations: [],
     resident_memberships: [],

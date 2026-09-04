@@ -5,7 +5,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
-import { canManageRegistry } from '../auth/access'
+import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { getAmenities } from '../locations/amenities-api'
 import { getReservations, type ReservationSummary } from './api'
@@ -59,7 +59,7 @@ export function ReservationsPage() {
   return (
     <ReservationsContent
       accountId={account.id}
-      canDecide={canManageRegistry(me)}
+      canDecide={can(me, 'reservations.decide')}
       locationId={location.id}
       locationName={location.name}
       timezone={location.timezone}

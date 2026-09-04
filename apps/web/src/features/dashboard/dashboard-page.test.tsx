@@ -5,6 +5,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { FRONT_DESK_CAPABILITIES, MANAGER_CAPABILITIES } from '../auth/access'
 import '../../i18n'
 import type { LocationDashboardResponse } from './api'
 
@@ -31,7 +32,7 @@ function meResponse(role: 'location_manager' | 'front_desk') {
     user: { id: 'usr_1', first_name: 'Ana', last_name: 'Quispe', name: 'Ana Quispe', email: 'ana@wasiy.test' },
     accounts: [{ id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' }],
     active_account: { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' },
-    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', roles: [role], access_source: 'location_role' },
+    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', roles: [role], capabilities: role === 'location_manager' ? MANAGER_CAPABILITIES : FRONT_DESK_CAPABILITIES, access_source: 'location_role' },
     roles: { account: [], location: [{ account_id: 'acc_1', location_id: 'loc_1', role }] },
     accessible_locations: [],
     resident_memberships: [],

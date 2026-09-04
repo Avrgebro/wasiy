@@ -8,7 +8,7 @@ import { StatCard } from '../../components/ui/stat-card'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { notifyError, notifySuccess } from '../../lib/notify'
-import { canManageRegistry, isAccountAdmin } from '../auth/access'
+import { can, isAccountAdmin } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import type { MeResponse } from '../auth/types'
 import { generateDues } from '../finances/api'
@@ -67,7 +67,8 @@ export function DashboardPage() {
 function DashboardContent({ accountId, locationId, locationName, me, timezone }: { accountId: string; locationId: string; locationName: string; me: MeResponse; timezone: string }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
-  const canManage = canManageRegistry(me)
+  // The management strip, the movement drawer and dues generation are all ledger actions.
+  const canManage = can(me, 'finances.manage')
   const [registeringVisit, setRegisteringVisit] = useState(false)
   const [registeringPackage, setRegisteringPackage] = useState(false)
   const [recordingMovement, setRecordingMovement] = useState(false)

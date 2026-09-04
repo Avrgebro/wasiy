@@ -10,7 +10,7 @@ import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { notifyError, notifySuccess } from '../../lib/notify'
-import { canManageRegistry } from '../auth/access'
+import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import type { MovementSummary } from '../finances/api'
 import { monthLabel, shortDate, shortDateTime } from '../finances/month'
@@ -49,7 +49,7 @@ export function UnitDetailPage() {
   return (
     <UnitDetailContent
       accountId={me.active_account.id}
-      canManage={canManageRegistry(me)}
+      canManage={can(me, 'registry.manage')}
       locationName={location?.name ?? ''}
       timezone={location?.timezone ?? 'America/Lima'}
     />
