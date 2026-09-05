@@ -1154,9 +1154,7 @@
       "noPeople": "Sin coincidencias.",
       "email": "Correo",
       "relation": "Relación con la unidad",
-      "primaryHint": "Recibe avisos y es el contacto para recepción.",
       "invite": "Invitar al portal del residente",
-      "inviteHint": "Se pedirá el correo al enviar la invitación.",
       "inviteNeedsEmail": "La invitación al portal requiere un correo.",
       "add": "Agregar",
       "added": "Residente agregado",
@@ -1168,7 +1166,8 @@
       "removeHint": "Quitarlo de la unidad revoca su acceso al portal de {{unit}}. Su registro como persona se conserva.",
       "removed": "Residente quitado de la unidad",
       "confirmRemove": "¿Quitar a {{name}} de la unidad?",
-      "confirmRemoveBody": "Pierde el acceso al portal de esta unidad. Su registro como persona se conserva."
+      "confirmRemoveBody": "Pierde el acceso al portal de esta unidad. Su registro como persona se conserva.",
+      "relationHint": "El contacto principal recibe los avisos y es la referencia para recepción. La invitación al portal pide el correo al enviarla."
     },
     "vehicle": {
       "title": "Vehículo",
@@ -1218,9 +1217,10 @@
       "unit": "Unidad",
       "resident": "Para",
       "anyResident": "Cualquier residente de la unidad",
-      "residentHint": "Si no eliges a nadie, se avisa al contacto principal de la unidad.",
       "notesPlaceholder": "Caja mediana, frágil…",
-      "submit": "Registrar"
+      "submit": "Registrar",
+      "destination": "Destino",
+      "destinationHint": "Elige la unidad y, si viene a nombre de alguien, la persona. Sin persona, se avisa al contacto principal de la unidad."
     },
     "detail": {
       "title": "Paquete · {{unit}}",
@@ -1263,7 +1263,7 @@
       "saved": "Cambios guardados",
       "phone": "Teléfono (opcional)",
       "unitSection": "Unidad",
-      "unitHint": "La persona entra a la ubicación por su unidad. Si luego se va, queda en «Sin unidad»."
+      "unitSectionHint": "La persona entra a la ubicación por su unidad; si luego se va, queda en «Sin unidad». El contacto principal recibe los avisos y atiende a recepción."
     },
     "detail": {
       "since": "Desde",
@@ -1273,7 +1273,6 @@
       "invite": "Invitar al portal",
       "sendInvite": "Enviar invitación",
       "emailLabel": "Correo del residente",
-      "emailHint": "Solo se pide aquí; se guarda para enviar la invitación.",
       "willSendTo": "Se enviará a {{email}}.",
       "noHistory": "Sin actividad registrada.",
       "edit": "Editar datos",
@@ -1283,7 +1282,8 @@
       "deactivateBlocked": "Solo disponible cuando no vive en ninguna unidad. Quítalo primero de sus unidades.",
       "reactivateHint": "La persona vuelve a aparecer como activa.",
       "confirmDeactivate": "¿Desactivar a {{name}}?",
-      "confirmDeactivateBody": "Pierde el acceso al portal. Su historial se conserva y puedes reactivarla después."
+      "confirmDeactivateBody": "Pierde el acceso al portal. Su historial se conserva y puedes reactivarla después.",
+      "portalHint": "El correo solo se pide aquí y se guarda para enviar la invitación."
     }
   },
   "visits": {
@@ -1337,11 +1337,11 @@
       "phone": "Teléfono (opcional)",
       "destination": "Destino",
       "host": "Recibe",
-      "hostHint": "Si no eliges a nadie, la visita queda registrada a la unidad.",
       "primaryContact": "Contacto principal",
       "confirmation": "Confirmación",
       "confirmationHint": "Opcional. Wasiy registra cómo se confirmó; no bloquea el ingreso.",
-      "submit": "Registrar ingreso"
+      "submit": "Registrar ingreso",
+      "destinationHint": "Elige la unidad y, si lo conoces, al residente que recibe. Sin residente, la visita queda registrada a la unidad."
     },
     "detail": {
       "insideSince": "Visita a Depto. {{unit}} · Dentro desde las {{time}}",

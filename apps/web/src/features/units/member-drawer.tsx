@@ -244,14 +244,13 @@ export function MemberDrawer({
             </>
           )}
 
-          <DrawerSection label={t('units.member.relation')} />
+          <DrawerSection description={t('units.member.relationHint')} label={t('units.member.relation')} />
           <Controller
             control={form.control}
             name="is_primary_contact"
             render={({ field }) => (
               <Switch
                 checked={field.value}
-                description={t('units.member.primaryHint')}
                 label={t('units.detail.primaryContact')}
                 onChange={(event) => field.onChange(event.currentTarget.checked)}
               />
@@ -264,7 +263,6 @@ export function MemberDrawer({
               render={({ field }) => (
                 <Switch
                   checked={field.value}
-                  description={t('units.member.inviteHint')}
                   label={t('units.member.invite')}
                   onChange={(event) => field.onChange(event.currentTarget.checked)}
                 />

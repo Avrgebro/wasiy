@@ -1154,9 +1154,7 @@
       "noPeople": "No matches.",
       "email": "Email",
       "relation": "Relation to the unit",
-      "primaryHint": "Receives notices and is the contact for the front desk.",
       "invite": "Invite to the resident portal",
-      "inviteHint": "The email is asked when sending the invitation.",
       "inviteNeedsEmail": "The portal invitation needs an email.",
       "add": "Add",
       "added": "Resident added",
@@ -1168,7 +1166,8 @@
       "removeHint": "Removing them revokes portal access to {{unit}}. Their person record is kept.",
       "removed": "Resident removed from the unit",
       "confirmRemove": "Remove {{name}} from the unit?",
-      "confirmRemoveBody": "They lose portal access to this unit. Their person record is kept."
+      "confirmRemoveBody": "They lose portal access to this unit. Their person record is kept.",
+      "relationHint": "The primary contact receives notices and is the desk's reference. The portal invitation asks for the email when sent."
     },
     "vehicle": {
       "title": "Vehicle",
@@ -1218,9 +1217,10 @@
       "unit": "Unit",
       "resident": "For",
       "anyResident": "Any resident of the unit",
-      "residentHint": "If you pick nobody, the unit's primary contact is notified.",
       "notesPlaceholder": "Medium box, fragile…",
-      "submit": "Register"
+      "submit": "Register",
+      "destination": "Destination",
+      "destinationHint": "Pick the unit and, if addressed to someone, the person. Without a person the unit's primary contact is notified."
     },
     "detail": {
       "title": "Package · {{unit}}",
@@ -1263,7 +1263,7 @@
       "saved": "Changes saved",
       "phone": "Phone (optional)",
       "unitSection": "Unit",
-      "unitHint": "A person joins the location through their unit. If they leave later, they show under \"No unit\"."
+      "unitSectionHint": "A person joins the location through their unit; if they leave later they show under \"No unit\". The primary contact receives notices and is the desk's reference."
     },
     "detail": {
       "since": "Since",
@@ -1273,7 +1273,6 @@
       "invite": "Invite to the portal",
       "sendInvite": "Send invitation",
       "emailLabel": "Resident's email",
-      "emailHint": "Asked only here; stored to send the invitation.",
       "willSendTo": "It will be sent to {{email}}.",
       "noHistory": "No activity recorded.",
       "edit": "Edit details",
@@ -1283,7 +1282,8 @@
       "deactivateBlocked": "Only available when they live in no unit. Remove them from their units first.",
       "reactivateHint": "The person shows as active again.",
       "confirmDeactivate": "Deactivate {{name}}?",
-      "confirmDeactivateBody": "They lose portal access. History is kept and you can reactivate them later."
+      "confirmDeactivateBody": "They lose portal access. History is kept and you can reactivate them later.",
+      "portalHint": "The email is asked only here and kept to send the invitation."
     }
   },
   "visits": {
@@ -1337,11 +1337,11 @@
       "phone": "Phone (optional)",
       "destination": "Destination",
       "host": "Host",
-      "hostHint": "If you pick nobody, the visit is registered to the unit.",
       "primaryContact": "Primary contact",
       "confirmation": "Confirmation",
       "confirmationHint": "Optional. Wasiy records how it was confirmed; it never blocks check-in.",
-      "submit": "Register check-in"
+      "submit": "Register check-in",
+      "destinationHint": "Pick the unit and, if known, the resident receiving. Without a resident the visit is logged to the unit."
     },
     "detail": {
       "insideSince": "Visit to unit {{unit}} · Inside since {{time}}",

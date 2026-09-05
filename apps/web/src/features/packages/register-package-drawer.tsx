@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
 import { getResidents } from '../residents/api'
@@ -74,6 +75,7 @@ export function RegisterPackageDrawer({
               {form.formState.errors.root.message}
             </Alert>
           ) : null}
+          <DrawerSection description={t('packages.form.destinationHint')} label={t('packages.form.destination')} />
           <Controller
             control={form.control}
             name="unit_id"
@@ -100,7 +102,6 @@ export function RegisterPackageDrawer({
                 {...field}
                 clearable
                 data={residentOptions}
-                description={t('packages.form.residentHint')}
                 disabled={unitId === ''}
                 error={fieldErrorMessage(fieldState.error)}
                 label={t('packages.form.resident')}

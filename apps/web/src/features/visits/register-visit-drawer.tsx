@@ -99,7 +99,7 @@ export function RegisterVisitDrawer({
             {t('visits.form.documentHint')}
           </Text>
 
-          <DrawerSection label={t('visits.form.destination')} />
+          <DrawerSection description={t('visits.form.destinationHint')} label={t('visits.form.destination')} />
           <Controller
             control={form.control}
             name="unit_id"
@@ -126,7 +126,6 @@ export function RegisterVisitDrawer({
                 {...field}
                 clearable
                 data={residents.map((resident) => ({ value: resident.id, label: resident.name }))}
-                description={t('visits.form.hostHint')}
                 disabled={unitId === ''}
                 error={fieldErrorMessage(fieldState.error)}
                 label={t('visits.form.host')}

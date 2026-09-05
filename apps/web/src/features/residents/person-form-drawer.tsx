@@ -98,7 +98,7 @@ export function PersonFormDrawer({
           <FormTextInput control={form.control} label={t('residents.form.phone')} name="phone" placeholder="+51 9…" />
           {!editing ? (
             <>
-              <DrawerSection label={t('residents.form.unitSection')} />
+              <DrawerSection description={t('residents.form.unitSectionHint')} label={t('residents.form.unitSection')} />
               <Controller
                 control={form.control}
                 name="unit_id"
@@ -106,7 +106,6 @@ export function PersonFormDrawer({
                   <Select
                     {...field}
                     data={unitOptions}
-                    description={t('residents.form.unitHint')}
                     error={fieldErrorMessage(fieldState.error)}
                     label={t('registry.residents.unit')}
                     required
@@ -121,7 +120,6 @@ export function PersonFormDrawer({
                 render={({ field }) => (
                   <Switch
                     checked={field.value}
-                    description={t('units.member.primaryHint')}
                     label={t('units.detail.primaryContact')}
                     onChange={(event) => field.onChange(event.currentTarget.checked)}
                   />

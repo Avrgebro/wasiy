@@ -177,7 +177,7 @@ export function PersonDrawer({
               {t('residents.detail.membershipsHint')}
             </Text>
 
-            <DrawerSection label={t('units.detail.portal')} />
+            <DrawerSection description={t('residents.detail.portalHint')} label={t('units.detail.portal')} />
             <div className="flex flex-col gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <Badge color={portalColor(person.portal_state)} radius="xl" size="sm" variant="surface">
@@ -194,7 +194,6 @@ export function PersonDrawer({
                   {!person.email ? (
                     <TextInput
                       autoFocus
-                      description={t('residents.detail.emailHint')}
                       error={emailError}
                       label={t('residents.detail.emailLabel')}
                       placeholder="nombre@correo.com"
