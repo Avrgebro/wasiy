@@ -25,8 +25,11 @@ class Visit extends Model
         return [
             'confirmation' => VisitConfirmation::class,
             'status' => VisitStatus::class,
+            'expected_on' => 'immutable_date',
+            'pre_registered_at' => 'immutable_datetime',
             'checked_in_at' => 'immutable_datetime',
             'checked_out_at' => 'immutable_datetime',
+            'cancelled_at' => 'immutable_datetime',
             'auto_checked_out' => 'boolean',
         ];
     }
@@ -53,6 +56,12 @@ class Visit extends Model
     public function resident(): BelongsTo
     {
         return $this->belongsTo(Resident::class);
+    }
+
+    /** @return BelongsTo<Resident, $this> */
+    public function preRegisteredBy(): BelongsTo
+    {
+        return $this->belongsTo(Resident::class, 'pre_registered_by');
     }
 
     /** @return BelongsTo<User, $this> */

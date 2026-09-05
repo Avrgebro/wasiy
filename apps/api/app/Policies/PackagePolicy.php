@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Enums\Capability;
 use App\Models\Location;
 use App\Models\Package;
+use App\Models\Unit;
 use App\Models\User;
 use App\Services\AccessAuthorizationService;
 
@@ -14,6 +15,12 @@ use App\Services\AccessAuthorizationService;
  */
 class PackagePolicy
 {
+    /** Portal: residents see the packages of units they live in. */
+    public function viewAsResident(User $user, Unit $unit): bool
+    {
+        return $this->access->canResidentAccessUnit($user, $unit);
+    }
+
     public function __construct(
         private readonly AccessAuthorizationService $access,
     ) {}

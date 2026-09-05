@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Visits\CheckOutVisit;
+use App\Actions\Visits\ConfirmExpectedVisit;
 use App\Actions\Visits\RegisterVisit;
 use App\Enums\RegistryStatus;
 use App\Enums\VisitConfirmation;
@@ -27,7 +28,7 @@ use Illuminate\Validation\ValidationException;
 
 class VisitController extends Controller
 {
-    private const RELATIONS = ['unit', 'resident', 'checkedInBy', 'checkedOutBy'];
+    private const RELATIONS = ['unit', 'resident', 'checkedInBy', 'checkedOutBy', 'preRegisteredBy'];
 
     public function index(Request $request, Location $location): AnonymousResourceCollection
     {
@@ -37,14 +38,25 @@ class VisitController extends Controller
             ...$this->paginationRules(),
             'status' => ['sometimes', 'nullable', Rule::enum(VisitStatus::class)],
             'today' => ['sometimes', 'nullable', 'boolean'],
+            // Pre-registrations for today (portal P1); combine with unit_id for the drawer band.
+            'expected' => ['sometimes', 'nullable', 'boolean'],
+            'unit_id' => ['sometimes', 'nullable', 'string', 'ulid'],
             'confirmation' => ['sometimes', 'nullable', Rule::enum(VisitConfirmation::class)],
             'search' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
 
-        $startOfToday = CarbonImmutable::now($location->timezone)->startOfDay()->utc();
+        $now = CarbonImmutable::now($location->timezone);
+        $startOfToday = $now->startOfDay()->utc();
+        $expected = (bool) ($validated['expected'] ?? false);
 
         $visits = Visit::query()
             ->where('location_id', $location->id)
+            ->when($validated['unit_id'] ?? null, fn (Builder $query, string $unitId) => $query->where('unit_id', $unitId))
+            ->when($expected, fn (Builder $query) => $query
+                ->where('status', VisitStatus::Expected->value)
+                ->where('expected_on', $now->toDateString()))
+            // The desk's log is what happened at the door; pre-registrations show only when asked for.
+            ->when(! $expected && ! isset($validated['status']), fn (Builder $query) => $query->whereIn('status', [VisitStatus::Inside->value, VisitStatus::Left->value]))
             ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->when((bool) ($validated['today'] ?? false), fn (Builder $query) => $query->where('checked_in_at', '>=', $startOfToday))
             ->when($validated['confirmation'] ?? null, fn (Builder $query, string $confirmation) => $query->where('confirmation', $confirmation))
@@ -53,10 +65,31 @@ class VisitController extends Controller
                 ->orWhereHas('unit', fn (Builder $unit) => $unit->searchIdentity($search))
                 ->orWhereHas('resident', fn (Builder $resident) => $resident->searchLike(["CONCAT(first_name, ' ', last_name)"], $search))))
             ->with(self::RELATIONS)
-            ->orderByDesc('checked_in_at')
+            ->when($expected, fn (Builder $query) => $query->orderByRaw('expected_time NULLS LAST')->orderBy('pre_registered_at'), fn (Builder $query) => $query->orderByDesc('checked_in_at'))
             ->orderByDesc('id');
 
         return VisitResource::collection($visits->paginate($this->perPage($validated))->withQueryString());
+    }
+
+    /** The desk confirms a pre-registered visitor is at the door (16c). */
+    public function confirmArrival(Request $request, Visit $visit, ConfirmExpectedVisit $confirm): JsonResource
+    {
+        Gate::authorize('confirmArrival', $visit);
+
+        $validated = $request->validate([
+            'visitor_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'document' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'phone' => ['sometimes', ...PhoneNumber::rules($visit->location->country ?? PhoneNumber::FALLBACK_COUNTRY)],
+            'notes' => ['sometimes', 'nullable', 'string', 'max:1000'],
+        ]);
+        if (array_key_exists('phone', $validated)) {
+            $validated['phone'] = PhoneNumber::normalize($validated['phone'], $visit->location->country ?? PhoneNumber::FALLBACK_COUNTRY);
+        }
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        return new VisitResource($confirm->handle($visit, $actor, $validated)->load(self::RELATIONS));
     }
 
     public function store(Request $request, Location $location, RegisterVisit $register): JsonResponse

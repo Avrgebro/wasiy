@@ -15,8 +15,10 @@ use App\Http\Controllers\Api\LocationSettingsController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PhotoController;
+use App\Http\Controllers\Api\PortalPackageController;
 use App\Http\Controllers\Api\PortalResidentController;
 use App\Http\Controllers\Api\PortalVehicleController;
+use App\Http\Controllers\Api\PortalVisitController;
 use App\Http\Controllers\Api\RegistryExportController;
 use App\Http\Controllers\Api\RegistryImportController;
 use App\Http\Controllers\Api\ReservationController;
@@ -121,6 +123,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::get('/locations/{location}/visits', [VisitController::class, 'index']);
     Route::post('/locations/{location}/visits', [VisitController::class, 'store']);
     Route::post('/visits/{visit}/check-out', [VisitController::class, 'checkOut']);
+    Route::post('/visits/{visit}/confirm-arrival', [VisitController::class, 'confirmArrival']);
     Route::get('/units/{unit}', [UnitController::class, 'show']);
     Route::post('/units/{unit}/notes', [UnitController::class, 'storeNote']);
     Route::post('/units/{unit}/deactivate', [UnitController::class, 'deactivate']);
@@ -157,6 +160,10 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     // roles.
     Route::prefix('portal')->group(function () {
         Route::patch('/resident/phone', [PortalResidentController::class, 'updatePhone']);
+        Route::get('/packages', [PortalPackageController::class, 'index']);
+        Route::get('/visits', [PortalVisitController::class, 'index']);
+        Route::post('/visits', [PortalVisitController::class, 'store']);
+        Route::post('/visits/{visit}/cancel', [PortalVisitController::class, 'cancel']);
         Route::get('/vehicles', [PortalVehicleController::class, 'index']);
         Route::post('/vehicles', [PortalVehicleController::class, 'store']);
         Route::patch('/vehicles/{vehicle}', [PortalVehicleController::class, 'update']);

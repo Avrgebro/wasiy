@@ -503,6 +503,25 @@ class DemoOperationsSeeder extends Seeder
                 $this->activity(ActivityEventType::VisitCheckedOut, ($auto ? 'Salida automática' : 'Salida registrada')." · {$visitor} · ".$unit->label().'.', $auto ? null : $this->desk, $checkedOutAt, 'visit', $visit->id, ['unit_id' => $unit->id, 'automatic' => $auto]);
             }
         }
+
+        // Portal pre-registrations for today (P1): the desk's "Esperados hoy" band.
+        foreach ([['Torre A-402', 'Jorge Peña', '41290877', '19:00', 'Viene a recoger unas llaves. Puede subir directo.'], ['Torre A-402', 'Delivery Rappi', null, null, null], ['Torre B-1203', 'Marcela Ríos', '70882134', '11:30', null]] as [$unitKey, $visitor, $document, $time, $note]) {
+            $unit = $this->units->get($unitKey);
+            $host = $primaries->get($unitKey);
+            if (! $unit || ! $host) {
+                continue;
+            }
+            $visit = Visit::query()->updateOrCreate(
+                ['unit_id' => $unit->id, 'visitor_name' => $visitor, 'expected_on' => $this->now->toDateString()],
+                [
+                    'account_id' => $this->account->id, 'location_id' => $this->central->id, 'resident_id' => $host->id,
+                    'document' => $document, 'confirmation' => VisitConfirmation::PreRegistered, 'notes' => $note,
+                    'status' => VisitStatus::Expected, 'expected_time' => $time, 'pre_registered_by' => $host->id,
+                    'pre_registered_at' => $this->now->setTime(8, 12)->utc(), 'checked_in_by' => null, 'checked_in_at' => null,
+                ],
+            );
+            $this->activity(ActivityEventType::VisitPreRegistered, "{$host->name} pre-registró a {$visitor} · ".$unit->label().'.', $host->user, $this->now->setTime(8, 12), 'visit', $visit->id, ['unit_id' => $unit->id]);
+        }
     }
 
     /** Recorded, then paid when settled; skipped if the row already has history. */

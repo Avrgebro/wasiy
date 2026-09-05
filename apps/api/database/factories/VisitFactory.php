@@ -32,4 +32,17 @@ class VisitFactory extends Factory
             'checked_in_at' => now(),
         ];
     }
+
+    /** A resident's pre-registration for today, not yet at the desk. */
+    public function expected(?string $on = null): static
+    {
+        return $this->state(fn () => [
+            'status' => VisitStatus::Expected,
+            'confirmation' => VisitConfirmation::PreRegistered,
+            'checked_in_by' => null,
+            'checked_in_at' => null,
+            'expected_on' => $on ?? now()->toDateString(),
+            'pre_registered_at' => now(),
+        ]);
+    }
 }

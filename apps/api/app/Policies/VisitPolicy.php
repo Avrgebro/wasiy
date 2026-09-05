@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Enums\Capability;
 use App\Models\Location;
+use App\Models\Unit;
 use App\Models\User;
 use App\Models\Visit;
 use App\Services\AccessAuthorizationService;
@@ -33,5 +34,26 @@ class VisitPolicy
     public function checkOut(User $user, Visit $visit): bool
     {
         return $this->access->can($user, $visit->location, Capability::ManageReception);
+    }
+
+    public function confirmArrival(User $user, Visit $visit): bool
+    {
+        return $this->access->can($user, $visit->location, Capability::ManageReception);
+    }
+
+    /** Portal: a resident sees and announces visits for units they live in. */
+    public function viewAsResident(User $user, Unit $unit): bool
+    {
+        return $this->access->canResidentAccessUnit($user, $unit);
+    }
+
+    public function preRegister(User $user, Unit $unit): bool
+    {
+        return $this->access->canResidentAccessUnit($user, $unit);
+    }
+
+    public function cancelAsResident(User $user, Visit $visit): bool
+    {
+        return $visit->unit !== null && $this->access->canResidentAccessUnit($user, $visit->unit);
     }
 }

@@ -45,8 +45,10 @@ enum ActivityEventType: string
     case DuesGenerated = 'dues.generated';
     case PackageReceived = 'package.received';
     case PackageDelivered = 'package.delivered';
+    case VisitPreRegistered = 'visit.pre_registered';
     case VisitCheckedIn = 'visit.checked_in';
     case VisitCheckedOut = 'visit.checked_out';
+    case VisitCancelled = 'visit.cancelled';
     case AmenityCreated = 'amenity.created';
     case AmenityUpdated = 'amenity.updated';
     case AmenityDeactivated = 'amenity.deactivated';
