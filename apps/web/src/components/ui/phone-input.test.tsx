@@ -19,16 +19,12 @@ function renderInput(value = '', country = 'PE') {
 }
 
 describe('PhoneInput', () => {
-  it('switches country from the left-section picker and re-emits', async () => {
-    const onChange = renderInput('+51987654321')
-    const user = userEvent.setup()
+  it('offers no picker while Peru is the only supported country', () => {
+    renderInput()
 
-    await user.click(screen.getByRole('button', { name: 'País' }))
-    await user.type(screen.getByPlaceholderText('Buscar país…'), 'chile')
-    await user.click(await screen.findByRole('option', { name: /Chile/ }))
-
-    expect(screen.getByRole('button', { name: 'País' })).toHaveTextContent('🇨🇱+56')
-    expect(onChange).toHaveBeenLastCalledWith('+56987654321')
+    const trigger = screen.getByRole('button', { name: 'País' })
+    expect(trigger).toBeDisabled()
+    expect(trigger).toHaveTextContent('🇵🇪+51')
   })
 
   it('emits E.164 for a national number typed in the location country', async () => {

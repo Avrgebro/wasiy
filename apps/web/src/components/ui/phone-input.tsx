@@ -7,6 +7,7 @@ import { Controller, type Control, type FieldValues, type Path } from 'react-hoo
 import { useTranslation } from 'react-i18next'
 import { fieldErrorMessage } from '../../lib/errors'
 import { asCountryCode, countryFlag, countryOptions, formatAsYouType, fromE164, toE164 } from '../../lib/phone'
+import { getCountryCallingCode } from 'libphonenumber-js/min'
 
 /**
  * A phone field: Mantine TextInput with the country picker in its left
@@ -94,7 +95,7 @@ function normalize(text: string) {
  */
 const NO_WRAPPER = { offsetTop: false, offsetBottom: false, describedBy: undefined, inputId: undefined, labelId: undefined, getStyles: null }
 
-/** Flag and calling code; click for a searchable list of countries. */
+/** Flag and calling code; with more than one supported country, click for a searchable list. */
 function CountryPicker({ value, onChange }: { value: CountryCode; onChange: (country: CountryCode) => void }) {
   const { t } = useTranslation('common')
   const [search, setSearch] = useState('')
@@ -106,7 +107,7 @@ function CountryPicker({ value, onChange }: { value: CountryCode; onChange: (cou
   })
 
   const options = countryOptions()
-  const current = options.find((option) => option.value === value)
+  const callingCode = getCountryCallingCode(value)
   const needle = normalize(search.trim())
   const shown = needle
     ? options.filter(
@@ -131,16 +132,17 @@ function CountryPicker({ value, onChange }: { value: CountryCode; onChange: (cou
       >
       <Combobox.Target>
         <UnstyledButton
-          aria-expanded={combobox.dropdownOpened}
-          aria-haspopup="listbox"
+          aria-expanded={options.length > 1 ? combobox.dropdownOpened : undefined}
+          aria-haspopup={options.length > 1 ? 'listbox' : undefined}
           aria-label={t('phone.country')}
-          className="flex h-full w-full items-center justify-center gap-1 rounded-l-[var(--input-radius)] text-sm text-[var(--mantine-color-text)] hover:bg-[var(--wa-hover)]"
+          className={`flex h-full w-full items-center justify-center gap-1 rounded-l-[var(--input-radius)] text-sm text-[var(--mantine-color-text)] ${options.length > 1 ? 'hover:bg-[var(--wa-hover)]' : 'cursor-default'}`}
+          disabled={options.length <= 1}
           type="button"
           onClick={() => combobox.toggleDropdown()}
         >
           <span aria-hidden>{countryFlag(value)}</span>
-          <span className="font-mono text-xs">+{current?.callingCode ?? ''}</span>
-          <AltArrowDown aria-hidden size={12} />
+          <span className="font-mono text-xs">+{callingCode}</span>
+          {options.length > 1 ? <AltArrowDown aria-hidden size={12} /> : null}
         </UnstyledButton>
       </Combobox.Target>
 

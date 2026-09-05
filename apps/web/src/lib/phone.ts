@@ -2,6 +2,13 @@ import { AsYouType, getCountries, getCountryCallingCode, parsePhoneNumberFromStr
 
 export const FALLBACK_COUNTRY: CountryCode = 'PE'
 
+/**
+ * Countries the phone picker offers. Peru only while the product serves
+ * Peru; add a code here when a location in another country goes live. A
+ * stored number from elsewhere still displays with its own prefix.
+ */
+export const SUPPORTED_COUNTRIES: CountryCode[] = ['PE']
+
 export function asCountryCode(value: string | null | undefined): CountryCode {
   const upper = (value ?? '').toUpperCase()
   return (getCountries() as string[]).includes(upper) ? (upper as CountryCode) : FALLBACK_COUNTRY
@@ -38,17 +45,15 @@ export type CountryOption = { value: CountryCode; label: string; callingCode: st
 
 let cachedOptions: CountryOption[] | null = null
 
-/** Every dialable country, Spanish name, sorted by name. Built once. */
+/** The supported countries with Spanish names, sorted by name. Built once. */
 export function countryOptions(): CountryOption[] {
   if (cachedOptions) return cachedOptions
-  cachedOptions = getCountries()
-    .map((code) => {
+  cachedOptions = SUPPORTED_COUNTRIES.map((code) => {
       const name = regionNames.of(code) ?? code
       const callingCode = getCountryCallingCode(code)
 
       return { value: code, name, callingCode, label: `${countryFlag(code)} +${callingCode} ${name}` }
-    })
-    .sort((a, b) => a.name.localeCompare(b.name, 'es'))
+    }).sort((a, b) => a.name.localeCompare(b.name, 'es'))
 
   return cachedOptions
 }
