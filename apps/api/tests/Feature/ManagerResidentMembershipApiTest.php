@@ -233,8 +233,9 @@ test('resident creation is closed to users without registry management rights', 
     $this->assertDatabaseMissing('residents', ['last_name' => 'Quispe']);
 });
 
-test('resident creation without memberships still requires registry rights in the account', function () {
+test('resident creation requires a unit and registry rights in the account', function () {
     $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
     $otherLocation = Location::factory()->create();
 
     // A manager of a different account must not be able to write into this one.
@@ -244,6 +245,7 @@ test('resident creation without memberships still requires registry rights in th
         ->postJson("/api/accounts/{$location->account_id}/residents", [
             'first_name' => 'Ines',
             'last_name' => 'Torres',
+            'memberships' => [['unit_id' => $unit->id]],
         ])
         ->assertForbidden();
 
@@ -251,10 +253,20 @@ test('resident creation without memberships still requires registry rights in th
 
     $admin = createRegistryAdmin($location->account);
 
+    // Without a unit the person would belong to no location's directory.
     $this->actingAs($admin)
         ->postJson("/api/accounts/{$location->account_id}/residents", [
             'first_name' => 'Ines',
             'last_name' => 'Torres',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('memberships');
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$location->account_id}/residents", [
+            'first_name' => 'Ines',
+            'last_name' => 'Torres',
+            'memberships' => [['unit_id' => $unit->id]],
         ])
         ->assertCreated();
 

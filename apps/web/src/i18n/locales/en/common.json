@@ -1262,7 +1262,7 @@
       "saved": "Changes saved",
       "phone": "Phone (optional)",
       "unitSection": "Unit",
-      "unitHint": "Optional when creating; without a unit the person shows under \"No unit\"."
+      "unitHint": "A person joins the location through their unit. If they leave later, they show under \"No unit\"."
     },
     "detail": {
       "since": "Since",

@@ -60,10 +60,10 @@ export type PersonPayload = { first_name: string; last_name: string; phone: stri
 export type MembershipPayload = { unit_id: string; is_primary_contact: boolean }
 
 /** Directory create: names, optional phone, optional unit relation. Never an email. */
-export function createPerson(accountId: string, person: PersonPayload, membership: MembershipPayload | null) {
+export function createPerson(accountId: string, person: PersonPayload, membership: MembershipPayload) {
   return apiRequest<{ data: ResidentSummary }>(`/api/accounts/${accountId}/residents`, {
     method: 'POST',
-    data: { ...person, memberships: membership ? [membership] : [] },
+    data: { ...person, memberships: [membership] },
   })
 }
 

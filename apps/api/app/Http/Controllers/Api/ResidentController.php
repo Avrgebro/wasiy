@@ -280,7 +280,9 @@ class ResidentController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
-            'memberships' => ['sometimes', 'array'],
+            // A person enters a location through a unit; without one the
+            // location-scoped directory could never list them (M11).
+            'memberships' => ['required', 'array', 'min:1'],
             'memberships.*.unit_id' => [
                 'required',
                 'string',

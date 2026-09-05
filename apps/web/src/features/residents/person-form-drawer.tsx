@@ -64,7 +64,7 @@ export function PersonFormDrawer({
         : createPerson(
             accountId,
             person,
-            values.unit_id ? { unit_id: values.unit_id, is_primary_contact: values.is_primary_contact } : null,
+            { unit_id: values.unit_id, is_primary_contact: values.is_primary_contact },
           )
     },
     onSuccess: async () => {
@@ -105,11 +105,11 @@ export function PersonFormDrawer({
                 render={({ field, fieldState }) => (
                   <Select
                     {...field}
-                    clearable
                     data={unitOptions}
                     description={t('residents.form.unitHint')}
                     error={fieldErrorMessage(fieldState.error)}
                     label={t('registry.residents.unit')}
+                    required
                     searchable
                     onChange={(value) => field.onChange(value ?? '')}
                   />

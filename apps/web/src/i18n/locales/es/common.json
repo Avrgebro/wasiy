@@ -1262,7 +1262,7 @@
       "saved": "Cambios guardados",
       "phone": "Teléfono (opcional)",
       "unitSection": "Unidad",
-      "unitHint": "Opcional al crear; sin unidad la persona aparece en «Sin unidad»."
+      "unitHint": "La persona entra a la ubicación por su unidad. Si luego se va, queda en «Sin unidad»."
     },
     "detail": {
       "since": "Desde",
