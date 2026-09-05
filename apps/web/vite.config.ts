@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => {
   process.env.VITE_SURFACE = surface
   process.env.VITE_APP_TITLE = surface === 'portal' ? 'Wasiy Residentes' : 'Wasiy'
   process.env.VITE_MANIFEST = `/manifest.${surface}.webmanifest`
+  // Where the other surface lives, for the no-access hand-off. Production
+  // sets these in Vercel (app.wasiy.co / portal.wasiy.co).
+  process.env.VITE_APP_URL ??= 'http://localhost:5174'
+  process.env.VITE_PORTAL_URL ??= 'http://localhost:5175'
 
   return {
     plugins: [

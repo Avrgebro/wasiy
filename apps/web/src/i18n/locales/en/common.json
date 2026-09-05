@@ -41,7 +41,11 @@
     "selectLocationRequired": "Select a location to view this dashboard.",
     "useYourInvitation": "Use your invitation",
     "welcomeBack": "Welcome back",
-    "welcomeBackSubtitle": "Sign in to continue with today's operation."
+    "welcomeBackSubtitle": "Sign in to continue with today's operation.",
+    "noAccessResidentHint": "Your access is to the resident portal, not the staff app.",
+    "goToPortal": "Go to the resident portal",
+    "noAccessStaffHint": "Your access is to the staff app, not the resident portal.",
+    "goToStaffApp": "Go to the staff app"
   },
   "accountSelection": {
     "selectFailed": "Account selection failed",

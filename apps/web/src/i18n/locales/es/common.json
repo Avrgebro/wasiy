@@ -41,7 +41,11 @@
     "selectLocationRequired": "Selecciona una ubicación para ver este panel.",
     "useYourInvitation": "Usa tu invitación",
     "welcomeBack": "Bienvenido de vuelta",
-    "welcomeBackSubtitle": "Ingresa para continuar con la operación de hoy."
+    "welcomeBackSubtitle": "Ingresa para continuar con la operación de hoy.",
+    "noAccessResidentHint": "Tu acceso es al portal de residentes, no a la aplicación del personal.",
+    "goToPortal": "Ir al portal de residentes",
+    "noAccessStaffHint": "Tu acceso es a la aplicación del personal, no al portal de residentes.",
+    "goToStaffApp": "Ir a la aplicación del personal"
   },
   "accountSelection": {
     "selectFailed": "No se pudo seleccionar la cuenta",
