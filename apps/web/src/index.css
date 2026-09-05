@@ -232,12 +232,21 @@
   box-shadow: none;
 }
 
-/* Unlayered so it wins over Mantine's per-component focus styles. */
+/* Global focus ring, retired 2026-09-05: it stacked a second ring on inputs,
+   which browsers treat as focus-visible on every click. Mantine's own
+   per-component focus styles (focusRing: 'auto') cover keyboard users.
+   Restore by uncommenting; scope it with the second rule to spare inputs.
+
 :focus-visible {
   outline: 2px solid var(--wa-focus);
   outline-offset: 2px;
   box-shadow: 0 0 0 3px var(--wa-focus-halo);
 }
+.mantine-Input-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+*/
 
 html {
   font-family: Inter, system-ui, 'Segoe UI', Roboto, sans-serif;

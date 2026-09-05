@@ -39,7 +39,8 @@ function meResponse(role: 'location_manager' | 'front_desk') {
   }
 }
 
-const hourAgo = new Date(Date.now() - 60 * 60_000).toISOString()
+// Thirty minutes never crosses midnight, so the relative label is stable at any hour.
+const halfHourAgo = new Date(Date.now() - 30 * 60_000).toISOString()
 const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60_000).toISOString()
 const fiveDaysAgo = new Date(Date.now() - 5 * 86_400_000).toISOString()
 
@@ -52,7 +53,7 @@ function dashboard(withManagement: boolean): LocationDashboardResponse {
       visitors_overdue_count: 1,
       visitors_inside: [
         { id: 'vs_1', account_id: 'acc_1', location_id: 'loc_1', unit_id: 'un_1', unit_number: '1203', building_name: 'Torre 1', resident_id: null, resident_name: null, resident_phone: null, visitor_name: 'Jorge Peña', document: null, phone: null, confirmation: 'none', notes: null, status: 'inside', checked_in_at: sixHoursAgo, checked_in_by_name: 'A. Quispe', checked_out_at: null, checked_out_by_name: null, checkout_notes: null, auto_checked_out: false, is_overdue: true },
-        { id: 'vs_2', account_id: 'acc_1', location_id: 'loc_1', unit_id: 'un_2', unit_number: '402', building_name: 'Torre 1', resident_id: null, resident_name: null, resident_phone: null, visitor_name: 'Elena Vargas', document: null, phone: null, confirmation: 'intercom', notes: null, status: 'inside', checked_in_at: hourAgo, checked_in_by_name: 'A. Quispe', checked_out_at: null, checked_out_by_name: null, checkout_notes: null, auto_checked_out: false, is_overdue: false },
+        { id: 'vs_2', account_id: 'acc_1', location_id: 'loc_1', unit_id: 'un_2', unit_number: '402', building_name: 'Torre 1', resident_id: null, resident_name: null, resident_phone: null, visitor_name: 'Elena Vargas', document: null, phone: null, confirmation: 'intercom', notes: null, status: 'inside', checked_in_at: halfHourAgo, checked_in_by_name: 'A. Quispe', checked_out_at: null, checked_out_by_name: null, checkout_notes: null, auto_checked_out: false, is_overdue: false },
       ],
       exits_today_count: 14,
       packages_pending_count: 1,
@@ -81,7 +82,7 @@ function dashboard(withManagement: boolean): LocationDashboardResponse {
             units_occupied: 82,
             units_vacant: 9,
             units_without_primary_contact: 5,
-            activity: [{ id: 'al_1', event_type: 'dues.generated', summary: 'Se generaron 96 cuotas de mantenimiento de septiembre 2026.', actor_name: 'Alejandra Admin', created_at: hourAgo }],
+            activity: [{ id: 'al_1', event_type: 'dues.generated', summary: 'Se generaron 96 cuotas de mantenimiento de septiembre 2026.', actor_name: 'Alejandra Admin', created_at: halfHourAgo }],
           },
         }
       : {}),
@@ -142,7 +143,7 @@ describe('DashboardPage', () => {
     expect(screen.getByText('3 reservas')).toBeInTheDocument()
     expect(screen.getByText('96 en total')).toBeInTheDocument()
     expect(screen.getByText(/Se generaron 96 cuotas/)).toBeInTheDocument()
-    expect(screen.getByText('hace 1 h')).toBeInTheDocument()
+    expect(screen.getByText('hace 30 min')).toBeInTheDocument()
   })
 
   it('shows the front desk only the today strip with the exits tile and desk actions', async () => {
