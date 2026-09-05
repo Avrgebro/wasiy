@@ -38,9 +38,9 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Case-insensitive substring search over the given SQL expressions,
-        // with LIKE wildcards in the term escaped. Single owner of the
-        // escaping rule for every list endpoint.
+        // Case- and accent-insensitive substring search over the given SQL
+        // expressions, with LIKE wildcards in the term escaped. Single owner
+        // of the escaping rule for every list endpoint and the spotlight.
         Builder::macro('searchLike', function (array $expressions, string $search): Builder {
             /** @var Builder $this */
             $likeSearch = '%'.addcslashes(Str::lower(trim($search)), '\\%_').'%';
@@ -48,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
             return $this->where(function (Builder $query) use ($expressions, $likeSearch): void {
                 foreach ($expressions as $index => $expression) {
                     $method = $index === 0 ? 'whereRaw' : 'orWhereRaw';
-                    $query->{$method}("LOWER({$expression}) LIKE ?", [$likeSearch]);
+                    $query->{$method}("unaccent(LOWER({$expression})) LIKE unaccent(?)", [$likeSearch]);
                 }
             });
         });

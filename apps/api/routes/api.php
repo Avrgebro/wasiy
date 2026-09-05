@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FinancialMovementController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\LocationDashboardController;
 use App\Http\Controllers\Api\LocationPhotoController;
+use App\Http\Controllers\Api\LocationSearchController;
 use App\Http\Controllers\Api\LocationSettingsController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\PackageController;
@@ -103,6 +104,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     // controllers' gates and FormRequests.
     Route::get('/locations/{location}/dashboard', LocationDashboardController::class)
         ->can('view', 'location');
+    Route::get('/locations/{location}/search', LocationSearchController::class);
     Route::get('/locations/{location}/units', [UnitController::class, 'index']);
     Route::post('/locations/{location}/units', [UnitController::class, 'store']);
     Route::get('/locations/{location}/vehicles', [VehicleController::class, 'index']);
