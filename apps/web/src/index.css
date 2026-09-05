@@ -5,6 +5,7 @@
 @import 'tailwindcss';
 @import '@mantine/core/styles.layer.css';
 @import '@mantine/notifications/styles.layer.css';
+@import '@mantine/spotlight/styles.layer.css';
 
 /* Brand typography (marketing site + auth surfaces only): Sora for display,
    Instrument Sans for body. Product UI stays on Inter per DESIGN-SYSTEM.md —

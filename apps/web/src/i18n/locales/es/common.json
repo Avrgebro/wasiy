@@ -1357,5 +1357,17 @@
       "confirmed": "Confirmada por {{method}}",
       "confirmedWith": "Confirmada por {{method}} con {{name}}"
     }
+  },
+  "search": {
+    "placeholder": "Buscar unidades, residentes, visitantes, paquetes o páginas…",
+    "hint": "Escribe al menos dos letras.",
+    "nothingFound": "Nada coincide con «{{query}}».",
+    "groups": {
+      "pages": "Páginas",
+      "units": "Unidades",
+      "residents": "Residentes",
+      "visits": "Visitantes",
+      "packages": "Paquetes"
+    }
   }
 }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { useRouterState } from '@tanstack/react-router'
+import { GlobalSpotlight } from '../../../features/search/global-spotlight'
 import { MobileLocationSheet } from './location-switcher'
 import { Sidebar } from './sidebar'
 import { Topbar } from './topbar'
@@ -60,6 +61,7 @@ export function AppShell({ children, navItems }: AppShellProps) {
         onClose={() => setMobileLocationOpened(false)}
         opened={mobileLocationOpened}
       />
+      <GlobalSpotlight navItems={navItems} />
     </div>
   )
 }

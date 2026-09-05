@@ -1357,5 +1357,17 @@
       "confirmed": "Confirmed by {{method}}",
       "confirmedWith": "Confirmed by {{method}} with {{name}}"
     }
+  },
+  "search": {
+    "placeholder": "Search units, residents, visitors, packages or pages…",
+    "hint": "Type at least two characters.",
+    "nothingFound": "Nothing matches “{{query}}”.",
+    "groups": {
+      "pages": "Pages",
+      "units": "Units",
+      "residents": "Residents",
+      "visits": "Visitors",
+      "packages": "Packages"
+    }
   }
 }

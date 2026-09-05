@@ -1,5 +1,6 @@
 import { ActionIcon, Tooltip } from '@mantine/core'
 import { Bell, HamburgerMenu, Magnifer } from '@solar-icons/react'
+import { spotlight } from '@mantine/spotlight'
 import { useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useLocationContext } from '../../../features/auth/hooks'
@@ -59,15 +60,29 @@ export function Topbar({
           </div>
         ) : null}
 
-        {/* TEMPORARY: visual placeholder only — global search is not built yet.
-            Remove or wire up when the search feature lands. */}
-        <div className="hidden h-9 w-full max-w-md items-center gap-2 rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-3 text-sm text-[var(--mantine-color-dimmed)] md:flex">
+        {/* Opens the ⌘K spotlight (features/search); the input look is a
+            button so the real field lives in the overlay. */}
+        <button
+          className="hidden h-9 w-full max-w-md cursor-pointer items-center gap-2 rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-3 text-sm text-[var(--mantine-color-dimmed)] hover:border-[var(--wa-border-strong)] md:flex"
+          onClick={spotlight.open}
+          type="button"
+        >
           <Magnifer aria-hidden="true" size={16} />
           <span>{t('shell.searchPlaceholder')}</span>
           <kbd className="ml-auto rounded border border-[var(--mantine-color-default-border)] px-1.5 py-0.5 font-sans text-[10px] font-semibold">
             ⌘K
           </kbd>
-        </div>
+        </button>
+        <ActionIcon
+          aria-label={t('shell.searchPlaceholder')}
+          className="md:hidden"
+          onClick={spotlight.open}
+          radius={10}
+          size={40}
+          variant="default"
+        >
+          <Magnifer size={18} />
+        </ActionIcon>
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {showNotifications ? (
