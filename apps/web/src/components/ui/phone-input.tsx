@@ -151,11 +151,12 @@ function CountryPicker({
       <Combobox.Dropdown>
         <Combobox.Search placeholder={t('phone.searchCountry')} value={search} onChange={(event) => setSearch(event.currentTarget.value)} />
         <Combobox.Options>
-          <ScrollArea.Autosize mah={260} type="scroll">
+          {/* Vertical only: the viewport otherwise grows to the widest row and scrolls sideways. */}
+          <ScrollArea.Autosize mah={260} offsetScrollbars scrollbars="y" type="scroll">
             {shown.length === 0 ? <Combobox.Empty>{t('phone.noCountry')}</Combobox.Empty> : null}
             {shown.map((option) => (
               <Combobox.Option key={option.value} active={option.value === value} value={option.value}>
-                <span className="flex items-center gap-2 text-sm">
+                <span className="flex min-w-0 items-center gap-2 text-sm">
                   <span aria-hidden>{countryFlag(option.value)}</span>
                   <span className="min-w-0 flex-1 truncate">{option.name}</span>
                   <span className="font-mono text-xs text-[var(--mantine-color-dimmed)]">+{option.callingCode}</span>
