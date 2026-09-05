@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\LocationType;
 use App\Models\Account;
+use App\Models\Building;
 use App\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -13,6 +14,17 @@ use Illuminate\Support\Str;
  */
 class LocationFactory extends Factory
 {
+    /** Every Location has its default Building from birth (ADR 0037). */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Location $location): void {
+            Building::query()->firstOrCreate(
+                ['location_id' => $location->id, 'name' => null],
+                ['account_id' => $location->account_id, 'sort_order' => 0],
+            );
+        });
+    }
+
     /**
      * Define the model's default state.
      *

@@ -376,10 +376,12 @@ test('seeded manager can complete m3 registry export and activity acceptance flo
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
     $unit = Unit::query()->where('location_id', $location->id)->where('unit_number', '101')->sole();
 
+    $torreC = $location->buildings()->create(['account_id' => $account->id, 'name' => 'Torre C', 'sort_order' => 9]);
+
     $this->actingAs($manager)
         ->postJson("/api/locations/{$location->id}/units", [
             'unit_number' => '901',
-            'building_name' => 'Torre C',
+            'building_id' => $torreC->id,
         ])
         ->assertCreated()
         ->assertJsonPath('data.status', RegistryStatus::Active->value);
@@ -447,7 +449,7 @@ test('seeded manager can complete m4 registry import acceptance flow', function 
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
     $existingUnit = Unit::query()
         ->where('location_id', $location->id)
-        ->where('building_name', 'Torre A')
+        ->whereRelation('building', 'name', 'Torre A')
         ->where('unit_number', '101')
         ->sole();
     $existingResident = Resident::query()
@@ -547,8 +549,8 @@ test('seeded manager can complete m4 registry import acceptance flow', function 
         ->sole();
 
     expect($confirmableImport->status)->toBe(ImportStatus::Completed)
-        ->and(Unit::query()->where('location_id', $location->id)->where('building_name', 'Torre Import')->where('unit_number', '701')->count())->toBe(1)
-        ->and(Unit::query()->where('location_id', $location->id)->where('building_name', 'Torre A')->where('unit_number', '101')->count())->toBe(1)
+        ->and(Unit::query()->where('location_id', $location->id)->whereRelation('building', 'name', 'Torre Import')->where('unit_number', '701')->count())->toBe(1)
+        ->and(Unit::query()->where('location_id', $location->id)->whereRelation('building', 'name', 'Torre A')->where('unit_number', '101')->count())->toBe(1)
         ->and(UnitMembership::query()->where('resident_id', $newResident->id)->where('location_id', $location->id)->count())->toBe(1)
         ->and($primaryMembership->unit->unit_number)->toBe('703')
         ->and(RegistryImportRow::query()->where('registry_import_id', $confirmableImport->id)->where('status', ImportRowStatus::Skipped)->count())->toBe(1)

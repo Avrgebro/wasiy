@@ -20,6 +20,8 @@ use Illuminate\Support\Str;
     'location_id',
     'unit_number',
     'type',
+    'building_id',
+    // Accepted for mass assignment and resolved to a Building on save.
     'building_name',
     'floor',
     'area_m2',
@@ -34,6 +36,84 @@ class Unit extends Model
 {
     /** @use HasFactory<UnitFactory> */
     use HasFactory, HasUlids;
+
+    /** Labels, search and resources read the tower through this relation. */
+    protected $with = ['building'];
+
+    /** A building name assigned before save; resolved once location_id is known. */
+    private ?string $pendingBuildingName = null;
+
+    private bool $hasPendingBuildingName = false;
+
+    /**
+     * Resolve the tower before every write. Done here rather than in a
+     * `saving` listener because seeders run WithoutModelEvents.
+     *
+     * @param  array<string, mixed>  $options
+     */
+    public function save(array $options = []): bool
+    {
+        // A blank name never overrides an explicit building_id (factories
+        // pass both); a real name always wins.
+        $pending = is_string($this->pendingBuildingName) ? trim($this->pendingBuildingName) : '';
+        if ($this->hasPendingBuildingName && ($pending !== '' || $this->building_id === null)) {
+            $this->building_id = Building::resolveForLocation($this->location, $pending)->id;
+        }
+        $this->hasPendingBuildingName = false;
+        $this->pendingBuildingName = null;
+
+        if ($this->building_id === null) {
+            $this->building_id = Building::resolveForLocation($this->location, null)->id;
+        }
+
+        if ($this->isDirty('building_id')) {
+            $this->unsetRelation('building');
+        }
+
+        return parent::save($options);
+    }
+
+    /**
+     * Setting the tower by name keeps factories, seeders and the CSV import
+     * simple: the Building is looked up or created in the unit's Location.
+     */
+    public function setBuildingNameAttribute(?string $name): void
+    {
+        $this->pendingBuildingName = $name;
+        $this->hasPendingBuildingName = true;
+    }
+
+    public function getBuildingNameAttribute(): ?string
+    {
+        if ($this->hasPendingBuildingName) {
+            return $this->pendingBuildingName;
+        }
+
+        return $this->building?->name;
+    }
+
+    /**
+     * Case-insensitive match on unit number and tower name (the desk types
+     * both; the spotlight sends one term for everything).
+     *
+     * @param  Builder<Unit>  $query
+     */
+    public function scopeSearchIdentity(Builder $query, string $search): void
+    {
+        $query->where(fn (Builder $group) => $group
+            ->searchLike(['unit_number'], $search)
+            ->orWhereHas('building', fn (Builder $building) => $building->searchLike(['name', 'code'], $search)));
+    }
+
+    /**
+     * Towers in the order the Location lists them, then whatever follows.
+     *
+     * @param  Builder<Unit>  $query
+     */
+    public function scopeOrderByBuilding(Builder $query, string $direction = 'asc'): void
+    {
+        $query->orderBy(Building::query()->select('sort_order')->whereColumn('buildings.id', 'units.building_id'), $direction);
+    }
 
     /**
      * @return array<string, string>
@@ -60,7 +140,8 @@ class Unit extends Model
     {
         $query
             ->whereRaw('LOWER(unit_number) = ?', [Str::lower((string) $unitNumber)])
-            ->whereRaw("LOWER(COALESCE(building_name, '')) = ?", [Str::lower((string) $buildingName)]);
+            ->whereHas('building', fn (Builder $building) => $building
+                ->whereRaw("LOWER(COALESCE(name, '')) = ?", [Str::lower((string) $buildingName)]));
     }
 
     /**
@@ -95,6 +176,14 @@ class Unit extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * @return BelongsTo<Building, $this>
+     */
+    public function building(): BelongsTo
+    {
+        return $this->belongsTo(Building::class);
     }
 
     /**

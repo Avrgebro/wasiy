@@ -34,6 +34,9 @@ class CreateLocation
                 'slug' => $this->availableSlug($account, $attributes['name']),
             ]);
 
+            // The single, unnamed Building every Location starts with (ADR 0037).
+            $location->buildings()->create(['account_id' => $account->id, 'name' => null, 'sort_order' => 0]);
+
             $this->activityLogger->log(
                 account: $account,
                 eventType: ActivityEventType::LocationCreated,

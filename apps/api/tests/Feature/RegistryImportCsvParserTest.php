@@ -222,9 +222,9 @@ test('duplicate detector runs a bounded number of queries regardless of row coun
     $queryCount = count(DB::getQueryLog());
     DB::disableQueryLog();
 
-    // One batched query each for units, residents, and memberships —
-    // never per-row.
-    expect($queryCount)->toBeLessThanOrEqual(3);
+    // One batched query each for units (plus their buildings), residents,
+    // and memberships — never per-row.
+    expect($queryCount)->toBeLessThanOrEqual(4);
 });
 
 test('unit only rows fail loudly on invalid membership status or primary contact values', function () {

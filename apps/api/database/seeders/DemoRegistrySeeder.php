@@ -162,9 +162,9 @@ class DemoRegistrySeeder extends Seeder
                 'account_id' => $account->id,
                 'location_id' => $location->id,
                 'unit_number' => $unitNumber,
-                'building_name' => $attributes['building_name'] ?? null,
             ],
             [
+                'building_name' => $attributes['building_name'] ?? null,
                 'floor' => $attributes['floor'] ?? null,
                 'type' => $attributes['type'] ?? 'apartment',
                 'area_m2' => $attributes['area_m2'] ?? null,

@@ -31,7 +31,9 @@ class UnitResource extends JsonResource
             // The DB default only lands after a refresh; a just-created unit
             // has no attribute yet.
             'type' => $this->type?->value ?? UnitType::Apartment->value,
+            'building_id' => $this->building_id,
             'building_name' => $this->building_name,
+            'building_code' => $this->building?->code,
             'floor' => $this->floor,
             'area_m2' => $this->area_m2 === null ? null : (float) $this->area_m2,
             'participation_share' => $this->participation_share === null ? null : (float) $this->participation_share,

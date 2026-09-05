@@ -150,6 +150,12 @@ class Location extends Model
         return $this->hasMany(Visit::class);
     }
 
+    /** @return HasMany<Building, $this> */
+    public function buildings(): HasMany
+    {
+        return $this->hasMany(Building::class)->orderBy('sort_order')->orderBy('name');
+    }
+
     /** @return HasMany<Unit, $this> */
     public function units(): HasMany
     {

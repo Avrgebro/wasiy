@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AccountSettingsController;
 use App\Http\Controllers\Api\AccountStaffController;
 use App\Http\Controllers\Api\AmenityController;
 use App\Http\Controllers\Api\AmenityPhotoController;
+use App\Http\Controllers\Api\BuildingController;
 use App\Http\Controllers\Api\FinancialMovementController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\LocationDashboardController;
@@ -105,6 +106,10 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::get('/locations/{location}/dashboard', LocationDashboardController::class)
         ->can('view', 'location');
     Route::get('/locations/{location}/search', LocationSearchController::class);
+    Route::get('/locations/{location}/buildings', [BuildingController::class, 'index']);
+    Route::post('/locations/{location}/buildings', [BuildingController::class, 'store']);
+    Route::patch('/buildings/{building}', [BuildingController::class, 'update']);
+    Route::delete('/buildings/{building}', [BuildingController::class, 'destroy']);
     Route::get('/locations/{location}/units', [UnitController::class, 'index']);
     Route::post('/locations/{location}/units', [UnitController::class, 'store']);
     Route::get('/locations/{location}/vehicles', [VehicleController::class, 'index']);

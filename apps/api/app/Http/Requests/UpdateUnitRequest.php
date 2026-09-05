@@ -18,7 +18,7 @@ class UpdateUnitRequest extends StoreUnitRequest
     {
         return [
             'unit_number' => ['sometimes', 'required', 'string', 'max:255'],
-            'building_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'building_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('buildings', 'id')->where('location_id', $this->route('unit')?->location_id)],
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
             'type' => ['sometimes', Rule::enum(UnitType::class)],
             'area_m2' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999'],
@@ -40,7 +40,7 @@ class UpdateUnitRequest extends StoreUnitRequest
             if ($this->hasDuplicateUnit(
                 location: $unit->location,
                 unitNumber: $this->input('unit_number', $unit->unit_number),
-                buildingName: $this->has('building_name') ? $this->input('building_name') : $unit->building_name,
+                buildingId: $this->has('building_id') ? $this->input('building_id') : $unit->building_id,
                 ignore: $unit,
             )) {
                 $validator->errors()->add('unit_number', __('The unit number has already been taken for this building and location.'));

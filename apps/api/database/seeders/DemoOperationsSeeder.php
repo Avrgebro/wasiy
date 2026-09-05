@@ -112,8 +112,9 @@ class DemoOperationsSeeder extends Seeder
             }
 
             $units->put($key, Unit::query()->updateOrCreate(
-                ['account_id' => $this->account->id, 'location_id' => $this->central->id, 'unit_number' => $number, 'building_name' => $tower],
+                ['account_id' => $this->account->id, 'location_id' => $this->central->id, 'unit_number' => $number],
                 [
+                    'building_name' => $tower,
                     'floor' => (string) $floor,
                     'type' => 'apartment',
                     'area_m2' => $area,
@@ -128,8 +129,8 @@ class DemoOperationsSeeder extends Seeder
         }
 
         $units->put($this->key('Torre A', 'L-01'), Unit::query()->updateOrCreate(
-            ['account_id' => $this->account->id, 'location_id' => $this->central->id, 'unit_number' => 'L-01', 'building_name' => 'Torre A'],
-            ['floor' => '1', 'type' => 'commercial', 'area_m2' => 64, 'participation_share' => 0.64, 'maintenance_fee' => 350, 'status' => RegistryStatus::Active, 'notes' => 'Local comercial · farmacia.'],
+            ['account_id' => $this->account->id, 'location_id' => $this->central->id, 'unit_number' => 'L-01'],
+            ['building_name' => 'Torre A', 'floor' => '1', 'type' => 'commercial', 'area_m2' => 64, 'participation_share' => 0.64, 'maintenance_fee' => 350, 'status' => RegistryStatus::Active, 'notes' => 'Local comercial · farmacia.'],
         ));
 
         return $units;

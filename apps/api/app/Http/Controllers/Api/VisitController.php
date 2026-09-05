@@ -49,7 +49,7 @@ class VisitController extends Controller
             ->when($validated['confirmation'] ?? null, fn (Builder $query, string $confirmation) => $query->where('confirmation', $confirmation))
             ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->where(fn (Builder $group) => $group
                 ->searchLike(['visitor_name', 'document'], $search)
-                ->orWhereHas('unit', fn (Builder $unit) => $unit->searchLike(['unit_number', 'building_name'], $search))
+                ->orWhereHas('unit', fn (Builder $unit) => $unit->searchIdentity($search))
                 ->orWhereHas('resident', fn (Builder $resident) => $resident->searchLike(["CONCAT(first_name, ' ', last_name)"], $search))))
             ->with(self::RELATIONS)
             ->orderByDesc('checked_in_at')

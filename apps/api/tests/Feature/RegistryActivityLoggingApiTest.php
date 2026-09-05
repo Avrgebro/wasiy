@@ -26,11 +26,12 @@ function createRegistryActivityManager(Location $location): User
 test('unit create update and inactivate log activity and no-op update does not', function () {
     $location = Location::factory()->create();
     $manager = createRegistryActivityManager($location);
+    $torreA = $location->buildings()->create(['account_id' => $location->account_id, 'name' => 'Torre A', 'sort_order' => 1]);
 
     $response = $this->actingAs($manager)
         ->postJson("/api/locations/{$location->id}/units", [
             'unit_number' => '301',
-            'building_name' => 'Torre A',
+            'building_id' => $torreA->id,
         ])
         ->assertCreated();
 

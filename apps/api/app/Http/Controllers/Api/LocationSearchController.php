@@ -69,11 +69,12 @@ class LocationSearchController extends Controller
         return Unit::query()
             ->where('location_id', $location->id)
             ->where(fn (Builder $group) => $group
-                ->searchLike(['unit_number', 'building_name', 'parking_spots', 'storage_rooms'], $term)
+                ->searchIdentity($term)
+                ->orWhere(fn (Builder $labels) => $labels->searchLike(['parking_spots', 'storage_rooms'], $term))
                 ->orWhereHas('vehicles', fn (Builder $vehicle) => $vehicle->searchLike(['plate'], $term)))
             ->with(['primaryContactMembership.resident', 'vehicles'])
             ->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END")
-            ->orderBy('building_name')->orderBy('unit_number')
+            ->orderByBuilding()->orderBy('unit_number')
             ->limit(self::PER_GROUP)
             ->get()
             ->map(function (Unit $unit) use ($term): array {

@@ -40,7 +40,7 @@ class GenerateMonthlyDues
                 ->where('location_id', $location->id)
                 ->where('status', RegistryStatus::Active->value)
                 ->where('maintenance_fee', '>', 0)
-                ->orderBy('building_name')->orderBy('unit_number')
+                ->orderByBuilding()->orderBy('unit_number')
                 ->get();
 
             $issued = FinancialMovement::query()

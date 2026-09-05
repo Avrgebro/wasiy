@@ -40,7 +40,7 @@ class PackageController extends Controller
             ->where('location_id', $location->id)
             ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->where(fn (Builder $group) => $group
-                ->whereHas('unit', fn (Builder $unit) => $unit->searchLike(['unit_number', 'building_name'], $search))
+                ->whereHas('unit', fn (Builder $unit) => $unit->searchIdentity($search))
                 ->orWhereHas('resident', fn (Builder $resident) => $resident->searchLike(["CONCAT(first_name, ' ', last_name)"], $search))))
             ->with(self::RELATIONS)
             ->orderByDesc('received_at')

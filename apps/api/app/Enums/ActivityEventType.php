@@ -56,6 +56,7 @@ enum ActivityEventType: string
     case LocationDeactivated = 'location.deactivated';
     case LocationReactivated = 'location.reactivated';
     case LocationSettingsChanged = 'location.settings_changed';
+    case LocationBuildingsChanged = 'location.buildings_changed';
     case AccountSettingsChanged = 'account.settings_changed';
     case ExportRequested = 'export.requested';
     case ExportCompleted = 'export.completed';

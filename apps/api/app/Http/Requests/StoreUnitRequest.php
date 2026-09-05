@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\UnitType;
+use App\Models\Building;
 use App\Models\Location;
 use App\Models\Unit;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -24,7 +25,7 @@ class StoreUnitRequest extends FormRequest
     {
         return [
             'unit_number' => ['required', 'string', 'max:255'],
-            'building_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'building_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('buildings', 'id')->where('location_id', $this->route('location')?->id)],
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
             'type' => ['sometimes', Rule::enum(UnitType::class)],
             'area_m2' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999'],
@@ -45,7 +46,7 @@ class StoreUnitRequest extends FormRequest
             if ($this->hasDuplicateUnit(
                 location: $location,
                 unitNumber: $this->input('unit_number'),
-                buildingName: $this->input('building_name'),
+                buildingId: $this->input('building_id'),
             )) {
                 $validator->errors()->add('unit_number', __('The unit number has already been taken for this building and location.'));
             }
@@ -60,7 +61,7 @@ class StoreUnitRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $trimmed = [];
-        foreach (['unit_number', 'building_name', 'floor', 'parking_spots', 'storage_rooms'] as $key) {
+        foreach (['unit_number', 'building_id', 'floor', 'parking_spots', 'storage_rooms'] as $key) {
             if ($this->has($key) && is_string($this->input($key))) {
                 $trimmed[$key] = trim($this->input($key)) ?: null;
             }
@@ -72,20 +73,17 @@ class StoreUnitRequest extends FormRequest
         $this->merge($trimmed);
     }
 
-    protected function hasDuplicateUnit(Location $location, mixed $unitNumber, mixed $buildingName, ?Unit $ignore = null): bool
+    protected function hasDuplicateUnit(Location $location, mixed $unitNumber, mixed $buildingId, ?Unit $ignore = null): bool
     {
+        // No building given means the location's default one (Unit::saving).
+        $buildingId = is_string($buildingId) && $buildingId !== ''
+            ? $buildingId
+            : Building::resolveForLocation($location, null)->id;
+
         return Unit::query()
             ->where('location_id', $location->id)
             ->where('unit_number', $unitNumber)
-            ->where(function ($query) use ($buildingName): void {
-                if ($buildingName === null || $buildingName === '') {
-                    $query->whereNull('building_name')->orWhere('building_name', '');
-
-                    return;
-                }
-
-                $query->where('building_name', $buildingName);
-            })
+            ->where('building_id', $buildingId)
             ->when($ignore, fn ($query) => $query->whereKeyNot($ignore->id))
             ->exists();
     }
