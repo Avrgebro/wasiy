@@ -13,6 +13,7 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
 use App\Services\ActivityLogger;
+use App\Support\PhoneNumber;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -250,7 +251,7 @@ class CommitRegistryImport implements ShouldQueue
             'account_id' => $import->account_id,
             'first_name' => $normalized->firstName,
             'last_name' => $normalized->lastName,
-            'phone' => $normalized->phone,
+            'phone' => PhoneNumber::normalizeLenient($normalized->phone, $import->location?->country ?? PhoneNumber::FALLBACK_COUNTRY),
             'email' => $normalized->email,
             'status' => RegistryStatus::Active,
         ]), true];

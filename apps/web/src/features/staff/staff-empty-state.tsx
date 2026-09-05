@@ -24,7 +24,7 @@ export function StaffEmptyState({
           {filtered ? t('staff.empty.filteredBody') : t('staff.empty.body')}
         </Text>
         {filtered ? null : (
-          <Button color="amber.4" mt="sm" onClick={onInvite}>
+          <Button color="accent" mt="sm" onClick={onInvite}>
             {t('staff.invite')}
           </Button>
         )}

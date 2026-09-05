@@ -3,7 +3,6 @@
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\Resident;
@@ -46,7 +45,6 @@ test('manager can create a resident and assign them to a unit', function () {
             'memberships' => [
                 [
                     'unit_id' => $unit->id,
-                    'resident_type' => ResidentType::Tenant->value,
                     'is_primary_contact' => true,
                     'started_at' => '2026-06-01',
                 ],
@@ -55,7 +53,6 @@ test('manager can create a resident and assign them to a unit', function () {
         ->assertCreated()
         ->assertJsonPath('data.name', 'Ana Salas')
         ->assertJsonPath('data.memberships.0.unit_id', $unit->id)
-        ->assertJsonPath('data.memberships.0.resident_type', ResidentType::Tenant->value)
         ->assertJsonPath('data.memberships.0.is_primary_contact', true);
 
     $this->assertDatabaseHas('residents', [
@@ -78,8 +75,8 @@ test('resident can belong to multiple units', function () {
             'first_name' => 'Luis',
             'last_name' => 'Ramos',
             'memberships' => [
-                ['unit_id' => $firstUnit->id, 'resident_type' => ResidentType::Owner->value],
-                ['unit_id' => $secondUnit->id, 'resident_type' => ResidentType::Occupant->value],
+                ['unit_id' => $firstUnit->id],
+                ['unit_id' => $secondUnit->id],
             ],
         ])
         ->assertCreated()
@@ -131,7 +128,7 @@ test('location manager cannot assign resident to a unit outside accessible locat
             'first_name' => 'Marta',
             'last_name' => 'Vega',
             'memberships' => [
-                ['unit_id' => $unit->id, 'resident_type' => ResidentType::Tenant->value],
+                ['unit_id' => $unit->id],
             ],
         ])
         ->assertUnprocessable()
@@ -149,7 +146,6 @@ test('account admin can manage cross location memberships in the account', funct
     $this->actingAs($admin)
         ->postJson("/api/residents/{$resident->id}/memberships", [
             'unit_id' => $unit->id,
-            'resident_type' => ResidentType::GuestResident->value,
             'status' => RegistryStatus::Active->value,
         ])
         ->assertCreated()
@@ -237,8 +233,9 @@ test('resident creation is closed to users without registry management rights', 
     $this->assertDatabaseMissing('residents', ['last_name' => 'Quispe']);
 });
 
-test('resident creation without memberships still requires registry rights in the account', function () {
+test('resident creation requires a unit and registry rights in the account', function () {
     $location = Location::factory()->create();
+    $unit = Unit::factory()->for($location->account)->for($location)->create();
     $otherLocation = Location::factory()->create();
 
     // A manager of a different account must not be able to write into this one.
@@ -248,6 +245,7 @@ test('resident creation without memberships still requires registry rights in th
         ->postJson("/api/accounts/{$location->account_id}/residents", [
             'first_name' => 'Ines',
             'last_name' => 'Torres',
+            'memberships' => [['unit_id' => $unit->id]],
         ])
         ->assertForbidden();
 
@@ -255,10 +253,20 @@ test('resident creation without memberships still requires registry rights in th
 
     $admin = createRegistryAdmin($location->account);
 
+    // Without a unit the person would belong to no location's directory.
     $this->actingAs($admin)
         ->postJson("/api/accounts/{$location->account_id}/residents", [
             'first_name' => 'Ines',
             'last_name' => 'Torres',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('memberships');
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$location->account_id}/residents", [
+            'first_name' => 'Ines',
+            'last_name' => 'Torres',
+            'memberships' => [['unit_id' => $unit->id]],
         ])
         ->assertCreated();
 

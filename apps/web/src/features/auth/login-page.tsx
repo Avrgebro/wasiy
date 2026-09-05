@@ -5,7 +5,6 @@ import {
   Button,
   Checkbox,
   Divider,
-  SegmentedControl,
 } from '@mantine/core'
 import {
   ArrowRight,
@@ -15,7 +14,6 @@ import {
   Password,
 } from '@solar-icons/react'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
-import '@fontsource/sora/600.css'
 import '@fontsource/instrument-sans/400.css'
 import '@fontsource/instrument-sans/500.css'
 import '@fontsource/instrument-sans/600.css'
@@ -109,8 +107,9 @@ function BrandPanel() {
 
 function BrandStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 rounded-[14px] border border-[var(--mantine-color-dark-4)] bg-[var(--mantine-color-dark-5)]/70 px-5 py-[18px] backdrop-blur-sm">
-      <div className="font-display text-2xl font-semibold text-[var(--mantine-color-amber-3)]">
+    <div className="flex-1 rounded-surface border border-[var(--mantine-color-dark-4)] bg-[var(--mantine-color-dark-5)]/70 px-5 py-[18px] backdrop-blur-sm">
+      {/* Constant petroleum panel: the accent stays at its dark value. */}
+      <div className="font-display text-2xl font-semibold text-[var(--mantine-color-accent-5)]">
         {value}
       </div>
       <div className="mt-1 text-[13px] text-[var(--mantine-color-dark-2)]">
@@ -159,7 +158,7 @@ export function LoginPage() {
         <div className="flex w-full max-w-[420px] flex-col gap-[26px]">
           <div className="flex items-center gap-2.5 xl:hidden">
             <WasiyLogo
-              className="shrink-0 text-[light-dark(#124E52,#F7F5F0)]"
+              className="shrink-0 text-[var(--wa-brand-mark)]"
               size={28}
             />
             <span className="font-display text-xl font-semibold tracking-tight text-[var(--mantine-color-text)]">
@@ -176,34 +175,13 @@ export function LoginPage() {
             </p>
           </div>
 
-          {/* Placeholder: both audiences share the same login for now. */}
-          <SegmentedControl
-            color="teal.6"
-            data={[
-              { label: t('auth.loginTabStaff'), value: 'staff' },
-              { label: t('auth.loginTabResident'), value: 'resident' },
-            ]}
-            defaultValue="staff"
-            fullWidth
-            radius={10}
-            styles={{
-              root: {
-                padding: 4,
-                border: '1px solid var(--mantine-color-default-border)',
-                backgroundColor: 'var(--mantine-color-default)',
-              },
-              indicator: { borderRadius: 7 },
-              label: { fontSize: 13.5, fontWeight: 600, padding: '9px 0' },
-            }}
-          />
-
           <form
             className="flex flex-col gap-[26px]"
             onSubmit={form.handleSubmit(handleSubmit)}
           >
             <div className="flex flex-col gap-4">
               {rootError ? (
-                <Alert color="red" title={t('auth.loginFailed')}>
+                <Alert color="error" title={t('auth.loginFailed')}>
                   {rootError}
                 </Alert>
               ) : null}
@@ -232,7 +210,7 @@ export function LoginPage() {
                 styles={fieldStyles}
               />
               <Checkbox
-                color="amber.4"
+                color="accent"
                 defaultChecked
                 label={t('auth.rememberMe')}
                 radius={5}
@@ -248,7 +226,7 @@ export function LoginPage() {
 
             <div className="flex flex-col gap-3.5">
               <Button
-                color="amber.4"
+                color="accent"
                 fullWidth
                 h={48}
                 loading={loginMutation.isPending}

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\RegistryExport;
@@ -32,7 +33,7 @@ class RegistryExportPolicy
 
         return $location !== null
             && $location->account_id === $account->id
-            && $this->access->canManageRegistry($user, $location);
+            && $this->access->can($user, $location, Capability::ManageRegistry);
     }
 
     public function view(User $user, RegistryExport $export): bool
@@ -42,7 +43,7 @@ class RegistryExportPolicy
         }
 
         return $export->location !== null
-            && $this->access->canManageRegistry($user, $export->location);
+            && $this->access->can($user, $export->location, Capability::ManageRegistry);
     }
 
     public function download(User $user, RegistryExport $export): bool

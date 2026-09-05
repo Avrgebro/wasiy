@@ -6,7 +6,10 @@
     "save": "Save",
     "search": "Search",
     "import": "Import",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back"
   },
   "common": {
     "loading": "Loading",
@@ -25,8 +28,6 @@
     "invalidCredentials": "These credentials do not match our records.",
     "login": "Sign in",
     "loginFailed": "Sign-in failed",
-    "loginTabResident": "Resident",
-    "loginTabStaff": "Staff",
     "loginTitle": "Sign in to Wasiy",
     "loginWithCode": "Code",
     "logout": "Sign out",
@@ -40,7 +41,11 @@
     "selectLocationRequired": "Select a location to view this dashboard.",
     "useYourInvitation": "Use your invitation",
     "welcomeBack": "Welcome back",
-    "welcomeBackSubtitle": "Sign in to continue with today's operation."
+    "welcomeBackSubtitle": "Sign in to continue with today's operation.",
+    "noAccessResidentHint": "Your access is to the resident portal, not the staff app.",
+    "goToPortal": "Go to the resident portal",
+    "noAccessStaffHint": "Your access is to the staff app, not the resident portal.",
+    "goToStaffApp": "Go to the staff app"
   },
   "accountSelection": {
     "selectFailed": "Account selection failed",
@@ -64,26 +69,83 @@
     "retry": "Try again"
   },
   "dashboard": {
-    "emptyRegistry": "There is no recent activity for this location yet.",
-    "heading": "{{location}} operation",
-    "registryTitle": "Recent registry",
-    "stats": {
-      "assignedStaff": "Assigned staff",
-      "assignedStaffDetail": "With access to this location",
-      "expectedVisitors": "Expected visitors",
-      "expectedVisitorsDetail": "For the current date",
-      "occupiedUnits": "Occupied units",
-      "occupiedUnitsDetail": "In this location",
-      "pendingReservations": "Pending reservations",
-      "pendingReservationsDetail": "Require review"
+    "heading": "{{location}} panel",
+    "today": "Today, {{date}}",
+    "overdue": "Check-out to confirm",
+    "primaryContact": "Primary contact",
+    "sections": {
+      "today": "Today",
+      "management": "Management"
     },
-    "summary": "Operational summary for front desk, residents, and reservations.",
-    "table": {
+    "actions": {
+      "newMovement": "New movement"
+    },
+    "tiles": {
+      "visitorsInside": "Visitors inside",
+      "visitorsOverdue_one": "{{count}} check-out to confirm",
+      "visitorsOverdue_other": "{{count}} check-outs to confirm",
+      "packagesPending": "Packages to deliver",
+      "packagesOldest": "oldest, {{age}}",
+      "reservationsToday": "Reservations today",
+      "withDeposit_one": "{{count}} with deposit",
+      "withDeposit_other": "{{count}} with deposit",
+      "pendingMovements": "Pending movements",
+      "exitsToday": "Check-outs today",
+      "duesCollected": "Dues collected",
+      "duesIssued": "of {{total}} issued · {{percent}} %",
+      "unitsWithBalance": "Units with pending balance",
+      "ofUnits": "of {{total}}",
+      "depositsHeld": "Deposits held",
+      "depositsHeldCount_one": "{{count}} reservation",
+      "depositsHeldCount_other": "{{count}} reservations",
+      "residentsNotInvited": "Residents not invited"
+    },
+    "cards": {
+      "visitorsInside": "Visitors inside",
+      "insideCount": "{{count}} inside",
+      "packagesPending": "Packages to deliver",
+      "atDeskCount": "{{count}} at the desk",
+      "reservationsToday": "Today's reservations",
+      "viewCalendar": "View calendar →",
+      "viewAll": "View all",
+      "units": "Units",
+      "unitsTotal": "{{count}} in total",
+      "activity": "Recent activity",
+      "viewAllActivity": "View all →"
+    },
+    "units": {
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "noPrimary": "No primary contact"
+    },
+    "empty": {
+      "visitors": "Nobody inside right now.",
+      "packages": "No packages to deliver.",
+      "reservations": "No reservations today.",
+      "activity": "No activity in this location yet."
+    },
+    "columns": {
+      "schedule": "Schedule",
+      "amenity": "Amenity",
+      "unit": "Unit",
       "resident": "Resident",
-      "status": "Status",
-      "unit": "Unit"
+      "status": "Status"
     },
-    "title": "Location dashboard"
+    "relative": {
+      "now": "now",
+      "minutes": "{{count}} min ago",
+      "hours": "{{count}} h ago",
+      "yesterday": "yesterday {{time}}",
+      "today": "today {{time}}",
+      "days_one": "{{count}} day ago",
+      "days_other": "{{count}} days ago"
+    },
+    "age": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days"
+    }
   },
   "frontDesk": {
     "title": "Visitor check-in"
@@ -98,24 +160,90 @@
     "phoneTitle": "Contact phone",
     "primaryContact": "Primary contact",
     "primaryUnit": "Active access for {{unit}}",
-    "residentTypes": {
-      "guestResident": "Guest resident",
-      "occupant": "Occupant",
-      "owner": "Owner",
-      "tenant": "Tenant"
-    },
     "savePhone": "Save phone",
     "summary": "Summary of your units and contact details.",
-    "title": "Resident portal"
+    "title": "Resident portal",
+    "home": "Home",
+    "noUnit": "You have no active unit in the portal yet.",
+    "greeting": "Hi, {{name}}",
+    "viewAll": "View all",
+    "tabs": {
+      "home": "Home",
+      "visits": "Visits",
+      "profile": "Profile"
+    },
+    "unit": {
+      "mine": "My units",
+      "switch": "Switch unit",
+      "switchHint": "Everything in the portal refers to the active unit."
+    },
+    "visits": {
+      "preRegister": "Pre-register a visit",
+      "registered": "Visit pre-registered",
+      "cancelled": "Pre-registration cancelled",
+      "expectedToday": "Visitors expected today",
+      "noneToday": "Nobody expected today.",
+      "today": "Today",
+      "noTime": "no time",
+      "arrivedAt": "Arrived {{time}}",
+      "chips": {
+        "expected": "Expected",
+        "history": "History"
+      },
+      "emptyExpected": "You have no pre-registered visits.",
+      "emptyHistory": "No visits recorded for this unit yet.",
+      "status": {
+        "label": "Status",
+        "expected": "Expected",
+        "arrived": "Arrived",
+        "cancelled": "Cancelled"
+      },
+      "cancel": "Cancel pre-registration",
+      "cancelHint": "Available only while the status is “Expected”.",
+      "cancelTitle": "Cancel the pre-registration for {{name}}?",
+      "cancelBody": "The desk will stop expecting this person. You can register them again any time.",
+      "timeline": {
+        "preRegistered": "Pre-registered",
+        "arrived": "Arrived",
+        "byDesk": "desk {{name}}",
+        "left": "Left",
+        "leftAuto": "Automatic check-out",
+        "cancelled": "Cancelled"
+      },
+      "form": {
+        "intro": "The desk will see this notice and confirm the arrival. You can cancel it until they arrive.",
+        "visitor": "Visitor name",
+        "document": "Document",
+        "documentOptional": "Document (optional)",
+        "documentPlaceholder": "ID number",
+        "date": "Date",
+        "otherDay": "Another day",
+        "whichDay": "Which day?",
+        "timeOptional": "Approximate time (optional)",
+        "note": "Note for the desk",
+        "noteOptional": "Note for the desk (optional)",
+        "notePlaceholder": "E.g. coming to pick up some keys"
+      }
+    },
+    "packages": {
+      "atDesk": "Packages at the desk",
+      "none": "No packages waiting for you.",
+      "toCollect": "To collect",
+      "package": "Package"
+    },
+    "age": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "days_one": "{{count}} day ago",
+      "days_other": "{{count}} days ago"
+    }
   },
   "nav": {
     "activity": "Activity",
     "announcements": "Announcements",
-    "checkIn": "Check-in",
     "dashboard": "Dashboard",
     "home": "Home",
     "locations": "Locations",
-    "people": "People",
     "imports": "Imports",
     "residents": "Residents",
     "reservations": "Reservations",
@@ -123,10 +251,10 @@
     "todaysVisitors": "Today's visitors",
     "unitLookup": "Unit lookup",
     "units": "Units",
-    "vehicles": "Vehicles",
     "visitors": "Visitors",
     "finances": "Finances",
-    "settings": "Settings"
+    "settings": "Settings",
+    "packages": "Packages"
   },
   "notifications": {
     "label": "View notifications"
@@ -134,13 +262,13 @@
   "navGroups": {
     "account": "Account",
     "communication": "Communication",
-    "frontDesk": "Front desk",
     "operations": "Operations",
     "overview": "Overview",
     "portal": "Portal",
     "registry": "Registry",
     "location": "Location",
-    "administration": "Administration"
+    "administration": "Administration",
+    "reception": "Reception"
   },
   "registry": {
     "imports": {
@@ -261,15 +389,23 @@
   },
   "shell": {
     "account": "Los Olivos Condominium",
+    "changeAccount": "Change account",
+    "changeLocation": "Change location",
+    "changeLocationShort": "Change",
     "closeNav": "Close navigation",
+    "currentLocation": "Current location",
     "frontDeskArea": "Front desk operations",
-    "location": "North Tower",
+    "locationMatchCount_one": "{{count}} location matches the search",
+    "locationMatchCount_other": "{{count}} locations match the search",
+    "locationSearchPlaceholder": "Search locations",
     "locations": "Locations",
     "mainNav": "Main navigation",
     "openNav": "Open navigation",
-    "productArea": "Residential operations",
     "selectLocation": "Select location",
+    "selectingLocation": "Selecting…",
+    "noLocationMatches": "No locations found",
     "userMenu": "Open user menu",
+    "viewAllLocations": "View all locations",
     "searchPlaceholder": "Search…"
   },
   "theme": {
@@ -291,7 +427,27 @@
     "passwordMismatch": "Passwords do not match.",
     "locationRequired": "Select a location.",
     "locationDuplicated": "This location is already assigned.",
-    "locationAssignmentsRequired": "Add at least one location."
+    "locationAssignmentsRequired": "Add at least one location.",
+    "nameRequired": "Enter the name.",
+    "typeRequired": "Select a property type.",
+    "addressLine1Required": "Enter the address.",
+    "cityRequired": "Enter the city.",
+    "amenityRequired": "Select an amenity.",
+    "dateRequired": "Select a date.",
+    "startRequired": "Set a start time.",
+    "endRequired": "Set an end time.",
+    "endAfterStart": "The end time must be after the start.",
+    "categoryRequired": "Select a category.",
+    "amountRequired": "Enter an amount greater than zero.",
+    "conceptRequired": "Enter the concept.",
+    "conceptTooLong": "The concept cannot exceed 120 characters.",
+    "detailTooLong": "The detail cannot exceed 255 characters.",
+    "counterpartyTooLong": "The vendor cannot exceed 120 characters.",
+    "noteTooLong": "The note cannot exceed 1000 characters.",
+    "shareTooHigh": "The share cannot exceed 100%.",
+    "personRequired": "Select a person.",
+    "emailRequiredForInvite": "Enter an email to send the invitation.",
+    "visitorNameRequired": "Enter the visitor's name."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -386,6 +542,953 @@
     "nextPage": "Next page",
     "filters": "Filters",
     "clearFilters": "Clear filters",
-    "removeFilter": "Remove filter {{filter}}"
+    "removeFilter": "Remove filter {{filter}}",
+    "sortBy": "Sort by this column",
+    "sortedAsc": "Sorted ascending, click for descending",
+    "sortedDesc": "Sorted descending, click to clear sorting"
+  },
+  "locations": {
+    "title": "Locations",
+    "subtitle": "{{count}} properties in the {{account}} account.",
+    "new": "New location",
+    "searchPlaceholder": "Search by name or address…",
+    "type": "Type",
+    "allTypes": "All types",
+    "allStatuses": "All statuses",
+    "activeLocation": "Active location",
+    "actionsFor": "Actions for {{name}}",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "deactivated": "Location deactivated.",
+    "reactivated": "Location reactivated.",
+    "created": "Location created.",
+    "updated": "Location updated.",
+    "createTitle": "New location",
+    "createSubtitle": "Created active and available immediately.",
+    "editTitle": "Edit location",
+    "create": "Create location",
+    "saveChanges": "Save changes",
+    "deactivateConfirmTitle": "Deactivate {{name}}?",
+    "deactivateHint": "The location disappears from the resident portal and stops accepting new visits and reservations. History is kept.",
+    "deactivateReversible": "You can reactivate it at any time without reloading the registry.",
+    "statuses": {
+      "active": "Active",
+      "deactivated": "Inactive"
+    },
+    "types": {
+      "multifamily_building": "Multifamily building",
+      "condominium": "Condominium",
+      "residential_community": "Residential community",
+      "other": "Other"
+    },
+    "counts": {
+      "units": "units",
+      "residents": "residents",
+      "vehicles": "vehicles",
+      "staff": "staff",
+      "unclaimedInvitations": "unclaimed invit."
+    },
+    "affected": {
+      "units": "Affected units",
+      "residents": "Residents with access",
+      "staff": "Assigned staff"
+    },
+    "empty": {
+      "title": "No locations yet",
+      "body": "Create your account's first property. You can load units, residents, and amenities afterwards.",
+      "filteredTitle": "No results",
+      "filteredBody": "No location matches the current search and filters."
+    },
+    "form": {
+      "name": "Location name",
+      "namePlaceholder": "e.g. Torre Mirador",
+      "type": "Type",
+      "timezone": "Timezone",
+      "addressSection": "Address",
+      "addressLine1": "Address line 1",
+      "addressLine1Placeholder": "Street and number",
+      "addressLine2": "Address line 2",
+      "addressLine2Placeholder": "Tower, floor, reference (optional)",
+      "district": "District",
+      "city": "City",
+      "state": "Region / state",
+      "postalCode": "Postal code",
+      "country": "Country",
+      "contactSection": "Contact",
+      "phone": "Front desk phone",
+      "contactEmail": "Operations email",
+      "accessNotes": "Access notes",
+      "accessNotesHint": "Visible to front desk staff.",
+      "accessNotesPlaceholder": "Directions for visitors and vendors: vehicle entrance, package delivery, restrictions.",
+      "sensitiveZone": "Sensitive zone",
+      "sensitiveZoneHint": "Deactivating hides the location from the portal and blocks new reservations."
+    },
+    "tabs": {
+      "info": "Information",
+      "amenities": "Amenities",
+      "staff": "Staff",
+      "settings": "Settings"
+    },
+    "stats": {
+      "units": "Units",
+      "residents": "Residents",
+      "vehicles": "Vehicles",
+      "unclaimedInvitations": "Unclaimed invitations",
+      "activeAmenities": "Active amenities"
+    },
+    "info": {
+      "title": "General information",
+      "editBlocked": "Editing blocked"
+    },
+    "photos": {
+      "title": "Photos",
+      "hint": "The cover shows on the locations list. All photos are visible in the resident portal.",
+      "cover": "Cover",
+      "makeCover": "Make cover",
+      "delete": "Delete",
+      "add": "Add photos",
+      "constraints": "JPG or PNG · max. 10 MB",
+      "rejected": "The file must be a JPG or PNG up to 10 MB.",
+      "none": "No photos yet",
+      "emptyHint": "Without photos, the locations list shows a placeholder and the portal displays no property images."
+    },
+    "staffTab": {
+      "readOnly": "Read-only view.",
+      "readOnlyBody": "Assignments and roles are managed in",
+      "person": "Person",
+      "access": "Access",
+      "thisLocation": "This location",
+      "frontDeskAccess": "Front desk only",
+      "emptyTitle": "Nobody assigned to this location",
+      "emptyBody": "Staff are assigned in Staff. Until then, only the Account Admin can operate front desk and reservations here.",
+      "goToStaff": "Go to Staff"
+    },
+    "detail": {
+      "changeCover": "Change cover",
+      "reactivateLocation": "Reactivate location",
+      "deactivatedTitle": "This location is deactivated",
+      "deactivatedBody": "Deactivated by {{name}} on {{date}}. It does not appear in the resident portal, accepts no new visits or reservations, and every form is read-only. The registry is fully preserved.",
+      "notFoundTitle": "Location not found",
+      "notFoundBody": "The location does not exist or does not belong to this account.",
+      "backToList": "Back to Locations",
+      "amenitiesSoon": "This location's amenities will be managed here soon.",
+      "settingsSoon": "This location's operational settings will be managed here soon."
+    }
+  },
+  "reservations": {
+    "title": "Reservations",
+    "subtitle": "{{location}} amenities",
+    "noLocation": "Select a location to see its reservations.",
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "emptyWeek": "No reservations this week.",
+    "allAmenities": "All amenities",
+    "chips": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Confirmed",
+      "completed": "Completed"
+    },
+    "columns": {
+      "amenity": "Amenity",
+      "unit": "Unit",
+      "resident": "Resident",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "approved": "Confirmed",
+      "observed": "Observed",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    },
+    "queue": {
+      "title": "Awaiting approval",
+      "empty": "No pending requests.",
+      "waiting_one": "Waiting for {{count}} day",
+      "waiting_other": "Waiting for {{count}} days",
+      "conflictNone": "conflict: none",
+      "conflictWith": "conflict: overlaps {{label}}",
+      "fee": "fee S/ {{amount}}",
+      "deposit": "deposit S/ {{amount}}",
+      "free": "no charge",
+      "showAll": "See all {{count}} pending →",
+      "showFewer": "Show fewer"
+    },
+    "actions": {
+      "approve": "Approve",
+      "observe": "Observe",
+      "reject": "Reject",
+      "cancel": "Cancel reservation"
+    },
+    "noteModal": {
+      "rejectTitle": "Reject reservation",
+      "observeTitle": "Observe reservation",
+      "noteLabel": "Note for the resident",
+      "observeHint": "The resident will see this note; the request stays open to approve or reject.",
+      "rejectHint": "The resident will see this note as the rejection reason."
+    },
+    "toasts": {
+      "approved": "Reservation approved.",
+      "rejected": "Reservation rejected.",
+      "observed": "Reservation observed.",
+      "created": "Reservation created.",
+      "requested": "Request sent for approval.",
+      "cancelled": "Reservation cancelled."
+    },
+    "newReservation": "New reservation",
+    "form": {
+      "amenity": "Amenity",
+      "unit": "Unit",
+      "resident": "Resident (optional)",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "availableWindows": "Available that day: {{windows}}",
+      "closedThatDay": "The amenity is closed that day.",
+      "submit": "Create reservation"
+    },
+    "detail": {
+      "fee": "Fee",
+      "deposit": "Deposit",
+      "note": "Note",
+      "charges": "Charges",
+      "chargesOnApproval": "Charges are created in Finances when the reservation is approved.",
+      "title": "Reservation",
+      "kind": "Reservation",
+      "registeredBy": "Registered by",
+      "decisionNote": "Decision note",
+      "viewInFinances": "View in Finances →",
+      "noteHint": "Visible to the resident.",
+      "noteRequiredHint": "Required to observe or reject.",
+      "confirmCancel": "Cancel the reservation?",
+      "confirmCancelBody": "The slot is released and pending charges are voided; a held deposit becomes due for refund. This cannot be undone.",
+      "decidedLabel": {
+        "approved": "Approved by",
+        "rejected": "Rejected by",
+        "observed": "Observed by",
+        "cancelled": "Cancelled by",
+        "pending": "Decided by"
+      }
+    },
+    "weekOf": "Week of {{range}}",
+    "history": {
+      "created": "Reservation registered",
+      "approved": "Reservation approved",
+      "observed": "Reservation observed",
+      "rejected": "Reservation rejected",
+      "cancelled": "Reservation cancelled",
+      "updated": "Reservation updated",
+      "chargeGenerated": "Charge generated: {{charge}}",
+      "completed": "Reservation completed",
+      "derived": "derived from the schedule"
+    }
+  },
+  "settings": {
+    "intro": "Each group saves separately. The values shown are the ones in effect, including those inherited from the account.",
+    "introAccount": "Defaults for every location in the account. Each location may override them.",
+    "accountTitle": "Settings",
+    "accountSubtitle": "Operational settings for the {{account}} account.",
+    "saved": "Settings saved.",
+    "discard": "Discard",
+    "clearOverride": "· Reset to the account value",
+    "willInherit": "On save, it will inherit the account value.",
+    "appliesOnlyTo": "Applies only to {{name}}.",
+    "appliesToAccount": "Applies to the whole {{name}} account.",
+    "effectWithAccount": "In effect: {{effective}} · account value: {{account}}",
+    "effectOnly": "In effect: {{effective}}",
+    "overridesAccount": "Overrides the account value ({{account}})",
+    "inheritedFromAccount": "Inherited from the account ({{account}})",
+    "hoursValue": "{{hours}} hours",
+    "visitors": {
+      "title": "Visitors",
+      "preregistration": "Resident pre-registration",
+      "preregistrationHint": "Residents can announce visitors from the portal.",
+      "autoCheckout": "Automatic visit close",
+      "autoCheckoutHint": "Visits without a recorded exit close on their own.",
+      "never": "Never"
+    },
+    "reservations": {
+      "title": "Reservations",
+      "maxAdvance": "Max. advance days",
+      "maxConcurrent": "Concurrent reservations per unit",
+      "cancellationWindow": "Cancellation window",
+      "days": "days",
+      "reservations": "reservations",
+      "hours": "hours",
+      "amenityOverrideHint": "Each amenity may override these values in its own booking policy.",
+      "footer": "Applies to amenities that do not define their own value."
+    },
+    "quietHours": {
+      "title": "Quiet hours",
+      "enabled": "Quiet hours active",
+      "enabledHint": "Shown in the portal and blocks nighttime reservations.",
+      "start": "Start",
+      "end": "End",
+      "effect": "In effect: {{start}}–{{end}}, location time ({{timezone}})",
+      "footer": "Turning it off leaves nights unrestricted."
+    },
+    "announcements": {
+      "title": "Announcements",
+      "managerCanPost": "Location Managers can post",
+      "managerCanPostHint": "If disabled, only the Account Admin posts announcements.",
+      "emailResidents": "Email residents on new announcement",
+      "emailResidentsHint": "Optional send in addition to the portal notification."
+    }
+  },
+  "amenities": {
+    "add": "Add amenity",
+    "createTitle": "New amenity",
+    "createSubtitle": "Residents will see it in the portal.",
+    "editTitle": "Edit amenity",
+    "create": "Create amenity",
+    "created": "Amenity created.",
+    "updated": "Amenity updated.",
+    "deactivated": "Amenity deactivated.",
+    "reactivated": "Amenity reactivated.",
+    "summary": "{{count}} amenities · {{reservable}} reservable",
+    "noFee": "Free",
+    "feeWithDeposit": "{{fee}} + deposit {{deposit}}",
+    "instant": "Instant",
+    "approval": "Requires approval",
+    "variableSchedule": "Variable schedule",
+    "pausedFootnote": "Inactive amenities do not appear in the resident portal. Changes are recorded in the activity log.",
+    "deactivateConfirmTitle": "Deactivate {{name}}?",
+    "deactivateHint": "The amenity is hidden from the portal and accepts no new reservations. Its history and recorded fees are kept.",
+    "statuses": {
+      "reservable": "Reservable",
+      "common": "Common",
+      "deactivated": "Inactive"
+    },
+    "columns": {
+      "amenity": "Amenity",
+      "schedule": "Schedule",
+      "capacity": "Capacity",
+      "fee": "Fee / deposit",
+      "approval": "Approval",
+      "actions": "Actions"
+    },
+    "types": {
+      "pool": "pool",
+      "gym": "gym",
+      "event_room": "event room",
+      "meeting_room": "meeting room",
+      "court": "court",
+      "rooftop": "rooftop",
+      "other": "other"
+    },
+    "empty": {
+      "title": "No amenities yet",
+      "body": "Add a pool, gym, event room, or common spaces so residents can reserve them."
+    },
+    "sections": {
+      "basics": "Basics",
+      "availability": "Availability",
+      "policy": "Booking policy",
+      "fees": "Fees"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "e.g. Event room",
+      "type": "Type",
+      "capacity": "Capacity",
+      "people": "people",
+      "description": "Description",
+      "reservable": "Reservable",
+      "reservableHint": "If disabled it becomes a common space, with no reservations.",
+      "maxDuration": "Maximum duration",
+      "maxDurationHint": "Optional (no limit)",
+      "requiresApproval": "Requires approval",
+      "approvalHint": "If disabled, reservations confirm instantly.",
+      "fee": "Usage fee",
+      "deposit": "Refundable deposit",
+      "feesHint": "Amounts in soles, no decimals. The deposit is recorded manually when the reservation is confirmed.",
+      "photosAfterCreate": "You can add photos by editing the amenity once created."
+    },
+    "policy": {
+      "inheritHint": "Inherits: {{value}} {{unit}}",
+      "overrideHint": "Overrides (base: {{value}} {{unit}})"
+    },
+    "availability": {
+      "columns": "Day · open · windows",
+      "timezoneNote": "Location local time ({{timezone}})",
+      "closed": "Closed",
+      "openDay": "Open and add a window",
+      "addWindow": "Add window",
+      "copyToAll": "Copy to all days",
+      "removeWindow": "Remove window from {{day}}",
+      "startFor": "Start {{n}} for {{day}}",
+      "endFor": "End {{n}} for {{day}}",
+      "to": "to",
+      "overlap": "Windows overlap between {{start}} and {{end}}. Adjust one of them to save.",
+      "inverted": "The window closes before it opens."
+    },
+    "weekdays": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
+  },
+  "finances": {
+    "title": "Finances",
+    "subtitle": "Income, expenses and deposits · {{location}} · {{month}}",
+    "noLocation": "Select a location to see its finances.",
+    "disclaimer": "Wasiy does not process payments: income (reservation fees and deposits) and building expenses (power, water, cleaning, maintenance) are recorded here by hand. Formal accounting will arrive as a future module.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "updated": "Movement updated",
+    "emptyMonth": "No movements in {{month}}.",
+    "emptyFiltered": "No movement matches the filter in {{month}}.",
+    "chips": {
+      "all": "All",
+      "income": "Income",
+      "expense": "Expenses",
+      "pending": "Pending",
+      "paid": "Paid",
+      "deposits": "Deposits",
+      "refunded": "Refunded"
+    },
+    "tiles": {
+      "income": "Income this month",
+      "expense": "Expenses this month",
+      "balance": "Balance this month",
+      "receivable": "Receivable · deposits held",
+      "heldAside": "· {{amount}} held",
+      "receivableDetail": "{{pending}} pending · {{refunds}} to refund",
+      "none": "No movements",
+      "balanceVsPrevious": "vs. {{month}}: {{delta}}"
+    },
+    "columns": {
+      "date": "Date",
+      "concept": "Concept",
+      "unit": "Unit",
+      "amount": "Amount",
+      "status": "Status",
+      "action": "Action",
+      "category": "Category"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "payable": "To pay",
+      "paid": "Paid",
+      "held": "Held",
+      "to_refund": "To refund",
+      "refunded": "Refunded",
+      "retained": "Retained for damages",
+      "voided": "Voided"
+    },
+    "transitions": {
+      "pending": "Mark pending",
+      "paid": "Mark paid",
+      "held": "Mark received",
+      "to_refund": "Release deposit",
+      "refunded": "Mark refunded",
+      "retained": "Do not refund",
+      "voided": "Void"
+    },
+    "categories": {
+      "reservation_fee": "Reservation fee",
+      "reservation_deposit": "Reservation deposit",
+      "utility": "Utilities",
+      "cleaning": "Cleaning",
+      "maintenance": "Maintenance and repairs",
+      "other": "Other",
+      "maintenance_dues": "Maintenance dues",
+      "fine": "Fine",
+      "other_income": "Other income",
+      "water": "Water",
+      "electricity": "Electricity",
+      "gas": "Gas",
+      "telecom": "Internet and phone",
+      "security": "Security",
+      "staff": "Staff",
+      "supplies": "Supplies",
+      "gardening": "Gardening",
+      "insurance_taxes": "Insurance and taxes",
+      "administration": "Administration",
+      "other_expense": "Other expense"
+    },
+    "detail": {
+      "open": "Details",
+      "dueOn": "Due",
+      "recordedBy": "Recorded by",
+      "note": "Note",
+      "reservation": "Reservation",
+      "recordedBySystem": "System · on reservation approval",
+      "actions": "Actions",
+      "actionNote": "Note (optional)",
+      "actionNoteHint": "Reason for the refund or retention, visible to the resident.",
+      "close": "Close",
+      "confirmRetain": "Retain the deposit?",
+      "confirmRetainBody": "The deposit will not be returned to the resident, for damages or a breach. You can revert it later from this panel.",
+      "confirmVoid": "Void the movement?",
+      "confirmVoidBody": "The movement will stop counting in the totals. This cannot be undone.",
+      "confirm": "Confirm"
+    },
+    "record": "Record movement",
+    "form": {
+      "subtitle": "Manual entry · Wasiy does not process payments",
+      "expense": "Expense",
+      "income": "Income",
+      "category": "Category",
+      "amount": "Amount",
+      "concept": "Concept",
+      "conceptExpenseHint": "Water · common areas",
+      "conceptIncomeHint": "Fee · Event hall",
+      "detail": "Detail",
+      "detailHint": "Receipt, invoice or reference",
+      "counterparty": "Vendor",
+      "counterpartyHint": "Sedapal, Luz del Sur…",
+      "unit": "Unit",
+      "occurredOn": "Date",
+      "dueOn": "Due",
+      "status": "Initial status",
+      "statusPending": "Pending",
+      "statusPaid": "Already paid",
+      "statusHeld": "Already received (held)",
+      "note": "Note",
+      "submit": "Record",
+      "recorded": "Movement recorded"
+    },
+    "categoriesPlural": {
+      "reservation_fee_one": "reservation fee",
+      "reservation_deposit_one": "deposit",
+      "maintenance_dues_one": "dues payment",
+      "fine_one": "fine",
+      "other_income_one": "other income",
+      "reservation_fee_other": "reservation fees",
+      "reservation_deposit_other": "deposits",
+      "maintenance_dues_other": "dues payments",
+      "fine_other": "fines",
+      "other_income_other": "other income"
+    },
+    "history": {
+      "title": "History",
+      "recorded": "Recorded",
+      "generatedOnApproval": "Generated on reservation approval",
+      "system": "System",
+      "paid": "Marked paid",
+      "pending": "Back to pending",
+      "held": "Deposit received (held)",
+      "to_refund": "Marked to refund",
+      "refunded": "Marked refunded",
+      "retained": "Retained for damages",
+      "voided": "Voided"
+    },
+    "searchPlaceholder": "Search concept, detail or vendor…",
+    "allCategories": "All categories",
+    "dues": {
+      "action": "Generate month's dues",
+      "confirmTitle": "Generate dues for {{month}}?",
+      "confirmBody": "One pending maintenance dues movement is created for every active unit with a fee. Units already issued this month are skipped, so it is safe to run again.",
+      "done": "{{created}} dues generated · {{skipped}} already existed"
+    }
+  },
+  "units": {
+    "title": "Units",
+    "subtitle_one": "{{count}} unit · {{location}}",
+    "subtitle_other": "{{count}} units · {{location}}",
+    "searchPlaceholder": "Search unit, resident or plate…",
+    "allTypes": "All types",
+    "chips": {
+      "all": "All",
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "attention": "No primary contact",
+      "no_portal": "No portal",
+      "no_fee": "No fee"
+    },
+    "columns": {
+      "unit": "Unit",
+      "floorType": "Floor · type",
+      "residents": "Residents",
+      "vehicles": "Vehicles",
+      "fee": "Fee",
+      "portal": "Portal",
+      "status": "Status",
+      "type": "Type"
+    },
+    "floorN": "Floor {{floor}}",
+    "types": {
+      "apartment": "Apartment",
+      "house": "House",
+      "commercial": "Commercial unit",
+      "office": "Office"
+    },
+    "typesShort": {
+      "apartment": "Apt.",
+      "house": "House",
+      "commercial": "Commercial",
+      "office": "Office"
+    },
+    "occupancy": {
+      "occupied": "Occupied",
+      "vacant": "Vacant",
+      "attention": "Attention"
+    },
+    "portal": {
+      "active": "On the portal",
+      "invited": "Invitation sent",
+      "not_invited": "Not invited"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Deactivated"
+    },
+    "noResidents": "No residents",
+    "noPrimaryContact": "No primary contact",
+    "emptyTitle": "No units in {{location}} yet",
+    "emptyBody": "Import the full roster from a spreadsheet or create the first unit by hand.",
+    "emptyFilteredTitle": "No unit matches",
+    "emptyFilteredBody": "Try another filter or search.",
+    "detail": {
+      "title": "{{type}} {{number}}",
+      "notFoundTitle": "Unit not found",
+      "notFoundBody": "It may have been removed or belong to another location.",
+      "backToList": "← Back to Units",
+      "monthlyFee": "Monthly fee",
+      "share": "Share",
+      "parking": "Parking",
+      "storage": "Storage",
+      "residents": "Residents",
+      "primaryContact": "Primary contact",
+      "noResidentsTitle": "No residents registered",
+      "noResidentsBody": "The unit shows as vacant and is not on the portal until you add someone.",
+      "reservations": "Unit reservations",
+      "seeAll": "See all →",
+      "noReservations": "No upcoming reservations.",
+      "bookedBy": "Booked by {{name}}",
+      "charges": "Dues and charges",
+      "viewInFinances": "View in Finances →",
+      "noMovements": "No movements this month.",
+      "pendingBalance": "Pending balance: {{amount}}",
+      "noPendingBalance": "No pending balance",
+      "vehicles": "Vehicles",
+      "noVehicles": "No vehicles registered.",
+      "portal": "Resident portal",
+      "noPortal": "Nobody in this unit has portal access.",
+      "notes": "Internal notes",
+      "addNote": "Add note",
+      "saveNote": "Save note",
+      "notePlaceholder": "Visible to staff only…",
+      "noNotes": "No internal notes.",
+      "notesHint": "Staff only. Kept in the activity log.",
+      "noteAdded": "Note added",
+      "edit": "Edit unit",
+      "reactivate": "Reactivate unit",
+      "addResident": "Add resident",
+      "addVehicle": "Add",
+      "deactivated": "Unit deactivated",
+      "reactivated": "Unit reactivated",
+      "confirmDeactivate": "Deactivate unit {{number}}?",
+      "confirmDeactivateBody": "{{residents}} resident(s) lose portal access and {{vehicles}} vehicle(s) become inactive. Future reservations are cancelled. The unit stays in the history.",
+      "packages": "Packages at reception",
+      "packagesHistory": "See history →",
+      "noPackages": "No packages at reception.",
+      "visits": "Recent visits",
+      "noVisits": "No visits registered."
+    },
+    "form": {
+      "createTitle": "New unit",
+      "editTitle": "Edit unit",
+      "create": "Create unit",
+      "save": "Save changes",
+      "created": "Unit created",
+      "saved": "Changes saved",
+      "identity": "Identification",
+      "number": "Number",
+      "building": "Tower / building",
+      "floor": "Floor",
+      "parking": "Parking spots",
+      "storage": "Storage rooms",
+      "feeSection": "Fee and share",
+      "share": "Participation share",
+      "sensitiveZone": "Sensitive zone",
+      "sensitiveZoneHint": "Deactivating removes the unit from the portal, leaves its vehicles inactive and blocks new reservations. History is kept.",
+      "deactivate": "Deactivate unit",
+      "buildingHint": "Pick the tower; units group by it.",
+      "moreDetails": "More details",
+      "feeSectionHint": "The monthly fee feeds the month's dues. The share is the bylaws' quota and splits common expenses.",
+      "moreDetailsHint": "Parking and storage as labels (Enter adds another) and internal notes."
+    },
+    "member": {
+      "addTitle": "Add resident",
+      "manageTitle": "Manage resident",
+      "existing": "Existing person",
+      "new": "New person",
+      "searchPerson": "Find person",
+      "searchPlaceholder": "Search by name, email or phone…",
+      "typeToSearch": "Type at least two letters.",
+      "noPeople": "No matches.",
+      "email": "Email",
+      "relation": "Relation to the unit",
+      "invite": "Invite to the resident portal",
+      "inviteNeedsEmail": "The portal invitation needs an email.",
+      "add": "Add",
+      "added": "Resident added",
+      "saved": "Changes saved",
+      "invited": "Invitation sent",
+      "sendInvite": "Send invitation",
+      "resendInvite": "Resend invitation",
+      "remove": "Remove from unit",
+      "removeHint": "Removing them revokes portal access to {{unit}}. Their person record is kept.",
+      "removed": "Resident removed from the unit",
+      "confirmRemove": "Remove {{name}} from the unit?",
+      "confirmRemoveBody": "They lose portal access to this unit. Their person record is kept.",
+      "relationHint": "The primary contact receives notices and is the desk's reference. The portal invitation asks for the email when sent."
+    },
+    "vehicle": {
+      "title": "Vehicle",
+      "added": "Vehicle added",
+      "saved": "Changes saved",
+      "deactivate": "Deactivate vehicle",
+      "reactivate": "Reactivate vehicle",
+      "deactivated": "Vehicle deactivated",
+      "reactivated": "Vehicle reactivated",
+      "deactivateHint": "An inactive vehicle disappears from the front desk and plate search. History is kept.",
+      "confirmDeactivate": "Deactivate vehicle {{plate}}?",
+      "confirmDeactivateBody": "It disappears from the front desk and plate search. You can reactivate it later."
+    }
+  },
+  "packages": {
+    "title": "Packages",
+    "subtitle": "Reception · {{location}}",
+    "register": "Register package",
+    "markDelivered": "Mark delivered",
+    "delivered": "Package delivered",
+    "registeredNotified": "Package registered · notice sent to {{email}}",
+    "registeredSilent": "Package registered · no notice (nobody has an email)",
+    "searchPlaceholder": "Search unit or resident…",
+    "primaryContact": "Primary contact",
+    "chips": {
+      "pending": "At reception",
+      "delivered": "Delivered",
+      "all": "All"
+    },
+    "columns": {
+      "received": "Received",
+      "unit": "Unit",
+      "for": "For",
+      "status": "Status"
+    },
+    "statuses": {
+      "pending": "At reception",
+      "delivered": "Delivered"
+    },
+    "empty": {
+      "pending": "No packages at reception.",
+      "delivered": "No delivered packages yet.",
+      "all": "No packages registered yet."
+    },
+    "emptyFiltered": "No package matches the search.",
+    "form": {
+      "unit": "Unit",
+      "resident": "For",
+      "anyResident": "Any resident of the unit",
+      "notesPlaceholder": "Medium box, fragile…",
+      "submit": "Register",
+      "destination": "Destination",
+      "destinationHint": "Pick the unit and, if addressed to someone, the person. Without a person the unit's primary contact is notified."
+    },
+    "detail": {
+      "title": "Package · {{unit}}",
+      "pendingSince": "At reception since {{date}}",
+      "deliveredOn": "Delivered on {{date}}",
+      "noActions": "No pending actions.",
+      "deliveryNotesLabel": "Delivery notes (optional)",
+      "deliveryNotesPlaceholder": "Who picked it up, where it was left…"
+    },
+    "timeline": {
+      "received": "Package received",
+      "notified": "Notice sent to {{email}}",
+      "notNotified": "No notice · nobody has an email",
+      "delivered": "Delivered"
+    }
+  },
+  "residents": {
+    "subtitle_one": "{{count}} person · {{location}}",
+    "subtitle_other": "{{count}} people · {{location}}",
+    "searchPlaceholder": "Search by name, phone or unit…",
+    "allPortalStates": "All",
+    "allStatuses": "All",
+    "primaryContactShort": "primary contact",
+    "deactivated": "Person deactivated",
+    "reactivated": "Person reactivated",
+    "chips": {
+      "all": "All",
+      "no_unit": "No unit"
+    },
+    "columns": {
+      "person": "Person"
+    },
+    "empty": "No people in {{location}} yet.",
+    "emptyFiltered": "Nobody matches.",
+    "form": {
+      "createTitle": "New person",
+      "editTitle": "Edit details",
+      "create": "Create person",
+      "created": "Person created",
+      "saved": "Changes saved",
+      "phone": "Phone (optional)",
+      "unitSection": "Unit",
+      "unitSectionHint": "A person joins the location through their unit; if they leave later they show under \"No unit\". The primary contact receives notices and is the desk's reference."
+    },
+    "detail": {
+      "since": "Since",
+      "sinceValue": "In Wasiy since {{date}}",
+      "noUnits": "Does not live in any unit of this location.",
+      "membershipsHint": "Memberships are managed from the unit.",
+      "invite": "Invite to the portal",
+      "sendInvite": "Send invitation",
+      "emailLabel": "Resident's email",
+      "willSendTo": "It will be sent to {{email}}.",
+      "noHistory": "No activity recorded.",
+      "edit": "Edit details",
+      "deactivate": "Deactivate person",
+      "reactivate": "Reactivate person",
+      "deactivateHint": "Removes portal access; history is kept.",
+      "deactivateBlocked": "Only available when they live in no unit. Remove them from their units first.",
+      "reactivateHint": "The person shows as active again.",
+      "confirmDeactivate": "Deactivate {{name}}?",
+      "confirmDeactivateBody": "They lose portal access. History is kept and you can reactivate them later.",
+      "portalHint": "The email is asked only here and kept to send the invitation."
+    }
+  },
+  "visits": {
+    "title": "Visitors",
+    "subtitle": "Reception · {{location}} · today, {{date}}",
+    "subtitleShort": "Reception · {{location}}",
+    "register": "Register visit",
+    "registered": "Check-in registered",
+    "markOut": "Mark out",
+    "checkedOut": "Check-out registered",
+    "searchPlaceholder": "Search visitor, unit or resident…",
+    "allConfirmations": "All",
+    "unitOnly": "Unit {{unit}}",
+    "chips": {
+      "inside": "Inside",
+      "today": "Today",
+      "all": "All",
+      "expected": "Expected today"
+    },
+    "columns": {
+      "checkIn": "Check-in",
+      "visitor": "Visitor",
+      "host": "Host",
+      "confirmation": "Confirmation"
+    },
+    "statuses": {
+      "inside": "Inside",
+      "left": "Left",
+      "expected": "Expected",
+      "cancelled": "Cancelled"
+    },
+    "confirmations": {
+      "none": "Not confirmed",
+      "intercom": "Intercom",
+      "phone": "Phone",
+      "management": "Management",
+      "pre_registered": "Pre-registered"
+    },
+    "empty": {
+      "inside": "No visitors inside the building.",
+      "today": "No visits today yet.",
+      "all": "No visits registered yet.",
+      "expected": "No resident pre-registered visits for today."
+    },
+    "emptyFiltered": "No visit matches.",
+    "duration": {
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min"
+    },
+    "form": {
+      "visitor": "Visitor",
+      "name": "Name",
+      "document": "Document (optional)",
+      "documentShort": "Document",
+      "documentHint": "Number only; no photos or copies are stored.",
+      "phone": "Phone (optional)",
+      "destination": "Destination",
+      "host": "Host",
+      "primaryContact": "Primary contact",
+      "confirmation": "Confirmation",
+      "confirmationHint": "Optional. Wasiy records how it was confirmed; it never blocks check-in.",
+      "submit": "Register check-in",
+      "destinationHint": "Pick the unit and, if known, the resident receiving. Without a resident the visit is logged to the unit."
+    },
+    "detail": {
+      "insideSince": "Visit to unit {{unit}} · Inside since {{time}}",
+      "range": "Visit to unit {{unit}} · {{from}} – {{to}}",
+      "insideBuilding": "inside the building",
+      "duration": "total",
+      "checkoutNotes": "Check-out notes (optional)",
+      "checkoutNotesPlaceholder": "E.g. left with a package from the unit"
+    },
+    "timeline": {
+      "in": "Check-in registered",
+      "out": "Check-out registered",
+      "autoOut": "Automatic check-out (no check-out recorded)",
+      "confirmed": "Confirmed by {{method}}",
+      "confirmedWith": "Confirmed by {{method}} with {{name}}",
+      "preRegistered": "Pre-registered by the resident"
+    },
+    "expected": {
+      "band": "Expected today",
+      "bandHint": "Only today's pre-registrations for this unit. Confirming an arrival does not prevent registering someone else.",
+      "pickUnit": "Pick the unit to see its expected visitors.",
+      "none": "No visitors expected for this unit today.",
+      "noTime": "no time",
+      "by": "pre-registered by {{name}}",
+      "confirm": "Confirm arrival",
+      "chosen": "Chosen",
+      "confirmationLocked": "The resident already authorised the visit: the method is fixed."
+    }
+  },
+  "search": {
+    "placeholder": "Search units, residents, visitors, packages or pages…",
+    "hint": "Type at least two characters.",
+    "nothingFound": "Nothing matches “{{query}}”.",
+    "groups": {
+      "pages": "Pages",
+      "units": "Units",
+      "residents": "Residents",
+      "visits": "Visitors",
+      "packages": "Packages"
+    }
+  },
+  "buildings": {
+    "title": "Buildings",
+    "name": "Name",
+    "namePlaceholder": "Tower B",
+    "code": "Code",
+    "unnamed": "Unnamed",
+    "add": "Add building",
+    "added": "Building added",
+    "saved": "Building saved",
+    "removed": "Building removed",
+    "delete": "Delete {{name}}",
+    "lastOne": "A location keeps at least one building.",
+    "inUse_one": "{{count}} unit lives in this building; move it before deleting.",
+    "inUse_other": "{{count}} units live in this building; move them before deleting.",
+    "unitsCount_one": "{{count}} unit",
+    "unitsCount_other": "{{count}} units",
+    "singleHint": "A single building: units show no tower. Add another when the location has more than one.",
+    "multiHint": "Every unit belongs to a building. Renaming here updates all its units.",
+    "confirmDeleteTitle": "Delete building {{name}}?",
+    "confirmDeleteBody": "Only buildings without units can be deleted. This cannot be undone."
+  },
+  "phone": {
+    "country": "Country",
+    "searchCountry": "Search country…",
+    "noCountry": "No country matches."
   }
 }

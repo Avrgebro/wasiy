@@ -1,19 +1,19 @@
 import { Widget } from '@solar-icons/react'
 import { describe, expect, it } from 'vitest'
 import {
-  canAccessFrontDesk,
+  ADMIN_CAPABILITIES,
+  can,
   canAccessPortal,
-  canManageRegistry,
+  FRONT_DESK_CAPABILITIES,
+  MANAGER_CAPABILITIES,
   getDefaultAuthenticatedRoute,
   getDefaultLocation,
   isAccountAdmin,
   requiresAccountSelection,
   surfaceAccess,
 } from './access'
-import {
-  filterNavigationEntries,
-  getSurfaceNavigation,
-} from '../navigation/navigation'
+import { getAdminNavigation } from '../navigation/admin-navigation'
+import { filterNavigationEntries } from '../navigation/spec'
 import type { MeResponse } from './types'
 
 function makeMe(overrides: Partial<MeResponse> = {}): MeResponse {
@@ -89,7 +89,8 @@ describe('access helpers', () => {
           timezone: 'America/Lima',
           address: null,
           roles: ['location_manager'],
-          access_source: 'location_role',
+          capabilities: MANAGER_CAPABILITIES,
+          country: 'PE', access_source: 'location_role',
         },
       ],
     })
@@ -99,6 +100,17 @@ describe('access helpers', () => {
 
   it('routes front desk-only users to the front desk surface', () => {
     const me = makeMe({
+      active_location: {
+        id: 'loc_1',
+        account_id: 'acc_1',
+        name: 'Edificio Central',
+        slug: 'edificio-central',
+        timezone: 'America/Lima',
+        address: null,
+        roles: [],
+        capabilities: FRONT_DESK_CAPABILITIES,
+        country: 'PE', access_source: 'location_role',
+      },
       roles: {
         account: [],
         location: [
@@ -111,8 +123,9 @@ describe('access helpers', () => {
       },
     })
 
-    expect(canAccessFrontDesk(me)).toBe(true)
-    expect(getDefaultAuthenticatedRoute(me)).toBe('/front-desk')
+    expect(can(me, 'reception.manage')).toBe(true)
+    // Front desk shares the admin surface (read-only subset).
+    expect(getDefaultAuthenticatedRoute(me)).toBe('/admin')
   })
 
   it('keeps portal guarded until resident memberships exist', () => {
@@ -125,10 +138,10 @@ describe('access helpers', () => {
       resident_memberships: [
         {
           account_id: 'acc_1',
+          country: 'PE',
           is_primary_contact: true,
           location_id: 'loc_1',
           resident_id: 'res_1',
-          resident_type: 'owner',
           unit_id: 'unit_1',
           unit_label: 'Torre A / 301',
           unit_membership_id: 'membership_1',
@@ -137,11 +150,24 @@ describe('access helpers', () => {
     })
 
     expect(canAccessPortal(residentMe)).toBe(true)
-    expect(getDefaultAuthenticatedRoute(residentMe)).toBe('/portal')
+    // Each build lands on its own surface; the other host sends them to /no-access.
+    expect(getDefaultAuthenticatedRoute(residentMe, 'portal')).toBe('/portal')
+    expect(getDefaultAuthenticatedRoute(residentMe, 'admin')).toBe('/no-access')
   })
 
   it('gives account admins the location section', () => {
     const me = makeMe({
+      active_location: {
+        id: 'loc_1',
+        account_id: 'acc_1',
+        name: 'Edificio Central',
+        slug: 'edificio-central',
+        timezone: 'America/Lima',
+        address: null,
+        roles: [],
+        capabilities: ADMIN_CAPABILITIES,
+        country: 'PE', access_source: 'location_role',
+      },
       roles: {
         account: [
           {
@@ -153,16 +179,18 @@ describe('access helpers', () => {
       },
     })
 
-    const navItems = getSurfaceNavigation(me, 'admin')
+    const navItems = getAdminNavigation(me)
     const serialized = JSON.stringify(navItems)
 
     expect(serialized).toContain('navGroups.location')
     expect(serialized).toContain('/admin')
     expect(serialized).toContain('/admin/registry/units')
-    expect(serialized).toContain('/admin/registry/vehicles')
+    // Vehicles live inside units since M9; no standalone entry.
+    expect(serialized).not.toContain('/admin/registry/vehicles')
 
-    // Residents sits inside the People group rather than at the top level.
-    expect(serialized).toContain('nav.people')
+    // Recepción is its own section, not a collapsible inside Ubicación.
+    expect(serialized).toContain('navGroups.reception')
+    expect(serialized).not.toContain('nav.reception')
     expect(serialized).toContain('/admin/registry/residents')
 
     // Imports is reached from the pages it loads, not from the sidebar.
@@ -178,6 +206,17 @@ describe('access helpers', () => {
 
   it('shows location managers the same location section', () => {
     const me = makeMe({
+      active_location: {
+        id: 'loc_1',
+        account_id: 'acc_1',
+        name: 'Edificio Central',
+        slug: 'edificio-central',
+        timezone: 'America/Lima',
+        address: null,
+        roles: [],
+        capabilities: MANAGER_CAPABILITIES,
+        country: 'PE', access_source: 'location_role',
+      },
       roles: {
         account: [],
         location: [
@@ -190,14 +229,16 @@ describe('access helpers', () => {
       },
     })
 
-    const navItems = getSurfaceNavigation(me, 'admin')
+    const navItems = getAdminNavigation(me)
     const serialized = JSON.stringify(navItems)
 
     expect(serialized).toContain('navGroups.location')
-    expect(serialized).toContain('/admin/registry/vehicles')
+    // Vehicles live inside units since M9; no standalone entry.
+    expect(serialized).not.toContain('/admin/registry/vehicles')
 
     // A manager manages the registry, so the manage-only entries stay.
-    expect(canManageRegistry(me)).toBe(true)
+    expect(can(me, 'registry.manage')).toBe(true)
+    expect(serialized).toContain('/admin/registry/units')
     expect(serialized).toContain('/admin/announcements')
     expect(serialized).toContain('/admin/finances')
 
@@ -209,8 +250,19 @@ describe('access helpers', () => {
     expect(serialized).not.toContain('/admin/settings')
   })
 
-  it('separates registry management from surface access for front desk', () => {
+  it('gives front desk the desk subset: no units, finances or announcements', () => {
     const frontDeskMe = makeMe({
+      active_location: {
+        id: 'loc_1',
+        account_id: 'acc_1',
+        name: 'Edificio Central',
+        slug: 'edificio-central',
+        timezone: 'America/Lima',
+        address: null,
+        roles: [],
+        capabilities: FRONT_DESK_CAPABILITIES,
+        country: 'PE', access_source: 'location_role',
+      },
       roles: {
         account: [],
         location: [
@@ -219,12 +271,44 @@ describe('access helpers', () => {
       },
     })
 
-    // Front desk reaches no staff surface yet, and must never be treated as
-    // able to write to the registry once it does.
-    expect(canManageRegistry(frontDeskMe)).toBe(false)
-    expect(canAccessFrontDesk(frontDeskMe)).toBe(true)
+    expect(can(frontDeskMe, 'registry.manage')).toBe(false)
+    expect(can(frontDeskMe, 'registry.view')).toBe(true)
+
+    const serialized = JSON.stringify(getAdminNavigation(frontDeskMe))
+    expect(serialized).toContain('/admin/visitors')
+    expect(serialized).toContain('/admin/registry/residents')
+    expect(serialized).toContain('/admin/reservations')
+    expect(serialized).not.toContain('/admin/registry/units')
+    expect(serialized).not.toContain('/admin/finances')
+    expect(serialized).not.toContain('/admin/announcements')
   })
 
+  it('reads capabilities from the active location, not from every role held', () => {
+    // Manager elsewhere, front desk here: the UI follows the location being viewed.
+    const me = makeMe({
+      active_location: {
+        id: 'loc_1',
+        account_id: 'acc_1',
+        name: 'Edificio Central',
+        slug: 'edificio-central',
+        timezone: 'America/Lima',
+        address: null,
+        roles: [],
+        capabilities: FRONT_DESK_CAPABILITIES,
+        country: 'PE', access_source: 'location_role',
+      },
+      roles: {
+        account: [],
+        location: [
+          { account_id: 'acc_1', location_id: 'loc_2', role: 'location_manager' },
+          { account_id: 'acc_1', location_id: 'loc_1', role: 'front_desk' },
+        ],
+      },
+    })
+
+    expect(can(me, 'finances.manage')).toBe(false)
+    expect(can(makeMe(), 'registry.view')).toBe(false)
+  })
 })
 
 describe('navigation filtering', () => {
@@ -313,7 +397,7 @@ describe('navigation filtering', () => {
     expect(serialized).not.toContain('nav.hidden')
   })
 
-  it('does not expose admin navigation to front desk users', () => {
+  it('gives front desk the read-only subset of the admin navigation', () => {
     const me = makeMe({
       roles: {
         account: [],
@@ -327,10 +411,13 @@ describe('navigation filtering', () => {
       },
     })
 
-    expect(surfaceAccess.admin(me)).toBe(false)
-    expect(surfaceAccess['front-desk'](me)).toBe(true)
-    expect(JSON.stringify(getSurfaceNavigation(me, 'front-desk'))).toContain(
-      'nav.checkIn',
-    )
+    expect(surfaceAccess.admin(me)).toBe(true)
+    const serialized = JSON.stringify(getAdminNavigation(me))
+    expect(serialized).toContain('/admin/reservations')
+    // Unidades carries the ledger; the desk finds people through Residentes.
+    expect(serialized).not.toContain('/admin/registry/units')
+    expect(serialized).not.toContain('/admin/finances')
+    expect(serialized).not.toContain('/admin/announcements')
+    expect(serialized).not.toContain('/admin/staff')
   })
 })

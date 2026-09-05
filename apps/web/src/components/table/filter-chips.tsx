@@ -32,12 +32,12 @@ export function FilterChips({
       {chips.map((chip) => (
         <span
           key={chip.key}
-          className="flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default-hover)] py-1 pl-2.5 pr-1.5 text-xs font-medium text-[var(--mantine-color-text)]"
+          className="flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default-hover)] py-1 pl-2.5 pr-1.5 text-xs font-medium text-[var(--mantine-color-text)] pointer-coarse:min-h-11 pointer-coarse:pl-4"
         >
           {chip.label}
           <button
             aria-label={t('table.removeFilter', { filter: chip.label })}
-            className="grid cursor-pointer place-items-center border-0 bg-transparent p-0 text-[var(--mantine-color-dimmed)] hover:text-[var(--mantine-color-text)]"
+            className="grid cursor-pointer place-items-center border-0 bg-transparent p-0 text-[var(--mantine-color-dimmed)] hover:text-[var(--mantine-color-text)] pointer-coarse:size-9"
             type="button"
             onClick={chip.onRemove}
           >

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
+use App\Enums\Capability;
 use App\Enums\ImportRowStatus;
 use App\Enums\ImportStatus;
 use App\Enums\ImportType;
@@ -66,7 +67,7 @@ class RegistryImportController extends Controller
         if (! $this->access->hasAccountRole($user, $account, AccountRole::AccountAdmin)) {
             $manageableLocationIds = $this->access->accessibleLocationsForAccount($user, $account)
                 ->get()
-                ->filter(fn (Location $location): bool => $this->access->canManageRegistry($user, $location))
+                ->filter(fn (Location $location): bool => $this->access->can($user, $location, Capability::ManageRegistry))
                 ->pluck('id');
 
             $imports->whereIn('location_id', $manageableLocationIds);

@@ -5,7 +5,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
 import type { MeResponse } from '../auth/types'
 import { DataTable } from '../../components/table/data-table'
@@ -28,7 +28,7 @@ export function StaffPage() {
 
   if (!me || !account) {
     return (
-      <Alert color="yellow" title={t('auth.noAccessTitle')}>
+      <Alert color="warning" title={t('auth.noAccessTitle')}>
         {t('accountSelection.title')}
       </Alert>
     )
@@ -91,10 +91,10 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
     mutationFn: (staff: StaffSummary) => reactivateStaff(accountId, staff.id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
-      showNotification({ color: 'green', message: t('staff.reactivated') })
+      notifySuccess(t('staff.reactivated'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 
@@ -119,7 +119,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
             {t('staff.subtitle')}
           </Text>
         </div>
-        <Button color="amber.4" leftSection={<AddCircle size={20} />} onClick={openInvite}>
+        <Button color="accent" leftSection={<AddCircle size={20} />} onClick={openInvite}>
           {t('staff.invite')}
         </Button>
       </div>
@@ -133,7 +133,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
       ) : null}
 
       {listQuery.isError ? (
-        <Alert color="red" title={t('errors.loadFailed')}>
+        <Alert color="error" title={t('errors.loadFailed')}>
           {getErrorMessage(listQuery.error)}
         </Alert>
       ) : null}

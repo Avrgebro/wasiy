@@ -100,6 +100,8 @@ class RegistryImportDuplicateDetector
             return [];
         }
 
+        // importMatchKey() reads the tower through the eager-loaded relation
+        // (Unit::$with); one query for the units, one for their buildings.
         return Unit::query()
             ->where('account_id', $location->account_id)
             ->where('location_id', $location->id)

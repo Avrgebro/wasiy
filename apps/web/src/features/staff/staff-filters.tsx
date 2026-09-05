@@ -1,8 +1,9 @@
-import { Select, TextInput } from '@mantine/core'
-import { Magnifier } from '@solar-icons/react'
+import { Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { FilterButton } from '../../components/table/filter-button'
-import { FilterChips, type FilterChip } from '../../components/table/filter-chips'
+import { buildFilterChips } from '../../components/table/build-filter-chips'
+import { FilterChips } from '../../components/table/filter-chips'
+import { SearchInput } from '../../components/table/search-input'
 import { accountRoles, getRoleLabelKey, locationRoles } from '../auth/access'
 import type { StaffSearchValues } from './schemas'
 
@@ -40,43 +41,36 @@ export function StaffFilters({
     { label: t('staff.statuses.deactivated'), value: 'deactivated' },
   ]
 
-  const chips: FilterChip[] = []
-  if (search.role) {
-    const label = roleOptions.find((option) => option.value === search.role)?.label ?? search.role
-    chips.push({
+  const chips = buildFilterChips([
+    {
       key: 'role',
-      label: `${t('staff.role')}: ${label}`,
+      label: t('staff.role'),
+      value: search.role,
+      options: roleOptions,
       onRemove: () => onChange({ role: '' }),
-    })
-  }
-  if (search.location_id) {
-    const label =
-      locations.find((option) => option.value === search.location_id)?.label ?? search.location_id
-    chips.push({
+    },
+    {
       key: 'location_id',
-      label: `${t('staff.location')}: ${label}`,
+      label: t('staff.location'),
+      value: search.location_id,
+      options: locations,
       onRemove: () => onChange({ location_id: '' }),
-    })
-  }
-  if (search.status) {
-    const label =
-      statusOptions.find((option) => option.value === search.status)?.label ?? search.status
-    chips.push({
+    },
+    {
       key: 'status',
-      label: `${t('registry.status')}: ${label}`,
+      label: t('registry.status'),
+      value: search.status,
+      options: statusOptions,
       onRemove: () => onChange({ status: '' }),
-    })
-  }
+    },
+  ])
 
   return (
     <div className="flex flex-wrap items-center gap-2.5 p-3.5 sm:px-5">
-      <TextInput
-        aria-label={t('actions.search')}
-        className="w-full sm:w-64 lg:w-80"
+      <SearchInput
         defaultValue={search.search}
-        leftSection={<Magnifier size={15} />}
         placeholder={t('staff.searchPlaceholder')}
-        onBlur={(event) => onChange({ search: event.currentTarget.value })}
+        onApply={(value) => onChange({ search: value })}
       />
       <FilterButton activeCount={chips.length}>
         <Select

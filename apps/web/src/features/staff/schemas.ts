@@ -16,15 +16,18 @@ export const staffSearchSchema = z.object({
 export type StaffSearchValues = z.infer<typeof staffSearchSchema>
 
 const locationAssignmentSchema = z.object({
-  location_id: z.string().min(1, 'validation.locationRequired'),
+  location_id: z.string(),
   role: z.enum(['location_manager', 'front_desk']),
 })
 
 /**
  * Access types are mutually exclusive — account admin already implies every
  * location — so the form models them as a radio choice. The API enforces
- * the same rule. Location staff needs at least one assignment, and no
- * location can be assigned twice.
+ * the same rule. Location staff needs at least one assignment, no location
+ * can be assigned twice, and every row needs a location. All assignment
+ * rules live here (not on the row schema) because the drawer keeps the
+ * hidden rows in form state while admin is selected — they must not block
+ * an admin submit.
  */
 export const staffAccessSchema = z
   .object({
@@ -32,7 +35,11 @@ export const staffAccessSchema = z
     location_assignments: z.array(locationAssignmentSchema),
   })
   .superRefine((values, ctx) => {
-    if (values.access_type === 'location_staff' && values.location_assignments.length === 0) {
+    if (values.access_type !== 'location_staff') {
+      return
+    }
+
+    if (values.location_assignments.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'validation.locationAssignmentsRequired',
@@ -43,6 +50,11 @@ export const staffAccessSchema = z
     const seen = new Set<string>()
     values.location_assignments.forEach((assignment, index) => {
       if (!assignment.location_id) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'validation.locationRequired',
+          path: ['location_assignments', index, 'location_id'],
+        })
         return
       }
 

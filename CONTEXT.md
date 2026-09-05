@@ -108,7 +108,7 @@ A file or record shared inside the system, such as rules, bylaws, policies, form
 
 ### Vehicle
 
-A car, motorcycle, bicycle, or other transport asset associated with a Unit in the initial product, and potentially with Visitors, Residents, or parking permissions in later phases.
+A car, motorcycle, bicycle, or other transport asset registered to a Unit. Vehicles are managed from the Unit (there is no separate vehicles surface); staff find a vehicle by plate from the Units list. Parking spots are labels on the Unit, not records of their own. Visitor vehicles and parking permissions belong to later phases.
 
 ### Package
 
@@ -152,7 +152,7 @@ The Resident's relationship to a specific Unit Membership. Initial fixed Residen
 
 ### Resident
 
-A person authorized to live in or be associated with a Unit. Residents belong to an Account, and their Location relationship comes through Unit Memberships. Resident Type is defined per Unit Membership, not on the Resident globally. Residents may have login access to resident-facing features such as visitor pre-registration, amenity reservations, profile management, payment visibility, and announcements.
+A person who lives in a Unit. Residents belong to an Account, and their Location relationship comes through Unit Memberships. A membership carries no role (owner, tenant, …): it means the person lives there, and at most one member is the Unit's primary contact. Owners who do not live in the building are not Residents; if the product needs them (dues, assemblies) they belong on the Unit as an owner contact, not in the directory. Residents may have login access to resident-facing features such as visitor pre-registration, amenity reservations, profile management, payment visibility, and announcements.
 
 ### Resident Invitation
 

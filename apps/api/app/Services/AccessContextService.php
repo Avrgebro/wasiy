@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Data\AccessContext;
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\StaffMembership;
@@ -151,6 +152,19 @@ class AccessContextService
         return $account;
     }
 
+    /**
+     * Drop the session's Active Location when it is the given one — used by
+     * Location deactivation so the actor is not left operating a Location
+     * that no longer grants access. Other users' sessions self-heal through
+     * sync()'s stale-selection repair.
+     */
+    public function forgetLocationIfActive(Request $request, Location $location): void
+    {
+        if ($request->session()->get(self::ACTIVE_LOCATION_KEY) === $location->id) {
+            $request->session()->forget(self::ACTIVE_LOCATION_KEY);
+        }
+    }
+
     public function forget(Request $request): void
     {
         $request->session()->forget([
@@ -263,6 +277,10 @@ class AccessContextService
             $roles[] = $locationRole->role->value;
         }
 
+        // The matrix row for this Location; the SPA gates its UI on this
+        // list and never re-derives permissions from roles (ADR 0036).
+        $capabilities = Capability::valuesForRoles($isAccountAdmin, $locationRole?->role);
+
         $accessSource = match (true) {
             $isAccountAdmin && $locationRole !== null => 'both',
             $isAccountAdmin => 'account_role',
@@ -275,8 +293,11 @@ class AccessContextService
             'name' => $location->name,
             'slug' => $location->slug,
             'timezone' => $location->timezone,
-            'address' => $location->address,
+            // Dialing rules for phone inputs and display (E.164 storage).
+            'country' => $location->country ?? 'PE',
+            'address' => $location->formattedAddress(),
             'roles' => array_values(array_unique($roles)),
+            'capabilities' => $capabilities,
             'access_source' => $accessSource,
         ];
     }
@@ -298,7 +319,7 @@ class AccessContextService
                 'location_id' => $membership->location_id,
                 'unit_id' => $membership->unit_id,
                 'unit_label' => $membership->unit->label(),
-                'resident_type' => $membership->resident_type->value,
+                'country' => $membership->location->country ?? 'PE',
                 'is_primary_contact' => $membership->is_primary_contact,
             ])
             ->values()

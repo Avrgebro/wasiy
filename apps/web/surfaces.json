@@ -1,0 +1,19 @@
+{
+  "staffFeatures": [
+    "buildings",
+    "dashboard",
+    "finances",
+    "imports",
+    "locations",
+    "packages",
+    "registry",
+    "reservations",
+    "residents",
+    "search",
+    "staff",
+    "units",
+    "vehicles",
+    "visits"
+  ],
+  "sharedOrPortalFeatures": ["auth", "invitations", "navigation", "portal"]
+}

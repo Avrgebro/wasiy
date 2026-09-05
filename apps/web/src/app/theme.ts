@@ -1,4 +1,4 @@
-import { Card, Container, createTheme, Paper, rem, Select } from "@mantine/core";
+import { Badge, Card, Container, createTheme, Paper, rem, Select } from "@mantine/core";
 import type {
   CSSVariablesResolver,
   MantineColorsTuple,
@@ -16,9 +16,12 @@ const CONTAINER_SIZES: Record<string, string> = {
 };
 
 /**
- * Paleta «Puerto» — see colorschema.md at the repo root.
- * Petróleo profundo + ámbar sobre papel cálido; the brand colors are
- * constant across modes, only surfaces/borders/text change.
+ * Paleta «Puerto» — see docs/colorschema.md.
+ * «Un rol, dos valores»: every role exists in both schemes. Role tuples
+ * (accent/success/warning/error/info) carry the light value at shade 6 and
+ * the dark value at shade 5; with `primaryShade: { light: 6, dark: 5 }`
+ * Mantine's filled/outline variants resolve the right value per scheme, and
+ * the `-light`/`-light-color` variables derive tints from the outer stops.
  */
 const teal: MantineColorsTuple = [
   "#E6F0EF", // 0
@@ -26,31 +29,105 @@ const teal: MantineColorsTuple = [
   "#A9C4C0", // 2
   "#7FB5B0", // 3  ← interactive (dark)
   "#3E7C80", // 4  ← secondary
-  "#1A5F63", // 5
-  "#124E52", // 6  ← primary
-  "#0A3538", // 7  ← primary-dark
+  "#1A6B70", // 5  ← primary (dark)
+  "#124E52", // 6  ← primary (light)
+  "#0A3538", // 7
   "#16282A", // 8  ← surface (dark)
   "#101D1E", // 9  ← background (dark)
 ];
 
-const amber: MantineColorsTuple = [
+// One main action per screen; always dark text (#1C2B2C), never white.
+const accent: MantineColorsTuple = [
   "#FBF3E2", // 0
-  "#F7EEDD", // 1
-  "#F0DCAE", // 2
-  "#E8B45C", // 3  ← accent-hover / emphasis text in dark
-  "#E0A438", // 4  ← accent (CTA); always with dark text, never white
-  "#C79433", // 5  ← pressed
+  "#F7E9C9", // 1
+  "#F2DBA4", // 2
+  "#EDC981", // 3
+  "#EBBF6E", // 4
+  "#E8B45C", // 5  ← accent (dark); hover in light
+  "#E0A438", // 6  ← accent (light)
+  "#C79433", // 7  ← pressed
+  "#8F6119", // 8
+  "#6B4A14", // 9
+];
+
+const success: MantineColorsTuple = [
+  "#E9F5EE", // 0
+  "#CCE7D8", // 1
+  "#A6D4BC", // 2
+  "#82C2A1", // 3
+  "#66B58D", // 4
+  "#4FA97C", // 5  ← success (dark)
+  "#2E7D5B", // 6  ← success (light)
+  "#25654A", // 7
+  "#1C4E39", // 8
+  "#143A2A", // 9
+];
+
+// Dark warning = light accent (#E0A438): the doubled role is deliberate, so
+// warnings always carry an icon and a label, never color alone.
+const warning: MantineColorsTuple = [
+  "#FCF4E4", // 0
+  "#F9EACF", // 1
+  "#F4DAAB", // 2
+  "#EDC983", // 3
+  "#E7B65C", // 4
+  "#E0A438", // 5  ← warning (dark)
   "#B97F24", // 6  ← warning (light)
-  "#8F6119", // 7
-  "#6B4A14", // 8
-  "#4A3520", // 9
+  "#96661C", // 7
+  "#734E15", // 8
+  "#52380F", // 9
+];
+
+const error: MantineColorsTuple = [
+  "#FCEEEB", // 0
+  "#FADDD7", // 1
+  "#F5C4BA", // 2
+  "#F0A99B", // 3
+  "#E88D7C", // 4
+  "#E0705C", // 5  ← error (dark)
+  "#C0442E", // 6  ← error (light)
+  "#9C3625", // 7
+  "#77291C", // 8
+  "#531D13", // 9
+];
+
+const info: MantineColorsTuple = [
+  "#EDF5F9", // 0
+  "#DCEBF2", // 1
+  "#C1DCE9", // 2
+  "#A5CBDE", // 3
+  "#8ABAD3", // 4
+  "#6FA8C7", // 5  ← info (dark)
+  "#2F6F8F", // 6  ← info (light)
+  "#265A74", // 7
+  "#1D4459", // 8
+  "#142F3E", // 9
+];
+
+/**
+ * Mantine's stock gray is a cool blue-gray that shows through Skeleton,
+ * dividers, hovers and anything using `gray`. Replaced with the paper
+ * neutrals of the palette so light mode stays warm (colorschema.md).
+ */
+const gray: MantineColorsTuple = [
+  "#F7F5F0", // 0  ← bg / hover
+  "#F2EFE9", // 1  ← surface 2°
+  "#EAEEEA", // 2  ← divider
+  "#DDE4E1", // 3  ← border
+  "#C5CFCC", // 4
+  "#9AA6A4", // 5  ← text 3° / placeholder
+  "#5A6B6B", // 6  ← text 2° / dimmed
+  "#3E4F4F", // 7
+  "#2A3A3B", // 8
+  "#1C2B2C", // 9  ← text
 ];
 
 /**
  * Replaces Mantine's neutral-gray dark scale so dark mode keeps the
  * petroleum background instead of gray. Mapped to Mantine's dark-mode
- * conventions: 7 = body, 6 = surfaces (Paper/Card/inputs), 5 = raised/hover,
- * 8 = sunken (sidebar), 4 = borders, 2 = dimmed text, 0 = text.
+ * conventions: 7 = body, 6 = surfaces (Paper/Card/inputs), 5 = surface 2°
+ * (fields, alternate rows, sidebar rail), 4 = borders, 2 = dimmed text,
+ * 0 = text.
  */
 const dark: MantineColorsTuple = [
   "#E9ECE8", // 0  ← text
@@ -58,14 +135,29 @@ const dark: MantineColorsTuple = [
   "#9FB0AE", // 2  ← text-secondary / dimmed
   "#5F7371", // 3  ← text-subtle / placeholders
   "#2A3F40", // 4  ← border
-  "#1D3335", // 5  ← surface-raised (hover, selected, chips, modals)
+  "#1D3335", // 5  ← surface 2° (hover, selected, chips, modals, sidebar rail)
   "#16282A", // 6  ← surface (cards, tables, fields)
   "#101D1E", // 7  ← app background
-  "#0D1A1B", // 8  ← surface-sunken (sidebar, heros)
+  "#0D1A1B", // 8  ← sunken (heros)
   "#081314", // 9
 ];
 
+/** Text color of a `light` Badge per semantic color name. */
+const PILL_TEXT: Record<string, string> = {
+  success: "var(--wa-success)",
+  warning: "var(--wa-warning)",
+  error: "var(--wa-error)",
+  info: "var(--wa-info)",
+  accent: "var(--wa-accent)",
+  teal: "var(--wa-interactive)",
+  gray: "var(--mantine-color-dimmed)",
+};
+
 export const mantineTheme: MantineThemeOverride = createTheme({
+  // `lg` is the surface radius (14px, see --radius-surface in index.css) so
+  // Modal/Paper/Skeleton radius="lg" match the Tailwind cards; md stays the
+  // 8px control radius.
+  radius: { xs: rem(2), sm: rem(4), md: rem(8), lg: rem(14), xl: rem(32) },
   fontSizes: {
     xs: rem("12px"),
     sm: rem("14px"),
@@ -89,11 +181,11 @@ export const mantineTheme: MantineThemeOverride = createTheme({
     "3xl": rem("32px"),
   },
   primaryColor: "teal",
-  primaryShade: { light: 6, dark: 6 },
-  colors: { teal, amber, dark },
+  primaryShade: { light: 6, dark: 5 },
+  colors: { teal, accent, success, warning, error, info, gray, dark },
   white: "#FFFFFF",
   black: "#1C2B2C",
-  // Amber CTAs (`color="amber.4"`) must carry dark text (#1C2B2C), never
+  // Accent CTAs (`color="accent"`) must carry dark text (#1C2B2C), never
   // white; autoContrast resolves that from luminance instead of per-button
   // `c` props.
   autoContrast: true,
@@ -131,6 +223,26 @@ export const mantineTheme: MantineThemeOverride = createTheme({
         checkIconPosition: "right",
       },
     }),
+    // The design system's status pill: role-colored text on the neutral
+    // second surface (mockups draw every pill this way). Mantine's stock
+    // `light` variant tints the background and pales the text instead, so
+    // the variant is remapped here for all 25+ badges at once.
+    Badge: Badge.extend({
+      defaultProps: { radius: "xl" },
+      // `light`: the pill on a card. `surface`: the same pill placed on a
+      // surface-2 box (drawer inner cards, bands), where it inverts to the
+      // card color so it does not vanish — exactly as the mockups draw it.
+      vars: (_theme, props) =>
+        props.variant === "light" || props.variant === "surface"
+          ? {
+              root: {
+                "--badge-bg":
+                  props.variant === "surface" ? "var(--mantine-color-default)" : "var(--wa-surface-2)",
+                "--badge-color": PILL_TEXT[props.color ?? "teal"] ?? PILL_TEXT.teal,
+              },
+            }
+          : { root: {} },
+    }),
   },
   other: {
     style: "mantine",
@@ -142,8 +254,9 @@ export const mantineTheme: MantineThemeOverride = createTheme({
  * the body defaults to theme.white, but «papel, no blanco» wants the app
  * background on #F7F5F0 while white stays reserved for floating surfaces.
  * These land in the provider's runtime-injected style tag, so a plain
- * stylesheet override in index.css would always lose to it. Dark mode
- * needs nothing here — the petroleum `dark` scale above already feeds it.
+ * stylesheet override in index.css would always lose to it. Surfaces and
+ * text in dark come from the petroleum `dark` scale above; only the anchor
+ * («Interactivo» role) needs an explicit value in both schemes.
  */
 export const cssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {},
@@ -152,6 +265,17 @@ export const cssVariablesResolver: CSSVariablesResolver = () => ({
     "--mantine-color-default-border": "#DDE4E1",
     "--mantine-color-dimmed": "#5A6B6B",
     "--mantine-color-placeholder": "#9AA6A4",
+    // Default-variant hover (buttons, options): surface 2°, distinct from both
+    // white cards and the paper canvas so a hovered button never blends in.
+    // Table rows hover on --wa-hover (paper) instead; see index.css.
+    "--mantine-color-default-hover": "#F2EFE9",
+    // «Interactivo» role: links get their own color (≈6.2:1 on paper)
+    // instead of reusing the primary, which read as plain text.
+    "--mantine-color-anchor": "#106E74",
   },
-  dark: {},
+  dark: {
+    // «Interactivo» (dark): petroleum has insufficient contrast for links.
+    "--mantine-color-anchor": "#7FB5B0",
+    "--mantine-color-default-hover": "#1D3335",
+  },
 });

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
+use App\Enums\LocationType;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\StaffLocationRole;
@@ -33,13 +34,63 @@ class DemoAccountsSeeder extends Seeder
         $location = $this->location($account, 'edificio-central', [
             'name' => 'Edificio Central',
             'timezone' => 'America/Lima',
-            'address' => 'Av. Javier Prado Este 123, Lima',
+            'type' => LocationType::MultifamilyBuilding,
+            'address_line1' => 'Av. Javier Prado Este 123',
+            'district' => 'San Isidro',
+            'city' => 'Lima',
         ]);
 
         $northTower = $this->location($account, 'torre-norte', [
             'name' => 'Torre Norte',
             'timezone' => 'America/Lima',
-            'address' => 'Av. Javier Prado Este 125, Lima',
+            'type' => LocationType::MultifamilyBuilding,
+            'address_line1' => 'Av. Javier Prado Este 125',
+            'district' => 'San Isidro',
+            'city' => 'Lima',
+        ]);
+
+        $this->location($account, 'torre-sur', [
+            'name' => 'Torre Sur',
+            'timezone' => 'America/Lima',
+            'type' => LocationType::MultifamilyBuilding,
+            'address_line1' => 'Av. Javier Prado Este 127',
+            'district' => 'San Isidro',
+            'city' => 'Lima',
+        ]);
+
+        $this->location($account, 'residencial-pacifico', [
+            'name' => 'Residencial Pacífico',
+            'timezone' => 'America/Lima',
+            'type' => LocationType::ResidentialCommunity,
+            'address_line1' => 'Av. La Marina 980',
+            'city' => 'Callao',
+        ]);
+
+        $this->location($account, 'condominio-valle', [
+            'name' => 'Condominio Valle',
+            'timezone' => 'America/Lima',
+            'type' => LocationType::Condominium,
+            'address_line1' => 'Av. El Sol 410',
+            'district' => 'La Molina',
+            'city' => 'Lima',
+        ]);
+
+        $this->location($account, 'parque-del-sol', [
+            'name' => 'Parque del Sol',
+            'timezone' => 'America/Lima',
+            'type' => LocationType::ResidentialCommunity,
+            'address_line1' => 'Calle Los Parques 245',
+            'district' => 'San Isidro',
+            'city' => 'Lima',
+        ]);
+
+        $this->location($account, 'jardines-de-miraflores', [
+            'name' => 'Jardines de Miraflores',
+            'timezone' => 'America/Lima',
+            'type' => LocationType::ResidentialCommunity,
+            'address_line1' => 'Av. Armendáriz 620',
+            'district' => 'Miraflores',
+            'city' => 'Lima',
         ]);
 
         $secondAccount = Account::query()->updateOrCreate(
@@ -53,7 +104,10 @@ class DemoAccountsSeeder extends Seeder
         $beachLocation = $this->location($secondAccount, 'edificio-playa', [
             'name' => 'Edificio Playa',
             'timezone' => 'America/Lima',
-            'address' => 'Malecón de la Reserva 456, Lima',
+            'type' => LocationType::MultifamilyBuilding,
+            'address_line1' => 'Malecón de la Reserva 456',
+            'district' => 'Miraflores',
+            'city' => 'Lima',
         ]);
 
         $admin = $this->user('admin@wasiy.test', 'Alejandra', 'Admin');
@@ -82,7 +136,7 @@ class DemoAccountsSeeder extends Seeder
     }
 
     /**
-     * @param  array{name: string, timezone: string, address: string}  $attributes
+     * @param  array<string, mixed>  $attributes
      */
     private function location(Account $account, string $slug, array $attributes): Location
     {

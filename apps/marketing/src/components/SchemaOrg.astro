@@ -1,0 +1,107 @@
+---
+import { SITE, absolute } from '../site';
+import { faqs } from '../data/faqs';
+import { plans, pricedPlans } from '../data/plans';
+
+interface Props {
+  /** Emit FAQPage — only on pages that actually render the FAQ list. */
+  includeFaq?: boolean;
+}
+
+const { includeFaq = false } = Astro.props;
+
+const organization = {
+  '@type': 'Organization',
+  '@id': `${SITE.url}/#organization`,
+  name: SITE.name,
+  legalName: SITE.legalName,
+  url: SITE.url,
+  logo: absolute(SITE.ogImage),
+  image: absolute(SITE.ogImage),
+  email: SITE.email,
+  telephone: SITE.phone,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: SITE.city,
+    addressCountry: SITE.country,
+  },
+  areaServed: {
+    '@type': 'Country',
+    name: 'Perú',
+  },
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'sales',
+    email: SITE.email,
+    telephone: SITE.phone,
+    availableLanguage: ['es'],
+    areaServed: SITE.country,
+  },
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': `${SITE.url}/#website`,
+  url: SITE.url,
+  name: SITE.name,
+  description: SITE.description,
+  inLanguage: 'es-PE',
+  publisher: { '@id': `${SITE.url}/#organization` },
+};
+
+const prices = pricedPlans.map((p) => p.price);
+
+const application = {
+  '@type': 'SoftwareApplication',
+  '@id': `${SITE.url}/#software`,
+  name: SITE.name,
+  description: SITE.description,
+  url: SITE.url,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  inLanguage: 'es-PE',
+  publisher: { '@id': `${SITE.url}/#organization` },
+  featureList: [
+    'Registro de visitantes',
+    'Reservas de amenidades con aprobación y cuotas',
+    'Registro de unidades, residentes y vehículos',
+    'Anuncios al portal del residente',
+    'Registro de actividad auditable',
+  ],
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: SITE.currency,
+    lowPrice: Math.min(...prices).toFixed(2),
+    highPrice: Math.max(...prices).toFixed(2),
+    offerCount: plans.length,
+    offers: pricedPlans.map((p) => ({
+      '@type': 'Offer',
+      name: p.name,
+      price: p.price.toFixed(2),
+      priceCurrency: SITE.currency,
+      description: p.pitch,
+      url: `${SITE.url}/#precios`,
+    })),
+  },
+};
+
+const faqPage = {
+  '@type': 'FAQPage',
+  '@id': `${SITE.url}/#faq`,
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const graph = [organization, website, application, ...(includeFaq ? [faqPage] : [])];
+
+const jsonLd = { '@context': 'https://schema.org', '@graph': graph };
+---
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(jsonLd)}
+/>

@@ -3,20 +3,20 @@ import { useTranslation } from 'react-i18next'
 import type { RegistryImportRowStatus, RegistryImportSummary } from './api'
 
 const statusColor: Record<RegistryImportSummary['status'], string> = {
-  failed: 'red',
-  completed: 'green',
-  ready_for_review: 'blue',
+  failed: 'error',
+  completed: 'success',
+  ready_for_review: 'info',
   pending: 'gray',
   processing: 'gray',
 }
 
 const rowStatusColor: Record<RegistryImportRowStatus, string> = {
-  error: 'red',
-  warning: 'yellow',
+  error: 'error',
+  warning: 'warning',
   duplicate: 'gray',
   skipped: 'gray',
-  valid: 'green',
-  imported: 'green',
+  valid: 'success',
+  imported: 'success',
 }
 
 export function StatusBadge({ status }: { status: RegistryImportSummary['status'] }) {

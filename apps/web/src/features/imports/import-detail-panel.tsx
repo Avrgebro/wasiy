@@ -1,5 +1,5 @@
 import { Alert, Button, Group, SimpleGrid, Stack, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { CheckCircle, Refresh } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -24,11 +24,7 @@ export function ImportDetailPanel({
         queryClient.invalidateQueries({ queryKey: ['registry', 'units'] }),
         queryClient.invalidateQueries({ queryKey: ['registry', 'residents'] }),
       ])
-      showNotification({
-        color: 'green',
-        message: t('registry.imports.confirmed'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(t('registry.imports.confirmed'), t('registry.savedTitle'))
     },
   })
 
@@ -36,11 +32,7 @@ export function ImportDetailPanel({
     mutationFn: (importId: string) => retryRegistryImport(importId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['registry', 'imports'] })
-      showNotification({
-        color: 'green',
-        message: t('registry.imports.retryQueued'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(t('registry.imports.retryQueued'), t('registry.savedTitle'))
     },
   })
 
@@ -49,7 +41,7 @@ export function ImportDetailPanel({
   const canRetry = selectedImport?.status === 'failed' && !selectedImport.confirmed_at
 
   return (
-    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
+    <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
       {selectedImport ? (
         <Stack gap="md">
           <Group align="start" justify="space-between">
@@ -67,7 +59,7 @@ export function ImportDetailPanel({
           <ImportCounters registryImport={selectedImport} />
 
           {selectedImport.failure_reason ? (
-            <Alert color="red" title={t('registry.imports.failureReason')}>
+            <Alert color="error" title={t('registry.imports.failureReason')}>
               {selectedImport.failure_reason}
             </Alert>
           ) : null}
@@ -94,12 +86,12 @@ export function ImportDetailPanel({
           </Group>
 
           {confirmMutation.isError ? (
-            <Alert color="red" title={t('errors.actionFailed')}>
+            <Alert color="error" title={t('errors.actionFailed')}>
               {getErrorMessage(confirmMutation.error)}
             </Alert>
           ) : null}
           {retryMutation.isError ? (
-            <Alert color="red" title={t('errors.actionFailed')}>
+            <Alert color="error" title={t('errors.actionFailed')}>
               {getErrorMessage(retryMutation.error)}
             </Alert>
           ) : null}
@@ -125,7 +117,7 @@ function ImportCounters({ registryImport }: { registryImport: RegistryImportSumm
     <SimpleGrid cols={{ base: 2, sm: 5 }} spacing="xs">
       {counters.map(([key, value]) => (
         <div
-          className="rounded-md border border-[var(--mantine-color-default-border)] p-3"
+          className="rounded-inner border border-[var(--mantine-color-default-border)] p-3"
           key={key}
         >
           <Text c="dimmed" size="xs">

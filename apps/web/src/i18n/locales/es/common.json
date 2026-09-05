@@ -6,7 +6,10 @@
     "save": "Guardar",
     "search": "Buscar",
     "import": "Importar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "back": "Volver"
   },
   "common": {
     "loading": "Cargando",
@@ -25,8 +28,6 @@
     "invalidCredentials": "Las credenciales no coinciden con nuestros registros.",
     "login": "Ingresar",
     "loginFailed": "No se pudo iniciar sesión",
-    "loginTabResident": "Residente",
-    "loginTabStaff": "Personal",
     "loginTitle": "Entrar a Wasiy",
     "loginWithCode": "Código",
     "logout": "Cerrar sesión",
@@ -40,7 +41,11 @@
     "selectLocationRequired": "Selecciona una ubicación para ver este panel.",
     "useYourInvitation": "Usa tu invitación",
     "welcomeBack": "Bienvenido de vuelta",
-    "welcomeBackSubtitle": "Ingresa para continuar con la operación de hoy."
+    "welcomeBackSubtitle": "Ingresa para continuar con la operación de hoy.",
+    "noAccessResidentHint": "Tu acceso es al portal de residentes, no a la aplicación del personal.",
+    "goToPortal": "Ir al portal de residentes",
+    "noAccessStaffHint": "Tu acceso es a la aplicación del personal, no al portal de residentes.",
+    "goToStaffApp": "Ir a la aplicación del personal"
   },
   "accountSelection": {
     "selectFailed": "No se pudo seleccionar la cuenta",
@@ -64,26 +69,83 @@
     "retry": "Reintentar"
   },
   "dashboard": {
-    "emptyRegistry": "Aún no hay actividad reciente para esta ubicación.",
-    "heading": "Operación de {{location}}",
-    "registryTitle": "Registro reciente",
-    "stats": {
-      "assignedStaff": "Personal asignado",
-      "assignedStaffDetail": "Con acceso a esta ubicación",
-      "expectedVisitors": "Visitantes esperados",
-      "expectedVisitorsDetail": "Para la fecha actual",
-      "occupiedUnits": "Unidades ocupadas",
-      "occupiedUnitsDetail": "En esta ubicación",
-      "pendingReservations": "Reservas pendientes",
-      "pendingReservationsDetail": "Requieren revisión"
+    "heading": "Panel de {{location}}",
+    "today": "Hoy, {{date}}",
+    "overdue": "Salida por confirmar",
+    "primaryContact": "Contacto principal",
+    "sections": {
+      "today": "Hoy",
+      "management": "Administración"
     },
-    "summary": "Resumen operativo para recepción, residentes y reservas.",
-    "table": {
+    "actions": {
+      "newMovement": "Nuevo movimiento"
+    },
+    "tiles": {
+      "visitorsInside": "Visitantes dentro",
+      "visitorsOverdue_one": "{{count}} salida por confirmar",
+      "visitorsOverdue_other": "{{count}} salidas por confirmar",
+      "packagesPending": "Paquetes por entregar",
+      "packagesOldest": "el más antiguo, {{age}}",
+      "reservationsToday": "Reservas hoy",
+      "withDeposit_one": "{{count}} con depósito",
+      "withDeposit_other": "{{count}} con depósito",
+      "pendingMovements": "Movimientos pendientes",
+      "exitsToday": "Salidas registradas hoy",
+      "duesCollected": "Cuotas cobradas",
+      "duesIssued": "de {{total}} emitidas · {{percent}} %",
+      "unitsWithBalance": "Unidades con saldo pendiente",
+      "ofUnits": "de {{total}}",
+      "depositsHeld": "Depósitos retenidos",
+      "depositsHeldCount_one": "{{count}} reserva",
+      "depositsHeldCount_other": "{{count}} reservas",
+      "residentsNotInvited": "Residentes sin invitar"
+    },
+    "cards": {
+      "visitorsInside": "Visitantes dentro",
+      "insideCount": "{{count}} dentro",
+      "packagesPending": "Paquetes por entregar",
+      "atDeskCount": "{{count}} en recepción",
+      "reservationsToday": "Reservas de hoy",
+      "viewCalendar": "Ver calendario →",
+      "viewAll": "Ver todos",
+      "units": "Unidades",
+      "unitsTotal": "{{count}} en total",
+      "activity": "Actividad reciente",
+      "viewAllActivity": "Ver todo →"
+    },
+    "units": {
+      "occupied": "Ocupadas",
+      "vacant": "Vacantes",
+      "noPrimary": "Sin contacto principal"
+    },
+    "empty": {
+      "visitors": "Nadie dentro en este momento.",
+      "packages": "Sin paquetes por entregar.",
+      "reservations": "Sin reservas para hoy.",
+      "activity": "Aún no hay actividad en esta ubicación."
+    },
+    "columns": {
+      "schedule": "Horario",
+      "amenity": "Amenidad",
+      "unit": "Unidad",
       "resident": "Residente",
-      "status": "Estado",
-      "unit": "Unidad"
+      "status": "Estado"
     },
-    "title": "Panel de ubicación"
+    "relative": {
+      "now": "ahora",
+      "minutes": "hace {{count}} min",
+      "hours": "hace {{count}} h",
+      "yesterday": "ayer {{time}}",
+      "today": "hoy {{time}}",
+      "days_one": "hace {{count}} día",
+      "days_other": "hace {{count}} días"
+    },
+    "age": {
+      "today": "hoy",
+      "yesterday": "ayer",
+      "days_one": "{{count}} día",
+      "days_other": "{{count}} días"
+    }
   },
   "frontDesk": {
     "title": "Registro de visitantes"
@@ -98,24 +160,90 @@
     "phoneTitle": "Teléfono de contacto",
     "primaryContact": "Contacto principal",
     "primaryUnit": "Acceso activo para {{unit}}",
-    "residentTypes": {
-      "guestResident": "Residente invitado",
-      "occupant": "Ocupante",
-      "owner": "Propietario",
-      "tenant": "Inquilino"
-    },
     "savePhone": "Guardar teléfono",
     "summary": "Resumen de tus unidades y datos de contacto.",
-    "title": "Portal de residentes"
+    "title": "Portal de residentes",
+    "home": "Inicio",
+    "noUnit": "Aún no tienes una unidad activa en el portal.",
+    "greeting": "Hola, {{name}}",
+    "viewAll": "Ver todo",
+    "tabs": {
+      "home": "Inicio",
+      "visits": "Visitas",
+      "profile": "Perfil"
+    },
+    "unit": {
+      "mine": "Mis unidades",
+      "switch": "Cambiar unidad",
+      "switchHint": "Todo lo que ves en el portal corresponde a la unidad activa."
+    },
+    "visits": {
+      "preRegister": "Pre-registrar visita",
+      "registered": "Visita pre-registrada",
+      "cancelled": "Pre-registro cancelado",
+      "expectedToday": "Visitantes esperados hoy",
+      "noneToday": "Nadie esperado hoy.",
+      "today": "Hoy",
+      "noTime": "sin hora",
+      "arrivedAt": "Llegó {{time}}",
+      "chips": {
+        "expected": "Esperados",
+        "history": "Historial"
+      },
+      "emptyExpected": "No tienes visitas pre-registradas.",
+      "emptyHistory": "Todavía no hay visitas registradas para esta unidad.",
+      "status": {
+        "label": "Estado",
+        "expected": "Esperado",
+        "arrived": "Llegó",
+        "cancelled": "Cancelado"
+      },
+      "cancel": "Cancelar pre-registro",
+      "cancelHint": "Disponible solo mientras el estado sea «Esperado».",
+      "cancelTitle": "¿Cancelar el pre-registro de {{name}}?",
+      "cancelBody": "Recepción dejará de esperar a esta persona. Podrás registrarla de nuevo cuando quieras.",
+      "timeline": {
+        "preRegistered": "Pre-registrado",
+        "arrived": "Llegó",
+        "byDesk": "recepción {{name}}",
+        "left": "Salió",
+        "leftAuto": "Salida automática",
+        "cancelled": "Cancelado"
+      },
+      "form": {
+        "intro": "Recepción verá este aviso y confirmará la llegada. Puedes cancelarlo mientras no haya llegado.",
+        "visitor": "Nombre del visitante",
+        "document": "Documento",
+        "documentOptional": "Documento (opcional)",
+        "documentPlaceholder": "DNI o carné",
+        "date": "Fecha",
+        "otherDay": "Otro día",
+        "whichDay": "¿Qué día?",
+        "timeOptional": "Hora aproximada (opcional)",
+        "note": "Nota para recepción",
+        "noteOptional": "Nota para recepción (opcional)",
+        "notePlaceholder": "Ej. viene a recoger unas llaves"
+      }
+    },
+    "packages": {
+      "atDesk": "Paquetes en recepción",
+      "none": "No tienes paquetes por recoger.",
+      "toCollect": "Por recoger",
+      "package": "Paquete"
+    },
+    "age": {
+      "today": "hoy",
+      "yesterday": "ayer",
+      "days_one": "hace {{count}} día",
+      "days_other": "hace {{count}} días"
+    }
   },
   "nav": {
     "activity": "Actividad",
     "announcements": "Anuncios",
-    "checkIn": "Registro",
     "dashboard": "Panel",
     "home": "Inicio",
     "locations": "Ubicaciones",
-    "people": "Personas",
     "imports": "Importaciones",
     "residents": "Residentes",
     "reservations": "Reservas",
@@ -123,10 +251,10 @@
     "todaysVisitors": "Visitantes de hoy",
     "unitLookup": "Buscar unidad",
     "units": "Unidades",
-    "vehicles": "Vehículos",
     "visitors": "Visitantes",
     "finances": "Finanzas",
-    "settings": "Configuración"
+    "settings": "Configuración",
+    "packages": "Paquetería"
   },
   "notifications": {
     "label": "Ver notificaciones"
@@ -134,13 +262,13 @@
   "navGroups": {
     "account": "Cuenta",
     "communication": "Comunicación",
-    "frontDesk": "Portería",
     "operations": "Operación",
     "overview": "Resumen",
     "portal": "Portal",
     "registry": "Registro",
     "location": "Ubicación",
-    "administration": "Administración"
+    "administration": "Administración",
+    "reception": "Recepción"
   },
   "registry": {
     "imports": {
@@ -261,15 +389,23 @@
   },
   "shell": {
     "account": "Condominio Los Olivos",
+    "changeAccount": "Cambiar cuenta",
+    "changeLocation": "Cambiar ubicación",
+    "changeLocationShort": "Cambiar",
     "closeNav": "Cerrar navegación",
+    "currentLocation": "Ubicación actual",
     "frontDeskArea": "Operaciones de portería",
-    "location": "Torre Norte",
+    "locationMatchCount_one": "{{count}} ubicación coincide con la búsqueda",
+    "locationMatchCount_other": "{{count}} ubicaciones coinciden con la búsqueda",
+    "locationSearchPlaceholder": "Buscar ubicación",
     "locations": "Ubicaciones",
     "mainNav": "Navegación principal",
     "openNav": "Abrir navegación",
-    "productArea": "Operaciones residenciales",
     "selectLocation": "Seleccionar ubicación",
+    "selectingLocation": "Seleccionando…",
+    "noLocationMatches": "No se encontraron ubicaciones",
     "userMenu": "Abrir menú de usuario",
+    "viewAllLocations": "Ver todas las ubicaciones",
     "searchPlaceholder": "Buscar…"
   },
   "theme": {
@@ -291,7 +427,27 @@
     "passwordMismatch": "Las contraseñas no coinciden.",
     "locationRequired": "Selecciona una ubicación.",
     "locationDuplicated": "Esta ubicación ya está asignada.",
-    "locationAssignmentsRequired": "Agrega al menos una ubicación."
+    "locationAssignmentsRequired": "Agrega al menos una ubicación.",
+    "nameRequired": "Ingresa el nombre.",
+    "typeRequired": "Selecciona un tipo de propiedad.",
+    "addressLine1Required": "Ingresa la dirección.",
+    "cityRequired": "Ingresa la ciudad.",
+    "amenityRequired": "Selecciona una amenidad.",
+    "dateRequired": "Selecciona una fecha.",
+    "startRequired": "Indica la hora de inicio.",
+    "endRequired": "Indica la hora de fin.",
+    "endAfterStart": "La hora de fin debe ser posterior al inicio.",
+    "categoryRequired": "Selecciona una categoría.",
+    "amountRequired": "Ingresa un monto mayor a cero.",
+    "conceptRequired": "Ingresa el concepto.",
+    "conceptTooLong": "El concepto no puede superar 120 caracteres.",
+    "detailTooLong": "El detalle no puede superar 255 caracteres.",
+    "counterpartyTooLong": "El proveedor no puede superar 120 caracteres.",
+    "noteTooLong": "La nota no puede superar 1000 caracteres.",
+    "shareTooHigh": "La participación no puede superar 100 %.",
+    "personRequired": "Selecciona una persona.",
+    "emailRequiredForInvite": "Ingresa un correo para enviar la invitación.",
+    "visitorNameRequired": "Ingresa el nombre del visitante."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",
@@ -386,6 +542,953 @@
     "nextPage": "Página siguiente",
     "filters": "Filtros",
     "clearFilters": "Limpiar filtros",
-    "removeFilter": "Quitar filtro {{filter}}"
+    "removeFilter": "Quitar filtro {{filter}}",
+    "sortBy": "Ordenar por esta columna",
+    "sortedAsc": "Ordenado ascendente, clic para descendente",
+    "sortedDesc": "Ordenado descendente, clic para quitar el orden"
+  },
+  "locations": {
+    "title": "Ubicaciones",
+    "subtitle": "{{count}} propiedades en la cuenta {{account}}.",
+    "new": "Nueva ubicación",
+    "searchPlaceholder": "Buscar por nombre o dirección…",
+    "type": "Tipo",
+    "allTypes": "Todos los tipos",
+    "allStatuses": "Todos los estados",
+    "activeLocation": "Ubicación activa",
+    "actionsFor": "Acciones para {{name}}",
+    "deactivate": "Desactivar",
+    "reactivate": "Reactivar",
+    "deactivated": "Ubicación desactivada.",
+    "reactivated": "Ubicación reactivada.",
+    "created": "Ubicación creada.",
+    "updated": "Ubicación actualizada.",
+    "createTitle": "Nueva ubicación",
+    "createSubtitle": "Se crea activa y disponible de inmediato.",
+    "editTitle": "Editar ubicación",
+    "create": "Crear ubicación",
+    "saveChanges": "Guardar cambios",
+    "deactivateConfirmTitle": "¿Desactivar {{name}}?",
+    "deactivateHint": "La ubicación deja de aparecer en el portal del residente y no admite nuevas visitas ni reservas. El historial se conserva.",
+    "deactivateReversible": "Puedes reactivarla en cualquier momento sin volver a cargar el registro.",
+    "statuses": {
+      "active": "Activa",
+      "deactivated": "Inactiva"
+    },
+    "types": {
+      "multifamily_building": "Edificio multifamiliar",
+      "condominium": "Condominio",
+      "residential_community": "Comunidad residencial",
+      "other": "Otro"
+    },
+    "counts": {
+      "units": "unidades",
+      "residents": "residentes",
+      "vehicles": "vehículos",
+      "staff": "staff",
+      "unclaimedInvitations": "invit. sin reclamar"
+    },
+    "affected": {
+      "units": "Unidades afectadas",
+      "residents": "Residentes con acceso",
+      "staff": "Personal asignado"
+    },
+    "empty": {
+      "title": "Aún no hay ubicaciones",
+      "body": "Crea la primera propiedad de tu cuenta. Podrás cargar unidades, residentes y amenidades después.",
+      "filteredTitle": "Ningún resultado",
+      "filteredBody": "Ninguna ubicación coincide con la búsqueda y los filtros activos."
+    },
+    "form": {
+      "name": "Nombre de la ubicación",
+      "namePlaceholder": "ej. Torre Mirador",
+      "type": "Tipo",
+      "timezone": "Zona horaria",
+      "addressSection": "Dirección",
+      "addressLine1": "Dirección línea 1",
+      "addressLine1Placeholder": "Av. o calle y número",
+      "addressLine2": "Dirección línea 2",
+      "addressLine2Placeholder": "Torre, piso, referencia (opcional)",
+      "district": "Distrito",
+      "city": "Ciudad",
+      "state": "Región / estado",
+      "postalCode": "Código postal",
+      "country": "País",
+      "contactSection": "Contacto",
+      "phone": "Teléfono de recepción",
+      "contactEmail": "Correo operativo",
+      "accessNotes": "Notas de acceso",
+      "accessNotesHint": "Visible para el personal de recepción.",
+      "accessNotesPlaceholder": "Indicaciones para visitas y proveedores: ingreso vehicular, entrega de paquetes, restricciones.",
+      "sensitiveZone": "Zona sensible",
+      "sensitiveZoneHint": "Desactivar oculta la ubicación del portal y bloquea nuevas reservas."
+    },
+    "tabs": {
+      "info": "Información",
+      "amenities": "Amenidades",
+      "staff": "Personal",
+      "settings": "Configuración"
+    },
+    "stats": {
+      "units": "Unidades",
+      "residents": "Residentes",
+      "vehicles": "Vehículos",
+      "unclaimedInvitations": "Invitaciones sin reclamar",
+      "activeAmenities": "Amenidades activas"
+    },
+    "info": {
+      "title": "Información general",
+      "editBlocked": "Edición bloqueada"
+    },
+    "photos": {
+      "title": "Fotos",
+      "hint": "La portada se muestra en la lista de ubicaciones. Todas son visibles en el portal del residente.",
+      "cover": "Portada",
+      "makeCover": "Hacer portada",
+      "delete": "Eliminar",
+      "add": "Agregar fotos",
+      "constraints": "JPG o PNG · máx. 10 MB",
+      "rejected": "El archivo debe ser JPG o PNG de hasta 10 MB.",
+      "none": "Sin fotos aún",
+      "emptyHint": "Sin fotos, la lista de ubicaciones muestra un marcador y el portal no exhibe imágenes de la propiedad."
+    },
+    "staffTab": {
+      "readOnly": "Vista de solo lectura.",
+      "readOnlyBody": "Las asignaciones y los roles se administran en",
+      "person": "Persona",
+      "access": "Acceso",
+      "thisLocation": "Esta ubicación",
+      "frontDeskAccess": "Solo recepción",
+      "emptyTitle": "Nadie asignado a esta ubicación",
+      "emptyBody": "El personal se asigna en Personal. Hasta entonces, solo el Account Admin puede operar recepción y reservas aquí.",
+      "goToStaff": "Ir a Personal"
+    },
+    "detail": {
+      "changeCover": "Cambiar portada",
+      "reactivateLocation": "Reactivar ubicación",
+      "deactivatedTitle": "Esta ubicación está desactivada",
+      "deactivatedBody": "Desactivada por {{name}} el {{date}}. No aparece en el portal del residente, no admite visitas ni reservas nuevas, y todos los formularios están en solo lectura. El registro se conserva íntegro.",
+      "notFoundTitle": "Ubicación no encontrada",
+      "notFoundBody": "La ubicación no existe o no pertenece a esta cuenta.",
+      "backToList": "Volver a Ubicaciones",
+      "amenitiesSoon": "Las amenidades de esta ubicación se administrarán aquí próximamente.",
+      "settingsSoon": "La configuración operativa de esta ubicación se administrará aquí próximamente."
+    }
+  },
+  "reservations": {
+    "title": "Reservas",
+    "subtitle": "Amenidades de {{location}}",
+    "noLocation": "Selecciona una ubicación para ver sus reservas.",
+    "previousWeek": "Semana anterior",
+    "nextWeek": "Semana siguiente",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "emptyWeek": "Sin reservas esta semana.",
+    "allAmenities": "Todas las amenidades",
+    "chips": {
+      "all": "Todas",
+      "pending": "Pendientes",
+      "approved": "Confirmadas",
+      "completed": "Completadas"
+    },
+    "columns": {
+      "amenity": "Amenidad",
+      "unit": "Unidad",
+      "resident": "Residente",
+      "date": "Fecha",
+      "time": "Horario",
+      "status": "Estado"
+    },
+    "statuses": {
+      "pending": "Pendiente",
+      "approved": "Confirmada",
+      "observed": "Observada",
+      "rejected": "Rechazada",
+      "cancelled": "Cancelada",
+      "completed": "Completada"
+    },
+    "queue": {
+      "title": "Por aprobar",
+      "empty": "No hay solicitudes pendientes.",
+      "waiting_one": "Esperando hace {{count}} día",
+      "waiting_other": "Esperando hace {{count}} días",
+      "conflictNone": "conflicto: ninguno",
+      "conflictWith": "conflicto: se cruza con {{label}}",
+      "fee": "cuota S/ {{amount}}",
+      "deposit": "depósito S/ {{amount}}",
+      "free": "sin costo",
+      "showAll": "Ver las {{count}} pendientes →",
+      "showFewer": "Ver menos"
+    },
+    "actions": {
+      "approve": "Aprobar",
+      "observe": "Observar",
+      "reject": "Rechazar",
+      "cancel": "Cancelar reserva"
+    },
+    "noteModal": {
+      "rejectTitle": "Rechazar reserva",
+      "observeTitle": "Observar reserva",
+      "noteLabel": "Nota para el residente",
+      "observeHint": "El residente verá esta nota; la solicitud queda abierta para aprobar o rechazar.",
+      "rejectHint": "El residente verá esta nota como motivo del rechazo."
+    },
+    "toasts": {
+      "approved": "Reserva aprobada.",
+      "rejected": "Reserva rechazada.",
+      "observed": "Reserva observada.",
+      "created": "Reserva registrada.",
+      "requested": "Solicitud enviada a aprobación.",
+      "cancelled": "Reserva cancelada."
+    },
+    "newReservation": "Nueva reserva",
+    "form": {
+      "amenity": "Amenidad",
+      "unit": "Unidad",
+      "resident": "Residente (opcional)",
+      "date": "Fecha",
+      "start": "Inicio",
+      "end": "Fin",
+      "availableWindows": "Disponible ese día: {{windows}}",
+      "closedThatDay": "La amenidad está cerrada ese día.",
+      "submit": "Registrar reserva"
+    },
+    "detail": {
+      "fee": "Cuota",
+      "deposit": "Depósito",
+      "note": "Nota",
+      "charges": "Cobros",
+      "chargesOnApproval": "Los cobros se generan en Finanzas al aprobar la reserva.",
+      "title": "Reserva",
+      "kind": "Reserva",
+      "registeredBy": "Registrada por",
+      "decisionNote": "Nota de decisión",
+      "viewInFinances": "Ver en Finanzas →",
+      "noteHint": "Visible para el residente.",
+      "noteRequiredHint": "Requerida para observar o rechazar.",
+      "confirmCancel": "¿Cancelar la reserva?",
+      "confirmCancelBody": "El espacio queda libre y los cobros pendientes se anulan; un depósito en garantía pasa a por devolver. Esta acción no se puede deshacer.",
+      "decidedLabel": {
+        "approved": "Aprobada por",
+        "rejected": "Rechazada por",
+        "observed": "Observada por",
+        "cancelled": "Cancelada por",
+        "pending": "Decidida por"
+      }
+    },
+    "weekOf": "Semana del {{range}}",
+    "history": {
+      "created": "Reserva registrada",
+      "approved": "Reserva aprobada",
+      "observed": "Reserva observada",
+      "rejected": "Reserva rechazada",
+      "cancelled": "Reserva cancelada",
+      "updated": "Reserva modificada",
+      "chargeGenerated": "Cobro generado: {{charge}}",
+      "completed": "Reserva completada",
+      "derived": "derivado del horario"
+    }
+  },
+  "settings": {
+    "intro": "Cada grupo se guarda por separado. Los valores mostrados son los que están en vigencia, incluidos los heredados de la cuenta.",
+    "introAccount": "Valores predeterminados para todas las ubicaciones de la cuenta. Cada ubicación puede sobrescribirlos.",
+    "accountTitle": "Configuración",
+    "accountSubtitle": "Configuración operativa de la cuenta {{account}}.",
+    "saved": "Configuración guardada.",
+    "discard": "Descartar",
+    "clearOverride": "· Restablecer al valor de la cuenta",
+    "willInherit": "Al guardar, heredará el valor de la cuenta.",
+    "appliesOnlyTo": "Aplica solo a {{name}}.",
+    "appliesToAccount": "Aplica a toda la cuenta {{name}}.",
+    "effectWithAccount": "En vigencia: {{effective}} · valor de la cuenta: {{account}}",
+    "effectOnly": "En vigencia: {{effective}}",
+    "overridesAccount": "Sobrescribe el valor de la cuenta ({{account}})",
+    "inheritedFromAccount": "Heredado de la cuenta ({{account}})",
+    "hoursValue": "{{hours}} horas",
+    "visitors": {
+      "title": "Visitas",
+      "preregistration": "Pre-registro por residentes",
+      "preregistrationHint": "Los residentes pueden anunciar visitas desde el portal.",
+      "autoCheckout": "Cierre automático de visitas",
+      "autoCheckoutHint": "Las visitas sin salida registrada se cierran solas.",
+      "never": "Nunca"
+    },
+    "reservations": {
+      "title": "Reservas",
+      "maxAdvance": "Días de anticipación máx.",
+      "maxConcurrent": "Reservas simultáneas por unidad",
+      "cancellationWindow": "Ventana de cancelación",
+      "days": "días",
+      "reservations": "reservas",
+      "hours": "horas",
+      "amenityOverrideHint": "Cada amenidad puede sobrescribir estos valores en su propia política de reserva.",
+      "footer": "Aplica a las amenidades que no definan su propio valor."
+    },
+    "quietHours": {
+      "title": "Horario de silencio",
+      "enabled": "Horario de silencio activo",
+      "enabledHint": "Se muestra en el portal y bloquea reservas nocturnas.",
+      "start": "Inicio",
+      "end": "Fin",
+      "effect": "En vigencia: {{start}}–{{end}}, hora de la ubicación ({{timezone}})",
+      "footer": "Desactivar deja las noches sin restricción."
+    },
+    "announcements": {
+      "title": "Anuncios",
+      "managerCanPost": "Los Location Managers pueden publicar",
+      "managerCanPostHint": "Si se desactiva, solo el Account Admin publica anuncios.",
+      "emailResidents": "Correo a residentes por anuncio nuevo",
+      "emailResidentsHint": "Envío opcional además de la notificación en el portal."
+    }
+  },
+  "amenities": {
+    "add": "Agregar amenidad",
+    "createTitle": "Nueva amenidad",
+    "createSubtitle": "Los residentes la verán en el portal.",
+    "editTitle": "Editar amenidad",
+    "create": "Crear amenidad",
+    "created": "Amenidad creada.",
+    "updated": "Amenidad actualizada.",
+    "deactivated": "Amenidad desactivada.",
+    "reactivated": "Amenidad reactivada.",
+    "summary": "{{count}} amenidades · {{reservable}} reservables",
+    "noFee": "Sin costo",
+    "feeWithDeposit": "{{fee}} + depósito {{deposit}}",
+    "instant": "Instantánea",
+    "approval": "Requiere aprobación",
+    "variableSchedule": "Horario variable",
+    "pausedFootnote": "Las amenidades inactivas no aparecen en el portal del residente. Los cambios quedan en el registro de actividad.",
+    "deactivateConfirmTitle": "¿Desactivar {{name}}?",
+    "deactivateHint": "La amenidad se oculta del portal y no acepta reservas nuevas. Su historial y sus cuotas registradas se conservan.",
+    "statuses": {
+      "reservable": "Reservable",
+      "common": "Común",
+      "deactivated": "Inactiva"
+    },
+    "columns": {
+      "amenity": "Amenidad",
+      "schedule": "Horario",
+      "capacity": "Aforo",
+      "fee": "Cuota / depósito",
+      "approval": "Aprobación",
+      "actions": "Acciones"
+    },
+    "types": {
+      "pool": "piscina",
+      "gym": "gimnasio",
+      "event_room": "salón de eventos",
+      "meeting_room": "sala de reuniones",
+      "court": "cancha",
+      "rooftop": "azotea",
+      "other": "otro"
+    },
+    "empty": {
+      "title": "Sin amenidades registradas",
+      "body": "Agrega piscina, gimnasio, salón de eventos o espacios comunes para que los residentes puedan reservarlos."
+    },
+    "sections": {
+      "basics": "Básicos",
+      "availability": "Disponibilidad",
+      "policy": "Política de reserva",
+      "fees": "Cuotas"
+    },
+    "form": {
+      "name": "Nombre",
+      "namePlaceholder": "ej. Salón de eventos",
+      "type": "Tipo",
+      "capacity": "Aforo",
+      "people": "personas",
+      "description": "Descripción",
+      "reservable": "Reservable",
+      "reservableHint": "Si se desactiva queda como espacio común, sin reservas.",
+      "maxDuration": "Duración máxima",
+      "maxDurationHint": "Opcional (sin límite)",
+      "requiresApproval": "Requiere aprobación",
+      "approvalHint": "Si se desactiva, la reserva se confirma al instante.",
+      "fee": "Cuota de uso",
+      "deposit": "Depósito reembolsable",
+      "feesHint": "Montos en soles, sin decimales. El depósito se registra manualmente al confirmar la reserva.",
+      "photosAfterCreate": "Podrás agregar fotos al editar la amenidad una vez creada."
+    },
+    "policy": {
+      "inheritHint": "Hereda: {{value}} {{unit}}",
+      "overrideHint": "Sobrescribe (base: {{value}} {{unit}})"
+    },
+    "availability": {
+      "columns": "Día · abierto · horarios",
+      "timezoneNote": "Hora local de la ubicación ({{timezone}})",
+      "closed": "Cerrado",
+      "openDay": "Abrir y agregar horario",
+      "addWindow": "Agregar horario",
+      "copyToAll": "Copiar a todos los días",
+      "removeWindow": "Quitar horario de {{day}}",
+      "startFor": "Inicio {{n}} de {{day}}",
+      "endFor": "Fin {{n}} de {{day}}",
+      "to": "a",
+      "overlap": "Los horarios se superponen entre {{start}} y {{end}}. Ajusta uno de los dos para guardar.",
+      "inverted": "El horario cierra antes de abrir."
+    },
+    "weekdays": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
+    }
+  },
+  "finances": {
+    "title": "Finanzas",
+    "subtitle": "Ingresos, egresos y depósitos · {{location}} · {{month}}",
+    "noLocation": "Selecciona una ubicación para ver sus finanzas.",
+    "disclaimer": "Wasiy no procesa pagos: aquí se registran manualmente los ingresos (cuotas y depósitos de reservas) y los egresos del edificio (luz, agua, limpieza, mantenimiento). La contabilidad formal llegará como módulo futuro.",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "updated": "Movimiento actualizado",
+    "emptyMonth": "Sin movimientos en {{month}}.",
+    "emptyFiltered": "Ningún movimiento coincide con el filtro en {{month}}.",
+    "chips": {
+      "all": "Todo",
+      "income": "Ingresos",
+      "expense": "Egresos",
+      "pending": "Pendientes",
+      "paid": "Pagados",
+      "deposits": "Depósitos",
+      "refunded": "Devueltos"
+    },
+    "tiles": {
+      "income": "Ingresos del mes",
+      "expense": "Egresos del mes",
+      "balance": "Balance del mes",
+      "receivable": "Por cobrar · depósitos retenidos",
+      "heldAside": "· {{amount}} en garantía",
+      "receivableDetail": "{{pending}} pendientes · {{refunds}} por devolver",
+      "none": "Sin movimientos",
+      "balanceVsPrevious": "vs. {{month}}: {{delta}}"
+    },
+    "columns": {
+      "date": "Fecha",
+      "concept": "Concepto",
+      "unit": "Unidad",
+      "amount": "Monto",
+      "status": "Estado",
+      "action": "Acción",
+      "category": "Categoría"
+    },
+    "statuses": {
+      "pending": "Pendiente",
+      "payable": "Por pagar",
+      "paid": "Pagado",
+      "held": "En garantía",
+      "to_refund": "Por devolver",
+      "refunded": "Devuelto",
+      "retained": "Retenido por daños",
+      "voided": "Anulado"
+    },
+    "transitions": {
+      "pending": "Marcar pendiente",
+      "paid": "Marcar pagado",
+      "held": "Marcar recibido",
+      "to_refund": "Liberar depósito",
+      "refunded": "Marcar devuelto",
+      "retained": "No devolver",
+      "voided": "Anular"
+    },
+    "categories": {
+      "reservation_fee": "Cuota de reserva",
+      "reservation_deposit": "Depósito de reserva",
+      "utility": "Servicios",
+      "cleaning": "Limpieza",
+      "maintenance": "Mantenimiento y reparaciones",
+      "other": "Otro",
+      "maintenance_dues": "Cuota de mantenimiento",
+      "fine": "Multa",
+      "other_income": "Otro ingreso",
+      "water": "Agua",
+      "electricity": "Luz",
+      "gas": "Gas",
+      "telecom": "Internet y telefonía",
+      "security": "Vigilancia",
+      "staff": "Personal",
+      "supplies": "Insumos",
+      "gardening": "Jardinería",
+      "insurance_taxes": "Seguros e impuestos",
+      "administration": "Administración",
+      "other_expense": "Otro egreso"
+    },
+    "detail": {
+      "open": "Detalle",
+      "dueOn": "Vence",
+      "recordedBy": "Registrado por",
+      "note": "Nota",
+      "reservation": "Reserva",
+      "recordedBySystem": "Sistema · al aprobar la reserva",
+      "actions": "Acciones",
+      "actionNote": "Nota (opcional)",
+      "actionNoteHint": "Motivo de la devolución o retención, visible para el residente.",
+      "close": "Cerrar",
+      "confirmRetain": "¿Retener el depósito?",
+      "confirmRetainBody": "El depósito no se devolverá al residente por daños o incumplimiento. Puedes revertirlo después desde este mismo panel.",
+      "confirmVoid": "¿Anular el movimiento?",
+      "confirmVoidBody": "El movimiento dejará de contar en los totales. Esta acción no se puede deshacer.",
+      "confirm": "Confirmar"
+    },
+    "record": "Registrar movimiento",
+    "form": {
+      "subtitle": "Registro manual · Wasiy no procesa pagos",
+      "expense": "Egreso",
+      "income": "Ingreso",
+      "category": "Categoría",
+      "amount": "Monto",
+      "concept": "Concepto",
+      "conceptExpenseHint": "Agua · áreas comunes",
+      "conceptIncomeHint": "Cuota · Salón de eventos",
+      "detail": "Detalle",
+      "detailHint": "Recibo, factura o referencia",
+      "counterparty": "Proveedor",
+      "counterpartyHint": "Sedapal, Luz del Sur…",
+      "unit": "Unidad",
+      "occurredOn": "Fecha",
+      "dueOn": "Vence",
+      "status": "Estado inicial",
+      "statusPending": "Pendiente",
+      "statusPaid": "Ya pagado",
+      "statusHeld": "Ya recibido (en garantía)",
+      "note": "Nota",
+      "submit": "Registrar",
+      "recorded": "Movimiento registrado"
+    },
+    "categoriesPlural": {
+      "reservation_fee_one": "cuota de reserva",
+      "reservation_deposit_one": "depósito",
+      "maintenance_dues_one": "cuota de mantenimiento",
+      "fine_one": "multa",
+      "other_income_one": "otro ingreso",
+      "reservation_fee_other": "cuotas de reserva",
+      "reservation_deposit_other": "depósitos",
+      "maintenance_dues_other": "cuotas de mantenimiento",
+      "fine_other": "multas",
+      "other_income_other": "otros ingresos"
+    },
+    "history": {
+      "title": "Historial",
+      "recorded": "Registrado",
+      "generatedOnApproval": "Generado al aprobar la reserva",
+      "system": "Sistema",
+      "paid": "Marcado pagado",
+      "pending": "Vuelto a pendiente",
+      "held": "Depósito recibido (en garantía)",
+      "to_refund": "Marcado por devolver",
+      "refunded": "Marcado devuelto",
+      "retained": "Retenido por daños",
+      "voided": "Anulado"
+    },
+    "searchPlaceholder": "Buscar concepto, detalle o proveedor…",
+    "allCategories": "Todas las categorías",
+    "dues": {
+      "action": "Generar cuotas del mes",
+      "confirmTitle": "¿Generar las cuotas de {{month}}?",
+      "confirmBody": "Se creará una cuota de mantenimiento pendiente por cada unidad activa con cuota definida. Las unidades que ya tienen su cuota de este mes se omiten, así que puedes repetirlo sin duplicar.",
+      "done": "{{created}} cuotas generadas · {{skipped}} ya existían"
+    }
+  },
+  "units": {
+    "title": "Unidades",
+    "subtitle_one": "{{count}} unidad · {{location}}",
+    "subtitle_other": "{{count}} unidades · {{location}}",
+    "searchPlaceholder": "Buscar unidad, residente o placa…",
+    "allTypes": "Todos los tipos",
+    "chips": {
+      "all": "Todas",
+      "occupied": "Ocupadas",
+      "vacant": "Vacías",
+      "attention": "Sin contacto principal",
+      "no_portal": "Sin portal",
+      "no_fee": "Sin cuota"
+    },
+    "columns": {
+      "unit": "Unidad",
+      "floorType": "Piso · tipo",
+      "residents": "Residentes",
+      "vehicles": "Vehículos",
+      "fee": "Cuota",
+      "portal": "Portal",
+      "status": "Estado",
+      "type": "Tipo"
+    },
+    "floorN": "Piso {{floor}}",
+    "types": {
+      "apartment": "Departamento",
+      "house": "Casa",
+      "commercial": "Local comercial",
+      "office": "Oficina"
+    },
+    "typesShort": {
+      "apartment": "Depto.",
+      "house": "Casa",
+      "commercial": "Local",
+      "office": "Oficina"
+    },
+    "occupancy": {
+      "occupied": "Ocupada",
+      "vacant": "Vacía",
+      "attention": "Atención"
+    },
+    "portal": {
+      "active": "En el portal",
+      "invited": "Invitación enviada",
+      "not_invited": "Sin invitar"
+    },
+    "statuses": {
+      "active": "Activa",
+      "inactive": "Desactivada"
+    },
+    "noResidents": "Sin residentes",
+    "noPrimaryContact": "Sin contacto principal",
+    "emptyTitle": "Aún no hay unidades en {{location}}",
+    "emptyBody": "Carga el padrón completo desde una hoja de cálculo o crea la primera unidad a mano.",
+    "emptyFilteredTitle": "Ninguna unidad coincide",
+    "emptyFilteredBody": "Prueba con otro filtro o búsqueda.",
+    "detail": {
+      "title": "{{type}} {{number}}",
+      "notFoundTitle": "Unidad no encontrada",
+      "notFoundBody": "Puede que haya sido eliminada o pertenezca a otra ubicación.",
+      "backToList": "← Volver a Unidades",
+      "monthlyFee": "Cuota mensual",
+      "share": "Participación",
+      "parking": "Estacionamientos",
+      "storage": "Depósitos",
+      "residents": "Residentes",
+      "primaryContact": "Contacto principal",
+      "noResidentsTitle": "Sin residentes registrados",
+      "noResidentsBody": "La unidad figura como vacía y no aparece en el portal hasta que agregues a alguien.",
+      "reservations": "Reservas de la unidad",
+      "seeAll": "Ver todas →",
+      "noReservations": "Sin reservas próximas.",
+      "bookedBy": "Reservó {{name}}",
+      "charges": "Cuotas y cobros",
+      "viewInFinances": "Ver en Finanzas →",
+      "noMovements": "Sin movimientos este mes.",
+      "pendingBalance": "Saldo pendiente: {{amount}}",
+      "noPendingBalance": "Sin saldo pendiente",
+      "vehicles": "Vehículos",
+      "noVehicles": "Sin vehículos registrados.",
+      "portal": "Portal del residente",
+      "noPortal": "Nadie de esta unidad tiene acceso al portal.",
+      "notes": "Notas internas",
+      "addNote": "Agregar nota",
+      "saveNote": "Guardar nota",
+      "notePlaceholder": "Visible solo para el personal…",
+      "noNotes": "Sin notas internas.",
+      "notesHint": "Visibles solo para staff. Quedan en el registro de actividad.",
+      "noteAdded": "Nota agregada",
+      "edit": "Editar unidad",
+      "reactivate": "Reactivar unidad",
+      "addResident": "Agregar residente",
+      "addVehicle": "Agregar",
+      "deactivated": "Unidad desactivada",
+      "reactivated": "Unidad reactivada",
+      "confirmDeactivate": "¿Desactivar la unidad {{number}}?",
+      "confirmDeactivateBody": "{{residents}} residente(s) perderán el acceso al portal y {{vehicles}} vehículo(s) quedarán inactivos. Las reservas futuras se cancelarán. La unidad queda en el historial.",
+      "packages": "Paquetes en recepción",
+      "packagesHistory": "Ver historial →",
+      "noPackages": "Sin paquetes en recepción.",
+      "visits": "Visitas recientes",
+      "noVisits": "Sin visitas registradas."
+    },
+    "form": {
+      "createTitle": "Nueva unidad",
+      "editTitle": "Editar unidad",
+      "create": "Crear unidad",
+      "save": "Guardar cambios",
+      "created": "Unidad creada",
+      "saved": "Cambios guardados",
+      "identity": "Identificación",
+      "number": "Número",
+      "building": "Torre / edificio",
+      "floor": "Piso",
+      "parking": "Estacionamientos",
+      "storage": "Depósitos",
+      "feeSection": "Cuota y participación",
+      "share": "Porcentaje de participación",
+      "sensitiveZone": "Zona sensible",
+      "sensitiveZoneHint": "Desactivar quita la unidad del portal, deja sus vehículos inactivos y bloquea nuevas reservas. El historial se conserva.",
+      "deactivate": "Desactivar unidad",
+      "buildingHint": "Selecciona la torre; las unidades se agrupan por ella.",
+      "moreDetails": "Más detalles",
+      "feeSectionHint": "La cuota mensual se usa al generar las cuotas del mes. La participación es la alícuota del reglamento interno y reparte los gastos comunes.",
+      "moreDetailsHint": "Estacionamientos y depósitos como etiquetas (Enter agrega otra) y notas internas."
+    },
+    "member": {
+      "addTitle": "Agregar residente",
+      "manageTitle": "Gestionar residente",
+      "existing": "Persona existente",
+      "new": "Nueva persona",
+      "searchPerson": "Buscar persona",
+      "searchPlaceholder": "Buscar por nombre, correo o teléfono…",
+      "typeToSearch": "Escribe al menos dos letras.",
+      "noPeople": "Sin coincidencias.",
+      "email": "Correo",
+      "relation": "Relación con la unidad",
+      "invite": "Invitar al portal del residente",
+      "inviteNeedsEmail": "La invitación al portal requiere un correo.",
+      "add": "Agregar",
+      "added": "Residente agregado",
+      "saved": "Cambios guardados",
+      "invited": "Invitación enviada",
+      "sendInvite": "Enviar invitación",
+      "resendInvite": "Reenviar invitación",
+      "remove": "Quitar de la unidad",
+      "removeHint": "Quitarlo de la unidad revoca su acceso al portal de {{unit}}. Su registro como persona se conserva.",
+      "removed": "Residente quitado de la unidad",
+      "confirmRemove": "¿Quitar a {{name}} de la unidad?",
+      "confirmRemoveBody": "Pierde el acceso al portal de esta unidad. Su registro como persona se conserva.",
+      "relationHint": "El contacto principal recibe los avisos y es la referencia para recepción. La invitación al portal pide el correo al enviarla."
+    },
+    "vehicle": {
+      "title": "Vehículo",
+      "added": "Vehículo agregado",
+      "saved": "Cambios guardados",
+      "deactivate": "Desactivar vehículo",
+      "reactivate": "Reactivar vehículo",
+      "deactivated": "Vehículo desactivado",
+      "reactivated": "Vehículo reactivado",
+      "deactivateHint": "Un vehículo inactivo deja de aparecer en recepción y en la búsqueda por placa. Su historial se conserva.",
+      "confirmDeactivate": "¿Desactivar el vehículo {{plate}}?",
+      "confirmDeactivateBody": "Dejará de aparecer en recepción y en la búsqueda por placa. Puedes reactivarlo después."
+    }
+  },
+  "packages": {
+    "title": "Paquetería",
+    "subtitle": "Recepción · {{location}}",
+    "register": "Registrar paquete",
+    "markDelivered": "Marcar entregado",
+    "delivered": "Paquete entregado",
+    "registeredNotified": "Paquete registrado · aviso enviado a {{email}}",
+    "registeredSilent": "Paquete registrado · sin aviso (nadie tiene correo)",
+    "searchPlaceholder": "Buscar unidad o residente…",
+    "primaryContact": "Contacto principal",
+    "chips": {
+      "pending": "En recepción",
+      "delivered": "Entregados",
+      "all": "Todos"
+    },
+    "columns": {
+      "received": "Recibido",
+      "unit": "Unidad",
+      "for": "Para",
+      "status": "Estado"
+    },
+    "statuses": {
+      "pending": "En recepción",
+      "delivered": "Entregado"
+    },
+    "empty": {
+      "pending": "No hay paquetes en recepción.",
+      "delivered": "Aún no hay paquetes entregados.",
+      "all": "Aún no hay paquetes registrados."
+    },
+    "emptyFiltered": "Ningún paquete coincide con la búsqueda.",
+    "form": {
+      "unit": "Unidad",
+      "resident": "Para",
+      "anyResident": "Cualquier residente de la unidad",
+      "notesPlaceholder": "Caja mediana, frágil…",
+      "submit": "Registrar",
+      "destination": "Destino",
+      "destinationHint": "Elige la unidad y, si viene a nombre de alguien, la persona. Sin persona, se avisa al contacto principal de la unidad."
+    },
+    "detail": {
+      "title": "Paquete · {{unit}}",
+      "pendingSince": "En recepción desde el {{date}}",
+      "deliveredOn": "Entregado el {{date}}",
+      "noActions": "Sin acciones pendientes.",
+      "deliveryNotesLabel": "Notas de entrega (opcional)",
+      "deliveryNotesPlaceholder": "Quién lo retiró, dónde quedó…"
+    },
+    "timeline": {
+      "received": "Paquete recibido",
+      "notified": "Aviso enviado a {{email}}",
+      "notNotified": "Sin aviso · nadie tiene correo",
+      "delivered": "Entregado"
+    }
+  },
+  "residents": {
+    "subtitle_one": "{{count}} persona · {{location}}",
+    "subtitle_other": "{{count}} personas · {{location}}",
+    "searchPlaceholder": "Buscar por nombre, teléfono o unidad…",
+    "allPortalStates": "Todos",
+    "allStatuses": "Todos",
+    "primaryContactShort": "contacto principal",
+    "deactivated": "Persona desactivada",
+    "reactivated": "Persona reactivada",
+    "chips": {
+      "all": "Todos",
+      "no_unit": "Sin unidad"
+    },
+    "columns": {
+      "person": "Persona"
+    },
+    "empty": "Aún no hay personas en {{location}}.",
+    "emptyFiltered": "Ninguna persona coincide.",
+    "form": {
+      "createTitle": "Nueva persona",
+      "editTitle": "Editar datos",
+      "create": "Crear persona",
+      "created": "Persona creada",
+      "saved": "Cambios guardados",
+      "phone": "Teléfono (opcional)",
+      "unitSection": "Unidad",
+      "unitSectionHint": "La persona entra a la ubicación por su unidad; si luego se va, queda en «Sin unidad». El contacto principal recibe los avisos y atiende a recepción."
+    },
+    "detail": {
+      "since": "Desde",
+      "sinceValue": "En Wasiy desde el {{date}}",
+      "noUnits": "No vive en ninguna unidad de esta ubicación.",
+      "membershipsHint": "Las membresías se gestionan desde la unidad.",
+      "invite": "Invitar al portal",
+      "sendInvite": "Enviar invitación",
+      "emailLabel": "Correo del residente",
+      "willSendTo": "Se enviará a {{email}}.",
+      "noHistory": "Sin actividad registrada.",
+      "edit": "Editar datos",
+      "deactivate": "Desactivar persona",
+      "reactivate": "Reactivar persona",
+      "deactivateHint": "Quita el acceso al portal; el historial se conserva.",
+      "deactivateBlocked": "Solo disponible cuando no vive en ninguna unidad. Quítalo primero de sus unidades.",
+      "reactivateHint": "La persona vuelve a aparecer como activa.",
+      "confirmDeactivate": "¿Desactivar a {{name}}?",
+      "confirmDeactivateBody": "Pierde el acceso al portal. Su historial se conserva y puedes reactivarla después.",
+      "portalHint": "El correo solo se pide aquí y se guarda para enviar la invitación."
+    }
+  },
+  "visits": {
+    "title": "Visitantes",
+    "subtitle": "Recepción · {{location}} · hoy, {{date}}",
+    "subtitleShort": "Recepción · {{location}}",
+    "register": "Registrar visita",
+    "registered": "Ingreso registrado",
+    "markOut": "Marcar salida",
+    "checkedOut": "Salida registrada",
+    "searchPlaceholder": "Buscar visitante, unidad o residente…",
+    "allConfirmations": "Todas",
+    "unitOnly": "Unidad {{unit}}",
+    "chips": {
+      "inside": "Dentro",
+      "today": "Hoy",
+      "all": "Todos",
+      "expected": "Esperados hoy"
+    },
+    "columns": {
+      "checkIn": "Ingreso",
+      "visitor": "Visitante",
+      "host": "Recibe",
+      "confirmation": "Confirmación"
+    },
+    "statuses": {
+      "inside": "Dentro",
+      "left": "Salió",
+      "expected": "Esperado",
+      "cancelled": "Cancelado"
+    },
+    "confirmations": {
+      "none": "Sin confirmar",
+      "intercom": "Intercom",
+      "phone": "Teléfono",
+      "management": "Administración",
+      "pre_registered": "Pre-registrado"
+    },
+    "empty": {
+      "inside": "No hay visitantes dentro del edificio.",
+      "today": "Aún no hay visitas hoy.",
+      "all": "Aún no hay visitas registradas.",
+      "expected": "Ningún residente pre-registró visitas para hoy."
+    },
+    "emptyFiltered": "Ninguna visita coincide.",
+    "duration": {
+      "hoursMinutes": "{{hours}} h {{minutes}} min",
+      "minutes": "{{minutes}} min"
+    },
+    "form": {
+      "visitor": "Visitante",
+      "name": "Nombre",
+      "document": "Documento (opcional)",
+      "documentShort": "Documento",
+      "documentHint": "Solo el número; no se guardan fotos ni copias.",
+      "phone": "Teléfono (opcional)",
+      "destination": "Destino",
+      "host": "Recibe",
+      "primaryContact": "Contacto principal",
+      "confirmation": "Confirmación",
+      "confirmationHint": "Opcional. Wasiy registra cómo se confirmó; no bloquea el ingreso.",
+      "submit": "Registrar ingreso",
+      "destinationHint": "Elige la unidad y, si lo conoces, al residente que recibe. Sin residente, la visita queda registrada a la unidad."
+    },
+    "detail": {
+      "insideSince": "Visita a Depto. {{unit}} · Dentro desde las {{time}}",
+      "range": "Visita a Depto. {{unit}} · {{from}} – {{to}}",
+      "insideBuilding": "dentro del edificio",
+      "duration": "de duración",
+      "checkoutNotes": "Notas de salida (opcional)",
+      "checkoutNotesPlaceholder": "Ej. se retira con paquete de la unidad"
+    },
+    "timeline": {
+      "in": "Ingreso registrado",
+      "out": "Salida registrada",
+      "autoOut": "Salida automática (sin registro de salida)",
+      "confirmed": "Confirmada por {{method}}",
+      "confirmedWith": "Confirmada por {{method}} con {{name}}",
+      "preRegistered": "Pre-registrado por el residente"
+    },
+    "expected": {
+      "band": "Esperados hoy",
+      "bandHint": "Solo pre-registros de hoy para esta unidad. Confirmar una llegada no impide registrar a otro visitante.",
+      "pickUnit": "Elige la unidad para ver sus visitas esperadas.",
+      "none": "Sin visitantes esperados para esta unidad hoy.",
+      "noTime": "sin hora",
+      "by": "pre-registrado por {{name}}",
+      "confirm": "Confirmar llegada",
+      "chosen": "Elegido",
+      "confirmationLocked": "El residente ya autorizó la visita: el método queda fijo."
+    }
+  },
+  "search": {
+    "placeholder": "Buscar unidades, residentes, visitantes, paquetes o páginas…",
+    "hint": "Escribe al menos dos letras.",
+    "nothingFound": "Nada coincide con «{{query}}».",
+    "groups": {
+      "pages": "Páginas",
+      "units": "Unidades",
+      "residents": "Residentes",
+      "visits": "Visitantes",
+      "packages": "Paquetes"
+    }
+  },
+  "buildings": {
+    "title": "Torres",
+    "name": "Nombre",
+    "namePlaceholder": "Torre B",
+    "code": "Código",
+    "unnamed": "Sin nombre",
+    "add": "Agregar torre",
+    "added": "Torre agregada",
+    "saved": "Torre guardada",
+    "removed": "Torre eliminada",
+    "delete": "Eliminar {{name}}",
+    "lastOne": "Una ubicación conserva al menos una torre.",
+    "inUse_one": "{{count}} unidad vive en esta torre; muévela antes de eliminarla.",
+    "inUse_other": "{{count}} unidades viven en esta torre; muévelas antes de eliminarla.",
+    "unitsCount_one": "{{count}} unidad",
+    "unitsCount_other": "{{count}} unidades",
+    "singleHint": "Una sola torre: las unidades no muestran torre. Agrega otra cuando la ubicación tenga más de un edificio.",
+    "multiHint": "Cada unidad pertenece a una torre. Renombrar aquí actualiza todas sus unidades.",
+    "confirmDeleteTitle": "¿Eliminar la torre {{name}}?",
+    "confirmDeleteBody": "Solo se eliminan torres sin unidades. Esta acción no se puede deshacer."
+  },
+  "phone": {
+    "country": "País",
+    "searchCountry": "Buscar país…",
+    "noCountry": "Ningún país coincide."
   }
 }

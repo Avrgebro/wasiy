@@ -1,7 +1,7 @@
-import { notifications } from '@mantine/notifications'
 import { MutationCache, QueryClient } from '@tanstack/react-query'
 import { i18next } from '../i18n'
 import { getErrorMessage } from '../lib/errors'
+import { notifyError } from '../lib/notify'
 
 declare module '@tanstack/react-query' {
   interface Register {
@@ -20,11 +20,7 @@ export const queryClient = new QueryClient({
         return
       }
 
-      notifications.show({
-        color: 'red',
-        message: getErrorMessage(error),
-        title: i18next.t('errors.actionFailed'),
-      })
+      notifyError(getErrorMessage(error), i18next.t('errors.actionFailed'))
     },
   }),
   defaultOptions: {

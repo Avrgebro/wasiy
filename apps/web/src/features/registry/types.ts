@@ -1,13 +1,4 @@
-export type PaginatedApiResponse<T> = {
-  data: T[]
-  links?: unknown
-  meta: {
-    current_page: number
-    last_page: number
-    per_page: number
-    total: number
-  }
-}
+export type { PaginatedApiResponse } from '../../lib/pagination'
 
 export type RegistrySearch = {
   page?: number

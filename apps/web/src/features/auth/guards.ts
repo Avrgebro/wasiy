@@ -1,5 +1,6 @@
 import { redirect, type ParsedLocation } from '@tanstack/react-router'
 import type { QueryClient } from '@tanstack/react-query'
+import { SURFACE } from '../../app/surface'
 import {
   getDefaultAuthenticatedRoute,
   requiresAccountSelection,
@@ -67,11 +68,20 @@ export function checkSurfaceAccess(
   me: MeResponse,
   canAccess: (me: MeResponse) => boolean,
 ) {
-  if (requiresAccountSelection(me)) {
-    throw redirect({ to: '/select-account' })
+  if (SURFACE === 'admin' && requiresAccountSelection(me)) {
+    // href, not to: the route exists only in the staff tree.
+    throw redirect({ href: '/select-account' })
   }
 
   if (!canAccess(me)) {
-    throw redirect({ to: getDefaultAuthenticatedRoute(me) })
+    throw redirectToLanding(me)
   }
+}
+
+/**
+ * The landing page is computed per surface and expressed as an href: a typed
+ * `to` would drag the other surface's route literals into this build.
+ */
+export function redirectToLanding(me: MeResponse) {
+  return redirect({ href: getDefaultAuthenticatedRoute(me) })
 }

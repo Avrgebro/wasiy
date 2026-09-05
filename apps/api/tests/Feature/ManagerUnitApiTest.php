@@ -3,7 +3,6 @@
 use App\Enums\AccountRole;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\Resident;
@@ -21,11 +20,13 @@ test('manager can create and edit units in an accessible location', function () 
     $manager = User::factory()->create();
 
     grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
+    $torreA = $location->buildings()->create(['account_id' => $account->id, 'name' => 'Torre A', 'sort_order' => 1]);
+    $torreB = $location->buildings()->create(['account_id' => $account->id, 'name' => 'Torre B', 'sort_order' => 2]);
 
     $createResponse = $this->actingAs($manager)
         ->postJson("/api/locations/{$location->id}/units", [
             'unit_number' => '301',
-            'building_name' => 'Torre A',
+            'building_id' => $torreA->id,
             'floor' => '3',
             'notes' => 'Vista interior',
         ])
@@ -33,6 +34,7 @@ test('manager can create and edit units in an accessible location', function () 
         ->assertJsonPath('data.account_id', $account->id)
         ->assertJsonPath('data.location_id', $location->id)
         ->assertJsonPath('data.unit_number', '301')
+        ->assertJsonPath('data.building_id', $torreA->id)
         ->assertJsonPath('data.building_name', 'Torre A')
         ->assertJsonPath('data.status', RegistryStatus::Active->value);
 
@@ -49,7 +51,7 @@ test('manager can create and edit units in an accessible location', function () 
     $this->actingAs($manager)
         ->patchJson("/api/units/{$unitId}", [
             'unit_number' => '302',
-            'building_name' => 'Torre B',
+            'building_id' => $torreB->id,
             'floor' => '4',
             'status' => RegistryStatus::Inactive->value,
             'notes' => null,
@@ -84,13 +86,12 @@ test('duplicate unit number and building within a location is rejected', functio
 
     Unit::factory()->for($account)->for($location)->create([
         'unit_number' => '501',
-        'building_name' => null,
     ]);
 
+    // No building given resolves to the location's default one, same as the existing unit.
     $this->actingAs($admin)
         ->postJson("/api/locations/{$location->id}/units", [
             'unit_number' => '501',
-            'building_name' => null,
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('unit_number');
@@ -108,13 +109,23 @@ test('same unit number can exist in different locations', function () {
         'unit_number' => '601',
         'building_name' => 'Torre A',
     ]);
+    $secondTorreA = $secondLocation->buildings()->create(['account_id' => $account->id, 'name' => 'Torre A', 'sort_order' => 1]);
 
     $this->actingAs($admin)
         ->postJson("/api/locations/{$secondLocation->id}/units", [
             'unit_number' => '601',
-            'building_name' => 'Torre A',
+            'building_id' => $secondTorreA->id,
         ])
         ->assertCreated();
+
+    // A tower from another location is not assignable here.
+    $this->actingAs($admin)
+        ->postJson("/api/locations/{$firstLocation->id}/units", [
+            'unit_number' => '602',
+            'building_id' => $secondTorreA->id,
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('building_id');
 });
 
 test('unit list defaults to active units and supports search filters sort and summary fields', function () {
@@ -148,9 +159,7 @@ test('unit list defaults to active units and supports search filters sort and su
         ->for($account)
         ->for($location)
         ->primaryContact()
-        ->create([
-            'resident_type' => ResidentType::Owner,
-        ]);
+        ->create();
     Vehicle::factory()->for($activeUnit)->for($account)->for($location)->create();
 
     createStaffMembership($account, $admin, AccountRole::AccountAdmin);

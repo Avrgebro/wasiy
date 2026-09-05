@@ -77,7 +77,7 @@ export function useStaffColumns({
                 <>
                   <Menu.Item onClick={() => onEdit(staff)}>{t('staff.editAccess')}</Menu.Item>
                   {staff.id === meUserId ? null : (
-                    <Menu.Item color="red" onClick={() => onDeactivate(staff)}>
+                    <Menu.Item color="error" onClick={() => onDeactivate(staff)}>
                       {t('staff.deactivate')}
                     </Menu.Item>
                   )}

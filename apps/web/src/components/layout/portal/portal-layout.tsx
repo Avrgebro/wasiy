@@ -1,69 +1,122 @@
-import { Button } from '@mantine/core'
-import { Link } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { UnstyledButton } from '@mantine/core'
+import { AltArrowDown, CheckCircle } from '@solar-icons/react'
+import { Link, useRouterState } from '@tanstack/react-router'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Brand } from '../shared/brand'
+import { ActiveUnitProvider } from '../../../features/portal/active-unit'
+import { useActiveUnit } from '../../../features/portal/active-unit-context'
+import { BottomSheet } from '../../ui/bottom-sheet'
 import { ColorSchemeToggle } from '../shared/color-scheme-toggle'
-import type {
-  LayoutNavCollapsible,
-  LayoutNavEntry,
-  LayoutNavGroup,
-  LayoutNavItem,
-  LayoutNavLeaf,
-} from '../shared/types'
+import type { LayoutNavEntry, LayoutNavLeaf } from '../shared/types'
 
 type PortalLayoutProps = {
   children: ReactNode
   navItems: LayoutNavEntry[]
 }
 
-function isGroup(entry: LayoutNavEntry): entry is LayoutNavGroup {
-  return entry.type === 'group'
-}
-
-function isCollapsible(item: LayoutNavItem): item is LayoutNavCollapsible {
-  return item.type === 'collapsible'
-}
-
-function flattenPortalNavItems(navItems: LayoutNavEntry[]): LayoutNavLeaf[] {
+function leaves(navItems: LayoutNavEntry[]): LayoutNavLeaf[] {
   return navItems.flatMap((entry) => {
-    if (isGroup(entry)) {
-      return entry.items.flatMap((item) =>
-        isCollapsible(item) ? item.children : [item],
-      )
-    }
+    if ('type' in entry && entry.type === 'group') return leaves(entry.items)
+    if ('type' in entry && entry.type === 'collapsible') return entry.children
 
-    return isCollapsible(entry) ? entry.children : [entry]
+    return [entry as LayoutNavLeaf]
   })
 }
 
+/**
+ * The resident portal shell (Portal.dc.html): one column capped at phone
+ * width, a compact header with the active unit as a pill, and a fixed tab
+ * bar. No sidebar, no search; the bell arrives with alerts (P3).
+ */
 export function PortalLayout({ children, navItems }: PortalLayoutProps) {
+  return (
+    <ActiveUnitProvider>
+      <PortalShell navItems={navItems}>{children}</PortalShell>
+    </ActiveUnitProvider>
+  )
+}
+
+function PortalShell({ children, navItems }: PortalLayoutProps) {
   const { t } = useTranslation('common')
-  const portalNavItems = flattenPortalNavItems(navItems)
+  const { active, units, select } = useActiveUnit()
+  const [switching, setSwitching] = useState(false)
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const tabs = leaves(navItems)
 
   return (
-    <div className="min-h-screen bg-[var(--mantine-color-body)] text-[var(--mantine-color-text)]">
-      <header className="sticky top-0 z-10 border-b border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <div className="[&>div]:p-0">
-            <Brand />
-          </div>
-          <div className="flex items-center gap-2">
-            <nav
-              className="hidden items-center gap-2 md:flex"
-              aria-label={t('shell.mainNav')}
+    <div className="flex min-h-full flex-col bg-[var(--mantine-color-body)] text-[var(--mantine-color-text)]">
+      <header className="sticky top-0 z-10 border-b border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]/95 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-[30rem] items-center justify-between gap-3 px-4">
+          <Link aria-label={t('portal.home')} className="font-display text-lg font-semibold text-[var(--mantine-color-text)] no-underline" to="/portal">
+            W
+          </Link>
+          {active ? (
+            <UnstyledButton
+              aria-haspopup="dialog"
+              aria-label={t('portal.unit.switch')}
+              className="flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 text-sm font-semibold"
+              disabled={units.length < 2}
+              onClick={() => setSwitching(true)}
             >
-              {portalNavItems.map((item) => (
-                <Button component={Link} key={item.to} to={item.to} variant="subtle">
-                  {t(item.labelKey)}
-                </Button>
-              ))}
-            </nav>
-            <ColorSchemeToggle />
-          </div>
+              <span>{active.unit_label}</span>
+              {units.length > 1 ? <AltArrowDown aria-hidden size={14} /> : null}
+            </UnstyledButton>
+          ) : null}
+          <ColorSchemeToggle />
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+
+      <main className="mx-auto w-full max-w-[30rem] flex-1 px-4 pt-4 pb-24">{children}</main>
+
+      <nav aria-label={t('shell.mainNav')} className="fixed inset-x-0 bottom-0 z-10 border-t border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]/95 backdrop-blur">
+        <ul className="mx-auto m-0 flex max-w-[30rem] list-none justify-around p-0 pb-[env(safe-area-inset-bottom)]">
+          {tabs.map((tab) => {
+            const current = tab.to === '/portal' ? pathname === '/portal' || pathname === '/portal/' : pathname.startsWith(tab.to)
+            const Icon = tab.icon
+
+            return (
+              <li key={tab.to} className="flex-1">
+                <Link
+                  aria-current={current ? 'page' : undefined}
+                  className={`flex min-h-14 flex-col items-center justify-center gap-1 text-[11px] font-semibold no-underline ${current ? 'text-[var(--wa-interactive)]' : 'text-[var(--mantine-color-dimmed)]'}`}
+                  to={tab.to}
+                >
+                  <Icon aria-hidden size={22} weight={current ? 'Bold' : 'Linear'} />
+                  {t(tab.labelKey)}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+
+      <BottomSheet description={t('portal.unit.switchHint')} opened={switching} title={t('portal.unit.mine')} onClose={() => setSwitching(false)}>
+        <ul className="m-0 flex list-none flex-col gap-2 p-0" role="radiogroup" aria-label={t('portal.unit.mine')}>
+          {units.map((unit) => {
+            const selected = unit.unit_id === active?.unit_id
+
+            return (
+              <li key={unit.unit_membership_id}>
+                <UnstyledButton
+                  aria-checked={selected}
+                  className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-inner border px-4 text-left ${selected ? 'border-[var(--wa-interactive)] bg-[var(--wa-surface-2)]' : 'border-[var(--mantine-color-default-border)]'}`}
+                  role="radio"
+                  onClick={() => {
+                    select(unit.unit_id)
+                    setSwitching(false)
+                  }}
+                >
+                  <span className="flex flex-col">
+                    <span className="text-sm font-semibold">{unit.unit_label}</span>
+                    {unit.is_primary_contact ? <span className="text-xs text-[var(--mantine-color-dimmed)]">{t('portal.primaryContact')}</span> : null}
+                  </span>
+                  {selected ? <CheckCircle aria-hidden className="text-[var(--wa-interactive)]" size={20} weight="Bold" /> : null}
+                </UnstyledButton>
+              </li>
+            )
+          })}
+        </ul>
+      </BottomSheet>
     </div>
   )
 }

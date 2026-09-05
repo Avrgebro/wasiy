@@ -8,7 +8,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess } from '../../lib/notify'
 import { AddCircle, CloseCircle } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, type ReactNode } from 'react'
@@ -86,7 +86,7 @@ function AccessTypeCard({
 }) {
   return (
     <div
-      className={`flex flex-col gap-3.5 rounded-xl border p-3.5 ${
+      className={`flex flex-col gap-3.5 rounded-inner border p-3.5 ${
         active
           ? 'border-[var(--mantine-primary-color-filled)] bg-[var(--mantine-color-default-hover)]'
           : 'border-[var(--mantine-color-default-border)]'
@@ -196,11 +196,7 @@ export function StaffAccessDrawer({
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
       onClose()
-      showNotification({
-        color: 'green',
-        message: editing ? t('registry.saved') : t('staff.invited'),
-        title: t('registry.savedTitle'),
-      })
+      notifySuccess(editing ? t('registry.saved') : t('staff.invited'), t('registry.savedTitle'))
     },
   })
 
@@ -230,7 +226,7 @@ export function StaffAccessDrawer({
       >
         <AppDrawerBody>
         {form.formState.errors.root?.message ? (
-          <Alert color="red" title={t('errors.actionFailed')}>
+          <Alert color="error" title={t('errors.actionFailed')}>
             {form.formState.errors.root.message}
           </Alert>
         ) : null}
@@ -287,7 +283,7 @@ export function StaffAccessDrawer({
             }
           />
           {adminSaveDropsAssignments ? (
-            <Alert color="yellow" p="xs">
+            <Alert color="warning" p="xs">
               {t('staff.adminReplacesLocations')}
             </Alert>
           ) : null}
@@ -359,7 +355,7 @@ export function StaffAccessDrawer({
             ) : null}
           </AccessTypeCard>
           {assignmentsError ? (
-            <Text c="red" size="xs">
+            <Text c="error" size="xs">
               {assignmentsError}
             </Text>
           ) : null}
@@ -368,7 +364,7 @@ export function StaffAccessDrawer({
           <div className="grid gap-2 border-0 border-t border-solid border-[var(--mantine-color-default-border)] pt-5">
             <Button
               className="justify-self-start"
-              color="red"
+              color="error"
               variant="outline"
               onClick={onDeactivate}
             >
@@ -384,7 +380,7 @@ export function StaffAccessDrawer({
           <Button variant="default" onClick={onClose}>
             {t('actions.cancel')}
           </Button>
-          <Button color="amber.4" loading={mutation.isPending} type="submit">
+          <Button color="accent" loading={mutation.isPending} type="submit">
             {editing ? t('staff.saveChanges') : t('staff.sendInvitation')}
           </Button>
         </AppDrawerFooter>

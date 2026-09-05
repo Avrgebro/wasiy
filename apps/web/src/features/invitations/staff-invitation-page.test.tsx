@@ -144,9 +144,9 @@ describe('StaffInvitationPage', () => {
       screen.getByRole('button', { name: /Aceptar invitación/i }),
     )
 
-    // front_desk lands on the front-desk surface.
+    // front_desk lands on the shared admin surface.
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith({ to: '/front-desk' })
+      expect(navigate).toHaveBeenCalledWith({ href: '/admin' })
     })
   })
 

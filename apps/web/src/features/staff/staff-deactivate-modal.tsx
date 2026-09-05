@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
@@ -26,10 +26,10 @@ export function StaffDeactivateModal({
     onSuccess: async () => {
       onClose()
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
-      showNotification({ color: 'green', message: t('staff.deactivated') })
+      notifySuccess(t('staff.deactivated'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 
@@ -48,7 +48,7 @@ export function StaffDeactivateModal({
             {t('actions.cancel')}
           </Button>
           <Button
-            color="red"
+            color="error"
             loading={mutation.isPending}
             onClick={() => staff && mutation.mutate(staff.id)}
           >

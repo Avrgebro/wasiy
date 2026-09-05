@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { showNotification } from '@mantine/notifications'
+import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,7 +10,7 @@ import {
   revokeStaffInvitation,
   type PendingStaffInvitation,
 } from './api'
-import { AccessChip } from './staff-badges'
+import { AccessChip } from '../../components/ui/chips'
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -56,10 +56,10 @@ export function PendingInvitations({
       // Resending issues a fresh token with a new expiry, so the card's
       // "Vence en N días" needs the latest data.
       await queryClient.invalidateQueries({ queryKey: ['staff', 'invitations'] })
-      showNotification({ color: 'green', message: t('staff.pending.resent') })
+      notifySuccess(t('staff.pending.resent'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 
@@ -68,10 +68,10 @@ export function PendingInvitations({
     onSuccess: async () => {
       setRevoking(null)
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
-      showNotification({ color: 'green', message: t('staff.pending.revoked') })
+      notifySuccess(t('staff.pending.revoked'))
     },
     onError: (error) => {
-      showNotification({ color: 'red', message: getErrorMessage(error) })
+      notifyError(getErrorMessage(error))
     },
   })
 
@@ -83,7 +83,7 @@ export function PendingInvitations({
     // @container makes the row breakpoints track the card's own width, not
     // the viewport — with the sidebar open a 1024px screen leaves ~690px of
     // card, where the columnar layout can't fit without overlapping.
-    <section className="@container overflow-hidden rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section className="@container overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <Group gap="xs" className="border-b border-[var(--mantine-color-default-border)] px-4 py-3.5 sm:px-5">
         <Text component="h2" fw={700} size="md">
           {t('staff.pending.title')}
@@ -167,7 +167,7 @@ export function PendingInvitations({
                   {t('staff.pending.resend')}
                 </Button>
                 <Button
-                  color="red"
+                  color="error"
                   fw={600}
                   radius="md"
                   size="compact-sm"
@@ -196,7 +196,7 @@ export function PendingInvitations({
               {t('actions.cancel')}
             </Button>
             <Button
-              color="red"
+              color="error"
               loading={revokeMutation.isPending}
               onClick={() => revoking && revokeMutation.mutate(revoking.id)}
             >

@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Location;
 use App\Models\Resident;
 use App\Models\Unit;
@@ -36,7 +35,6 @@ class UnitMembershipFactory extends Factory
             'location_id' => $location->id,
             'unit_id' => $unit->id,
             'resident_id' => $resident->id,
-            'resident_type' => ResidentType::Owner,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => now()->toDateString(),

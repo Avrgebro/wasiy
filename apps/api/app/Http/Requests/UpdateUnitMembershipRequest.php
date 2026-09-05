@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Models\Resident;
 use App\Models\UnitMembership;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -24,7 +23,6 @@ class UpdateUnitMembershipRequest extends StoreUnitMembershipRequest
     {
         return [
             'unit_id' => ['sometimes', ...$this->unitRules()],
-            'resident_type' => ['sometimes', Rule::enum(ResidentType::class)],
             'status' => ['sometimes', Rule::enum(RegistryStatus::class)],
             'is_primary_contact' => ['sometimes', 'boolean'],
             'started_at' => ['sometimes', 'nullable', 'date'],

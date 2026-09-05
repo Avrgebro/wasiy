@@ -27,7 +27,7 @@ export function ImportHistorySection({
   const { t } = useTranslation('common')
 
   return (
-    <section className="rounded-md border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+    <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       <Group justify="space-between" p="md">
         <Text fw={700}>{t('registry.imports.history')}</Text>
         {isFetching ? <Loader size="sm" /> : null}

@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\UnitType;
+use App\Models\Building;
 use App\Models\Location;
 use App\Models\Unit;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreUnitRequest extends FormRequest
@@ -22,8 +25,18 @@ class StoreUnitRequest extends FormRequest
     {
         return [
             'unit_number' => ['required', 'string', 'max:255'],
-            'building_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            // Optional while the location has one building; required once it has towers.
+            'building_id' => [
+                Rule::requiredIf(fn (): bool => ($this->route('location')?->buildings()->count() ?? 0) > 1),
+                'nullable', 'string', 'ulid',
+                Rule::exists('buildings', 'id')->where('location_id', $this->route('location')?->id),
+            ],
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'type' => ['sometimes', Rule::enum(UnitType::class)],
+            'participation_share' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+            'maintenance_fee' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000000'],
+            'parking_spots' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'storage_rooms' => ['sometimes', 'nullable', 'string', 'max:255'],
             'notes' => ['sometimes', 'nullable', 'string', 'max:5000'],
         ];
     }
@@ -37,36 +50,44 @@ class StoreUnitRequest extends FormRequest
             if ($this->hasDuplicateUnit(
                 location: $location,
                 unitNumber: $this->input('unit_number'),
-                buildingName: $this->input('building_name'),
+                buildingId: $this->input('building_id'),
             )) {
                 $validator->errors()->add('unit_number', __('The unit number has already been taken for this building and location.'));
             }
         });
     }
 
+    /**
+     * Trim the free-text identifiers. Only keys actually sent are merged, so
+     * a partial PATCH (UpdateUnitRequest extends this) does not turn an
+     * omitted unit_number into a null that fails `required`.
+     */
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'unit_number' => is_string($this->input('unit_number')) ? trim($this->input('unit_number')) : $this->input('unit_number'),
-            'building_name' => is_string($this->input('building_name')) ? trim($this->input('building_name')) : $this->input('building_name'),
-            'floor' => is_string($this->input('floor')) ? trim($this->input('floor')) : $this->input('floor'),
-        ]);
+        $trimmed = [];
+        foreach (['unit_number', 'building_id', 'floor', 'parking_spots', 'storage_rooms'] as $key) {
+            if ($this->has($key) && is_string($this->input($key))) {
+                $trimmed[$key] = trim($this->input($key)) ?: null;
+            }
+        }
+        if (isset($trimmed['unit_number']) === false && $this->has('unit_number') && is_string($this->input('unit_number'))) {
+            $trimmed['unit_number'] = trim($this->input('unit_number'));
+        }
+
+        $this->merge($trimmed);
     }
 
-    protected function hasDuplicateUnit(Location $location, mixed $unitNumber, mixed $buildingName, ?Unit $ignore = null): bool
+    protected function hasDuplicateUnit(Location $location, mixed $unitNumber, mixed $buildingId, ?Unit $ignore = null): bool
     {
+        // No building given means the location's default one (Unit::saving).
+        $buildingId = is_string($buildingId) && $buildingId !== ''
+            ? $buildingId
+            : Building::resolveForLocation($location, null)->id;
+
         return Unit::query()
             ->where('location_id', $location->id)
             ->where('unit_number', $unitNumber)
-            ->where(function ($query) use ($buildingName): void {
-                if ($buildingName === null || $buildingName === '') {
-                    $query->whereNull('building_name')->orWhere('building_name', '');
-
-                    return;
-                }
-
-                $query->where('building_name', $buildingName);
-            })
+            ->where('building_id', $buildingId)
             ->when($ignore, fn ($query) => $query->whereKeyNot($ignore->id))
             ->exists();
     }

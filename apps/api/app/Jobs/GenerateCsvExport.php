@@ -100,7 +100,6 @@ class GenerateCsvExport implements ShouldQueue
             'Piso',
             'Estado de unidad',
             'Residente',
-            'Tipo de residente',
             'Contacto principal',
             'Estado de membresia',
             'Telefono',
@@ -112,7 +111,7 @@ class GenerateCsvExport implements ShouldQueue
             ->when($export->location_id, fn (Builder $query, string $locationId) => $query->where('location_id', $locationId))
             ->when($export->filters['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             ->with(['unitMemberships.resident'])
-            ->orderBy('building_name')
+            ->orderByBuilding()
             ->orderBy('floor')
             ->orderBy('unit_number')
             ->get();
@@ -124,7 +123,6 @@ class GenerateCsvExport implements ShouldQueue
                     $unit->building_name,
                     $unit->floor,
                     $unit->status->value,
-                    '',
                     '',
                     '',
                     '',
@@ -144,7 +142,6 @@ class GenerateCsvExport implements ShouldQueue
                     $unit->floor,
                     $unit->status->value,
                     trim($resident->first_name.' '.$resident->last_name),
-                    $membership->resident_type->value,
                     $membership->is_primary_contact ? 'Si' : 'No',
                     $membership->status->value,
                     $resident->phone,

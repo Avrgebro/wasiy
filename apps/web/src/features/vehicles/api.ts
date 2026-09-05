@@ -31,7 +31,15 @@ export function getVehicles(locationId: string, search: RegistrySearch & { vehic
   )
 }
 
-export function createVehicle(locationId: string, values: VehicleFormValues) {
+export type VehiclePayload = Omit<VehicleFormValues, 'color' | 'make' | 'model' | 'notes' | 'plate'> & {
+  color: string | null
+  make: string | null
+  model: string | null
+  notes: string | null
+  plate: string | null
+}
+
+export function createVehicle(locationId: string, values: VehicleFormValues | VehiclePayload) {
   return apiRequest<{ data: VehicleSummary }>(
     `/api/locations/${locationId}/vehicles`,
     {
@@ -41,7 +49,7 @@ export function createVehicle(locationId: string, values: VehicleFormValues) {
   )
 }
 
-export function updateVehicle(vehicleId: string, values: VehicleFormValues) {
+export function updateVehicle(vehicleId: string, values: Partial<VehicleFormValues | VehiclePayload>) {
   return apiRequest<{ data: VehicleSummary }>(`/api/vehicles/${vehicleId}`, {
     data: values,
     method: 'PATCH',

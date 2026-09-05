@@ -2,6 +2,23 @@ export type AccountRole = 'account_admin'
 
 export type LocationRole = 'location_manager' | 'front_desk'
 
+/**
+ * What the current user may do in a Location. Computed by the API from the
+ * role matrix (ADR 0036) and delivered per location; the SPA never derives
+ * permissions from roles itself.
+ */
+export type Capability =
+  | 'registry.view'
+  | 'registry.manage'
+  | 'reception.manage'
+  | 'reservations.view'
+  | 'reservations.create'
+  | 'reservations.decide'
+  | 'finances.manage'
+  | 'announcements.manage'
+  | 'location.settings'
+  | 'account.manage'
+
 export type AuthUser = {
   id: string
   first_name: string
@@ -24,8 +41,11 @@ export type LocationSummary = {
   name: string
   slug: string
   timezone: string
+  /** ISO 3166-1 alpha-2; dialing rules for phones. */
+  country: string
   address: string | null
   roles: Array<AccountRole | LocationRole>
+  capabilities: Capability[]
   access_source: 'account_role' | 'location_role' | 'both'
 }
 
@@ -47,7 +67,7 @@ export type ResidentMembership = {
   location_id: string
   unit_id: string
   unit_label: string
-  resident_type: 'owner' | 'tenant' | 'occupant' | 'guest_resident'
+  country: string
   is_primary_contact: boolean
 }
 

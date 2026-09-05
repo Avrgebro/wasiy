@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Enums\VehicleType;
 use App\Models\Account;
 use App\Models\Location;
@@ -33,18 +32,27 @@ class DemoRegistrySeeder extends Seeder
         $central101 = $this->unit($account, $centralLocation, '101', [
             'building_name' => 'Torre A',
             'floor' => '1',
+            'participation_share' => 1.18,
+            'maintenance_fee' => 420,
+            'parking_spots' => 'E-23',
+            'storage_rooms' => 'D-04',
             'status' => RegistryStatus::Active,
             'notes' => 'Unidad demo con contacto principal.',
         ]);
         $central102 = $this->unit($account, $centralLocation, '102', [
             'building_name' => 'Torre A',
             'floor' => '1',
+            'participation_share' => 0.76,
+            'maintenance_fee' => 380,
             'status' => RegistryStatus::Active,
             'notes' => null,
         ]);
         $central201 = $this->unit($account, $centralLocation, '201', [
             'building_name' => 'Torre B',
             'floor' => '2',
+            'participation_share' => 1.42,
+            'maintenance_fee' => 520,
+            'parking_spots' => 'E-12, E-13',
             'status' => RegistryStatus::Active,
             'notes' => 'Unidad con invitacion pendiente.',
         ]);
@@ -72,47 +80,43 @@ class DemoRegistrySeeder extends Seeder
             'user_id' => $portalUser->id,
             'first_name' => 'Rosa',
             'last_name' => 'Portal',
-            'phone' => '999-100-100',
+            'phone' => '+51999100100',
             'status' => RegistryStatus::Active,
         ]);
         $multiUnitResident = $this->resident($account, 'multi.resident@wasiy.test', [
             'user_id' => null,
             'first_name' => 'Carlos',
             'last_name' => 'Multiunidad',
-            'phone' => '999-200-200',
+            'phone' => '+51999200200',
             'status' => RegistryStatus::Active,
         ]);
         $invitedResident = $this->resident($account, 'invited.resident@wasiy.test', [
             'user_id' => null,
             'first_name' => 'Lucia',
             'last_name' => 'Invitada',
-            'phone' => '999-300-300',
+            'phone' => '+51999300300',
             'status' => RegistryStatus::Active,
         ]);
 
         $this->membership($account, $centralLocation, $central101, $claimedResident, [
-            'resident_type' => ResidentType::Owner,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => true,
             'started_at' => '2026-01-01',
             'ended_at' => null,
         ]);
         $this->membership($account, $centralLocation, $central102, $multiUnitResident, [
-            'resident_type' => ResidentType::Tenant,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => '2026-02-01',
             'ended_at' => null,
         ]);
         $this->membership($account, $northTower, $north501, $multiUnitResident, [
-            'resident_type' => ResidentType::Occupant,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => '2026-03-01',
             'ended_at' => null,
         ]);
         $this->membership($account, $centralLocation, $central201, $invitedResident, [
-            'resident_type' => ResidentType::Tenant,
             'status' => RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => '2026-04-01',
@@ -155,10 +159,15 @@ class DemoRegistrySeeder extends Seeder
                 'account_id' => $account->id,
                 'location_id' => $location->id,
                 'unit_number' => $unitNumber,
-                'building_name' => $attributes['building_name'] ?? null,
             ],
             [
+                'building_name' => $attributes['building_name'] ?? null,
                 'floor' => $attributes['floor'] ?? null,
+                'type' => $attributes['type'] ?? 'apartment',
+                'participation_share' => $attributes['participation_share'] ?? null,
+                'maintenance_fee' => $attributes['maintenance_fee'] ?? null,
+                'parking_spots' => $attributes['parking_spots'] ?? null,
+                'storage_rooms' => $attributes['storage_rooms'] ?? null,
                 'status' => $attributes['status'],
                 'notes' => $attributes['notes'] ?? null,
             ],
@@ -186,7 +195,7 @@ class DemoRegistrySeeder extends Seeder
     }
 
     /**
-     * @param  array{resident_type: ResidentType, status: RegistryStatus, is_primary_contact: bool, started_at: string|null, ended_at: string|null}  $attributes
+     * @param  array{status: RegistryStatus, is_primary_contact: bool, started_at: string|null, ended_at: string|null}  $attributes
      */
     private function membership(Account $account, Location $location, Unit $unit, Resident $resident, array $attributes): UnitMembership
     {
@@ -198,7 +207,6 @@ class DemoRegistrySeeder extends Seeder
             ],
             [
                 'location_id' => $location->id,
-                'resident_type' => $attributes['resident_type'],
                 'status' => $attributes['status'],
                 'is_primary_contact' => false,
                 'started_at' => $attributes['started_at'],

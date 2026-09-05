@@ -1,4 +1,5 @@
-import type { LocationRole, MeResponse } from './types'
+import { SURFACE } from '../../app/surface'
+import type { Capability, LocationRole, MeResponse } from './types'
 
 export const accountRoles = {
   accountAdmin: 'account_admin',
@@ -35,27 +36,45 @@ export function getRoleLabelKey(role: string) {
 }
 
 /**
- * Manager and above: every staff role except front desk. Gates the
- * registry-mutating actions and the location entries front desk must not see.
- * Currently identical to canAccessAdmin, and will diverge from it the moment
- * front desk joins this surface.
+ * The one location-scoped permission check. Reads the capabilities the API
+ * computed for the active Location (ADR 0036), so a manager of Torre Norte
+ * browsing Edificio Central as front desk sees the desk's UI, not the
+ * manager's. No active Location means no location capability.
  */
-export function canManageRegistry(me: MeResponse) {
-  return (
-    hasAccountRole(me, accountRoles.accountAdmin) ||
-    hasLocationRole(me, locationRoles.locationManager)
-  )
+export function can(me: MeResponse, capability: Capability) {
+  return me.active_location?.capabilities.includes(capability) ?? false
 }
 
+/** A predicate for nav `visibleTo` and route guards: `hasCapability('finances.manage')`. */
+export function hasCapability(capability: Capability) {
+  return (me: MeResponse) => can(me, capability)
+}
+
+/** The matrix rows, mirrored from the API's Capability::forRoles() for fixtures and stories. */
+export const FRONT_DESK_CAPABILITIES: Capability[] = ['registry.view', 'reception.manage', 'reservations.view']
+export const MANAGER_CAPABILITIES: Capability[] = [
+  ...FRONT_DESK_CAPABILITIES,
+  'registry.manage',
+  'reservations.create',
+  'reservations.decide',
+  'finances.manage',
+  'announcements.manage',
+  'location.settings',
+]
+export const ADMIN_CAPABILITIES: Capability[] = [...MANAGER_CAPABILITIES, 'account.manage']
+
+/**
+ * Every staff role shares the admin surface; front desk sees the read-only
+ * subset through the navigation predicates and the pages' manage checks, and
+ * the API policies enforce the same line. There is no separate front-desk
+ * shell.
+ */
 export function canAccessAdmin(me: MeResponse) {
   return (
     hasAccountRole(me, accountRoles.accountAdmin) ||
-    hasLocationRole(me, locationRoles.locationManager)
+    hasLocationRole(me, locationRoles.locationManager) ||
+    hasLocationRole(me, locationRoles.frontDesk)
   )
-}
-
-export function canAccessFrontDesk(me: MeResponse) {
-  return hasLocationRole(me, locationRoles.frontDesk)
 }
 
 export function canAccessPortal(me: MeResponse) {
@@ -63,7 +82,7 @@ export function canAccessPortal(me: MeResponse) {
 }
 
 export function canAccessAnySurface(me: MeResponse) {
-  return canAccessAdmin(me) || canAccessFrontDesk(me) || canAccessPortal(me)
+  return canAccessAdmin(me) || canAccessPortal(me)
 }
 
 export function getDefaultLocation(me: MeResponse) {
@@ -74,26 +93,22 @@ export function requiresAccountSelection(me: MeResponse) {
   return me.accounts.length > 1 && me.active_account === null
 }
 
-export function getDefaultAuthenticatedRoute(me: MeResponse) {
+/**
+ * Where a signed-in user lands on this build. Each surface knows only its own
+ * routes: a resident on the staff host, or a manager on the portal host, is
+ * sent to /no-access, which tells them which host to use.
+ */
+export function getDefaultAuthenticatedRoute(me: MeResponse, surface: Surface = SURFACE) {
+  if (surface === 'portal') {
+    return canAccessPortal(me) ? ('/portal' as const) : ('/no-access' as const)
+  }
+
   if (requiresAccountSelection(me)) {
     return '/select-account' as const
   }
 
-  if (canAccessAdmin(me)) {
-    return '/admin' as const
-  }
-
-  if (canAccessFrontDesk(me)) {
-    return '/front-desk' as const
-  }
-
-  if (canAccessPortal(me)) {
-    return '/portal' as const
-  }
-
-  return '/no-access' as const
+  return canAccessAdmin(me) ? ('/admin' as const) : ('/no-access' as const)
 }
-
 
 /**
  * Account-wide administration rights. Exported so route guards enforce exactly
@@ -103,7 +118,7 @@ export function isAccountAdmin(me: MeResponse) {
   return hasAccountRole(me, accountRoles.accountAdmin)
 }
 
-export type Surface = 'admin' | 'front-desk' | 'portal'
+export type Surface = 'admin' | 'portal'
 
 /**
  * The single map from surface to its access predicate. Route guards are the
@@ -112,6 +127,5 @@ export type Surface = 'admin' | 'front-desk' | 'portal'
  */
 export const surfaceAccess: Record<Surface, (me: MeResponse) => boolean> = {
   admin: canAccessAdmin,
-  'front-desk': canAccessFrontDesk,
   portal: canAccessPortal,
 }

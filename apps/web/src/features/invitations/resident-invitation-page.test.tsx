@@ -126,7 +126,7 @@ describe('ResidentInvitationPage', () => {
     await user.click(screen.getByRole('button', { name: /Activar acceso/i }))
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith({ to: '/portal' })
+      expect(navigate).toHaveBeenCalledWith({ href: '/portal' })
     })
   })
 
@@ -159,7 +159,7 @@ describe('ResidentInvitationPage', () => {
     await user.click(screen.getByRole('button', { name: /Activar acceso/i }))
 
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith({ to: '/login' })
+      expect(navigate).toHaveBeenCalledWith({ href: '/login' })
     })
   })
 

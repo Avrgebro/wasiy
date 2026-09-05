@@ -16,6 +16,13 @@ return [
             env('WASIY_SPA_URL', 'http://localhost:5174').'/invitations/staff/{token}',
         ),
     ],
+    'photos' => [
+        'disk' => env('WASIY_PHOTO_DISK', 'local'),
+        // JPG and PNG at up to 10 MB, per the dropzone contract in the
+        // mockups; Laravel stays authoritative regardless of the dropzone.
+        'max_file_kb' => (int) env('WASIY_PHOTO_MAX_FILE_KB', 10240),
+        'max_per_owner' => (int) env('WASIY_PHOTO_MAX_PER_OWNER', 10),
+    ],
     'exports' => [
         'disk' => env('WASIY_EXPORT_DISK', 'local'),
         'expires_days' => (int) env('WASIY_EXPORT_EXPIRES_DAYS', 7),

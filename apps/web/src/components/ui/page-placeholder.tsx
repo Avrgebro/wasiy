@@ -22,7 +22,7 @@ export function PagePlaceholder({
         {t(titleKey)}
       </h1>
       <Alert
-        color="yellow"
+        color="warning"
         icon={<CodeSquare size={20} />}
         title={t('placeholder.title')}
       >

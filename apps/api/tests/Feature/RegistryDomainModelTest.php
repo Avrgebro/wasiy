@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Enums\VehicleType;
 use App\Models\Location;
 use App\Models\Resident;
@@ -120,9 +119,7 @@ test('resident user id cannot be linked to multiple residents', function () {
 });
 
 test('registry models cast enum values', function () {
-    $membership = UnitMembership::factory()->create([
-        'resident_type' => ResidentType::Tenant,
-    ]);
+    $membership = UnitMembership::factory()->create();
     $vehicle = Vehicle::factory()->for($membership->unit)->create([
         'account_id' => $membership->account_id,
         'location_id' => $membership->location_id,
@@ -130,8 +127,7 @@ test('registry models cast enum values', function () {
         'status' => RegistryStatus::Inactive,
     ]);
 
-    expect($membership->fresh()->resident_type)->toBe(ResidentType::Tenant)
-        ->and($membership->fresh()->status)->toBe(RegistryStatus::Active)
+    expect($membership->fresh()->status)->toBe(RegistryStatus::Active)
         ->and($vehicle->fresh()->vehicle_type)->toBe(VehicleType::Motorcycle)
         ->and($vehicle->fresh()->status)->toBe(RegistryStatus::Inactive);
 });

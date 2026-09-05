@@ -15,11 +15,42 @@ class Account extends Model
     use HasFactory, HasUlids, SoftDeletes;
 
     /**
+     * Stored operational setting overrides for this level of the cascade —
+     * only the keys this level overrides, never a full settings set. Not
+     * mass-assignable: written only through the settings update action, which
+     * validates keys against OperationalSettings. Read via SettingsResolver.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'array',
+        ];
+    }
+
+    /**
      * @return HasMany<Location, $this>
      */
     public function locations(): HasMany
     {
         return $this->hasMany(Location::class);
+    }
+
+    /**
+     * @return HasMany<Reservation, $this>
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * @return HasMany<FinancialMovement, $this>
+     */
+    public function financialMovements(): HasMany
+    {
+        return $this->hasMany(FinancialMovement::class);
     }
 
     /**

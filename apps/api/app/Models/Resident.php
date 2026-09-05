@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RegistryStatus;
+use App\Support\PhoneNumber;
 use Database\Factories\ResidentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,6 +29,18 @@ class Resident extends Model
         return [
             'status' => RegistryStatus::class,
         ];
+    }
+
+    /**
+     * The country whose dialing rules this person's phone follows: the
+     * Location they live in, the account's fallback otherwise.
+     */
+    public function phoneCountry(): string
+    {
+        return $this->unitMemberships()
+            ->orderByRaw("CASE WHEN status = 'active' THEN 0 ELSE 1 END")
+            ->with('location')->first()?->location?->country
+            ?? PhoneNumber::FALLBACK_COUNTRY;
     }
 
     public function getNameAttribute(): string
@@ -83,7 +96,7 @@ class Resident extends Model
     public function units(): BelongsToMany
     {
         return $this->belongsToMany(Unit::class, 'unit_memberships')
-            ->withPivot(['account_id', 'location_id', 'resident_type', 'status', 'is_primary_contact', 'started_at', 'ended_at'])
+            ->withPivot(['account_id', 'location_id', 'status', 'is_primary_contact', 'started_at', 'ended_at'])
             ->withTimestamps();
     }
 
@@ -94,6 +107,8 @@ class Resident extends Model
     {
         return [
             'unitMemberships.unit',
+            'userInvitations',
+            'account',
         ];
     }
 

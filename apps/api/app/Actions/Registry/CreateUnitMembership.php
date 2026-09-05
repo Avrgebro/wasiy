@@ -22,7 +22,7 @@ class CreateUnitMembership
     ) {}
 
     /**
-     * @param  array{resident_type: mixed, status?: mixed, is_primary_contact?: bool, started_at?: string|null, ended_at?: string|null}  $payload
+     * @param  array{resident_type?: mixed, status?: mixed, is_primary_contact?: bool, started_at?: string|null, ended_at?: string|null}  $payload
      */
     public function handle(Resident $resident, Unit $unit, array $payload, User $actor): UnitMembership
     {
@@ -30,7 +30,8 @@ class CreateUnitMembership
             'account_id' => $resident->account_id,
             'location_id' => $unit->location_id,
             'unit_id' => $unit->id,
-            'resident_type' => $payload['resident_type'],
+            // Legacy column kept nullable for the CSV import until it is redesigned.
+            'resident_type' => $payload['resident_type'] ?? null,
             'status' => $payload['status'] ?? RegistryStatus::Active,
             'is_primary_contact' => false,
             'started_at' => $payload['started_at'] ?? null,

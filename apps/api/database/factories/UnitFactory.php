@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\RegistryStatus;
+use App\Enums\UnitType;
 use App\Models\Location;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,9 +26,12 @@ class UnitFactory extends Factory
             'account_id' => $location->account_id,
             'location_id' => $location->id,
             'unit_number' => fake()->unique()->bothify('###?'),
-            'building_name' => fake()->optional()->randomElement(['Torre A', 'Torre B', 'Bloque C']),
+            // Defaults to the location's unnamed Building; tests name towers explicitly.
+            'building_name' => null,
             'floor' => fake()->optional()->numberBetween(1, 20),
             'status' => RegistryStatus::Active,
+            'type' => UnitType::Apartment,
+            'maintenance_fee' => null,
             'notes' => null,
         ];
     }

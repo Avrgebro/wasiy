@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Models\Account;
@@ -196,9 +197,9 @@ test('account admins can manage registry records in any location in their accoun
 
     createStaffMembership($account, $admin, AccountRole::AccountAdmin);
 
-    expect($service->canManageRegistry($admin, $firstLocation))->toBeTrue()
-        ->and($service->canManageRegistry($admin, $secondLocation))->toBeTrue()
-        ->and($service->canManageRegistry($admin, $otherLocation))->toBeFalse()
+    expect($service->can($admin, $firstLocation, Capability::ManageRegistry))->toBeTrue()
+        ->and($service->can($admin, $secondLocation, Capability::ManageRegistry))->toBeTrue()
+        ->and($service->can($admin, $otherLocation, Capability::ManageRegistry))->toBeFalse()
         ->and($service->canManageUnit($admin, $unit))->toBeTrue()
         ->and($service->canManageResidentInLocation($admin, $resident, $firstLocation))->toBeTrue()
         ->and($admin->can('update', $unit))->toBeTrue()
@@ -223,8 +224,8 @@ test('location managers can manage registry records only in accessible locations
 
     grantLocationRole($account, $accessibleLocation, $manager, LocationRole::LocationManager);
 
-    expect($service->canManageRegistry($manager, $accessibleLocation))->toBeTrue()
-        ->and($service->canManageRegistry($manager, $inaccessibleLocation))->toBeFalse()
+    expect($service->can($manager, $accessibleLocation, Capability::ManageRegistry))->toBeTrue()
+        ->and($service->can($manager, $inaccessibleLocation, Capability::ManageRegistry))->toBeFalse()
         ->and($service->canManageUnit($manager, $accessibleUnit))->toBeTrue()
         ->and($service->canManageUnit($manager, $inaccessibleUnit))->toBeFalse()
         ->and($service->canManageResidentInLocation($manager, $resident, $accessibleLocation))->toBeTrue()
@@ -255,8 +256,8 @@ test('front desk can view registry context but cannot mutate registry records', 
 
     grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
 
-    expect($service->canViewRegistry($frontDesk, $location))->toBeTrue()
-        ->and($service->canManageRegistry($frontDesk, $location))->toBeFalse()
+    expect($service->can($frontDesk, $location, Capability::ViewRegistry))->toBeTrue()
+        ->and($service->can($frontDesk, $location, Capability::ManageRegistry))->toBeFalse()
         ->and($frontDesk->can('view', $unit))->toBeTrue()
         ->and($frontDesk->can('update', $unit))->toBeFalse()
         ->and($frontDesk->can('delete', $vehicle))->toBeFalse();
@@ -324,4 +325,30 @@ test('resident users cannot mutate memberships or another units vehicles', funct
     // setting status and reassigning units, so they must stay out of reach.
     expect($residentUser->can('update', $vehicle))->toBeFalse()
         ->and($residentUser->can('delete', $vehicle))->toBeFalse();
+});
+
+test('the capability matrix follows ADR 0036 and travels in /me', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $other = Location::factory()->for($account)->create();
+    $service = app(AccessAuthorizationService::class);
+
+    $admin = User::factory()->create();
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
+    $manager = User::factory()->create();
+    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
+    $desk = User::factory()->create();
+    grantLocationRole($account, $location, $desk, LocationRole::FrontDesk);
+
+    expect($service->capabilitiesFor($admin, $location))->toBe(Capability::cases())
+        ->and($service->capabilitiesFor($admin, $other))->toBe(Capability::cases())
+        ->and($service->can($manager, $location, Capability::ManageFinances))->toBeTrue()
+        ->and($service->can($manager, $location, Capability::ManageAccount))->toBeFalse()
+        ->and($service->capabilitiesFor($manager, $other))->toBe([])
+        ->and($service->capabilitiesFor($desk, $location))->toBe([Capability::ViewRegistry, Capability::ManageReception, Capability::ViewReservations])
+        ->and($service->can($desk, $location, Capability::CreateReservations))->toBeFalse();
+
+    $this->actingAs($desk)->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('active_location.capabilities', ['registry.view', 'reception.manage', 'reservations.view']);
 });

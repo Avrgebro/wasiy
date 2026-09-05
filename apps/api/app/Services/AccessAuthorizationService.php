@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
 use App\Models\Account;
@@ -84,20 +85,44 @@ class AccessAuthorizationService
         return $this->hasAccountRole($user, $account, AccountRole::AccountAdmin);
     }
 
-    public function canManageRegistry(User $user, Location $location): bool
+    /**
+     * The capability check every policy composes (ADR 0036). Deactivated
+     * Locations grant nothing; an account admin holds every capability in
+     * the account's Locations; a location role grants its matrix row there.
+     */
+    public function can(User $user, Location $location, Capability $capability): bool
     {
         if (! $this->isLiveLocation($location)) {
             return false;
         }
 
-        return $this->hasAccountRole($user, $location->account, AccountRole::AccountAdmin)
-            || $this->hasLocationRole($user, $location, LocationRole::LocationManager);
+        return in_array($capability, $this->capabilitiesFor($user, $location), true);
     }
 
-    public function canViewRegistry(User $user, Location $location): bool
+    /**
+     * @return list<Capability>
+     */
+    public function capabilitiesFor(User $user, Location $location): array
     {
-        return $this->canManageRegistry($user, $location)
-            || $this->hasLocationRole($user, $location, LocationRole::FrontDesk);
+        if (! $this->isLiveLocation($location)) {
+            return [];
+        }
+
+        return Capability::forRoles(
+            $this->hasAccountRole($user, $location->account, AccountRole::AccountAdmin),
+            $this->locationRoleFor($user, $location),
+        );
+    }
+
+    public function locationRoleFor(User $user, Location $location): ?LocationRole
+    {
+        $role = StaffLocationRole::query()
+            ->where('location_id', $location->id)
+            ->whereIn('staff_membership_id', $this->activeMemberships($user)->where('account_id', $location->account_id)->select('id'))
+            ->value('role');
+
+        // The model casts the column, so value() already yields the enum.
+        return $role instanceof LocationRole ? $role : null;
     }
 
     public function canManageUnit(User $user, Unit $unit): bool
@@ -106,12 +131,12 @@ class AccessAuthorizationService
             return false;
         }
 
-        return $this->canManageRegistry($user, $unit->location);
+        return $this->can($user, $unit->location, Capability::ManageRegistry);
     }
 
     public function canManageResidentInLocation(User $user, Resident $resident, Location $location): bool
     {
-        if ($resident->account_id !== $location->account_id || ! $this->canManageRegistry($user, $location)) {
+        if ($resident->account_id !== $location->account_id || ! $this->can($user, $location, Capability::ManageRegistry)) {
             return false;
         }
 
@@ -190,7 +215,7 @@ class AccessAuthorizationService
             return false;
         }
 
-        return $this->canManageRegistry($user, $vehicle->location);
+        return $this->can($user, $vehicle->location, Capability::ManageRegistry);
     }
 
     public function residentForUser(User $user): ?Resident
@@ -277,11 +302,12 @@ class AccessAuthorizationService
         }
 
         if ($this->hasAccountRole($user, $account, AccountRole::AccountAdmin)) {
-            return $account->locations()->getQuery();
+            return $account->locations()->getQuery()->whereNull('deactivated_at');
         }
 
         return Location::query()
             ->where('account_id', $account->id)
+            ->whereNull('deactivated_at')
             ->whereIn('id', StaffLocationRole::query()
                 ->select('location_id')
                 ->where('account_id', $account->id)
@@ -306,12 +332,15 @@ class AccessAuthorizationService
     }
 
     /**
-     * The single owner of soft-delete liveness: a location counts only when
-     * neither it nor its account is trashed.
+     * The single owner of operational liveness: a location grants access only
+     * when neither it nor its account is trashed and it has not been
+     * deactivated. A deactivated Location keeps its history but grants no
+     * operational access; only the admin Location surface can still see it.
      */
     private function isLiveLocation(Location $location): bool
     {
         return ! $location->trashed()
+            && ! $location->isDeactivated()
             && Account::query()->whereKey($location->account_id)->exists();
     }
 

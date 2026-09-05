@@ -2,13 +2,13 @@
 
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
+use App\Enums\BookingMode;
 use App\Enums\ExportType;
 use App\Enums\ImportRowStatus;
 use App\Enums\ImportStatus;
 use App\Enums\ImportType;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Enums\VehicleType;
@@ -16,6 +16,7 @@ use App\Jobs\CommitRegistryImport;
 use App\Jobs\ValidateRegistryImport;
 use App\Models\Account;
 use App\Models\ActivityLog;
+use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\RegistryImport;
 use App\Models\RegistryImportRow;
@@ -125,6 +126,10 @@ test('seeded users expose the final m2 access context scenarios', function () {
     $centralLocation = Location::query()->where('slug', 'edificio-central')->sole();
     $northTower = Location::query()->where('slug', 'torre-norte')->sole();
     $beachLocation = Location::query()->where('slug', 'edificio-playa')->sole();
+    $valleLocation = Location::query()->where('slug', 'condominio-valle')->sole();
+    // Deactivated locations grant no access, so they are absent from
+    // accessible_locations (M6); jardines-de-miraflores seeds deactivated.
+    $demoLocationCount = Location::query()->where('account_id', $demoAccount->id)->active()->count();
 
     $admin = User::query()->where('email', 'admin@wasiy.test')->sole();
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
@@ -137,9 +142,9 @@ test('seeded users expose the final m2 access context scenarios', function () {
         ->getJson('/api/me')
         ->assertOk()
         ->assertJsonPath('active_account.id', $demoAccount->id)
-        ->assertJsonPath('active_location.id', $centralLocation->id)
+        ->assertJsonPath('active_location.id', $valleLocation->id)
         ->assertJsonPath('roles.account.0.role', AccountRole::AccountAdmin->value)
-        ->assertJsonCount(2, 'accessible_locations');
+        ->assertJsonCount($demoLocationCount, 'accessible_locations');
 
     $this->flushSession();
 
@@ -243,7 +248,11 @@ test('seeded account admin can complete staff workflow and activity logging acce
         ])
         ->assertOk();
 
-    expect(ActivityLog::query()->count())->toBe(4)
+    // The demo seeders write their own timeline entries; this test is about
+    // the staff entries the requests above produced.
+    $requestEntries = ActivityLog::query()->where('event_type', 'like', 'staff.%');
+
+    expect($requestEntries->count())->toBe(4)
         ->and(ActivityLog::query()->where('event_type', ActivityEventType::StaffInvited->value)->sole()->metadata)
         ->toMatchArray([
             'invitation_id' => $invitation->id,
@@ -319,10 +328,10 @@ test('seeded resident has portal access and can manage own phone and vehicles on
 
     $this->actingAs($residentUser)
         ->patchJson('/api/portal/resident/phone', [
-            'phone' => '999-777-555',
+            'phone' => '999 777 555',
         ])
         ->assertOk()
-        ->assertJsonPath('data.phone', '999-777-555');
+        ->assertJsonPath('data.phone', '+51999777555');
 
     $this->actingAs($residentUser)
         ->patchJson('/api/portal/resident/phone', [
@@ -367,10 +376,12 @@ test('seeded manager can complete m3 registry export and activity acceptance flo
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
     $unit = Unit::query()->where('location_id', $location->id)->where('unit_number', '101')->sole();
 
+    $torreC = $location->buildings()->create(['account_id' => $account->id, 'name' => 'Torre C', 'sort_order' => 9]);
+
     $this->actingAs($manager)
         ->postJson("/api/locations/{$location->id}/units", [
             'unit_number' => '901',
-            'building_name' => 'Torre C',
+            'building_id' => $torreC->id,
         ])
         ->assertCreated()
         ->assertJsonPath('data.status', RegistryStatus::Active->value);
@@ -382,7 +393,6 @@ test('seeded manager can complete m3 registry export and activity acceptance flo
             'email' => 'acceptance.resident@wasiy.test',
             'memberships' => [[
                 'unit_id' => $unit->id,
-                'resident_type' => ResidentType::GuestResident->value,
             ]],
         ])
         ->assertCreated();
@@ -439,7 +449,7 @@ test('seeded manager can complete m4 registry import acceptance flow', function 
     $manager = User::query()->where('email', 'manager@wasiy.test')->sole();
     $existingUnit = Unit::query()
         ->where('location_id', $location->id)
-        ->where('building_name', 'Torre A')
+        ->whereRelation('building', 'name', 'Torre A')
         ->where('unit_number', '101')
         ->sole();
     $existingResident = Resident::query()
@@ -539,8 +549,8 @@ test('seeded manager can complete m4 registry import acceptance flow', function 
         ->sole();
 
     expect($confirmableImport->status)->toBe(ImportStatus::Completed)
-        ->and(Unit::query()->where('location_id', $location->id)->where('building_name', 'Torre Import')->where('unit_number', '701')->count())->toBe(1)
-        ->and(Unit::query()->where('location_id', $location->id)->where('building_name', 'Torre A')->where('unit_number', '101')->count())->toBe(1)
+        ->and(Unit::query()->where('location_id', $location->id)->whereRelation('building', 'name', 'Torre Import')->where('unit_number', '701')->count())->toBe(1)
+        ->and(Unit::query()->where('location_id', $location->id)->whereRelation('building', 'name', 'Torre A')->where('unit_number', '101')->count())->toBe(1)
         ->and(UnitMembership::query()->where('resident_id', $newResident->id)->where('location_id', $location->id)->count())->toBe(1)
         ->and($primaryMembership->unit->unit_number)->toBe('703')
         ->and(RegistryImportRow::query()->where('registry_import_id', $confirmableImport->id)->where('status', ImportRowStatus::Skipped)->count())->toBe(1)
@@ -648,4 +658,44 @@ test('factory built invitations can be resolved by their token', function () {
             ->resolve($residentToken, UserInvitationPurpose::Resident)
             ->purpose,
     )->toBe(UserInvitationPurpose::Resident);
+});
+
+test('it seeds the m6 locations settings amenity matrix and photos', function () {
+    Storage::fake('local');
+    $this->seed();
+
+    $account = Account::query()->where('slug', 'wasiy-demo')->sole();
+    $central = Location::query()->where('slug', 'edificio-central')->sole();
+
+    // The cascade has a real override to show.
+    expect($account->settings)->toMatchArray(['visitor_auto_checkout_hours' => 24])
+        ->and($central->settings)->toMatchArray(['visitor_auto_checkout_hours' => 12]);
+
+    // One retired property, with who and when stamped.
+    $jardines = Location::query()->where('slug', 'jardines-de-miraflores')->sole();
+    expect($jardines->isDeactivated())->toBeTrue()
+        ->and($jardines->deactivatedBy->email)->toBe('admin@wasiy.test');
+
+    // The amenity matrix: approval+fee+deposit, instant free, instant with
+    // fee, common space, and deactivated.
+    $amenities = Amenity::query()->where('location_id', $central->id)->get()->keyBy('slug');
+    expect($amenities)->toHaveCount(5)
+        ->and($amenities['salon-de-eventos']->booking_mode)->toBe(BookingMode::Approval)
+        ->and($amenities['salon-de-eventos']->fee_amount)->toBe(150)
+        ->and($amenities['salon-de-eventos']->deposit_amount)->toBe(300)
+        ->and($amenities['gimnasio']->fee_amount)->toBeNull()
+        ->and($amenities['parrilla-terraza']->fee_amount)->toBe(50)
+        ->and($amenities['parrilla-terraza']->availabilitySchedule->isOpenOn('monday'))->toBeFalse()
+        ->and($amenities['lobby-recepcion']->is_reservable)->toBeFalse()
+        ->and($amenities['cancha-de-squash']->isDeactivated())->toBeTrue();
+
+    // Covers exist for the location and the event room, files included.
+    expect($central->photos()->where('is_cover', true)->count())->toBe(1)
+        ->and($amenities['salon-de-eventos']->photos()->where('is_cover', true)->count())->toBe(1);
+    $central->photos->each(fn ($photo) => Storage::disk($photo->disk)->assertExists($photo->path));
+
+    // Idempotent: reseeding stacks nothing.
+    $this->seed();
+    expect(Amenity::query()->where('location_id', $central->id)->count())->toBe(5)
+        ->and($central->photos()->count())->toBe(2);
 });

@@ -2,7 +2,7 @@ import { Button } from '@mantine/core'
 import { Import } from '@solar-icons/react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { canManageRegistry } from '../auth/access'
+import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
 
 /**
@@ -14,7 +14,7 @@ export function ImportRegistryButton() {
   const { t } = useTranslation('common')
   const meQuery = useMe()
 
-  if (!meQuery.data || !canManageRegistry(meQuery.data)) {
+  if (!meQuery.data || !can(meQuery.data, 'registry.manage')) {
     return null
   }
 

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\AccountRole;
+use App\Enums\Capability;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\Resident;
@@ -17,7 +18,7 @@ class ResidentPolicy
 
     public function create(User $user, Location $location): bool
     {
-        return $this->access->canManageRegistry($user, $location);
+        return $this->access->can($user, $location, Capability::ManageRegistry);
     }
 
     public function createInAccount(User $user, Account $account): bool
@@ -61,7 +62,7 @@ class ResidentPolicy
     {
         return $this->access->canManageResidentInLocation($user, $resident, $location)
             || (
-                $this->access->canViewRegistry($user, $location)
+                $this->access->can($user, $location, Capability::ViewRegistry)
                 && $resident->account_id === $location->account_id
                 && $resident->unitMemberships()
                     ->where('location_id', $location->id)

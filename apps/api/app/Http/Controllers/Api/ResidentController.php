@@ -6,10 +6,10 @@ use App\Actions\Registry\CreateUnitMembership;
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentResource;
 use App\Models\Account;
+use App\Models\ActivityLog;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Rules\AssignableUnit;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
+use App\Support\PhoneNumber;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ResidentController extends Controller
 {
@@ -44,15 +46,31 @@ class ResidentController extends Controller
             'status' => ['sometimes', 'nullable', Rule::enum(RegistryStatus::class)],
             'location_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('locations', 'id')->where('account_id', $account->id)->whereNull('deleted_at')],
             'unit_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('units', 'id')->where('account_id', $account->id)],
+            'portal' => ['sometimes', 'nullable', Rule::in(['active', 'invited', 'not_invited'])],
+            'no_unit' => ['sometimes', 'nullable', 'boolean'],
         ]);
+
+        $locationId = $validated['location_id'] ?? null;
 
         $residents = Resident::query()
             ->where('account_id', $account->id)
             ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
-            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->searchLike(
-                ['first_name', 'last_name', "first_name || ' ' || last_name", 'email', 'phone'],
-                $search,
-            ));
+            // The directory's one box: name, phone, or the unit they live in.
+            ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->where(fn (Builder $group) => $group
+                ->searchLike(['first_name', 'last_name', "first_name || ' ' || last_name", 'email'], $search)
+                // Phones are E.164; the desk types digits with spaces or dashes.
+                ->when(PhoneNumber::digits($search) !== '', fn (Builder $phones) => $phones->orWhere('phone', 'like', '%'.PhoneNumber::digits($search).'%'))
+                ->orWhereHas('unitMemberships', fn (Builder $membership) => $membership->active()
+                    ->when($locationId, fn (Builder $inner) => $inner->where('location_id', $locationId))
+                    ->whereHas('unit', fn (Builder $unit) => $unit->searchLike(['unit_number'], $search)))))
+            ->when($validated['portal'] ?? null, fn (Builder $query, string $portal) => match ($portal) {
+                'active' => $query->whereNotNull('user_id'),
+                'invited' => $query->whereNull('user_id')->whereHas('userInvitations', fn (Builder $invitation) => $invitation->where('status', 'pending')),
+                default => $query->whereNull('user_id')->whereDoesntHave('userInvitations', fn (Builder $invitation) => $invitation->where('status', 'pending')),
+            })
+            // "Sin unidad": known here, but every membership in the location has ended.
+            ->when((bool) ($validated['no_unit'] ?? false), fn (Builder $query) => $query->whereDoesntHave('unitMemberships', fn (Builder $membership) => $membership
+                ->active()->when($locationId, fn (Builder $inner) => $inner->where('location_id', $locationId))));
 
         $accessibleLocationIds = $this->access->accessibleLocationsForAccount($request->user(), $account)->pluck('id');
 
@@ -83,6 +101,9 @@ class ResidentController extends Controller
         Gate::authorize('createInAccount', [Resident::class, $account]);
 
         $validated = $this->validateResidentPayload($request, $account);
+        $country = Unit::query()->where('account_id', $account->id)->find($validated['memberships'][0]['unit_id'] ?? null)?->location?->country ?? PhoneNumber::FALLBACK_COUNTRY;
+        $request->validate(['phone' => PhoneNumber::rules($country)]);
+        $validated['phone'] = PhoneNumber::normalize($validated['phone'] ?? null, $country);
 
         /** @var User $user */
         $user = $request->user();
@@ -113,9 +134,71 @@ class ResidentController extends Controller
         return (new ResidentResource($resident->loadSummary()))->response()->setStatusCode(201);
     }
 
+    /**
+     * The person drawer: the record plus everything the activity log says
+     * about them — entries on the person and entries that mention them
+     * (packages, reservations, memberships), newest first.
+     */
     public function show(Request $request, Resident $resident): ResidentResource
     {
         Gate::authorize('view', $resident);
+
+        $history = ActivityLog::query()
+            ->where('account_id', $resident->account_id)
+            ->where(fn (Builder $query) => $query
+                ->where(fn (Builder $own) => $own->where('subject_type', Resident::class)->where('subject_id', $resident->id))
+                ->orWhereRaw("metadata->>'resident_id' = ?", [$resident->id]))
+            ->with('actor')
+            ->orderByDesc('created_at')->orderByDesc('id')
+            ->limit(50)
+            ->get()
+            ->map(fn (ActivityLog $entry): array => [
+                'id' => $entry->id,
+                'event_type' => $entry->event_type->value,
+                'summary' => $entry->summary,
+                'actor_name' => $entry->actor?->name,
+                'created_at' => $entry->created_at?->toJSON(),
+            ])
+            ->all();
+
+        return (new ResidentResource($resident->loadSummary()))->additional(['history' => $history]);
+    }
+
+    /** Only a person who lives nowhere in the account can be deactivated from the directory. */
+    public function deactivate(Request $request, Resident $resident): ResidentResource
+    {
+        Gate::authorize('update', $resident);
+
+        if ($resident->unitMemberships()->active()->exists()) {
+            throw ValidationException::withMessages([
+                'status' => __('Remove the person from their units before deactivating them.'),
+            ]);
+        }
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        DB::transaction(function () use ($resident, $actor): void {
+            $resident->forceFill(['status' => RegistryStatus::Inactive])->save();
+            $this->logResidentActivity(resident: $resident, eventType: ActivityEventType::ResidentInactivated,
+                summary: "Residente {$resident->name} inactivado.", actor: $actor, changed: ['status']);
+        });
+
+        return new ResidentResource($resident->loadSummary());
+    }
+
+    public function reactivate(Request $request, Resident $resident): ResidentResource
+    {
+        Gate::authorize('update', $resident);
+
+        /** @var User $actor */
+        $actor = $request->user();
+
+        DB::transaction(function () use ($resident, $actor): void {
+            $resident->forceFill(['status' => RegistryStatus::Active])->save();
+            $this->logResidentActivity(resident: $resident, eventType: ActivityEventType::ResidentUpdated,
+                summary: "Residente {$resident->name} reactivado.", actor: $actor, changed: ['status']);
+        });
 
         return new ResidentResource($resident->loadSummary());
     }
@@ -124,13 +207,17 @@ class ResidentController extends Controller
     {
         Gate::authorize('update', $resident);
 
+        $country = $resident->phoneCountry();
         $validated = $request->validate([
             'first_name' => ['sometimes', 'required', 'string', 'max:255'],
             'last_name' => ['sometimes', 'required', 'string', 'max:255'],
-            'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'phone' => ['sometimes', ...PhoneNumber::rules($country)],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'status' => ['sometimes', 'required', Rule::enum(RegistryStatus::class)],
         ]);
+        if (array_key_exists('phone', $validated)) {
+            $validated['phone'] = PhoneNumber::normalize($validated['phone'], $country);
+        }
 
         /** @var User $actor */
         $actor = $request->user();
@@ -203,7 +290,9 @@ class ResidentController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
-            'memberships' => ['sometimes', 'array'],
+            // A person enters a location through a unit; without one the
+            // location-scoped directory could never list them (M11).
+            'memberships' => ['required', 'array', 'min:1'],
             'memberships.*.unit_id' => [
                 'required',
                 'string',
@@ -215,7 +304,6 @@ class ResidentController extends Controller
                     __('The selected unit is not available for membership assignment.'),
                 ),
             ],
-            'memberships.*.resident_type' => ['required', Rule::enum(ResidentType::class)],
             'memberships.*.status' => ['sometimes', Rule::enum(RegistryStatus::class)],
             'memberships.*.is_primary_contact' => ['sometimes', 'boolean'],
             'memberships.*.started_at' => ['sometimes', 'nullable', 'date'],

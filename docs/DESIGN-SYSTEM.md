@@ -14,63 +14,32 @@ Design direction:
 - Dashboard-first and operational.
 - Avoid loud gradients, playful visuals, oversized decorative UI, and marketing-style card layouts.
 
-## Working Color Direction
+## Color: the «Puerto» palette
 
-The working palette is a restrained violet system with soft lavender surfaces and a pale blue accent. The provided token set is color inspiration only; spacing, radius, shadows, typography, and component behavior are defined by this design system rather than inherited wholesale from the source palette.
+The product uses the **Puerto** palette documented in `docs/colorschema.md`: petroleum teal as brand, paper (`#F7F5F0`) instead of white as the light canvas, and a single amber accent. Fourteen semantic roles, each with a light and a dark value («un rol, dos valores»). Nothing in this document repeats the hex values; `colorschema.md` is the single source.
 
-Because violet can quickly feel decorative or generic SaaS, it should be used intentionally: primary actions, focus states, selected controls, charts, and small accents. Large dashboard surfaces should remain neutral and quiet.
+Roles, in the words the code uses:
 
-Use the provided hex token set as the starting point for implementation.
+- `primary` (teal): active navigation, solid brand buttons, data headings.
+- `secondary` (teal, mid): icons, avatars, supporting emphasis.
+- `interactive` (teal, link tone): links, actionable text, section rules and timeline dots in drawers, the selected-row bar.
+- `accent` (amber): **one main action per screen** (`Registrar movimiento`, `Nueva reserva`, `Invitar`), highlighted figures such as receivables. Always dark text, never white.
+- `bg`, `surface`, `surface-2`, `text`, `text-2`, `text-3`, `border`, `divider`, `hover`: canvas, cards and tables, fields and pills, three text levels (body, metadata, hints/chevrons/timestamps), card and control outlines, row separators inside a surface, and the paper fill for hovered or selected rows and default controls.
+- `success`, `warning`, `error`, `info`: status roles; see Status Colors.
 
-Key usage guidance:
+Rules:
 
-- `background` is the app background.
-- `card` is the primary panel and table surface.
-- `foreground` is the main text color.
-- `muted` and `muted-foreground` are for secondary surfaces and supporting text.
-- `primary` is for primary actions, focus rings, and the most important active states.
-- `accent` is preferred for subtle selected navigation states.
-- `destructive` is reserved for destructive actions and critical errors.
-- Sidebar selected items should use `sidebar-accent`, not a saturated primary fill.
+- In dark mode the accent doubles as the warning color, so a warning always carries an icon and a label, never color alone.
+- Hierarchy is built by elevation in dark mode (no shadows, borders and surface steps delimit) and by paper-versus-white in light mode.
+- The old violet direction is gone; the mockups in `docs/mockups/` are the visual reference.
 
-The current visual preview lives at `docs/design-palette-preview.html`.
+### Using color in code
 
-### Light Theme Tokens
-
-```css
---background: #f5f5ff;
---foreground: #2a2a4a;
---card: #ffffff;
---card-foreground: #2a2a4a;
---popover: #ffffff;
---popover-foreground: #2a2a4a;
---primary: #6e56cf;
---primary-foreground: #ffffff;
---secondary: #e4dfff;
---secondary-foreground: #4a4080;
---muted: #f0f0fa;
---muted-foreground: #6c6c8a;
---accent: #d8e6ff;
---accent-foreground: #2a2a4a;
---destructive: #ff5470;
---destructive-foreground: #ffffff;
---border: #e0e0f0;
---input: #e0e0f0;
---ring: #6e56cf;
---chart-1: #6e56cf;
---chart-2: #9e8cfc;
---chart-3: #5d5fef;
---chart-4: #7c75fa;
---chart-5: #4740b3;
---sidebar: #f0f0fa;
---sidebar-foreground: #2a2a4a;
---sidebar-primary: #6e56cf;
---sidebar-primary-foreground: #ffffff;
---sidebar-accent: #d8e6ff;
---sidebar-accent-foreground: #2a2a4a;
---sidebar-border: #e0e0f0;
---sidebar-ring: #6e56cf;
-```
+- **Tailwind classes** reference the semantic tokens: `text-[var(--wa-success)]`, `bg-[var(--wa-surface-2)]`, `border-[var(--mantine-color-default-border)]`. Never a raw hex in a feature component.
+- **Mantine props** use the semantic scale names: `color="accent"`, `color="error"`, `color="success"`, `color="warning"`, `color="info"`, plus `gray` for neutral. Never `red`, `yellow`, `green`, `blue`.
+- **Colored text and figures** (KPI values, amounts, icon marks) use the `--wa-*` tokens. Do not use Mantine's `--mantine-color-<role>-light-color` variables for text: in dark mode they resolve to the pale shade 3 of the scale and wash the intended color out. They exist for the `light` Badge variant, which is where they belong.
+- Deposits in motion (held, to refund) use `--wa-interactive`, the teal the mockups use, not `info` blue.
+- Mantine's `gray` scale is remapped to the palette's paper neutrals in `theme.ts`, and `--mantine-color-default-hover`, `--table-border-color` and `--table-hover-color` point at the `hover` and `divider` tokens. Never use Mantine's stock gray hex values or `gray-0..9` directly; in light mode they read cool and blue against the paper canvas.
 
 ## Interface Density
 
@@ -78,17 +47,15 @@ Use adaptive density.
 
 Admin and Front Desk screens should be compact but readable because they support repeated operational work. Resident Portal screens should be more comfortable and clearer because residents use them less frequently and need fewer dense tables.
 
-Starting defaults:
+Defaults in use:
 
-- Desktop page padding: `24px`.
-- Mobile page padding: `16px`.
-- Panel and card padding: `16px`.
-- Table row height: `44px` to `48px`.
-- Input height: `40px`.
-- Primary button height: `40px`.
-- Compact icon button size: `32px` to `36px`.
-- Section gap: `24px`.
-- Field gap: `12px` to `16px`.
+- Desktop page padding: `32px` horizontal; mobile `16px`.
+- Panel and card padding: `16px` (`p-4`); KPI tiles `16px`; drawer body `20px` grid gap.
+- Table rows: Mantine `verticalSpacing="sm"` (about `44px` with badges).
+- Inputs and default buttons: Mantine `md`, `42px`; `sm` buttons `36px`.
+- Icon buttons: `32px`, or `36px` beside inputs.
+- Section gap on pages: `20px` (`gap-5`); `24px` on staff.
+- Field gap in forms: `20px`.
 
 Density guidance:
 
@@ -102,19 +69,15 @@ Use different shells for staff operations and resident self-service while keepin
 
 ### Admin and Location Manager
 
-- Use a classic left sidebar plus top bar.
-- Sidebar width: about `260px` on desktop.
-- Top bar height: `56px` to `64px`.
-- Data-heavy screens should use the available width instead of a narrow content column.
-- Content padding: `24px` desktop, `16px` mobile.
-- Mobile should replace the persistent sidebar with drawer navigation.
+- Classic left sidebar plus top bar, the "soft workspace" shell: the rail floats on the paper canvas in light mode and sits on surface 2° in dark mode.
+- Sidebar: pinned at `20rem` from the `xl` breakpoint (80rem); below it the same rail opens as a `24rem` drawer. Width lives in `--sidebar-width` in `index.css` and must match the `xl:` classes in the shell components.
+- Top bar: `64px` (`h-16`), with the search box and the user menu.
+- Content padding: `32px` horizontal on desktop, `16px` on mobile.
+- Data-heavy screens use the available width instead of a narrow column; sections that sit next to the rail use Tailwind container queries (`@container` and `@4xl:`), because viewport breakpoints misfire around `1024px` there.
 
 ### Front Desk / Security
 
-- Use a simplified operations shell.
-- Prioritize quick search, expected visitors, recent check-ins, and check-in actions.
-- Navigation may use a narrower sidebar or rail if the workflow stays small.
-- Avoid burying visitor check-in behind deep navigation.
+Front desk uses the same admin shell with a reduced navigation and no manage actions (ADR 0035). There is no separate operations shell. Recepción (Visitantes, Paquetería) is a group inside the admin sidebar; the front desk landing is the admin Panel until a slimmer variant is needed.
 
 ### Resident Portal
 
@@ -129,7 +92,7 @@ Authenticated app screens should not use marketing-style hero layouts.
 
 Use Inter as the primary UI font and JetBrains Mono for code-like values, IDs, and technical metadata. Serif fonts should not be used in the product UI.
 
-Brand surfaces (the marketing site and the auth pages: login, select account) use the brand typography instead: Sora for display text (wordmark, headings, stat values) and Instrument Sans for body and controls. In the web app these are self-hosted via Fontsource and applied with the `font-display` / `font-brand` Tailwind utilities plus a scoped `--mantine-font-family` override — never globally. Everything behind the app shell stays on Inter.
+Brand surfaces (the marketing site and the auth pages: login, select account) use the brand typography instead: Sora for display text (wordmark, headings, stat values) and Instrument Sans for body and controls. In the web app these are self-hosted via Fontsource and applied with the `font-display` / `font-brand` Tailwind utilities plus a scoped `--mantine-font-family` override — never globally. Behind the app shell only the wordmark and the location mark in the sidebar use `font-display`; everything else stays on Inter. Monospace (`font-mono`) is reserved for money amounts, ledger dates and timeline timestamps.
 
 Typography should be practical and restrained. Avoid oversized headings inside authenticated app screens.
 
@@ -153,13 +116,24 @@ Letter spacing should remain `0`.
 
 Use a restrained radius and elevation system.
 
-Radius:
+Radius (revised 2026-09-03, after the mockups settled on `14px` surfaces):
 
-- Default radius: `8px`.
-- Small controls: `6px`.
-- Pills and badges: fully rounded.
-- Modals, drawers, and panels: `8px`, with `10px` as the practical maximum.
-- Avoid large rounded cards because they can make operational software feel less serious.
+Three tiers only. Every rounded corner in the app is one of these; nothing is hand-typed.
+
+| Tier | Value | Used for | In code |
+| --- | --- | --- | --- |
+| Surface | `14px` | cards, tables, KPI tiles, panels, banners, modals, popovers, the sidebar shell | Tailwind `rounded-surface`; Mantine `radius="lg"` |
+| Inner | `10px` | nested cards, slot bands, list rows and tiles inside a surface, nav items | Tailwind `rounded-inner` |
+| Control | `8px` | buttons, inputs, selects, search boxes, icon buttons, pager arrows | Mantine `md` (the theme default, no prop needed) |
+
+Pills, badges, chips and avatars stay fully rounded.
+
+Implementation:
+
+- The two custom tiers are Tailwind theme tokens in `apps/web/src/index.css` (`--radius-surface`, `--radius-inner`), which generate the `rounded-surface` and `rounded-inner` utilities.
+- Mantine's `lg` radius is remapped to `14px` in `apps/web/src/app/theme.ts` so `Modal`, `Skeleton`, `Paper` and friends match the Tailwind cards with `radius="lg"`. `md` stays `8px`.
+- Do not use `rounded-lg`, `rounded-xl`, `rounded-2xl` or bracket values like `rounded-[14px]` for surfaces or inner elements; they drift (Tailwind `lg` is `8px`, Mantine `lg` was `16px`, mockups are `14px`). Shared components (`DataTable`, `StatCard`, `AppDrawer`, detail drawer parts) already carry the right tier, so prefer them over new wrappers.
+- Skeletons standing in for a surface use `radius="lg"`; skeletons inside a drawer body use `md`.
 
 Elevation:
 
@@ -172,22 +146,24 @@ Use borders more often than shadows. Shadows should indicate meaningful elevatio
 
 ## Status Colors
 
-Use muted classic status colors separate from the brand palette. Status colors should help users scan tables, badges, alerts, and workflow states without making the interface feel loud.
+Status colors are the four semantic roles plus neutral gray. They help users scan tables, badges and drawers without making the interface loud.
 
-Status categories:
+Mapping used in the product:
 
-- Success: approved, paid, ready, active, completed.
-- Warning: pending, waiting, needs review, incomplete.
-- Danger: rejected, failed, overdue, cancelled, destructive.
-- Info: expected, scheduled, in progress, service-related.
-- Neutral: inactive, draft, archived, not applicable.
+| Role | Reservations | Movements (finances) | Staff and registry |
+| --- | --- | --- | --- |
+| `success` | approved (Confirmada) | paid, refunded | active |
+| `warning` | pending | pending (Pendiente / Por pagar) | invitation pending |
+| `info` | observed | held (En garantía), to refund (Por devolver) | — |
+| `error` | rejected | — (voided is gray) | — |
+| `gray` | cancelled, completed (derived) | retained, voided | deactivated, inactive |
 
-Usage guidance:
+Rules:
 
-- Use soft backgrounds with darker text for badges.
-- Avoid using saturated fills except for destructive confirmations or strong alerts.
-- Do not use the purple primary color for every status.
-- Status labels must include text, not color alone.
+- Status pills are Mantine `Badge` with `variant="light"` and `size="sm"` (radius `xl` is the theme default). The theme remaps that variant to the design system's pill: **role-colored text on the neutral second surface** (`--wa-surface-2`), never a tinted background — the mockups draw every pill this way. `gray` means dimmed text, `teal` means the interactive token. On a surface-2 box (drawer inner cards, bands) use `variant="surface"`: same text, background flips to the card color so the pill does not vanish. Where a label must never truncate in a narrow cell, use `TintChip` from `components/ui/chips.tsx`, which follows the same recipe. Filled badges are reserved for counters (the Por aprobar count), not statuses.
+- Colored figures (amounts, KPI values) use the `--wa-*` tokens, not the badge tint variables.
+- Amber is both accent and dark-mode warning, so a warning always carries text; badges never rely on color alone.
+- Presentation rules for a status (label, color, allowed inline action) live in one module per feature (`movement-presentation.ts`, `reservation-modal-parts.tsx`) so a row and its drawer never disagree.
 - Tables should remain readable in grayscale; color is secondary support.
 
 ## Buttons
@@ -211,12 +187,29 @@ Rules:
 - Async actions require loading states.
 - Disabled states should explain themselves when the reason is not obvious.
 
-Default sizes:
+Sizes (Mantine scale, unchanged):
 
-- Default button height: `40px`.
-- Compact button height: `32px` to `36px`.
-- Icon button size: `32px` to `36px` square.
-- Radius: `6px` to `8px`.
+- Default (`md`): `42px`. Used for drawer footers and action rows.
+- `sm`: `36px`. Used for page-header actions and toolbar buttons.
+- `xs` and `compact-xs`: table row actions and text-link tertiaries.
+- Icon buttons: `ActionIcon` at `32px`, or `size="input-sm"` (`36px`) when it sits next to an input.
+- Radius: `8px` (Mantine `md`, the control tier).
+
+Color:
+
+- Primary: `color="accent"` (amber, dark text). One per screen or overlay.
+- Secondary: `variant="default"` (bordered, surface; hovers to surface 2° so it stays visible on the paper canvas). Secondary buttons stay neutral in both schemes — the mockups never fill them with teal; amber is the only filled button color, one per screen.
+- Tertiary: `variant="subtle"`, usually `size="compact-sm"` and dimmed, for reverts and low-emphasis links.
+- Destructive: `color="error"` only inside a confirmation dialog; in the action row a destructive move is a `default` button that opens the confirmation.
+
+Action rows in drawers: one row of stretched `md` buttons (primary accent, the rest default), tertiaries below as text buttons. Both detail drawers follow this.
+
+Touch targets:
+
+- On a coarse pointer (`@media (pointer: coarse)`, a finger regardless of screen size) every Mantine button and icon button below the default size grows to a `44px` minimum with wider padding. This is one rule in `index.css` on `.mantine-Button-root` and `.mantine-ActionIcon-root`; nothing per page.
+- Custom controls (chip rows, sort headers, filter-chip remove, text links that act) carry Tailwind's `pointer-coarse:min-h-11` and get more gap between neighbours with `pointer-coarse:gap-3`.
+- Inputs follow the same rule: 44px tall and 16px text on a coarse pointer (below 16px, iOS Safari zooms the page on focus). Dropdown options grow to a 44px row, switches and checkboxes step up one size, segmented controls get a 44px minimum. All of it lives in the same `index.css` block.
+- Desktop with a mouse is unchanged. Verify in the browser with device emulation; jsdom cannot evaluate media queries.
 
 ## Forms
 
@@ -237,35 +230,33 @@ Rules:
 
 Defaults:
 
-- Label: `13px`, medium weight.
-- Input height: `40px`.
-- Field gap: `12px`.
-- Group gap: `20px` to `24px`.
-- Normal form max width: `640px`.
-- Modal form width: `520px` to `720px`.
+- Inputs are Mantine `md` (`42px`), labels Mantine `sm`.
+- Field gap in drawers: `20px` (the `AppDrawerBody` grid); two short related fields share a row with `sm:grid-cols-2`.
+- Drawer width: `620px` for every `AppDrawer`; below `64rem` (tablets and phones) the sheet takes the full viewport.
+- Forms use `react-hook-form` with a `zod` resolver (ADR 0009). Schema messages are i18n keys; server `422` errors land under their field through `submitHandlingServerErrors`, and anything unmatched goes to a root `Alert`.
+- Plain `rows` on `Textarea`, never `autosize` (it needs layout APIs jsdom lacks). Note fields use three rows everywhere.
+- Money inputs: `NumberInput` with `prefix="S/ "`, integers only, `thousandSeparator=" "`.
 
 ## Tables
 
-Tables should be dense, bordered, and highly scannable.
+All lists use the shared `DataTable` in `components/table/data-table.tsx`: TanStack Table as the engine, the design system as the skin. It owns the surface card (`rounded-surface`), the toolbar strip, the header band and the footer pager; the page owns every data concern and passes results in.
 
 Rules:
 
-- Header rows should be subtle, not visually heavy.
-- Row height: `44px` to `48px`.
-- Use sticky or persistent table controls above important tables.
-- Common filters should stay visible.
-- Advanced filters can live in a drawer or menu.
-- Use badges for status.
-- Use icon buttons or a row action menu for secondary actions.
-- Use empty states with a clear next action.
-- Use server-side pagination, filtering, and sorting.
-- Prefer row hover over zebra striping.
-- Avoid wrapping every table in a decorative card when the whole page is already a data surface.
+- Header cells: `12px`, uppercase, wide tracking, dimmed. Sortable headers (column `meta.sortKey`) are buttons cycling ascending, descending, cleared, with an arrow only while active.
+- Rows: Mantine `Table` with `horizontalSpacing="lg"`, `verticalSpacing="sm"`, hover highlight, no zebra striping.
+- **Never stack rows into mobile cards.** Narrow viewports scroll the table sideways inside the card; headers stay. Columns can drop below a breakpoint with `meta.hideBelow`.
+- Clickable rows (`onRowClick`) get the pointer and a hover background; the selected row (`selectedId`) shows a `2.5px` left bar in the interactive teal while its drawer is open.
+- Row actions: prefer opening the row's drawer over inline buttons. When an inline action exists, it is the single forward move; everything else lives in the drawer.
+- Server-side pagination, filtering and sorting (ADR 0011); all of it lives in the URL through the route's `validateSearch` schema, so bookmarks and back navigation work.
+- Toolbar: `SearchInput` (applies on Enter or blur), `FilterButton` popover with the configured filters, `FilterChips` echoing applied filters as removable pills. Quick filters that are not "filters" (status or direction chip rows, a month navigator) sit above the card.
+- Empty states are plain text inside the card, with different copy for "nothing this period" and "nothing matches the filter".
+- Footer pager: "Mostrando a–b de n" and two `ActionIcon` arrows. No "load more".
 
 Typical toolbar pattern:
 
 ```txt
-[Search...] [Status filter] [Date range] [More filters]        [Export] [Create]
+[Buscar…] [Filtros ●2] [Categoría: Agua ×] [Categoría: Multa ×]
 ```
 
 ## Empty States
@@ -299,14 +290,13 @@ Patterns:
 - Full page: complex workflows, multi-step flows, CSV import preview, reservation calendar/details, and location setup.
 - Confirmation dialog: destructive or irreversible actions.
 
-Examples:
+Patterns in use:
 
-- Create visitor walk-in: drawer.
-- Edit resident contact info: drawer.
-- Approve or reject reservation: modal or drawer depending on required detail.
-- CSV import preview: full page.
-- Amenity creation with photos and rules: full page or large drawer.
-- Delete or deactivate resident: confirmation modal.
+- **Form drawer** (`AppDrawer` + `AppDrawerBody` + `AppDrawerFooter`, `620px`, full width below `64rem`): create and edit flows — staff access, location, amenity, new reservation, record movement. Footer: `Cancelar` (default) and the accent submit.
+- **Detail drawer** (same `AppDrawer`, pieces from `components/ui/detail-drawer-parts.tsx`): the row's home. Inner cards inside a drawer (unit list, portal block, member header, slot band) are filled with `--wa-surface-2` and bordered, never border-only on the drawer surface. Sections in order: header value and status badge, `DrawerFacts` (uppercase label over value, two columns), `DrawerSection` rules, `DrawerTimeline` (Historial, newest first; derived events drawn with a hollow dot and dimmed), Acciones with one optional note field and the action row. Footer: only `Cerrar`. Used for movements and reservations; deep-linked by a URL param (`movement`, `reservation`).
+- **Confirmation** (`ConfirmDialog`): irreversible moves only — void, retain, cancel a reservation. Names the consequence, `Cancelar` + `Confirmar` in `error`.
+- **Small modal**: a prompt that needs one field before acting (the queue's observe/reject note).
+- **Full page**: CSV import preview, location detail with tabs.
 
 Rules:
 
@@ -354,56 +344,29 @@ Aprovisionar Usuario
 
 ## Icons
 
-Use `solar-react` for product icons.
+Use `@solar-icons/react` (Solar icon set) for product icons. Verify a name exists in the package's `dist/types` before importing; never fall back to text glyphs like `‹` or `›` for controls (the row chevron `›` in tables is a decorative hint, not a control).
 
 Rules:
 
-- Icons should support scanning, not decorate.
-- Use icons in navigation, table actions, empty states, and key buttons.
-- Avoid custom SVG icons unless the library lacks an important concept.
-- Icon-only buttons require tooltips and accessible labels.
-- Avoid using icons as the only status indicator; pair status with text.
+- Icons support scanning, not decoration: navigation, table actions, empty states, key buttons.
+- Icon-only buttons require an `aria-label`.
+- Never the only status indicator; pair with text.
 
-Suggested mapping:
+Navigation mapping in use:
 
-- Visitors: `UserRoundCheck` or `ClipboardCheck`.
-- Residents: `UsersRound`.
-- Units: `Building2` or `Home`.
-- Reservations: `CalendarCheck`.
-- Amenities: `Landmark` or context-specific icons like `Dumbbell`.
-- Vehicles: `Car`.
-- Announcements: `Megaphone`.
-- Activity log: `ListChecks`.
-- Exports: `Download`.
-- Settings: `Settings`.
-- Search: `Search`.
-- Filter: `SlidersHorizontal`.
-- More actions: `Ellipsis`.
+- Panel: `Widget`. Personas: `UsersGroupRounded`. Unidades: `KeySquare`. Reservas: `Calendar`. Finanzas: `Wallet`. Anuncios: `Speaker`. Visitantes: `UserCheckRounded`. Ubicaciones: `Buildings2`. Actividad: `ClipboardList`. Configuración: `Settings`. Búsqueda: `Magnifier`.
+- Controls: `AddCircle` on create buttons, `AltArrowLeft`/`AltArrowRight` on pagers and month or week navigators, `AltArrowUp`/`AltArrowDown` as sort indicators, `Filter` on the filters button, `CloseCircle` on chips, `InfoCircle` on informational banners, `ArrowDown` as the expense mark.
 
 ## Dashboard Metrics
 
-Use metric blocks sparingly. Metrics should answer operational questions, not decorate the dashboard.
+Metric tiles use `StatCard` in `components/ui/stat-card.tsx`: label, value, subline, optional `tone` (`success`, `error`, `accent`) for the value, optional `aside` after the value, optional `highlighted` border and dot for a tile that needs attention.
 
 Rules:
 
-- Do not use decorative nested cards.
-- Keep metric cards compact.
-- Group metrics close to the workflow they affect.
-- Front Desk screens should prioritize quick search and check-in actions over metric cards.
-- Use at most four metrics in one row.
-
-Suggested metrics:
-
-- Visitantes hoy.
-- Reservas pendientes.
-- Invitaciones sin reclamar.
-- Unidades activas.
-
-Defaults:
-
-- Metric card height: `88px` to `112px`.
-- Value size: `24px` to `30px`.
-- Label size: `13px`.
+- **Tiles are statistics only.** Values, counts, breakdowns by category, comparisons against the previous period. Never an interpretive sentence or a claim the system cannot verify ("Se cubre con cuotas de mantenimiento" was removed for this reason).
+- At most four in a row (`grid-cols-4` from the `@4xl` container breakpoint, two on tablets, one on phones).
+- Value in `24px` bold with the role token color; label `14px` dimmed; subline `14px` dimmed.
+- Colored values use `--wa-*` tokens, not badge tint variables.
 
 ## Accessibility
 
@@ -440,91 +403,64 @@ Rules:
 - Desktop admin screens should show the sidebar.
 - Tablet layouts may collapse the sidebar.
 - Mobile layouts should use drawer navigation or bottom navigation depending on the surface.
-- Tables should not simply squeeze; use horizontal scroll, column priority, or mobile list alternatives.
+- Tables never squeeze and never collapse into stacked cards: they scroll horizontally inside their card, keep their headers, and drop low-priority columns with `meta.hideBelow`.
+- Sections beside the sidebar use container queries (`@container`, `@4xl:`) instead of viewport breakpoints, which misfire around `1024px` next to the rail.
 - Critical actions must remain reachable without horizontal scrolling.
 - Front Desk workflows should work well on tablet.
 - Resident Portal should feel natural on phone.
 - Long Spanish labels should wrap cleanly.
 
-## V1 Component Inventory
+## Component Inventory
 
-The design system should cover these reusable components and patterns for v1:
+What exists today, and where:
 
-- `AppShell`
-- `SidebarNav`
-- `TopBar`
-- `PageHeader`
-- `Breadcrumbs`
-- `MetricCard`
-- `DataTable`
-- `TableToolbar`
-- `StatusBadge`
-- `FilterBar`
-- `SearchInput`
-- `EmptyState`
-- `FormSection`
-- `ConfirmDialog`
-- `DrawerForm`
-- `ModalForm`
-- `Toast` / `Notification`
-- `DateRangePicker`
-- `FileUpload`
-- `CSVImportPreview`
-- `ActivityTimeline`
-- `ReservationCalendar` or `ReservationSchedule`
+| Component | Location | Notes |
+| --- | --- | --- |
+| App shell, sidebar, top bar, location switcher, user menu | `components/layout/shared/` | soft workspace rail, container-query aware |
+| `DataTable` + `SearchInput`, `FilterButton`, `FilterChips`, `buildFilterChips`, `sort.ts` | `components/table/` | server-driven, sortable headers, row click and selection |
+| `StatCard` | `components/ui/stat-card.tsx` | statistical tiles |
+| `AppDrawer`, `AppDrawerBody`, `AppDrawerFooter` | `components/ui/app-drawer.tsx` | form and detail drawers |
+| `DrawerFacts`, `DrawerFact`, `DrawerSection`, `DrawerTimeline`, `ConfirmDialog` | `components/ui/detail-drawer-parts.tsx` | shared by every detail drawer |
+| `TintChip`, `AccessChip` | `components/ui/chips.tsx` | non-truncating status and access pills |
+| `FormTextInput`, `FormPasswordInput`, `NullableTextInput` | `components/ui/form-fields.tsx`, `features/registry/` | react-hook-form wired inputs |
+| Toasts (`notifySuccess`, `notifyError`, `notifyWarning`) | `lib/notify.tsx` + `.wa-toast` in `index.css` | card chrome, tinted icon chip |
+| `PagePlaceholder` | `components/ui/page-placeholder.tsx` | route stubs |
 
-Mantine should provide primitives where useful, but these should become Wasiy-specific wrappers or patterns when they encode product behavior, layout, copy, or accessibility rules.
+Not built, and not currently planned: breadcrumbs, a date range picker, a calendar or schedule grid (the day view was removed from M7; the week agenda list is the reservations view).
 
 ## Token Implementation Strategy
 
-Use semantic Wasiy tokens as the source of truth, then bridge them into Tailwind and Mantine.
+Semantic tokens are the source of truth, bridged into Tailwind and Mantine:
 
 ```txt
-Wasiy semantic tokens
-  -> CSS variables
-  -> Tailwind theme utilities
-  -> Mantine theme adapter
+docs/colorschema.md (roles)
+  -> apps/web/src/index.css        --wa-* CSS variables (light on :root, dark on [data-mantine-color-scheme='dark']); @theme radius and font tokens
+  -> apps/web/src/app/theme.ts     Mantine scales (teal, accent, success, warning, error, info, petroleum dark), primaryShade { light: 6, dark: 5 }, radius scale, cssVariablesResolver for body/border/dimmed/anchor
 ```
 
 Rules:
 
-- Product components should use semantic tokens, not raw hex values.
-- Tailwind layout classes should reference semantic color names like `bg-background`, `text-foreground`, and `border-border`.
-- Mantine components should receive matching colors, radius, typography, and component defaults through `createTheme`.
-- Do not use Mantine default color values directly unless mapped to Wasiy tokens.
-- Do not hard-code hex values inside feature components.
-- Status colors should get semantic tokens such as `success`, `warning`, `info`, `danger`, and `neutral`.
-
-Suggested files:
-
-```txt
-apps/web/src/styles/tokens.css
-apps/web/src/styles/app.css
-apps/web/src/app/mantine-theme.ts
-```
+- Feature components use `var(--wa-*)` or `var(--mantine-color-*)` in Tailwind classes, or semantic Mantine color names. No raw hex outside `index.css`, `theme.ts` and the seeders' image generation.
+- No `light-dark()`; dark values swap through the color-scheme attribute block.
+- Radius comes from the three-tier scale above; spacing from Tailwind's default scale; fonts from the `font-display` / `font-brand` utilities on brand surfaces only.
+- Both color schemes must work for every new token: add the light value on `:root` and the dark value in the dark block in the same change.
 
 ## Mantine Defaults
 
 Define common Mantine component defaults globally through `createTheme` so forms, buttons, modals, drawers, and notifications stay consistent.
 
-Initial defaults:
+Defaults set in `theme.ts`:
 
-- Button: medium radius, `40px` default height, weight `600`.
-- TextInput, Select, and Textarea: medium radius, `40px` input height, `13px` labels, consistent error styling.
-- Modal: medium radius; centered for confirmations; avoid centered layout for larger workflows when it hurts usability.
-- Drawer: right-side placement; responsive width, typically `520px` to `720px`.
-- Notifications: top-right on desktop; success and info notifications may auto-close.
+- `primaryColor: "teal"`, `primaryShade: { light: 6, dark: 5 }`, `autoContrast: true` so accent buttons get dark text without per-button props.
+- Radius scale: `md` `8px` (controls), `lg` `14px` (surfaces), see Radius.
+- Font sizes and spacing scales extended with `2xl`–`5xl` and `3xs`–`3xl` steps.
+- `Select`: check icon on the right. `Paper` and `Card` defaults exist but the app builds surfaces with Tailwind classes instead.
+- Body, default border, dimmed and anchor colors are pinned through `cssVariablesResolver` («papel, no blanco»).
+- Modal: `radius="lg"`, centered for confirmations. Drawer: right side, `620px` on laptops and up, full viewport below `64rem`. Notifications: top-right, card chrome via `.wa-toast`.
 
 Do not use Mantine layout primitives such as `Box`, `Stack`, or `Grid` for page layout. Use semantic HTML and Tailwind classes for layout.
 
-Use `@mantine/modals` for global confirmation dialogs and simple context modal flows:
-
-- Deactivate resident.
-- Cancel reservation.
-- Delete amenity photo.
-- Confirm sensitive fee/deposit status changes when needed.
-
-Do not use the modals manager as a dumping ground for complex forms. Complex create/edit flows should use explicit Wasiy `ModalForm` or `DrawerForm` wrappers.
+`@mantine/modals` is installed and its provider mounted, but confirmations in the product use the explicit `ConfirmDialog` component so they render inside the feature's tree and tests. Complex create and edit flows use `AppDrawer`; nothing goes through the modals manager.
 
 Use `@mantine/dropzone` for file upload surfaces:
 
@@ -598,22 +534,7 @@ Recent announcements or status
 
 ## Branding
 
-The product name is still pending, so branding should remain provisional.
-
-Rules:
-
-- Do not create a final logo until the product name is chosen.
-- Use a simple wordmark placeholder in the sidebar and top bar.
-- A small abstract building/unit mark is acceptable only as a temporary app mark.
-- Avoid investing in final brand assets before naming is resolved.
-
-Future brand assets:
-
-- Wordmark.
-- App icon.
-- Favicon.
-- Sidebar collapsed mark.
-- Email header mark.
+The product is **Wasiy**. The wordmark is set in Sora (`font-display`) in the sidebar and on the auth screens; the location mark in the switcher is a two-letter monogram on the secondary teal. Final app icon, favicon and email header mark are still pending.
 
 ## Visual Assets
 
@@ -642,7 +563,7 @@ Screens:
 Rules:
 
 - Use a clean centered auth panel or restrained split layout.
-- Use the violet palette subtly.
+- Use the Puerto palette with the brand fonts (Sora display, Instrument Sans body), scoped to these screens.
 - Avoid marketing-heavy hero layouts.
 - Avoid large generic real-estate imagery.
 - Include provisional product name or mark.
@@ -651,16 +572,7 @@ Rules:
 
 ## Reservation Schedule UI
 
-Use an agenda-first reservation interface for v1.
-
-Patterns:
-
-- Resident reservation flow: date picker plus available time slots.
-- Manager view: agenda/list by date and amenity.
-- Front Desk view: today's schedule list.
-- Full month calendar grid is optional later.
-
-Amenity booking should focus on available slots and operational clarity rather than dense calendar browsing.
+Agenda-first. The manager view is a week list grouped by day (custom component, not `DataTable`), with a Por aprobar rail beside it; rows and queue cards open the reservation detail drawer. The day grid built on `@mantine/schedule` shipped and was removed in M7: at condominium volumes it was mostly empty space and its conflict value was covered by the queue's advisory line and the server's revalidation on approval. A calendar grid is not planned.
 
 ## Loading and Async States
 

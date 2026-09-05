@@ -5,7 +5,6 @@ use App\Enums\ExportStatus;
 use App\Enums\ExportType;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
-use App\Enums\ResidentType;
 use App\Enums\VehicleType;
 use App\Jobs\GenerateCsvExport;
 use App\Models\Location;
@@ -113,9 +112,7 @@ test('job writes registry csv with expected spanish headings and rows', function
         ->for($unit)
         ->for($resident)
         ->primaryContact()
-        ->create([
-            'resident_type' => ResidentType::Owner,
-        ]);
+        ->create();
 
     $export = RegistryExport::factory()
         ->for($location->account)
@@ -138,8 +135,8 @@ test('job writes registry csv with expected spanish headings and rows', function
 
     $csv = Storage::disk('local')->get($export->path);
 
-    expect($csv)->toContain('Unidad,Edificio,Piso,"Estado de unidad",Residente,"Tipo de residente","Contacto principal","Estado de membresia",Telefono,Email')
-        ->and($csv)->toContain('301,"Torre A",3,active,"Ana Salas",owner,Si,active,999,ana@example.test');
+    expect($csv)->toContain('Unidad,Edificio,Piso,"Estado de unidad",Residente,"Contacto principal","Estado de membresia",Telefono,Email')
+        ->and($csv)->toContain('301,"Torre A",3,active,"Ana Salas",Si,active,999,ana@example.test');
 
     $this->assertDatabaseHas('activity_logs', [
         'account_id' => $location->account_id,
