@@ -6,6 +6,6 @@ export const Route = createFileRoute('/')({
   beforeLoad: async ({ context }) => {
     const me = await requireAuthenticated(context)
 
-    throw redirect({ to: getDefaultAuthenticatedRoute(me) })
+    throw redirect({ href: getDefaultAuthenticatedRoute(me) })
   },
 })

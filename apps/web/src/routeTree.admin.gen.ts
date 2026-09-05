@@ -8,33 +8,30 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as NoAccessRouteImport } from './routes/no-access'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedSelectAccountRouteImport } from './routes/_authenticated/select-account'
-import { Route as AuthenticatedPortalRouteRouteImport } from './routes/_authenticated/portal/route'
-import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
-import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal/index'
-import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
-import { Route as InvitationsStaffTokenRouteImport } from './routes/invitations/staff.$token'
-import { Route as InvitationsResidentTokenRouteImport } from './routes/invitations/resident.$token'
-import { Route as AuthenticatedAdminVisitorsRouteImport } from './routes/_authenticated/admin/visitors'
-import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated/admin/staff'
-import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin/settings'
-import { Route as AuthenticatedAdminReservationsRouteImport } from './routes/_authenticated/admin/reservations'
-import { Route as AuthenticatedAdminPackagesRouteImport } from './routes/_authenticated/admin/packages'
-import { Route as AuthenticatedAdminLocationsRouteImport } from './routes/_authenticated/admin/locations'
-import { Route as AuthenticatedAdminFinancesRouteImport } from './routes/_authenticated/admin/finances'
-import { Route as AuthenticatedAdminAnnouncementsRouteImport } from './routes/_authenticated/admin/announcements'
-import { Route as AuthenticatedAdminActivityRouteImport } from './routes/_authenticated/admin/activity'
-import { Route as AuthenticatedAdminRegistryVehiclesRouteImport } from './routes/_authenticated/admin/registry/vehicles'
-import { Route as AuthenticatedAdminRegistryUnitsRouteImport } from './routes/_authenticated/admin/registry/units'
-import { Route as AuthenticatedAdminRegistryResidentsRouteImport } from './routes/_authenticated/admin/registry/residents'
-import { Route as AuthenticatedAdminRegistryImportsRouteImport } from './routes/_authenticated/admin/registry/imports'
-import { Route as AuthenticatedAdminLocationsLocationIdRouteImport } from './routes/_authenticated/admin/locations_.$locationId'
-import { Route as AuthenticatedAdminRegistryUnitsUnitIdRouteImport } from './routes/_authenticated/admin/registry/units_.$unitId'
+import { Route as rootRouteImport } from './routes-admin/__root'
+import { Route as NoAccessRouteImport } from './routes-admin/no-access'
+import { Route as LoginRouteImport } from './routes-admin/login'
+import { Route as AuthenticatedRouteImport } from './routes-admin/_authenticated'
+import { Route as IndexRouteImport } from './routes-admin/index'
+import { Route as AuthenticatedSelectAccountRouteImport } from './routes-admin/_authenticated/select-account'
+import { Route as AuthenticatedAdminRouteRouteImport } from './routes-admin/_authenticated/admin/route'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes-admin/_authenticated/admin/index'
+import { Route as InvitationsStaffTokenRouteImport } from './routes-admin/invitations/staff.$token'
+import { Route as AuthenticatedAdminVisitorsRouteImport } from './routes-admin/_authenticated/admin/visitors'
+import { Route as AuthenticatedAdminStaffRouteImport } from './routes-admin/_authenticated/admin/staff'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes-admin/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminReservationsRouteImport } from './routes-admin/_authenticated/admin/reservations'
+import { Route as AuthenticatedAdminPackagesRouteImport } from './routes-admin/_authenticated/admin/packages'
+import { Route as AuthenticatedAdminLocationsRouteImport } from './routes-admin/_authenticated/admin/locations'
+import { Route as AuthenticatedAdminFinancesRouteImport } from './routes-admin/_authenticated/admin/finances'
+import { Route as AuthenticatedAdminAnnouncementsRouteImport } from './routes-admin/_authenticated/admin/announcements'
+import { Route as AuthenticatedAdminActivityRouteImport } from './routes-admin/_authenticated/admin/activity'
+import { Route as AuthenticatedAdminRegistryVehiclesRouteImport } from './routes-admin/_authenticated/admin/registry/vehicles'
+import { Route as AuthenticatedAdminRegistryUnitsRouteImport } from './routes-admin/_authenticated/admin/registry/units'
+import { Route as AuthenticatedAdminRegistryResidentsRouteImport } from './routes-admin/_authenticated/admin/registry/residents'
+import { Route as AuthenticatedAdminRegistryImportsRouteImport } from './routes-admin/_authenticated/admin/registry/imports'
+import { Route as AuthenticatedAdminLocationsLocationIdRouteImport } from './routes-admin/_authenticated/admin/locations_.$locationId'
+import { Route as AuthenticatedAdminRegistryUnitsUnitIdRouteImport } from './routes-admin/_authenticated/admin/registry/units_.$unitId'
 
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
@@ -61,23 +58,11 @@ const AuthenticatedSelectAccountRoute =
     path: '/select-account',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedPortalRouteRoute =
-  AuthenticatedPortalRouteRouteImport.update({
-    id: '/portal',
-    path: '/portal',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   id: '/admin',
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedPortalIndexRoute =
-  AuthenticatedPortalIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedPortalRouteRoute,
-  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -88,12 +73,6 @@ const InvitationsStaffTokenRoute = InvitationsStaffTokenRouteImport.update({
   path: '/invitations/staff/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InvitationsResidentTokenRoute =
-  InvitationsResidentTokenRouteImport.update({
-    id: '/invitations/resident/$token',
-    path: '/invitations/resident/$token',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const AuthenticatedAdminVisitorsRoute =
   AuthenticatedAdminVisitorsRouteImport.update({
     id: '/visitors',
@@ -189,7 +168,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
@@ -200,10 +178,8 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
-  '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
-  '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/locations/$locationId': typeof AuthenticatedAdminLocationsLocationIdRoute
   '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
@@ -225,10 +201,8 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
-  '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
-  '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/locations/$locationId': typeof AuthenticatedAdminLocationsLocationIdRoute
   '/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
@@ -243,7 +217,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
-  '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/_authenticated/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
@@ -254,10 +227,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
   '/_authenticated/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
-  '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
-  '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/locations_/$locationId': typeof AuthenticatedAdminLocationsLocationIdRoute
   '/_authenticated/admin/registry/imports': typeof AuthenticatedAdminRegistryImportsRoute
   '/_authenticated/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
@@ -272,7 +243,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/admin'
-    | '/portal'
     | '/select-account'
     | '/admin/activity'
     | '/admin/announcements'
@@ -283,10 +253,8 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/visitors'
-    | '/invitations/resident/$token'
     | '/invitations/staff/$token'
     | '/admin/'
-    | '/portal/'
     | '/admin/locations/$locationId'
     | '/admin/registry/imports'
     | '/admin/registry/residents'
@@ -308,10 +276,8 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/staff'
     | '/admin/visitors'
-    | '/invitations/resident/$token'
     | '/invitations/staff/$token'
     | '/admin'
-    | '/portal'
     | '/admin/locations/$locationId'
     | '/admin/registry/imports'
     | '/admin/registry/residents'
@@ -325,7 +291,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/_authenticated/admin'
-    | '/_authenticated/portal'
     | '/_authenticated/select-account'
     | '/_authenticated/admin/activity'
     | '/_authenticated/admin/announcements'
@@ -336,10 +301,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/staff'
     | '/_authenticated/admin/visitors'
-    | '/invitations/resident/$token'
     | '/invitations/staff/$token'
     | '/_authenticated/admin/'
-    | '/_authenticated/portal/'
     | '/_authenticated/admin/locations_/$locationId'
     | '/_authenticated/admin/registry/imports'
     | '/_authenticated/admin/registry/residents'
@@ -353,7 +316,6 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
-  InvitationsResidentTokenRoute: typeof InvitationsResidentTokenRoute
   InvitationsStaffTokenRoute: typeof InvitationsStaffTokenRoute
 }
 
@@ -394,26 +356,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSelectAccountRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/portal': {
-      id: '/_authenticated/portal'
-      path: '/portal'
-      fullPath: '/portal'
-      preLoaderRoute: typeof AuthenticatedPortalRouteRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/portal/': {
-      id: '/_authenticated/portal/'
-      path: '/'
-      fullPath: '/portal/'
-      preLoaderRoute: typeof AuthenticatedPortalIndexRouteImport
-      parentRoute: typeof AuthenticatedPortalRouteRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -427,13 +375,6 @@ declare module '@tanstack/react-router' {
       path: '/invitations/staff/$token'
       fullPath: '/invitations/staff/$token'
       preLoaderRoute: typeof InvitationsStaffTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/invitations/resident/$token': {
-      id: '/invitations/resident/$token'
-      path: '/invitations/resident/$token'
-      fullPath: '/invitations/resident/$token'
-      preLoaderRoute: typeof InvitationsResidentTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/visitors': {
@@ -593,29 +534,13 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
-interface AuthenticatedPortalRouteRouteChildren {
-  AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
-}
-
-const AuthenticatedPortalRouteRouteChildren: AuthenticatedPortalRouteRouteChildren =
-  {
-    AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
-  }
-
-const AuthenticatedPortalRouteRouteWithChildren =
-  AuthenticatedPortalRouteRoute._addFileChildren(
-    AuthenticatedPortalRouteRouteChildren,
-  )
-
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
-  AuthenticatedPortalRouteRoute: typeof AuthenticatedPortalRouteRouteWithChildren
   AuthenticatedSelectAccountRoute: typeof AuthenticatedSelectAccountRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
-  AuthenticatedPortalRouteRoute: AuthenticatedPortalRouteRouteWithChildren,
   AuthenticatedSelectAccountRoute: AuthenticatedSelectAccountRoute,
 }
 
@@ -628,7 +553,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
-  InvitationsResidentTokenRoute: InvitationsResidentTokenRoute,
   InvitationsStaffTokenRoute: InvitationsStaffTokenRoute,
 }
 export const routeTree = rootRouteImport

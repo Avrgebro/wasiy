@@ -24,7 +24,7 @@ export const Route = createFileRoute('/no-access')({
       }
 
       if (canAccessAnySurface(session.me)) {
-        throw redirect({ to: getDefaultAuthenticatedRoute(session.me) })
+        throw redirect({ href: getDefaultAuthenticatedRoute(session.me) })
       }
     }
   },
