@@ -69,7 +69,11 @@ export function PhoneInput({
           label={label}
           leftSection={trigger}
           leftSectionPointerEvents="all"
-          leftSectionWidth={92}
+          // The section reserves 100px of input padding but the trigger is
+          // drawn 86px wide, so the digits start a comfortable gap after the
+          // separator instead of touching it.
+          leftSectionProps={{ style: { width: 86 } }}
+          leftSectionWidth={100}
           placeholder={placeholder}
           required={required}
           value={national}
@@ -133,7 +137,7 @@ function CountryPicker({
           aria-expanded={combobox.dropdownOpened}
           aria-haspopup="listbox"
           aria-label={t('phone.country')}
-          className="flex h-full w-full items-center justify-center gap-1 rounded-l-[inherit] border-r border-[var(--mantine-color-default-border)] pl-2.5 pr-1.5 text-sm text-[var(--mantine-color-text)] hover:bg-[var(--wa-hover)]"
+          className="flex h-full w-full items-center justify-center gap-1 rounded-l-[var(--input-radius)] border-r border-[var(--mantine-color-default-border)] pl-2 pr-1.5 text-sm text-[var(--mantine-color-text)] hover:bg-[var(--wa-hover)]"
           type="button"
           onClick={() => combobox.toggleDropdown()}
         >
