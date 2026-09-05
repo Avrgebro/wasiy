@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Badge, Button, Loader } from '@mantine/core'
+import { Alert, Badge, Button, Loader, Switch } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { sessionQueryKey } from '../auth/query-options'
 import type { MeResponse, Session } from '../auth/types'
 import { FormPhoneInput } from '../../components/ui/phone-input'
-import { updatePortalResidentPhone } from './api'
+import { ALERT_FAMILIES, getPortalResident, updatePortalEmailAlerts, updatePortalResidentPhone, type AlertFamily, type EmailAlertPreferences } from './api'
 import {
   portalPhoneSchema,
   type PortalPhoneFormValues,
@@ -15,7 +15,7 @@ import {
 import { submitHandlingServerErrors } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 
-/** Perfil (P1): the household list and the contact phone; email, password and preferences arrive in P4. */
+/** Perfil (P1, 03c): the household list, the contact phone and which alerts also reach the inbox; email and password arrive in P4. */
 export function PortalProfilePage() {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -49,6 +49,23 @@ export function PortalProfilePage() {
       notifySuccess(t('portal.phoneSaved'), t('portal.phoneSavedTitle'))
     },
   })
+  const resident = useQuery({ queryKey: ['portal', 'resident'], queryFn: getPortalResident })
+  const preferences = resident.data?.email_alerts
+  const emailAlerts = useMutation({
+    mutationFn: updatePortalEmailAlerts,
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['portal', 'resident'], updated)
+    },
+  })
+
+  function toggle(family: AlertFamily, on: boolean) {
+    if (!preferences) return
+    const next: EmailAlertPreferences = { ...preferences, [family]: on }
+    // Optimistic: the switch moves now, the server confirms or the query refetches.
+    queryClient.setQueryData(['portal', 'resident'], { ...resident.data, email_alerts: next })
+    emailAlerts.mutate(next, { onError: () => void queryClient.invalidateQueries({ queryKey: ['portal', 'resident'] }) })
+  }
+
   const form = useForm<PortalPhoneFormValues>({
     defaultValues: {
       phone: '',
@@ -147,6 +164,35 @@ export function PortalProfilePage() {
             </Button>
           </div>
         </form>
+
+        <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
+          <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
+            {t('portal.alerts.preferences.title')}
+          </h2>
+          <p className="mt-1 text-sm text-[var(--mantine-color-dimmed)]">
+            {t('portal.alerts.preferences.hint')}
+          </p>
+          <div className="mt-4 flex flex-col gap-1">
+            {ALERT_FAMILIES.map((family) => (
+              <Switch
+                key={family}
+                checked={preferences?.[family] ?? true}
+                classNames={{ body: 'flex-row-reverse justify-between', labelWrapper: 'flex-1' }}
+                color="accent"
+                description={t(`portal.alerts.preferences.${family}Hint`)}
+                disabled={!preferences}
+                label={t(`portal.alerts.preferences.${family}`)}
+                py="xs"
+                onChange={(event) => toggle(family, event.currentTarget.checked)}
+              />
+            ))}
+          </div>
+          {resident.data?.login_email ? (
+            <p className="mt-3 mb-0 text-xs text-[var(--mantine-color-dimmed)]">
+              {t('portal.alerts.preferences.emailLine', { email: resident.data.login_email })}
+            </p>
+          ) : null}
+        </section>
       </section>
     </div>
   )

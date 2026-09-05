@@ -310,6 +310,38 @@
         "updated": "Updated",
         "staff": "management"
       }
+    },
+    "alerts": {
+      "title": "Alerts",
+      "bellUnread": "Alerts · {{count}} unread",
+      "markAllRead": "Mark all as read",
+      "unread": "unread",
+      "chips": {
+        "new": "New",
+        "all": "All"
+      },
+      "empty": "You're all caught up.",
+      "emptyNewHint": "No new alerts.",
+      "emptyAllHint": "Bookings, packages and visitors for your unit will show up here.",
+      "age": {
+        "minutes_one": "{{count}} min ago",
+        "minutes_other": "{{count}} min ago",
+        "hours_one": "{{count}} h ago",
+        "hours_other": "{{count}} h ago"
+      },
+      "preferences": {
+        "title": "Email notifications",
+        "hint": "Alerts always show up here. Choose which ones also reach your inbox.",
+        "reservations": "Bookings",
+        "reservationsHint": "approved, observed or rejected",
+        "packages": "Packages",
+        "packagesHint": "received at the desk and delivered",
+        "visitors": "Visitors",
+        "visitorsHint": "visitors arriving at your unit",
+        "announcements": "Announcements",
+        "announcementsHint": "published by management",
+        "emailLine": "{{email}} · the login email will be editable from Profile soon"
+      }
     }
   },
   "nav": {

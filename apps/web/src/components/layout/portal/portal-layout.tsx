@@ -1,10 +1,12 @@
 import { UnstyledButton } from '@mantine/core'
-import { AltArrowDown, CheckCircle } from '@solar-icons/react'
+import { AltArrowDown, Bell, CheckCircle } from '@solar-icons/react'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActiveUnitProvider } from '../../../features/portal/active-unit'
 import { useActiveUnit } from '../../../features/portal/active-unit-context'
+import { getPortalUnreadCount } from '../../../features/portal/api'
 import { BottomSheet } from '../../ui/bottom-sheet'
 import { ColorSchemeToggle } from '../shared/color-scheme-toggle'
 import type { LayoutNavEntry, LayoutNavLeaf } from '../shared/types'
@@ -23,10 +25,32 @@ function leaves(navItems: LayoutNavEntry[]): LayoutNavLeaf[] {
   })
 }
 
+/** The bell (mockup 03): an amber count while something is unread, plain when nothing is. Polled once a minute. */
+function AlertsBell({ unitId }: { unitId?: string }) {
+  const { t } = useTranslation('common')
+  const unread = useQuery({
+    queryKey: ['portal', 'alerts', unitId, 'unread-count'],
+    queryFn: () => getPortalUnreadCount(unitId!),
+    enabled: unitId !== undefined,
+    refetchInterval: 60_000,
+  }).data?.unread ?? 0
+
+  return (
+    <Link aria-label={unread > 0 ? t('portal.alerts.bellUnread', { count: unread }) : t('portal.alerts.title')} className="relative grid h-9 w-9 place-items-center rounded-full text-[var(--mantine-color-text)]" to="/portal/alertas">
+      <Bell aria-hidden size={22} />
+      {unread > 0 ? (
+        <span aria-hidden className="absolute -top-0.5 -right-0.5 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-[var(--wa-accent)] px-1 text-[10px] font-bold text-[#1c2b2c]">
+          {unread > 99 ? '99+' : unread}
+        </span>
+      ) : null}
+    </Link>
+  )
+}
+
 /**
  * The resident portal shell (Portal.dc.html): one column capped at phone
  * width, a compact header with the active unit as a pill, and a fixed tab
- * bar. No sidebar, no search; the bell arrives with alerts (P3).
+ * bar. No sidebar, no search; the bell carries the unread count (P3).
  */
 export function PortalLayout({ children, navItems }: PortalLayoutProps) {
   return (
@@ -62,7 +86,10 @@ function PortalShell({ children, navItems }: PortalLayoutProps) {
               {units.length > 1 ? <AltArrowDown aria-hidden size={14} /> : null}
             </UnstyledButton>
           ) : null}
-          <ColorSchemeToggle />
+          <div className="flex items-center gap-1">
+            <AlertsBell unitId={active?.unit_id} />
+            <ColorSchemeToggle />
+          </div>
         </div>
       </header>
 

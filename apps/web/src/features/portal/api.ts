@@ -14,10 +14,62 @@ export type PortalResident = {
   email: string | null
   status: 'active' | 'inactive'
   memberships: ResidentMembership[]
+  /** Only present for the person themself. */
+  email_alerts?: EmailAlertPreferences
+  login_email?: string
 }
 
 type PortalResidentResponse = {
   data: PortalResident
+}
+
+/** The four switches under "Notificaciones por correo" (mockup 03c). */
+export const ALERT_FAMILIES = ['reservations', 'packages', 'visitors', 'announcements'] as const
+export type AlertFamily = (typeof ALERT_FAMILIES)[number]
+export type EmailAlertPreferences = Record<AlertFamily, boolean>
+
+export async function getPortalResident() {
+  const response = await apiRequest<PortalResidentResponse>('/api/portal/resident')
+
+  return response.data
+}
+
+export async function updatePortalEmailAlerts(preferences: EmailAlertPreferences) {
+  const response = await apiRequest<PortalResidentResponse>('/api/portal/resident/email-alerts', { data: preferences, method: 'PATCH' })
+
+  return response.data
+}
+
+/** An alert row (mockup 03b): what happened, for which unit, and whether I opened it. */
+export type PortalAlert = {
+  id: string
+  unit_id: string
+  kind: 'reservation.approved' | 'reservation.observed' | 'reservation.rejected' | 'package.received' | 'package.delivered' | 'visit.arrived' | 'announcement.published'
+  family: AlertFamily
+  title: string
+  body: string | null
+  subject_type: 'reservation' | 'package' | 'visit' | null
+  subject_id: string | null
+  read_at: string | null
+  created_at: string
+}
+
+export function getPortalAlerts(unitId: string, scope: 'new' | 'all') {
+  const params = buildParams({ unit_id: unitId, scope, per_page: 50 })
+
+  return apiRequest<PaginatedApiResponse<PortalAlert>>(`/api/portal/alerts?${params.toString()}`)
+}
+
+export function getPortalUnreadCount(unitId: string) {
+  return apiRequest<{ unread: number }>(`/api/portal/alerts/unread-count?unit_id=${unitId}`)
+}
+
+export function markPortalAlertRead(alertId: string) {
+  return apiRequest<{ data: PortalAlert }>(`/api/portal/alerts/${alertId}/read`, { method: 'POST' })
+}
+
+export function markAllPortalAlertsRead(unitId: string) {
+  return apiRequest<{ marked: number }>('/api/portal/alerts/read-all', { method: 'POST', data: { unit_id: unitId } })
 }
 
 export async function updatePortalResidentPhone(phone: string | null) {

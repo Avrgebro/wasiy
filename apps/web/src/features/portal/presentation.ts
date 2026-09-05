@@ -119,3 +119,14 @@ export function longDate(date: string) {
 
   return new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)))
 }
+
+/** "hace 5 min", "hace 2 h", "ayer", then "lun 1": the age column of an alert row (mockup 03b). */
+export function alertAge(iso: string, now: Date, timezone: string, t: TFunction) {
+  const minutes = Math.max(0, Math.round((now.getTime() - new Date(iso).getTime()) / 60_000))
+  if (minutes < 60) return t('portal.alerts.age.minutes', { count: minutes })
+  const days = Math.round((utcMidnight(now, timezone) - utcMidnight(new Date(iso), timezone)) / 86_400_000)
+  if (days <= 0) return t('portal.alerts.age.hours', { count: Math.round(minutes / 60) })
+  if (days === 1) return t('portal.age.yesterday')
+
+  return new Intl.DateTimeFormat('es-PE', { weekday: 'short', day: 'numeric', timeZone: timezone }).format(new Date(iso)).replace('.', '')
+}

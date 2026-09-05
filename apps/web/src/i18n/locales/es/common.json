@@ -310,6 +310,38 @@
         "updated": "Actualizada",
         "staff": "administración"
       }
+    },
+    "alerts": {
+      "title": "Alertas",
+      "bellUnread": "Alertas · {{count}} sin leer",
+      "markAllRead": "Marcar todo como leído",
+      "unread": "sin leer",
+      "chips": {
+        "new": "Nuevas",
+        "all": "Todas"
+      },
+      "empty": "Estás al día.",
+      "emptyNewHint": "No tienes alertas nuevas.",
+      "emptyAllHint": "Aquí aparecerán las reservas, paquetes y visitas de tu unidad.",
+      "age": {
+        "minutes_one": "hace {{count}} min",
+        "minutes_other": "hace {{count}} min",
+        "hours_one": "hace {{count}} h",
+        "hours_other": "hace {{count}} h"
+      },
+      "preferences": {
+        "title": "Notificaciones por correo",
+        "hint": "Las alertas siempre aparecen aquí. Elige cuáles también llegan a tu correo.",
+        "reservations": "Reservas",
+        "reservationsHint": "aprobadas, observadas o rechazadas",
+        "packages": "Paquetes",
+        "packagesHint": "recibidos en recepción y entregados",
+        "visitors": "Visitantes",
+        "visitorsHint": "llegada de visitantes a tu unidad",
+        "announcements": "Anuncios",
+        "announcementsHint": "publicados por administración",
+        "emailLine": "{{email}} · el correo de acceso se podrá cambiar pronto desde Perfil"
+      }
     }
   },
   "nav": {

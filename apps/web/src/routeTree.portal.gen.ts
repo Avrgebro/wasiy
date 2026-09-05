@@ -19,6 +19,7 @@ import { Route as InvitationsResidentTokenRouteImport } from './routes-portal/in
 import { Route as AuthenticatedPortalVisitasRouteImport } from './routes-portal/_authenticated/portal/visitas'
 import { Route as AuthenticatedPortalReservasRouteImport } from './routes-portal/_authenticated/portal/reservas'
 import { Route as AuthenticatedPortalPerfilRouteImport } from './routes-portal/_authenticated/portal/perfil'
+import { Route as AuthenticatedPortalAlertasRouteImport } from './routes-portal/_authenticated/portal/alertas'
 import { Route as AuthenticatedPortalVisitasNuevaRouteImport } from './routes-portal/_authenticated/portal/visitas_.nueva'
 import { Route as AuthenticatedPortalReservasAmenidadesAmenityIdRouteImport } from './routes-portal/_authenticated/portal/reservas_.amenidades.$amenityId'
 import { Route as AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRouteImport } from './routes-portal/_authenticated/portal/reservas_.amenidades.$amenityId_.horario'
@@ -78,6 +79,12 @@ const AuthenticatedPortalPerfilRoute =
     path: '/perfil',
     getParentRoute: () => AuthenticatedPortalRouteRoute,
   } as any)
+const AuthenticatedPortalAlertasRoute =
+  AuthenticatedPortalAlertasRouteImport.update({
+    id: '/alertas',
+    path: '/alertas',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
 const AuthenticatedPortalVisitasNuevaRoute =
   AuthenticatedPortalVisitasNuevaRouteImport.update({
     id: '/visitas_/nueva',
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
+  '/portal/alertas': typeof AuthenticatedPortalAlertasRoute
   '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
   '/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
@@ -115,6 +123,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/portal/alertas': typeof AuthenticatedPortalAlertasRoute
   '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
   '/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
@@ -131,6 +140,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
+  '/_authenticated/portal/alertas': typeof AuthenticatedPortalAlertasRoute
   '/_authenticated/portal/perfil': typeof AuthenticatedPortalPerfilRoute
   '/_authenticated/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/_authenticated/portal/visitas': typeof AuthenticatedPortalVisitasRoute
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/portal'
+    | '/portal/alertas'
     | '/portal/perfil'
     | '/portal/reservas'
     | '/portal/visitas'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/no-access'
+    | '/portal/alertas'
     | '/portal/perfil'
     | '/portal/reservas'
     | '/portal/visitas'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/_authenticated/portal'
+    | '/_authenticated/portal/alertas'
     | '/_authenticated/portal/perfil'
     | '/_authenticated/portal/reservas'
     | '/_authenticated/portal/visitas'
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalPerfilRouteImport
       parentRoute: typeof AuthenticatedPortalRouteRoute
     }
+    '/_authenticated/portal/alertas': {
+      id: '/_authenticated/portal/alertas'
+      path: '/alertas'
+      fullPath: '/portal/alertas'
+      preLoaderRoute: typeof AuthenticatedPortalAlertasRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
     '/_authenticated/portal/visitas_/nueva': {
       id: '/_authenticated/portal/visitas_/nueva'
       path: '/visitas/nueva'
@@ -290,6 +310,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedPortalRouteRouteChildren {
+  AuthenticatedPortalAlertasRoute: typeof AuthenticatedPortalAlertasRoute
   AuthenticatedPortalPerfilRoute: typeof AuthenticatedPortalPerfilRoute
   AuthenticatedPortalReservasRoute: typeof AuthenticatedPortalReservasRoute
   AuthenticatedPortalVisitasRoute: typeof AuthenticatedPortalVisitasRoute
@@ -301,6 +322,7 @@ interface AuthenticatedPortalRouteRouteChildren {
 
 const AuthenticatedPortalRouteRouteChildren: AuthenticatedPortalRouteRouteChildren =
   {
+    AuthenticatedPortalAlertasRoute: AuthenticatedPortalAlertasRoute,
     AuthenticatedPortalPerfilRoute: AuthenticatedPortalPerfilRoute,
     AuthenticatedPortalReservasRoute: AuthenticatedPortalReservasRoute,
     AuthenticatedPortalVisitasRoute: AuthenticatedPortalVisitasRoute,

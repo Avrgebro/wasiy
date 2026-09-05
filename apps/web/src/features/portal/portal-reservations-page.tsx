@@ -25,7 +25,13 @@ export function PortalReservationsPage() {
   const search = routeApi.useSearch()
   const { active } = useActiveUnit()
   const queryClient = useQueryClient()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  // An alert row arrives with ?reserva=; closing the sheet clears it so back doesn't reopen.
+  const [pickedId, setPickedId] = useState<string | null>(null)
+  const selectedId = pickedId ?? search.reserva ?? null
+  const setSelectedId = (id: string | null) => {
+    setPickedId(id)
+    if (id === null && search.reserva) void navigate({ search: { chip: search.chip }, replace: true })
+  }
   const [confirmingCancel, setConfirmingCancel] = useState(false)
   const timezone = me?.active_location?.timezone ?? 'America/Lima'
   const chip = search.chip
