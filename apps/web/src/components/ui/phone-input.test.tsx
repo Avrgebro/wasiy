@@ -23,7 +23,7 @@ describe('PhoneInput', () => {
     const onChange = renderInput()
     const user = userEvent.setup()
 
-    expect(screen.getByRole('combobox', { name: 'Teléfono' })).toHaveValue('🇵🇪 +51 Perú')
+    expect(screen.getByRole('combobox', { name: 'País' })).toHaveValue('🇵🇪 +51 Perú')
     await user.type(screen.getByRole('textbox', { name: 'Número de teléfono' }), '987654321')
 
     expect(onChange).toHaveBeenLastCalledWith('+51987654321')
@@ -32,7 +32,7 @@ describe('PhoneInput', () => {
   it('seeds the selector and national digits from a stored value', () => {
     renderInput('+56987654321')
 
-    expect(screen.getByRole('combobox', { name: 'Teléfono' })).toHaveValue('🇨🇱 +56 Chile')
+    expect(screen.getByRole('combobox', { name: 'País' })).toHaveValue('🇨🇱 +56 Chile')
     expect(screen.getByRole('textbox', { name: 'Número de teléfono' })).toHaveValue('9 8765 4321')
   })
 })
