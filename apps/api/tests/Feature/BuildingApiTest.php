@@ -77,12 +77,16 @@ test('towers are added, renamed in one place, and protected from deletion while 
     $this->assertDatabaseCount('buildings', Location::query()->count());
 });
 
-test('a unit posted without a building lands in the default one and duplicates are per building', function () {
+test('a tower is required once the location has two, and duplicates are per building', function () {
     [$location, $manager] = buildingWorld();
     $torreB = $location->buildings()->create(['account_id' => $location->account_id, 'name' => 'Torre B', 'sort_order' => 1]);
 
-    $this->actingAs($manager)->postJson("/api/locations/{$location->id}/units", ['unit_number' => '101'])->assertCreated();
-    $this->actingAs($manager)->postJson("/api/locations/{$location->id}/units", ['unit_number' => '101'])->assertUnprocessable();
+    // With two towers the tower is required; with one it is implied.
+    $this->actingAs($manager)->postJson("/api/locations/{$location->id}/units", ['unit_number' => '101'])
+        ->assertUnprocessable()->assertJsonValidationErrors('building_id');
+    $default = $location->buildings()->whereNull('name')->sole();
+    $this->actingAs($manager)->postJson("/api/locations/{$location->id}/units", ['unit_number' => '101', 'building_id' => $default->id])->assertCreated();
+    $this->actingAs($manager)->postJson("/api/locations/{$location->id}/units", ['unit_number' => '101', 'building_id' => $default->id])->assertUnprocessable();
     $this->actingAs($manager)->postJson("/api/locations/{$location->id}/units", ['unit_number' => '101', 'building_id' => $torreB->id])
         ->assertCreated()
         ->assertJsonPath('data.building_name', 'Torre B');

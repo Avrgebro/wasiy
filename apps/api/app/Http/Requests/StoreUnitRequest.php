@@ -25,7 +25,12 @@ class StoreUnitRequest extends FormRequest
     {
         return [
             'unit_number' => ['required', 'string', 'max:255'],
-            'building_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('buildings', 'id')->where('location_id', $this->route('location')?->id)],
+            // Optional while the location has one building; required once it has towers.
+            'building_id' => [
+                Rule::requiredIf(fn (): bool => ($this->route('location')?->buildings()->count() ?? 0) > 1),
+                'nullable', 'string', 'ulid',
+                Rule::exists('buildings', 'id')->where('location_id', $this->route('location')?->id),
+            ],
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
             'type' => ['sometimes', Rule::enum(UnitType::class)],
             'area_m2' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999'],

@@ -18,7 +18,12 @@ class UpdateUnitRequest extends StoreUnitRequest
     {
         return [
             'unit_number' => ['sometimes', 'required', 'string', 'max:255'],
-            'building_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('buildings', 'id')->where('location_id', $this->route('unit')?->location_id)],
+            'building_id' => [
+                'sometimes',
+                Rule::requiredIf(fn (): bool => ($this->route('unit')?->location?->buildings()->count() ?? 0) > 1),
+                'nullable', 'string', 'ulid',
+                Rule::exists('buildings', 'id')->where('location_id', $this->route('unit')?->location_id),
+            ],
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
             'type' => ['sometimes', Rule::enum(UnitType::class)],
             'area_m2' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999'],
