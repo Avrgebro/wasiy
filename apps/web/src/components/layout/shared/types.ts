@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 import type { IconProps, IconWeight } from '@solar-icons/react'
-import type { FileRouteTypes } from '../../../routeTree.gen'
+import type { FileRouteTypes } from '@surface/routeTree'
 
 export type LayoutIcon = ComponentType<IconProps>
 

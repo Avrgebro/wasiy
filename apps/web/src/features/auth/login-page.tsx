@@ -5,7 +5,6 @@ import {
   Button,
   Checkbox,
   Divider,
-  SegmentedControl,
 } from '@mantine/core'
 import {
   ArrowRight,
@@ -175,27 +174,6 @@ export function LoginPage() {
               {t('auth.welcomeBackSubtitle')}
             </p>
           </div>
-
-          {/* Placeholder: both audiences share the same login for now. */}
-          <SegmentedControl
-            color="teal.6"
-            data={[
-              { label: t('auth.loginTabStaff'), value: 'staff' },
-              { label: t('auth.loginTabResident'), value: 'resident' },
-            ]}
-            defaultValue="staff"
-            fullWidth
-            radius={10}
-            styles={{
-              root: {
-                padding: 4,
-                border: '1px solid var(--mantine-color-default-border)',
-                backgroundColor: 'var(--mantine-color-default)',
-              },
-              indicator: { borderRadius: 7 },
-              label: { fontSize: 13.5, fontWeight: 600, padding: '9px 0' },
-            }}
-          />
 
           <form
             className="flex flex-col gap-[26px]"

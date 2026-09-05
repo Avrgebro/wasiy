@@ -19,7 +19,7 @@ vi.mock('@tanstack/react-router', async (importOriginal) => {
 })
 
 const { GlobalSpotlight } = await import('./global-spotlight')
-const { getSurfaceNavigation } = await import('../navigation/navigation')
+const { getAdminNavigation } = await import('../navigation/admin-navigation')
 
 const originalAdapter = apiClient.defaults.adapter
 
@@ -62,7 +62,7 @@ function renderSpotlight() {
   return render(
     <MantineProvider env="test">
       <QueryClientProvider client={queryClient}>
-        <GlobalSpotlight navItems={getSurfaceNavigation(me as never, 'admin')} />
+        <GlobalSpotlight navItems={getAdminNavigation(me as never)} />
       </QueryClientProvider>
     </MantineProvider>,
   )

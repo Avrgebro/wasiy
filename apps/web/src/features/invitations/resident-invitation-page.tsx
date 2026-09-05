@@ -40,7 +40,7 @@ export function ResidentInvitationPage({ token }: { token: string }) {
         token,
       })
 
-      await navigate({ to: postInvitationRoute(result.session) })
+      await navigate({ href: postInvitationRoute(result.session, 'portal') })
     })
   }
 

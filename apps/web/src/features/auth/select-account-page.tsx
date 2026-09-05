@@ -55,7 +55,7 @@ export function SelectAccountPage() {
   function handleSelectAccount(accountId: string) {
     selectAccountMutation.mutate(accountId, {
       onSuccess: (me) =>
-        void router.navigate({ to: getDefaultAuthenticatedRoute(me) }),
+        void router.navigate({ href: getDefaultAuthenticatedRoute(me) }),
     })
   }
 

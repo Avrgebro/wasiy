@@ -6,7 +6,7 @@ import {
   RoutePendingFallback,
 } from './route-fallbacks'
 import { installSessionExpiryHandler } from '../features/auth/session'
-import { routeTree } from '../routeTree.gen'
+import { routeTree } from '@surface/routeTree'
 
 export const router = createRouter({
   routeTree,

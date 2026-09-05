@@ -3,7 +3,6 @@ import type { ComponentType, ReactNode } from 'react'
 import type { LayoutNavEntry } from '../../components/layout/shared/types'
 import type { MeResponse } from './types'
 import { surfaceAccess, type Surface } from './access'
-import { getSurfaceNavigation } from '../navigation/navigation'
 import { checkSurfaceAccess } from './guards'
 import { useMe } from './hooks'
 
@@ -15,10 +14,14 @@ type SurfaceLayout = ComponentType<{ children: ReactNode; navItems: LayoutNavEnt
  * still requires one createFileRoute call per surface; everything else
  * lives here.
  */
-export function surfaceRouteOptions(surface: Surface, Layout: SurfaceLayout) {
+export function surfaceRouteOptions(
+  surface: Surface,
+  Layout: SurfaceLayout,
+  navigationFor: (me: MeResponse) => LayoutNavEntry[],
+) {
   function SurfaceRouteLayout() {
     const meQuery = useMe()
-    const navItems = meQuery.data ? getSurfaceNavigation(meQuery.data, surface) : []
+    const navItems = meQuery.data ? navigationFor(meQuery.data) : []
 
     return (
       <Layout navItems={navItems}>

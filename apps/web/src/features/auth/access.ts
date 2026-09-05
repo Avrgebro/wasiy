@@ -1,3 +1,4 @@
+import { SURFACE } from '../../app/surface'
 import type { Capability, LocationRole, MeResponse } from './types'
 
 export const accountRoles = {
@@ -92,22 +93,22 @@ export function requiresAccountSelection(me: MeResponse) {
   return me.accounts.length > 1 && me.active_account === null
 }
 
-export function getDefaultAuthenticatedRoute(me: MeResponse) {
+/**
+ * Where a signed-in user lands on this build. Each surface knows only its own
+ * routes: a resident on the staff host, or a manager on the portal host, is
+ * sent to /no-access, which tells them which host to use.
+ */
+export function getDefaultAuthenticatedRoute(me: MeResponse, surface: Surface = SURFACE) {
+  if (surface === 'portal') {
+    return canAccessPortal(me) ? ('/portal' as const) : ('/no-access' as const)
+  }
+
   if (requiresAccountSelection(me)) {
     return '/select-account' as const
   }
 
-  if (canAccessAdmin(me)) {
-    return '/admin' as const
-  }
-
-  if (canAccessPortal(me)) {
-    return '/portal' as const
-  }
-
-  return '/no-access' as const
+  return canAccessAdmin(me) ? ('/admin' as const) : ('/no-access' as const)
 }
-
 
 /**
  * Account-wide administration rights. Exported so route guards enforce exactly

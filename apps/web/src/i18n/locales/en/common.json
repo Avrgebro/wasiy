@@ -27,8 +27,6 @@
     "invalidCredentials": "These credentials do not match our records.",
     "login": "Sign in",
     "loginFailed": "Sign-in failed",
-    "loginTabResident": "Resident",
-    "loginTabStaff": "Staff",
     "loginTitle": "Sign in to Wasiy",
     "loginWithCode": "Code",
     "logout": "Sign out",

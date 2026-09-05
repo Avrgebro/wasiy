@@ -1,0 +1,31 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.portal.tsbuildinfo",
+    "paths": { "@surface/routeTree": ["./src/routeTree.portal.gen.ts"] }
+  },
+  /* The resident portal build: shared rooms plus portal code, nothing from the staff app. */
+  "include": [
+    "src/app",
+    "src/lib",
+    "src/i18n",
+    "src/components/ui",
+    "src/components/table",
+    "src/components/layout/shared/brand.tsx",
+    "src/components/layout/shared/color-scheme-toggle.tsx",
+    "src/components/layout/shared/types.ts",
+    "src/components/layout/portal",
+    "src/features/auth",
+    "src/features/portal",
+    "src/features/invitations/resident-invitation-page.tsx",
+    "src/features/invitations/post-invitation-route.ts",
+    "src/features/invitations/api.ts",
+    "src/features/invitations/schemas.ts",
+    "src/features/navigation/spec.ts",
+    "src/routes-portal",
+    "src/routeTree.portal.gen.ts",
+    "src/test",
+    "src/*.d.ts"
+  ],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+}

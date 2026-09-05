@@ -1,0 +1,9 @@
+{
+  "name": "Wasiy",
+  "short_name": "Wasiy",
+  "start_url": "/admin",
+  "display": "standalone",
+  "background_color": "#0f1d1e",
+  "theme_color": "#16282a",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

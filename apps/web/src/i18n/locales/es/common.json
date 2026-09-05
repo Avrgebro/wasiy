@@ -27,8 +27,6 @@
     "invalidCredentials": "Las credenciales no coinciden con nuestros registros.",
     "login": "Ingresar",
     "loginFailed": "No se pudo iniciar sesión",
-    "loginTabResident": "Residente",
-    "loginTabStaff": "Personal",
     "loginTitle": "Entrar a Wasiy",
     "loginWithCode": "Código",
     "logout": "Cerrar sesión",

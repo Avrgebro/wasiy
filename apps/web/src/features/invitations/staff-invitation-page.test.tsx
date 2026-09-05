@@ -146,7 +146,7 @@ describe('StaffInvitationPage', () => {
 
     // front_desk lands on the shared admin surface.
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith({ to: '/admin' })
+      expect(navigate).toHaveBeenCalledWith({ href: '/admin' })
     })
   })
 

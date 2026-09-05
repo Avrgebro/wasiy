@@ -75,7 +75,7 @@ function CreateAccountMode({
         token,
       })
 
-      await navigate({ to: postInvitationRoute(result.session) })
+      await navigate({ href: postInvitationRoute(result.session, 'admin') })
     })
   }
 
@@ -155,7 +155,7 @@ function ConfirmJoinMode({
     try {
       const result = await acceptMutation.mutateAsync({ token })
 
-      await navigate({ to: postInvitationRoute(result.session) })
+      await navigate({ href: postInvitationRoute(result.session, 'admin') })
     } catch (caught) {
       setError(caught)
     }

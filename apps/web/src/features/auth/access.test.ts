@@ -12,10 +12,8 @@ import {
   requiresAccountSelection,
   surfaceAccess,
 } from './access'
-import {
-  filterNavigationEntries,
-  getSurfaceNavigation,
-} from '../navigation/navigation'
+import { getAdminNavigation } from '../navigation/admin-navigation'
+import { filterNavigationEntries } from '../navigation/spec'
 import type { MeResponse } from './types'
 
 function makeMe(overrides: Partial<MeResponse> = {}): MeResponse {
@@ -152,7 +150,9 @@ describe('access helpers', () => {
     })
 
     expect(canAccessPortal(residentMe)).toBe(true)
-    expect(getDefaultAuthenticatedRoute(residentMe)).toBe('/portal')
+    // Each build lands on its own surface; the other host sends them to /no-access.
+    expect(getDefaultAuthenticatedRoute(residentMe, 'portal')).toBe('/portal')
+    expect(getDefaultAuthenticatedRoute(residentMe, 'admin')).toBe('/no-access')
   })
 
   it('gives account admins the location section', () => {
@@ -179,7 +179,7 @@ describe('access helpers', () => {
       },
     })
 
-    const navItems = getSurfaceNavigation(me, 'admin')
+    const navItems = getAdminNavigation(me)
     const serialized = JSON.stringify(navItems)
 
     expect(serialized).toContain('navGroups.location')
@@ -229,7 +229,7 @@ describe('access helpers', () => {
       },
     })
 
-    const navItems = getSurfaceNavigation(me, 'admin')
+    const navItems = getAdminNavigation(me)
     const serialized = JSON.stringify(navItems)
 
     expect(serialized).toContain('navGroups.location')
@@ -274,7 +274,7 @@ describe('access helpers', () => {
     expect(can(frontDeskMe, 'registry.manage')).toBe(false)
     expect(can(frontDeskMe, 'registry.view')).toBe(true)
 
-    const serialized = JSON.stringify(getSurfaceNavigation(frontDeskMe, 'admin'))
+    const serialized = JSON.stringify(getAdminNavigation(frontDeskMe))
     expect(serialized).toContain('/admin/visitors')
     expect(serialized).toContain('/admin/registry/residents')
     expect(serialized).toContain('/admin/reservations')
@@ -412,7 +412,7 @@ describe('navigation filtering', () => {
     })
 
     expect(surfaceAccess.admin(me)).toBe(true)
-    const serialized = JSON.stringify(getSurfaceNavigation(me, 'admin'))
+    const serialized = JSON.stringify(getAdminNavigation(me))
     expect(serialized).toContain('/admin/reservations')
     // Unidades carries the ledger; the desk finds people through Residentes.
     expect(serialized).not.toContain('/admin/registry/units')

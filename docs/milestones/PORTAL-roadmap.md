@@ -51,6 +51,7 @@ The resident-facing side of Wasiy: a mobile-first web app where a resident sees 
 
 ## Milestones (value order)
 
+- **P0 Two builds, one codebase (done 2026-09-05, ADR 0038)** — separate route trees and artifacts per surface, import boundary, unified login without the audience switcher, manifests per host.
 - **P1 Shell and visitors** — portal shell with bottom tabs and unit switcher; home board (visitors and packages parts); visitor pre-registration and history; desk-side "Esperados hoy" and arrival confirmation. Closes the M12 second phase.
 - **P2 Reservations and packages** — amenity browsing, booking requests, my reservations with cancellation; packages list; home board gains next reservation.
 - **P3 Alerts** — notification center and email; preferences in the profile.
