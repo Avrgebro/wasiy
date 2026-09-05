@@ -95,3 +95,79 @@ export function getPortalPackages(unitId: string, status?: 'pending' | 'delivere
 
   return apiRequest<PaginatedApiResponse<PortalPackage>>(`/api/portal/packages?${params.toString()}`)
 }
+
+/** Amenities as the resident sees them (P2): what can be booked and on which terms. */
+export type PortalAmenity = {
+  id: string
+  name: string
+  type: string
+  description: string | null
+  capacity: number | null
+  booking_mode: 'instant' | 'approval'
+  max_duration_minutes: number | null
+  min_duration_minutes: number | null
+  effective_booking_policy: Record<'max_advance_days' | 'max_concurrent_per_unit' | 'cancellation_window_hours', { value: number | null; source: string }> | null
+  fee_amount: number | null
+  deposit_amount: number | null
+  photos: { id: string; url: string; is_cover: boolean }[]
+  cover_photo_url: string | null
+}
+
+export function getPortalAmenities(unitId: string) {
+  return apiRequest<{ data: PortalAmenity[] }>(`/api/portal/amenities?${buildParams({ unit_id: unitId }).toString()}`)
+}
+
+export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | 'taken' | 'unit_limit' | null }
+
+export type AvailabilityResponse = {
+  date: string
+  slot_minutes: number
+  booking_mode: 'instant' | 'approval'
+  fee_amount: number | null
+  deposit_amount: number | null
+  slots: AvailabilitySlot[]
+}
+
+export function getAvailability(amenityId: string, unitId: string, date: string) {
+  return apiRequest<AvailabilityResponse>(`/api/portal/amenities/${amenityId}/availability?${buildParams({ unit_id: unitId, date }).toString()}`)
+}
+
+export type PortalReservationStatus = 'pending' | 'approved' | 'observed' | 'rejected' | 'cancelled'
+
+export type PortalReservation = {
+  id: string
+  amenity_id: string
+  amenity_name?: string
+  unit_id: string
+  unit_number?: string
+  resident_name?: string | null
+  starts_at: string
+  ends_at: string
+  status: PortalReservationStatus
+  is_completed: boolean
+  status_note: string | null
+  fee_snapshot: number | null
+  deposit_snapshot: number | null
+  created_by_name?: string | null
+  decided_by_name?: string | null
+  decided_at: string | null
+  created_at: string | null
+}
+
+export type PortalReservationHistory = { id: string; event_type: string; status: string | null; note: string | null; actor_name: string | null; created_at: string | null }
+
+export function getPortalReservations(unitId: string, scope: 'upcoming' | 'past', page = 1) {
+  return apiRequest<PaginatedApiResponse<PortalReservation>>(`/api/portal/reservations?${buildParams({ unit_id: unitId, scope, page }).toString()}`)
+}
+
+export function getPortalReservation(reservationId: string) {
+  return apiRequest<{ data: PortalReservation; history: PortalReservationHistory[]; can_cancel: boolean; cancellation_window_hours: number | null }>(`/api/portal/reservations/${reservationId}`)
+}
+
+export function requestReservation(payload: { unit_id: string; amenity_id: string; date: string; start: string; end: string }) {
+  return apiRequest<{ data: PortalReservation }>('/api/portal/reservations', { method: 'POST', data: payload })
+}
+
+export function cancelPortalReservation(reservationId: string) {
+  return apiRequest<{ data: PortalReservation }>(`/api/portal/reservations/${reservationId}/cancel`, { method: 'POST' })
+}

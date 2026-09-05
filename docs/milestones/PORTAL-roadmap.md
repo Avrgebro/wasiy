@@ -53,12 +53,24 @@ The resident-facing side of Wasiy: a mobile-first web app where a resident sees 
 
 - **P0 Two builds, one codebase (done 2026-09-05, ADR 0038)** — separate route trees and artifacts per surface, import boundary, unified login without the audience switcher, manifests per host.
 - **P1 Shell and visitors (built 2026-09-05)** — portal shell with bottom tabs and unit switcher; home board (visitors and packages parts); visitor pre-registration and history; desk-side "Esperados hoy" and arrival confirmation. Closes the M12 second phase.
-- **P2 Reservations and packages** — amenity browsing, booking requests, my reservations with cancellation; packages list; home board gains next reservation.
+- **P2 Reservations and packages (built 2026-09-05)** — amenity browsing, booking requests, my reservations with cancellation; packages list; home board gains next reservation.
 - **P3 Alerts** — notification center and email; preferences in the profile.
 - **P4 My unit and profile** — members management for the primary contact, vehicles UI, estado de cuenta; phone, email, password.
 - **P5 Announcements** — admin Anuncios module plus the portal feed; home board gains the latest announcement.
 
 Each milestone: backend slice with tests, frontend slice with tests, mockups first.
+
+## P2 decisions (2026-09-05)
+
+- Any member of the unit may request a booking; the fee lands on the unit's ledger as today.
+- Availability is a day picker with free slots for one amenity, not a week grid. A slot is `min_duration_minutes` long (60 when unset), laid on the amenity's availability windows; each slot is checked with the same validator staff bookings use (grid, duration, buffer, capacity, per-unit limit).
+- The amenity detail's "Reglas" shows the description; a dedicated rules field can come later.
+- Residents may read amenity photos: the amenity view policy admits residents with an active membership in the location.
+
+## P2 slices
+
+1. Backend — portal amenities list, availability per day, reservations list (upcoming/past), request, cancel inside the window, detail with history; resident policies; tests.
+2. Frontend — Reservas tab (Mis reservas / Amenidades), amenity detail sheet, day strip + slots sheet, reservation detail sheet with cancel, home "Próxima reserva" card and "Reservar" quick action.
 
 ## Parked
 

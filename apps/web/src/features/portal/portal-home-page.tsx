@@ -1,24 +1,26 @@
 import { Button, Loader, Text } from '@mantine/core'
 import { AddCircle } from '@solar-icons/react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useMe } from '../auth/hooks'
 import { useActiveUnit } from './active-unit-context'
-import { getPortalPackages, getPortalVisits } from './api'
+import { getPortalPackages, getPortalReservations, getPortalVisits } from './api'
 import { PortalCard, PortalRow, StatusPill } from './portal-cards'
-import { ageLabel, arrivedAt, expectedLabel, statusTone } from './presentation'
+import { ageLabel, arrivedAt, expectedLabel, reservationRange, reservationTone, statusTone } from './presentation'
 
 /** Inicio (Portal 01): today's board for the active unit. */
 export function PortalHomePage() {
   const { t } = useTranslation('common')
   const me = useMe().data
+  const navigate = useNavigate()
   const { active } = useActiveUnit()
   const now = new Date()
   const timezone = me?.active_location?.timezone ?? 'America/Lima'
 
   const visits = useQuery({ queryKey: ['portal', 'visits', active?.unit_id, 'today'], queryFn: () => getPortalVisits(active!.unit_id, 'today'), enabled: active !== null })
   const packages = useQuery({ queryKey: ['portal', 'packages', active?.unit_id, 'pending'], queryFn: () => getPortalPackages(active!.unit_id, 'pending'), enabled: active !== null })
+  const reservations = useQuery({ queryKey: ['portal', 'reservations', active?.unit_id, 'upcoming'], queryFn: () => getPortalReservations(active!.unit_id, 'upcoming'), enabled: active !== null })
 
   if (!active) {
     return (
@@ -41,14 +43,29 @@ export function PortalHomePage() {
         </Text>
       </div>
 
-      <Button className="w-full" color="accent" component={Link} leftSection={<AddCircle size={18} />} size="md" to="/portal/visitas/nueva">
-        {t('portal.visits.preRegister')}
-      </Button>
+      <div className="grid grid-cols-2 gap-2.5">
+        <Button color="accent" component={Link} leftSection={<AddCircle size={18} />} size="md" to="/portal/visitas/nueva">
+          {t('portal.visits.preRegister')}
+        </Button>
+        <Button size="md" variant="default" onClick={() => void navigate({ to: '/portal/reservas', search: { chip: 'amenidades' } })}>
+          {t('portal.reservations.book')}
+        </Button>
+      </div>
 
       {visits.isLoading || packages.isLoading ? (
         <div className="grid min-h-24 place-items-center">
           <Loader aria-label={t('common.loading')} />
         </div>
+      ) : null}
+
+      {reservations.data?.data[0] ? (
+        <PortalCard title={t('portal.reservations.next')} to="/portal/reservas" viewAllLabel={t('portal.reservations.view')}>
+          <PortalRow
+            pill={<StatusPill color={reservationTone(reservations.data.data[0].status)}>{t(`portal.reservations.status.${reservations.data.data[0].status}`)}</StatusPill>}
+            primary={reservations.data.data[0].amenity_name ?? ''}
+            secondary={reservationRange(reservations.data.data[0].starts_at, reservations.data.data[0].ends_at, timezone)}
+          />
+        </PortalCard>
       ) : null}
 
       {visits.data ? (

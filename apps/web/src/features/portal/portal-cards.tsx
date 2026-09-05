@@ -18,7 +18,7 @@ export function PortalCard({
   children: ReactNode
   empty?: string
   title: string
-  to?: '/portal/visitas' | '/portal/perfil'
+  to?: '/portal/visitas' | '/portal/perfil' | '/portal/reservas'
   viewAllLabel?: string
 }) {
   const isEmpty = empty !== undefined && count === 0

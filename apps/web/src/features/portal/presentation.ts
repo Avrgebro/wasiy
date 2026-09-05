@@ -67,3 +67,55 @@ export function ageLabel(iso: string, now: Date, timezone: string, t: TFunction)
 
   return t('portal.age.days', { count: days })
 }
+
+/** "sáb 6 · 19:00–21:00" for a booking, in the location's clock. */
+export function reservationRange(startsAt: string, endsAt: string, timezone: string) {
+  const day = shortDay(dayKey(new Date(startsAt), timezone))
+
+  return `${day} · ${time(startsAt, timezone)}–${time(endsAt, timezone)}`
+}
+
+/** "sábado 6 de septiembre · 19:00–21:00" for the detail sheet. */
+export function reservationLongRange(startsAt: string, endsAt: string, timezone: string) {
+  const day = new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone }).format(new Date(startsAt))
+
+  return `${day} · ${time(startsAt, timezone)}–${time(endsAt, timezone)}`
+}
+
+/** Status pill color for a booking; completed approved ones read as neutral history. */
+export function reservationTone(status: string, completed = false): 'success' | 'warning' | 'info' | 'error' | 'gray' {
+  if (completed) return 'gray'
+  switch (status) {
+    case 'approved':
+      return 'success'
+    case 'pending':
+      return 'warning'
+    case 'observed':
+      return 'info'
+    case 'rejected':
+      return 'error'
+    default:
+      return 'gray'
+  }
+}
+
+/** The next 14 days as Y-m-d strings in the location's calendar, today first. */
+export function upcomingDays(now: Date, timezone: string, count = 14): string[] {
+  const start = utcMidnight(now, timezone)
+
+  return Array.from({ length: count }, (_, index) => new Date(start + index * 86_400_000).toISOString().slice(0, 10))
+}
+
+/** "S" / "6" pieces for the day strip. */
+export function dayStripLabel(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+  const weekday = new Intl.DateTimeFormat('es-PE', { weekday: 'narrow', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)))
+
+  return { weekday: weekday.toUpperCase(), day: String(day) }
+}
+
+export function longDate(date: string) {
+  const [year, month, day] = date.split('-').map(Number)
+
+  return new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)))
+}

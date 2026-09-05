@@ -170,7 +170,8 @@
     "tabs": {
       "home": "Home",
       "visits": "Visits",
-      "profile": "Profile"
+      "profile": "Profile",
+      "reservations": "Bookings"
     },
     "unit": {
       "mine": "My units",
@@ -236,6 +237,79 @@
       "yesterday": "yesterday",
       "days_one": "{{count}} day ago",
       "days_other": "{{count}} days ago"
+    },
+    "reservations": {
+      "book": "Book",
+      "request": "Request booking",
+      "booked": "Booking confirmed",
+      "requested": "Request sent to management",
+      "cancelled": "Booking cancelled",
+      "chips": {
+        "mine": "My bookings",
+        "amenidades": "Amenities"
+      },
+      "past": "Past",
+      "emptyUpcoming": "You have no upcoming bookings.",
+      "noAmenities": "This location has no bookable amenities yet.",
+      "next": "Next booking",
+      "view": "View booking",
+      "status": {
+        "pending": "Pending approval",
+        "approved": "Confirmed",
+        "observed": "Observed",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled",
+        "completed": "Completed"
+      },
+      "mode": {
+        "instant": "Instant booking",
+        "approval": "Needs approval"
+      },
+      "upTo": "Up to {{count}} people",
+      "free": "Free",
+      "depositOf": "deposit {{amount}}",
+      "capacity": "Capacity",
+      "people": "{{count}} people",
+      "maxDuration": "Maximum duration",
+      "hours_one": "{{count}} hour",
+      "hours_other": "{{count}} hours",
+      "minutes": "{{count}} min",
+      "fee": "Fee",
+      "deposit": "Deposit",
+      "advance": "Advance",
+      "upToDays": "up to {{count}} days",
+      "cancellation": "Cancellation",
+      "upToHours": "up to {{count}} h before",
+      "rules": "Rules",
+      "approvalExplainer": "Management confirms every request. The deposit is returned after the room is checked; the unit answers for its guests.",
+      "instantExplainer": "The booking confirms instantly. The unit answers for its guests and the state of the room.",
+      "amenityMissing": "This amenity is no longer available.",
+      "slotsIntro": "Times shown already exclude other bookings. If the amenity needs approval, management will confirm your request.",
+      "pickDay": "Pick a day",
+      "pickSlot": "Pick a time",
+      "closedThatDay": "The amenity is closed that day.",
+      "slotReason": {
+        "past": "Passed",
+        "taken": "Taken",
+        "unit_limit": "Your unit's limit"
+      },
+      "requestedBy": "Requested by",
+      "staffNote": "Note from management",
+      "cancel": "Cancel booking",
+      "cancelWindow": "You can cancel up to {{hours}} h before.",
+      "cancelAnytime": "You can cancel any time before the start.",
+      "cancelClosed": "The cancellation window has closed.",
+      "cancelTitle": "Cancel the {{amenity}} booking?",
+      "cancelBody": "The slot frees up for other units. If a charge existed, management will void it.",
+      "timeline": {
+        "created": "Requested",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "observed": "Observed",
+        "cancelled": "Cancelled",
+        "updated": "Updated",
+        "staff": "management"
+      }
     }
   },
   "nav": {

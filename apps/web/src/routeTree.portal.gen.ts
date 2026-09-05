@@ -17,8 +17,11 @@ import { Route as AuthenticatedPortalRouteRouteImport } from './routes-portal/_a
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes-portal/_authenticated/portal/index'
 import { Route as InvitationsResidentTokenRouteImport } from './routes-portal/invitations/resident.$token'
 import { Route as AuthenticatedPortalVisitasRouteImport } from './routes-portal/_authenticated/portal/visitas'
+import { Route as AuthenticatedPortalReservasRouteImport } from './routes-portal/_authenticated/portal/reservas'
 import { Route as AuthenticatedPortalPerfilRouteImport } from './routes-portal/_authenticated/portal/perfil'
 import { Route as AuthenticatedPortalVisitasNuevaRouteImport } from './routes-portal/_authenticated/portal/visitas_.nueva'
+import { Route as AuthenticatedPortalReservasAmenidadesAmenityIdRouteImport } from './routes-portal/_authenticated/portal/reservas_.amenidades.$amenityId'
+import { Route as AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRouteImport } from './routes-portal/_authenticated/portal/reservas_.amenidades.$amenityId_.horario'
 
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
@@ -63,6 +66,12 @@ const AuthenticatedPortalVisitasRoute =
     path: '/visitas',
     getParentRoute: () => AuthenticatedPortalRouteRoute,
   } as any)
+const AuthenticatedPortalReservasRoute =
+  AuthenticatedPortalReservasRouteImport.update({
+    id: '/reservas',
+    path: '/reservas',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
 const AuthenticatedPortalPerfilRoute =
   AuthenticatedPortalPerfilRouteImport.update({
     id: '/perfil',
@@ -75,6 +84,18 @@ const AuthenticatedPortalVisitasNuevaRoute =
     path: '/visitas/nueva',
     getParentRoute: () => AuthenticatedPortalRouteRoute,
   } as any)
+const AuthenticatedPortalReservasAmenidadesAmenityIdRoute =
+  AuthenticatedPortalReservasAmenidadesAmenityIdRouteImport.update({
+    id: '/reservas_/amenidades/$amenityId',
+    path: '/reservas/amenidades/$amenityId',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
+const AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute =
+  AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRouteImport.update({
+    id: '/reservas_/amenidades/$amenityId_/horario',
+    path: '/reservas/amenidades/$amenityId/horario',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,20 +103,26 @@ export interface FileRoutesByFullPath {
   '/no-access': typeof NoAccessRoute
   '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
+  '/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/portal/visitas/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
+  '/portal/reservas/amenidades/$amenityId': typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
+  '/portal/reservas/amenidades/$amenityId/horario': typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
+  '/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/portal/visitas/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
+  '/portal/reservas/amenidades/$amenityId': typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
+  '/portal/reservas/amenidades/$amenityId/horario': typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,10 +132,13 @@ export interface FileRoutesById {
   '/no-access': typeof NoAccessRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/_authenticated/portal/perfil': typeof AuthenticatedPortalPerfilRoute
+  '/_authenticated/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/_authenticated/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/portal/visitas_/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
+  '/_authenticated/portal/reservas_/amenidades/$amenityId': typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
+  '/_authenticated/portal/reservas_/amenidades/$amenityId_/horario': typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,20 +148,26 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/portal'
     | '/portal/perfil'
+    | '/portal/reservas'
     | '/portal/visitas'
     | '/invitations/resident/$token'
     | '/portal/'
     | '/portal/visitas/nueva'
+    | '/portal/reservas/amenidades/$amenityId'
+    | '/portal/reservas/amenidades/$amenityId/horario'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/no-access'
     | '/portal/perfil'
+    | '/portal/reservas'
     | '/portal/visitas'
     | '/invitations/resident/$token'
     | '/portal'
     | '/portal/visitas/nueva'
+    | '/portal/reservas/amenidades/$amenityId'
+    | '/portal/reservas/amenidades/$amenityId/horario'
   id:
     | '__root__'
     | '/'
@@ -140,10 +176,13 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/_authenticated/portal'
     | '/_authenticated/portal/perfil'
+    | '/_authenticated/portal/reservas'
     | '/_authenticated/portal/visitas'
     | '/invitations/resident/$token'
     | '/_authenticated/portal/'
     | '/_authenticated/portal/visitas_/nueva'
+    | '/_authenticated/portal/reservas_/amenidades/$amenityId'
+    | '/_authenticated/portal/reservas_/amenidades/$amenityId_/horario'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -212,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalVisitasRouteImport
       parentRoute: typeof AuthenticatedPortalRouteRoute
     }
+    '/_authenticated/portal/reservas': {
+      id: '/_authenticated/portal/reservas'
+      path: '/reservas'
+      fullPath: '/portal/reservas'
+      preLoaderRoute: typeof AuthenticatedPortalReservasRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
     '/_authenticated/portal/perfil': {
       id: '/_authenticated/portal/perfil'
       path: '/perfil'
@@ -226,22 +272,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalVisitasNuevaRouteImport
       parentRoute: typeof AuthenticatedPortalRouteRoute
     }
+    '/_authenticated/portal/reservas_/amenidades/$amenityId': {
+      id: '/_authenticated/portal/reservas_/amenidades/$amenityId'
+      path: '/reservas/amenidades/$amenityId'
+      fullPath: '/portal/reservas/amenidades/$amenityId'
+      preLoaderRoute: typeof AuthenticatedPortalReservasAmenidadesAmenityIdRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
+    '/_authenticated/portal/reservas_/amenidades/$amenityId_/horario': {
+      id: '/_authenticated/portal/reservas_/amenidades/$amenityId_/horario'
+      path: '/reservas/amenidades/$amenityId/horario'
+      fullPath: '/portal/reservas/amenidades/$amenityId/horario'
+      preLoaderRoute: typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
   }
 }
 
 interface AuthenticatedPortalRouteRouteChildren {
   AuthenticatedPortalPerfilRoute: typeof AuthenticatedPortalPerfilRoute
+  AuthenticatedPortalReservasRoute: typeof AuthenticatedPortalReservasRoute
   AuthenticatedPortalVisitasRoute: typeof AuthenticatedPortalVisitasRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
   AuthenticatedPortalVisitasNuevaRoute: typeof AuthenticatedPortalVisitasNuevaRoute
+  AuthenticatedPortalReservasAmenidadesAmenityIdRoute: typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
+  AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute: typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
 }
 
 const AuthenticatedPortalRouteRouteChildren: AuthenticatedPortalRouteRouteChildren =
   {
     AuthenticatedPortalPerfilRoute: AuthenticatedPortalPerfilRoute,
+    AuthenticatedPortalReservasRoute: AuthenticatedPortalReservasRoute,
     AuthenticatedPortalVisitasRoute: AuthenticatedPortalVisitasRoute,
     AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
     AuthenticatedPortalVisitasNuevaRoute: AuthenticatedPortalVisitasNuevaRoute,
+    AuthenticatedPortalReservasAmenidadesAmenityIdRoute:
+      AuthenticatedPortalReservasAmenidadesAmenityIdRoute,
+    AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute:
+      AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute,
   }
 
 const AuthenticatedPortalRouteRouteWithChildren =

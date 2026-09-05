@@ -170,7 +170,8 @@
     "tabs": {
       "home": "Inicio",
       "visits": "Visitas",
-      "profile": "Perfil"
+      "profile": "Perfil",
+      "reservations": "Reservas"
     },
     "unit": {
       "mine": "Mis unidades",
@@ -236,6 +237,79 @@
       "yesterday": "ayer",
       "days_one": "hace {{count}} día",
       "days_other": "hace {{count}} días"
+    },
+    "reservations": {
+      "book": "Reservar",
+      "request": "Solicitar reserva",
+      "booked": "Reserva confirmada",
+      "requested": "Solicitud enviada a administración",
+      "cancelled": "Reserva cancelada",
+      "chips": {
+        "mine": "Mis reservas",
+        "amenidades": "Amenidades"
+      },
+      "past": "Pasadas",
+      "emptyUpcoming": "No tienes reservas próximas.",
+      "noAmenities": "Esta ubicación aún no tiene amenidades reservables.",
+      "next": "Próxima reserva",
+      "view": "Ver reserva",
+      "status": {
+        "pending": "Por aprobar",
+        "approved": "Confirmada",
+        "observed": "Observada",
+        "rejected": "Rechazada",
+        "cancelled": "Cancelada",
+        "completed": "Completada"
+      },
+      "mode": {
+        "instant": "Reserva inmediata",
+        "approval": "Requiere aprobación"
+      },
+      "upTo": "Hasta {{count}} personas",
+      "free": "Sin costo",
+      "depositOf": "depósito {{amount}}",
+      "capacity": "Capacidad",
+      "people": "{{count}} personas",
+      "maxDuration": "Duración máxima",
+      "hours_one": "{{count}} hora",
+      "hours_other": "{{count}} horas",
+      "minutes": "{{count}} min",
+      "fee": "Costo",
+      "deposit": "Depósito",
+      "advance": "Anticipación",
+      "upToDays": "hasta {{count}} días",
+      "cancellation": "Cancelación",
+      "upToHours": "hasta {{count}} h antes",
+      "rules": "Reglas",
+      "approvalExplainer": "Administración confirma cada solicitud. El depósito se devuelve tras la revisión del ambiente; la unidad responde por sus invitados.",
+      "instantExplainer": "La reserva se confirma al instante. La unidad responde por sus invitados y por el estado del ambiente.",
+      "amenityMissing": "Esta amenidad ya no está disponible.",
+      "slotsIntro": "Las horas mostradas ya descuentan otras reservas. Si la amenidad requiere aprobación, administración confirmará tu solicitud.",
+      "pickDay": "Elegir día",
+      "pickSlot": "Elegir horario",
+      "closedThatDay": "La amenidad no abre ese día.",
+      "slotReason": {
+        "past": "Pasó",
+        "taken": "Ocupado",
+        "unit_limit": "Límite de tu unidad"
+      },
+      "requestedBy": "Solicitada por",
+      "staffNote": "Nota de administración",
+      "cancel": "Cancelar reserva",
+      "cancelWindow": "Puedes cancelar hasta {{hours}} h antes.",
+      "cancelAnytime": "Puedes cancelar en cualquier momento antes del inicio.",
+      "cancelClosed": "El plazo de cancelación venció.",
+      "cancelTitle": "¿Cancelar la reserva de {{amenity}}?",
+      "cancelBody": "El horario quedará libre para otras unidades. Si ya había un cobro, administración lo anulará.",
+      "timeline": {
+        "created": "Solicitada",
+        "approved": "Aprobada",
+        "rejected": "Rechazada",
+        "observed": "Observada",
+        "cancelled": "Cancelada",
+        "updated": "Actualizada",
+        "staff": "administración"
+      }
     }
   },
   "nav": {
