@@ -1391,5 +1391,9 @@
     "multiHint": "Cada unidad pertenece a una torre. Renombrar aquí actualiza todas sus unidades.",
     "confirmDeleteTitle": "¿Eliminar la torre {{name}}?",
     "confirmDeleteBody": "Solo se eliminan torres sin unidades. Esta acción no se puede deshacer."
+  },
+  "phone": {
+    "country": "País",
+    "number": "Número de teléfono"
   }
 }

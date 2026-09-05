@@ -92,7 +92,7 @@ describe('access helpers', () => {
           address: null,
           roles: ['location_manager'],
           capabilities: MANAGER_CAPABILITIES,
-          access_source: 'location_role',
+          country: 'PE', access_source: 'location_role',
         },
       ],
     })
@@ -111,7 +111,7 @@ describe('access helpers', () => {
         address: null,
         roles: [],
         capabilities: FRONT_DESK_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       roles: {
         account: [],
@@ -140,6 +140,7 @@ describe('access helpers', () => {
       resident_memberships: [
         {
           account_id: 'acc_1',
+          country: 'PE',
           is_primary_contact: true,
           location_id: 'loc_1',
           resident_id: 'res_1',
@@ -165,7 +166,7 @@ describe('access helpers', () => {
         address: null,
         roles: [],
         capabilities: ADMIN_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       roles: {
         account: [
@@ -214,7 +215,7 @@ describe('access helpers', () => {
         address: null,
         roles: [],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       roles: {
         account: [],
@@ -260,7 +261,7 @@ describe('access helpers', () => {
         address: null,
         roles: [],
         capabilities: FRONT_DESK_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       roles: {
         account: [],
@@ -294,7 +295,7 @@ describe('access helpers', () => {
         address: null,
         roles: [],
         capabilities: FRONT_DESK_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       roles: {
         account: [],

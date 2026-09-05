@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Badge, Button, Loader, TextInput } from '@mantine/core'
+import { Alert, Badge, Button, Loader } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { sessionQueryKey } from '../auth/query-options'
 import type { MeResponse, Session } from '../auth/types'
+import { FormPhoneInput } from '../../components/ui/phone-input'
 import { updatePortalResidentPhone } from './api'
 import {
   portalPhoneSchema,
@@ -133,21 +134,12 @@ export function PortalDashboardPage() {
                 {rootError}
               </Alert>
             ) : null}
-            <Controller
+            <FormPhoneInput
               control={form.control}
+              defaultCountry={memberships[0]?.country ?? 'PE'}
+              label={t('portal.phone')}
               name="phone"
-              render={({ field, fieldState }) => (
-                <TextInput
-                  {...field}
-                  value={field.value ?? ''}
-                  error={
-                    fieldState.error?.message
-                      ? t(fieldState.error.message)
-                      : undefined
-                  }
-                  label={t('portal.phone')}
-                />
-              )}
+              placeholder="987 654 321"
             />
             <Button loading={phoneMutation.isPending} type="submit">
               {t('portal.savePhone')}

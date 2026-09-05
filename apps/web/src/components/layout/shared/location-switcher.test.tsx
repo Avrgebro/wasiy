@@ -49,7 +49,7 @@ const mocks = vi.hoisted(() => {
       address: 'Lima',
       roles: ['location_manager'],
       capabilities: MANAGER_CAPABILITIES,
-      access_source: 'location_role',
+      country: 'PE', access_source: 'location_role',
     },
     roles: {
       account: [],
@@ -71,7 +71,7 @@ const mocks = vi.hoisted(() => {
         address: 'Lima',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       {
         id: 'loc_2',
@@ -82,7 +82,7 @@ const mocks = vi.hoisted(() => {
         address: 'Lima',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       {
         id: 'loc_3',
@@ -93,7 +93,7 @@ const mocks = vi.hoisted(() => {
         address: 'Miraflores',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       {
         id: 'loc_4',
@@ -104,7 +104,7 @@ const mocks = vi.hoisted(() => {
         address: 'Surco',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       {
         id: 'loc_5',
@@ -115,7 +115,7 @@ const mocks = vi.hoisted(() => {
         address: 'San Isidro',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       {
         id: 'loc_6',
@@ -126,7 +126,7 @@ const mocks = vi.hoisted(() => {
         address: 'San Borja',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
       {
         id: 'loc_7',
@@ -137,7 +137,7 @@ const mocks = vi.hoisted(() => {
         address: 'Barranco',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
     ],
     resident_memberships: [],

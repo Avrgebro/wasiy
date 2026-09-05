@@ -108,7 +108,7 @@ describe('VisitsPage', () => {
     await user.click(screen.getByText('Elena Vargas'))
     const drawer = await screen.findByRole('dialog')
     expect(within(drawer).getByText('2 h 12 min')).toBeInTheDocument()
-    expect(within(drawer).getByRole('link', { name: '+51 987 654 321' })).toHaveAttribute('href', 'tel:+51987654321')
+    expect(within(drawer).getByRole('link', { name: '987 654 321' })).toHaveAttribute('href', 'tel:+51987654321')
     expect(within(drawer).getByText('Confirmada por Intercom con Carlos Mendoza')).toBeInTheDocument()
     await user.type(within(drawer).getByLabelText('Notas de salida (opcional)'), 'Se retira con paquete')
     await user.click(within(drawer).getByRole('button', { name: 'Marcar salida' }))

@@ -3,11 +3,12 @@ import { Alert, Button, Select, Text, Textarea } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
+import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { createLocation, updateLocation, type LocationPayload, type LocationSummary } from './api'
 import { locationFormSchema, locationTypeValues, type LocationFormValues } from './schemas'
@@ -97,6 +98,7 @@ export function LocationFormDrawer({
     resolver: zodResolver(locationFormSchema),
   })
   const { control, formState, handleSubmit, reset, setError, getValues } = form
+  const formCountry = useWatch({ control, name: 'country' })
 
   useEffect(() => {
     if (opened) {
@@ -204,12 +206,7 @@ export function LocationFormDrawer({
             <FormTextInput control={control} label={t('locations.form.country')} name="country" />
 
             <SectionLabel>{t('locations.form.contactSection')}</SectionLabel>
-            <FormTextInput
-              control={control}
-              label={t('locations.form.phone')}
-              name="phone"
-              placeholder="+51 …"
-            />
+            <FormPhoneInput control={control} defaultCountry={formCountry || 'PE'} label={t('locations.form.phone')} name="phone" placeholder="1 302 4410" />
             <FormTextInput
               control={control}
               label={t('locations.form.contactEmail')}

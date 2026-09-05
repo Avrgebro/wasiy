@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { can } from '../auth/access'
-import { useMe } from '../auth/hooks'
+import { useMe, usePhoneFormat } from '../auth/hooks'
 import type { MovementSummary } from '../finances/api'
 import { monthLabel, shortDate, shortDateTime } from '../finances/month'
 import type { PackageSummary } from '../packages/api'
@@ -438,6 +438,7 @@ function monogram(name: string): string {
 
 function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void }) {
   const { t } = useTranslation('common')
+  const formatPhone = usePhoneFormat()
 
   return (
     <div
@@ -462,7 +463,7 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void
           ) : null}
         </div>
         <Text c="dimmed" className="truncate" size="xs">
-          {[member.email, member.phone].filter(Boolean).join(' · ') || '—'}
+          {[member.email, formatPhone(member.phone)].filter(Boolean).join(' · ') || '—'}
         </Text>
       </div>
       <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="light">

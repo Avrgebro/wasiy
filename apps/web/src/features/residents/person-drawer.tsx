@@ -3,10 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePhoneFormat } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { ConfirmDialog, DrawerFact, DrawerFacts, DrawerSection, DrawerTimeline } from '../../components/ui/detail-drawer-parts'
 import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
+import { telHref } from '../../lib/phone'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { shortDateTime } from '../finances/month'
 import { portalColor } from '../units/unit-presentation'
@@ -34,6 +36,7 @@ export function PersonDrawer({
   timezone: string
 }) {
   const { t } = useTranslation('common')
+  const formatPhone = usePhoneFormat()
   const queryClient = useQueryClient()
   const [inviting, setInviting] = useState(false)
   const [email, setEmail] = useState('')
@@ -126,8 +129,8 @@ export function PersonDrawer({
                 label={t('registry.residents.phone')}
                 value={
                   person.phone ? (
-                    <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={`tel:${person.phone.replace(/\s+/g, '')}`}>
-                      {person.phone}
+                    <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={telHref(person.phone)}>
+                      {formatPhone(person.phone)}
                     </a>
                   ) : (
                     '—'

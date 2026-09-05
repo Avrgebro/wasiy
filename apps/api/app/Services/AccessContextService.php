@@ -293,6 +293,8 @@ class AccessContextService
             'name' => $location->name,
             'slug' => $location->slug,
             'timezone' => $location->timezone,
+            // Dialing rules for phone inputs and display (E.164 storage).
+            'country' => $location->country ?? 'PE',
             'address' => $location->formattedAddress(),
             'roles' => array_values(array_unique($roles)),
             'capabilities' => $capabilities,
@@ -317,6 +319,7 @@ class AccessContextService
                 'location_id' => $membership->location_id,
                 'unit_id' => $membership->unit_id,
                 'unit_label' => $membership->unit->label(),
+                'country' => $membership->location->country ?? 'PE',
                 'is_primary_contact' => $membership->is_primary_contact,
             ])
             ->values()

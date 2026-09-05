@@ -4,9 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useMe } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
+import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
 import { useActiveUnitOptions } from '../units/use-active-unit-options'
@@ -45,6 +47,7 @@ export function PersonFormDrawer({
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
+  const country = useMe().data?.active_location?.country ?? 'PE'
   const form = useForm<PersonFormValues>({ defaultValues: defaults(editing), resolver: zodResolver(personSchema) })
   const unitOptions = useActiveUnitOptions(opened && !editing ? { id: locationId } : null)
 
@@ -95,7 +98,7 @@ export function PersonFormDrawer({
             <FormTextInput control={form.control} label={t('registry.residents.firstName')} name="first_name" />
             <FormTextInput control={form.control} label={t('registry.residents.lastName')} name="last_name" />
           </div>
-          <FormTextInput control={form.control} label={t('residents.form.phone')} name="phone" placeholder="+51 9…" />
+          <FormPhoneInput control={form.control} defaultCountry={country} label={t('residents.form.phone')} name="phone" placeholder="987 654 321" />
           {!editing ? (
             <>
               <DrawerSection description={t('residents.form.unitSectionHint')} label={t('residents.form.unitSection')} />

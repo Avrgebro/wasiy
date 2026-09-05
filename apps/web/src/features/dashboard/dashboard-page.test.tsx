@@ -32,7 +32,7 @@ function meResponse(role: 'location_manager' | 'front_desk') {
     user: { id: 'usr_1', first_name: 'Ana', last_name: 'Quispe', name: 'Ana Quispe', email: 'ana@wasiy.test' },
     accounts: [{ id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' }],
     active_account: { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima' },
-    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', roles: [role], capabilities: role === 'location_manager' ? MANAGER_CAPABILITIES : FRONT_DESK_CAPABILITIES, access_source: 'location_role' },
+    active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', roles: [role], capabilities: role === 'location_manager' ? MANAGER_CAPABILITIES : FRONT_DESK_CAPABILITIES, country: 'PE', access_source: 'location_role' },
     roles: { account: [], location: [{ account_id: 'acc_1', location_id: 'loc_1', role }] },
     accessible_locations: [],
     resident_memberships: [],

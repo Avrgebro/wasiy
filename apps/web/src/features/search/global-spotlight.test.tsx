@@ -31,7 +31,7 @@ const me = {
   user: { id: 'usr_1', first_name: 'Ana', last_name: 'Quispe', name: 'Ana Quispe', email: 'ana@wasiy.test' },
   accounts: [{ id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1 }],
   active_account: { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1 },
-  active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', address: null, roles: ['front_desk'], capabilities: FRONT_DESK_CAPABILITIES, access_source: 'location_role' },
+  active_location: { id: 'loc_1', account_id: 'acc_1', name: 'Edificio Central', slug: 'edificio-central', timezone: 'America/Lima', address: null, roles: ['front_desk'], capabilities: FRONT_DESK_CAPABILITIES, country: 'PE', access_source: 'location_role' },
   roles: { account: [], location: [{ account_id: 'acc_1', location_id: 'loc_1', role: 'front_desk' }] },
   accessible_locations: [],
   resident_memberships: [],

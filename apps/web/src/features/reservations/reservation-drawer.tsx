@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePhoneFormat } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import {
   ConfirmDialog,
@@ -58,6 +59,7 @@ export function ReservationDrawer({
   timezone: string
 }) {
   const { t } = useTranslation('common')
+  const formatPhone = usePhoneFormat()
   const queryClient = useQueryClient()
   const [note, setNote] = useState('')
   const [confirmingCancel, setConfirmingCancel] = useState(false)
@@ -155,7 +157,7 @@ export function ReservationDrawer({
               />
               <DrawerFact
                 label={t('reservations.columns.resident')}
-                value={[reservation.resident_name, reservation.resident_phone].filter(Boolean).join(' · ') || '—'}
+                value={[reservation.resident_name, formatPhone(reservation.resident_phone)].filter(Boolean).join(' · ') || '—'}
               />
               <DrawerFact
                 label={t('reservations.detail.registeredBy')}

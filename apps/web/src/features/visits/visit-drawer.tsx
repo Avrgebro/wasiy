@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePhoneFormat } from '../auth/hooks'
+import { telHref } from '../../lib/phone'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DrawerFact, DrawerFacts, DrawerSection, DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
 import { getErrorMessage } from '../../lib/errors'
@@ -14,6 +16,7 @@ import { checkInLabel, durationLabel } from './visit-presentation'
 /** Mockup 16 drawer: time inside (live), facts, timeline, Marcar salida. */
 export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void; timezone: string; visit: VisitSummary | null }) {
   const { t } = useTranslation('common')
+  const formatPhone = usePhoneFormat()
   const queryClient = useQueryClient()
   const [notes, setNotes] = useState('')
   const [now, setNow] = useState(() => new Date())
@@ -93,8 +96,8 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
                       {visit.resident_phone ? (
                         <>
                           {' · '}
-                          <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={`tel:${visit.resident_phone.replace(/\s+/g, '')}`}>
-                            {visit.resident_phone}
+                          <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={telHref(visit.resident_phone)}>
+                            {formatPhone(visit.resident_phone)}
                           </a>
                         </>
                       ) : null}
@@ -106,7 +109,7 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
               />
               <DrawerFact label={t('visits.columns.confirmation')} value={t(`visits.confirmations.${visit.confirmation}`)} />
               <DrawerFact label={t('visits.form.documentShort')} value={visit.document ?? '—'} />
-              <DrawerFact label={t('registry.residents.phone')} value={visit.phone ?? '—'} />
+              <DrawerFact label={t('registry.residents.phone')} value={visit.phone ? formatPhone(visit.phone) : '—'} />
               {visit.notes ? <DrawerFact wide label={t('registry.notes')} value={visit.notes} /> : null}
             </DrawerFacts>
 

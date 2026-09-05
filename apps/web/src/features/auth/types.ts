@@ -41,6 +41,8 @@ export type LocationSummary = {
   name: string
   slug: string
   timezone: string
+  /** ISO 3166-1 alpha-2; dialing rules for phones. */
+  country: string
   address: string | null
   roles: Array<AccountRole | LocationRole>
   capabilities: Capability[]
@@ -65,6 +67,7 @@ export type ResidentMembership = {
   location_id: string
   unit_id: string
   unit_label: string
+  country: string
   is_primary_contact: boolean
 }
 

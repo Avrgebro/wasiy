@@ -4,11 +4,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useMe, usePhoneFormat } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
+import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
+import { telHref } from '../../lib/phone'
 import { getResidents } from '../residents/api'
 import { useActiveUnitOptions } from '../units/use-active-unit-options'
 import { registerVisit } from './api'
@@ -37,6 +40,8 @@ export function RegisterVisitDrawer({
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
+  const country = useMe().data?.active_location?.country ?? 'PE'
+  const formatPhone = usePhoneFormat()
   const form = useForm<RegisterVisitValues>({ defaultValues: EMPTY, resolver: zodResolver(registerVisitSchema) })
 
   useEffect(() => {
@@ -93,7 +98,7 @@ export function RegisterVisitDrawer({
                 <FormTextInput control={form.control} label={t('visits.form.document')} name="document" placeholder="DNI 45872213" />
               )}
             />
-            <FormTextInput control={form.control} label={t('visits.form.phone')} name="phone" placeholder="+51 9…" />
+            <FormPhoneInput control={form.control} defaultCountry={country} label={t('visits.form.phone')} name="phone" placeholder="987 654 321" />
           </div>
           <Text c="dimmed" mt={-12} size="xs">
             {t('visits.form.documentHint')}
@@ -139,8 +144,8 @@ export function RegisterVisitDrawer({
               {primary.phone ? (
                 <>
                   {' · '}
-                  <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={`tel:${primary.phone.replace(/\s+/g, '')}`}>
-                    {primary.phone}
+                  <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={telHref(primary.phone)}>
+                    {formatPhone(primary.phone)}
                   </a>
                 </>
               ) : null}

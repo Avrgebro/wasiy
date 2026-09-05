@@ -115,7 +115,8 @@ describe('ResidentsPage', () => {
     expect(await screen.findByText('Carlos Mendoza')).toBeInTheDocument()
     expect(screen.getByText('2 personas · Edificio Central')).toBeInTheDocument()
     expect(screen.getByText('carlos.mendoza@gmail.com')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: '+51 987 654 321' })).toHaveAttribute('href', 'tel:+51987654321')
+    // Stored E.164, shown nationally because the viewer is in Peru.
+    expect(screen.getByRole('link', { name: '987 654 321' })).toHaveAttribute('href', 'tel:+51987654321')
     expect(screen.getByText('402')).toBeInTheDocument()
     expect(screen.getByText('118')).toBeInTheDocument()
     expect(screen.getByText('En el portal')).toBeInTheDocument()
@@ -155,13 +156,13 @@ describe('ResidentsPage', () => {
     expect(within(drawer).queryByLabelText(/Correo/)).not.toBeInTheDocument()
     await user.type(within(drawer).getByLabelText('Nombres'), 'Elena')
     await user.type(within(drawer).getByLabelText('Apellidos'), 'Vargas')
-    await user.type(within(drawer).getByLabelText('Teléfono (opcional)'), '+51 977 105 630')
+    await user.type(within(drawer).getByRole('textbox', { name: 'Número de teléfono' }), '977105630')
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
     await user.click(await screen.findByRole('option', { name: 'Torre A / 402' }))
     await user.click(within(drawer).getByRole('button', { name: 'Crear persona' }))
 
     await waitFor(() => expect(writes).toHaveLength(1))
-    expect(writes[0].body).toEqual({ first_name: 'Elena', last_name: 'Vargas', phone: '+51 977 105 630', memberships: [{ unit_id: 'un_402', is_primary_contact: false }] })
+    expect(writes[0].body).toEqual({ first_name: 'Elena', last_name: 'Vargas', phone: '+51977105630', memberships: [{ unit_id: 'un_402', is_primary_contact: false }] })
   })
 
   it('shows front desk phones but no emails, no create button and no actions', async () => {

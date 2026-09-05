@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
+import { formatPhone } from '../../lib/phone'
 import { getDefaultLocation } from './access'
 import { login, logout, selectAccount, selectLocation } from './api'
 import { sessionQueryKey, sessionQueryOptions } from './query-options'
@@ -33,6 +34,14 @@ const NO_LOCATIONS: LocationSummary[] = []
  * guarantees active_location is non-null whenever accessible_locations is
  * non-empty, so no client-side fallback is needed.
  */
+/** Phones read nationally in the viewer's location, internationally elsewhere. */
+export function usePhoneFormat() {
+  const me = useMe().data
+  const country = me?.active_location?.country ?? me?.resident_memberships[0]?.country ?? 'PE'
+
+  return (phone: string | null | undefined) => formatPhone(phone, country)
+}
+
 export function useLocationContext() {
   const me = useMe().data
   const accessibleLocations = me?.accessible_locations ?? NO_LOCATIONS

@@ -4,9 +4,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { useMe, usePhoneFormat } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { ConfirmDialog, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
+import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
 import { getResidents } from '../residents/api'
@@ -55,6 +57,8 @@ export function MemberDrawer({
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
+  const country = useMe().data?.active_location?.country ?? 'PE'
+  const formatPhone = usePhoneFormat()
   const [personSearch, setPersonSearch] = useState('')
   const [confirmingRemove, setConfirmingRemove] = useState(false)
 
@@ -195,7 +199,7 @@ export function MemberDrawer({
                   {member.name}
                 </Text>
                 <Text c="dimmed" size="xs">
-                  {[member.email, member.phone].filter(Boolean).join(' · ') || '—'}
+                  {[member.email, formatPhone(member.phone)].filter(Boolean).join(' · ') || '—'}
                 </Text>
               </div>
             </div>
@@ -238,7 +242,9 @@ export function MemberDrawer({
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
                   <FormTextInput control={form.control} label={t('registry.residents.firstName')} name="first_name" />
                   <FormTextInput control={form.control} label={t('registry.residents.lastName')} name="last_name" />
-                  <FormTextInput control={form.control} label={t('registry.residents.phone')} name="phone" placeholder="+51 …" />
+                  <div className="sm:col-span-2">
+                    <FormPhoneInput control={form.control} defaultCountry={country} label={t('registry.residents.phone')} name="phone" placeholder="987 654 321" />
+                  </div>
                 </div>
               )}
             </>

@@ -11,7 +11,7 @@ import { FilterButton } from '../../components/table/filter-button'
 import { FilterChips } from '../../components/table/filter-chips'
 import { SearchInput } from '../../components/table/search-input'
 import { getErrorMessage } from '../../lib/errors'
-import { useMe } from '../auth/hooks'
+import { useMe, usePhoneFormat } from '../auth/hooks'
 import { getVisits, type VisitSummary } from './api'
 import { RegisterVisitDrawer } from './register-visit-drawer'
 import { VISIT_CHIPS, VISIT_CONFIRMATIONS, type VisitsSearchValues } from './schemas'
@@ -78,6 +78,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
     { key: 'confirmation', label: t('visits.columns.confirmation'), value: search.confirmation, options: confirmationOptions, onRemove: () => updateSearch({ confirmation: '' }) },
   ])
 
+  const formatPhone = usePhoneFormat()
   const columns: ColumnDef<VisitSummary>[] = [
     {
       accessorKey: 'checked_in_at',
@@ -92,7 +93,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
         <div className="flex flex-col">
           <span className="text-sm font-semibold">{row.original.visitor_name}</span>
           {row.original.document || row.original.phone ? (
-            <span className="text-[11.5px] text-[var(--wa-text-3)]">{row.original.document ?? row.original.phone}</span>
+            <span className="text-[11.5px] text-[var(--wa-text-3)]">{row.original.document ?? formatPhone(row.original.phone)}</span>
           ) : null}
         </div>
       ),

@@ -1391,5 +1391,9 @@
     "multiHint": "Every unit belongs to a building. Renaming here updates all its units.",
     "confirmDeleteTitle": "Delete building {{name}}?",
     "confirmDeleteBody": "Only buildings without units can be deleted. This cannot be undone."
+  },
+  "phone": {
+    "country": "Country",
+    "number": "Phone number"
   }
 }

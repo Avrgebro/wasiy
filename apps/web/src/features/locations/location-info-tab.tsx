@@ -1,6 +1,7 @@
 import { Button, Text } from '@mantine/core'
 import { Pen } from '@solar-icons/react'
 import { useTranslation } from 'react-i18next'
+import { formatPhone } from '../../lib/phone'
 import type { LocationSummary } from './api'
 import { LocationPhotoGallery } from './location-photo-gallery'
 
@@ -91,7 +92,7 @@ export function LocationInfoTab({
           <InfoField label={t('locations.form.state')} value={location.state} />
           <InfoField label={t('locations.form.postalCode')} value={location.postal_code} />
           <InfoField label={t('locations.form.country')} value={location.country} />
-          <InfoField label={t('locations.form.phone')} value={location.phone} />
+          <InfoField label={t('locations.form.phone')} value={location.phone ? formatPhone(location.phone, location.country) : null} />
           <InfoField label={t('locations.form.contactEmail')} value={location.contact_email} />
           <InfoField label={t('locations.form.district')} value={location.district} />
           <InfoField wide label={t('locations.form.accessNotes')} value={location.access_notes} />

@@ -11,8 +11,9 @@ import { FilterButton } from '../../components/table/filter-button'
 import { FilterChips } from '../../components/table/filter-chips'
 import { SearchInput } from '../../components/table/search-input'
 import { getErrorMessage } from '../../lib/errors'
+import { telHref } from '../../lib/phone'
 import { can } from '../auth/access'
-import { useMe } from '../auth/hooks'
+import { useMe, usePhoneFormat } from '../auth/hooks'
 import { portalColor } from '../units/unit-presentation'
 import { getResidents, type ResidentSummary } from './api'
 import { PersonDrawer } from './person-drawer'
@@ -105,6 +106,7 @@ function ResidentsContent({
     { key: 'status', label: t('registry.status'), value: search.status, options: statusOptions, onRemove: () => updateSearch({ status: '' }) },
   ])
 
+  const formatPhone = usePhoneFormat()
   const columns: ColumnDef<ResidentSummary>[] = [
     {
       accessorKey: 'name',
@@ -120,10 +122,10 @@ function ResidentsContent({
           // Tap to call on phones; a plain link elsewhere.
           <a
             className="font-mono text-[13px] text-[var(--wa-interactive)] no-underline hover:underline"
-            href={`tel:${row.original.phone.replace(/\s+/g, '')}`}
+            href={telHref(row.original.phone)}
             onClick={(event) => event.stopPropagation()}
           >
-            {row.original.phone}
+            {formatPhone(row.original.phone)}
           </a>
         ) : (
           <Text c="dimmed" size="sm">

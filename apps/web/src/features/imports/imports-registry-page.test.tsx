@@ -73,7 +73,7 @@ function meResponse() {
       timezone: 'America/Lima',
       roles: ['location_manager'],
       capabilities: MANAGER_CAPABILITIES,
-      access_source: 'location_role',
+      country: 'PE', access_source: 'location_role',
     },
     roles: {
       account: [],
@@ -94,7 +94,7 @@ function meResponse() {
         timezone: 'America/Lima',
         roles: ['location_manager'],
         capabilities: MANAGER_CAPABILITIES,
-        access_source: 'location_role',
+        country: 'PE', access_source: 'location_role',
       },
     ],
     resident_memberships: [],
