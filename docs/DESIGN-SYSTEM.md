@@ -232,7 +232,7 @@ Defaults:
 
 - Inputs are Mantine `md` (`42px`), labels Mantine `sm`.
 - Field gap in drawers: `20px` (the `AppDrawerBody` grid); two short related fields share a row with `sm:grid-cols-2`.
-- Drawer width: `520px` (`AppDrawer` default), `620px` for the amenity form.
+- Drawer width: `620px` (`AppDrawer` default), `620px` for the amenity form.
 - Forms use `react-hook-form` with a `zod` resolver (ADR 0009). Schema messages are i18n keys; server `422` errors land under their field through `submitHandlingServerErrors`, and anything unmatched goes to a root `Alert`.
 - Plain `rows` on `Textarea`, never `autosize` (it needs layout APIs jsdom lacks). Note fields use three rows everywhere.
 - Money inputs: `NumberInput` with `prefix="S/ "`, integers only, `thousandSeparator=" "`.
@@ -292,7 +292,7 @@ Patterns:
 
 Patterns in use:
 
-- **Form drawer** (`AppDrawer` + `AppDrawerBody` + `AppDrawerFooter`, `520px`): create and edit flows — staff access, location, amenity (`620px`), new reservation, record movement. Footer: `Cancelar` (default) and the accent submit.
+- **Form drawer** (`AppDrawer` + `AppDrawerBody` + `AppDrawerFooter`, `620px`): create and edit flows — staff access, location, amenity (`620px`), new reservation, record movement. Footer: `Cancelar` (default) and the accent submit.
 - **Detail drawer** (same `AppDrawer`, pieces from `components/ui/detail-drawer-parts.tsx`): the row's home. Inner cards inside a drawer (unit list, portal block, member header, slot band) are filled with `--wa-surface-2` and bordered, never border-only on the drawer surface. Sections in order: header value and status badge, `DrawerFacts` (uppercase label over value, two columns), `DrawerSection` rules, `DrawerTimeline` (Historial, newest first; derived events drawn with a hollow dot and dimmed), Acciones with one optional note field and the action row. Footer: only `Cerrar`. Used for movements and reservations; deep-linked by a URL param (`movement`, `reservation`).
 - **Confirmation** (`ConfirmDialog`): irreversible moves only — void, retain, cancel a reservation. Names the consequence, `Cancelar` + `Confirmar` in `error`.
 - **Small modal**: a prompt that needs one field before acting (the queue's observe/reject note).
@@ -456,7 +456,7 @@ Defaults set in `theme.ts`:
 - Font sizes and spacing scales extended with `2xl`–`5xl` and `3xs`–`3xl` steps.
 - `Select`: check icon on the right. `Paper` and `Card` defaults exist but the app builds surfaces with Tailwind classes instead.
 - Body, default border, dimmed and anchor colors are pinned through `cssVariablesResolver` («papel, no blanco»).
-- Modal: `radius="lg"`, centered for confirmations. Drawer: right side, `520px`, clamped to the viewport on phones. Notifications: top-right, card chrome via `.wa-toast`.
+- Modal: `radius="lg"`, centered for confirmations. Drawer: right side, `620px`, clamped to the viewport on phones. Notifications: top-right, card chrome via `.wa-toast`.
 
 Do not use Mantine layout primitives such as `Box`, `Stack`, or `Grid` for page layout. Use semantic HTML and Tailwind classes for layout.
 

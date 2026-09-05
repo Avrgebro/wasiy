@@ -133,7 +133,6 @@ export function AmenityFormDrawer({
   return (
     <AppDrawer
       opened={opened}
-      size={620}
       subtitle={editing ? editing.name : t('amenities.createSubtitle')}
       title={editing ? t('amenities.editTitle') : t('amenities.createTitle')}
       onClose={onClose}
