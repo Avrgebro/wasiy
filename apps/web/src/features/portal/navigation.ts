@@ -1,15 +1,13 @@
-import { Widget } from '@solar-icons/react'
+import { Home2, UserCircle, UserPlusRounded } from '@solar-icons/react'
 import type { LayoutNavEntry } from '../../components/layout/shared/types'
 import type { MeResponse } from '../auth/types'
 import { filterNavigationEntries, type NavEntrySpec } from '../navigation/spec'
 
-/** The portal's tabs (P1 grows this to Inicio, Visitas, Reservas, Mi unidad, Perfil). */
+/** The portal's tab bar (P1). Reservas and Mi unidad join when P2 and P4 land. */
 const portalNavigation: NavEntrySpec[] = [
-  {
-    type: 'group',
-    titleKey: 'navGroups.portal',
-    items: [{ icon: Widget, labelKey: 'nav.home', to: '/portal' }],
-  },
+  { icon: Home2, labelKey: 'portal.tabs.home', to: '/portal' },
+  { icon: UserPlusRounded, labelKey: 'portal.tabs.visits', to: '/portal/visitas' },
+  { icon: UserCircle, labelKey: 'portal.tabs.profile', to: '/portal/perfil' },
 ]
 
 export function getPortalNavigation(me: MeResponse): LayoutNavEntry[] {

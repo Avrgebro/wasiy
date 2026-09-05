@@ -15,7 +15,8 @@ import {
 import { submitHandlingServerErrors } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 
-export function PortalDashboardPage() {
+/** Perfil (P1): the household list and the contact phone; email, password and preferences arrive in P4. */
+export function PortalProfilePage() {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
   const meQuery = useMe()
@@ -77,7 +78,7 @@ export function PortalDashboardPage() {
       <section className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
-            {t('portal.title')}
+            {t('portal.tabs.profile')}
           </h1>
           <p className="mt-1 text-sm text-[var(--mantine-color-dimmed)]">
             {primaryMembership
@@ -92,7 +93,7 @@ export function PortalDashboardPage() {
         </Badge>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <section className="grid gap-4">
         <div className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4">
           <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
             {t('portal.householdTitle')}

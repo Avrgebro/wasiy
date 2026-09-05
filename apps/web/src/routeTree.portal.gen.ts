@@ -16,6 +16,9 @@ import { Route as IndexRouteImport } from './routes-portal/index'
 import { Route as AuthenticatedPortalRouteRouteImport } from './routes-portal/_authenticated/portal/route'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes-portal/_authenticated/portal/index'
 import { Route as InvitationsResidentTokenRouteImport } from './routes-portal/invitations/resident.$token'
+import { Route as AuthenticatedPortalVisitasRouteImport } from './routes-portal/_authenticated/portal/visitas'
+import { Route as AuthenticatedPortalPerfilRouteImport } from './routes-portal/_authenticated/portal/perfil'
+import { Route as AuthenticatedPortalVisitasNuevaRouteImport } from './routes-portal/_authenticated/portal/visitas_.nueva'
 
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
@@ -54,21 +57,45 @@ const InvitationsResidentTokenRoute =
     path: '/invitations/resident/$token',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedPortalVisitasRoute =
+  AuthenticatedPortalVisitasRouteImport.update({
+    id: '/visitas',
+    path: '/visitas',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
+const AuthenticatedPortalPerfilRoute =
+  AuthenticatedPortalPerfilRouteImport.update({
+    id: '/perfil',
+    path: '/perfil',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
+const AuthenticatedPortalVisitasNuevaRoute =
+  AuthenticatedPortalVisitasNuevaRouteImport.update({
+    id: '/visitas_/nueva',
+    path: '/visitas/nueva',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
+  '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
+  '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/portal/visitas/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
+  '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
+  '/portal/visitas/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,8 +104,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
+  '/_authenticated/portal/perfil': typeof AuthenticatedPortalPerfilRoute
+  '/_authenticated/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/_authenticated/portal/visitas_/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,10 +117,21 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/portal'
+    | '/portal/perfil'
+    | '/portal/visitas'
     | '/invitations/resident/$token'
     | '/portal/'
+    | '/portal/visitas/nueva'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/no-access' | '/invitations/resident/$token' | '/portal'
+  to:
+    | '/'
+    | '/login'
+    | '/no-access'
+    | '/portal/perfil'
+    | '/portal/visitas'
+    | '/invitations/resident/$token'
+    | '/portal'
+    | '/portal/visitas/nueva'
   id:
     | '__root__'
     | '/'
@@ -98,8 +139,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/_authenticated/portal'
+    | '/_authenticated/portal/perfil'
+    | '/_authenticated/portal/visitas'
     | '/invitations/resident/$token'
     | '/_authenticated/portal/'
+    | '/_authenticated/portal/visitas_/nueva'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -161,16 +205,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitationsResidentTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/portal/visitas': {
+      id: '/_authenticated/portal/visitas'
+      path: '/visitas'
+      fullPath: '/portal/visitas'
+      preLoaderRoute: typeof AuthenticatedPortalVisitasRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
+    '/_authenticated/portal/perfil': {
+      id: '/_authenticated/portal/perfil'
+      path: '/perfil'
+      fullPath: '/portal/perfil'
+      preLoaderRoute: typeof AuthenticatedPortalPerfilRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
+    '/_authenticated/portal/visitas_/nueva': {
+      id: '/_authenticated/portal/visitas_/nueva'
+      path: '/visitas/nueva'
+      fullPath: '/portal/visitas/nueva'
+      preLoaderRoute: typeof AuthenticatedPortalVisitasNuevaRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
   }
 }
 
 interface AuthenticatedPortalRouteRouteChildren {
+  AuthenticatedPortalPerfilRoute: typeof AuthenticatedPortalPerfilRoute
+  AuthenticatedPortalVisitasRoute: typeof AuthenticatedPortalVisitasRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
+  AuthenticatedPortalVisitasNuevaRoute: typeof AuthenticatedPortalVisitasNuevaRoute
 }
 
 const AuthenticatedPortalRouteRouteChildren: AuthenticatedPortalRouteRouteChildren =
   {
+    AuthenticatedPortalPerfilRoute: AuthenticatedPortalPerfilRoute,
+    AuthenticatedPortalVisitasRoute: AuthenticatedPortalVisitasRoute,
     AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
+    AuthenticatedPortalVisitasNuevaRoute: AuthenticatedPortalVisitasNuevaRoute,
   }
 
 const AuthenticatedPortalRouteRouteWithChildren =

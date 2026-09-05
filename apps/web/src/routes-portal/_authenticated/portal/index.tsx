@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PortalDashboardPage } from '../../../features/portal/portal-dashboard-page'
+import { PortalHomePage } from '../../../features/portal/portal-home-page'
 
 export const Route = createFileRoute('/_authenticated/portal/')({
-  component: PortalDashboardPage,
+  component: PortalHomePage,
 })
