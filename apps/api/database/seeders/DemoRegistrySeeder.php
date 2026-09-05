@@ -80,21 +80,21 @@ class DemoRegistrySeeder extends Seeder
             'user_id' => $portalUser->id,
             'first_name' => 'Rosa',
             'last_name' => 'Portal',
-            'phone' => '999-100-100',
+            'phone' => '+51999100100',
             'status' => RegistryStatus::Active,
         ]);
         $multiUnitResident = $this->resident($account, 'multi.resident@wasiy.test', [
             'user_id' => null,
             'first_name' => 'Carlos',
             'last_name' => 'Multiunidad',
-            'phone' => '999-200-200',
+            'phone' => '+51999200200',
             'status' => RegistryStatus::Active,
         ]);
         $invitedResident = $this->resident($account, 'invited.resident@wasiy.test', [
             'user_id' => null,
             'first_name' => 'Lucia',
             'last_name' => 'Invitada',
-            'phone' => '999-300-300',
+            'phone' => '+51999300300',
             'status' => RegistryStatus::Active,
         ]);
 

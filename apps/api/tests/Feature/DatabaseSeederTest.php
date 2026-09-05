@@ -328,10 +328,10 @@ test('seeded resident has portal access and can manage own phone and vehicles on
 
     $this->actingAs($residentUser)
         ->patchJson('/api/portal/resident/phone', [
-            'phone' => '999-777-555',
+            'phone' => '999 777 555',
         ])
         ->assertOk()
-        ->assertJsonPath('data.phone', '999-777-555');
+        ->assertJsonPath('data.phone', '+51999777555');
 
     $this->actingAs($residentUser)
         ->patchJson('/api/portal/resident/phone', [

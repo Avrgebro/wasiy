@@ -182,7 +182,7 @@ class DemoOperationsSeeder extends Seeder
                     [
                         'first_name' => $first,
                         'last_name' => $last,
-                        'phone' => '9'.str_pad((string) (10_000_000 + crc32($slug) % 89_999_999), 8, '0', STR_PAD_LEFT),
+                        'phone' => '+519'.str_pad((string) (10_000_000 + crc32($slug) % 89_999_999), 8, '0', STR_PAD_LEFT),
                         'status' => RegistryStatus::Active,
                     ],
                 );

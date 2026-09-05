@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Rules\AssignableUnit;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
+use App\Support\PhoneNumber;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,7 +57,9 @@ class ResidentController extends Controller
             ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
             // The directory's one box: name, phone, or the unit they live in.
             ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->where(fn (Builder $group) => $group
-                ->searchLike(['first_name', 'last_name', "first_name || ' ' || last_name", 'email', 'phone'], $search)
+                ->searchLike(['first_name', 'last_name', "first_name || ' ' || last_name", 'email'], $search)
+                // Phones are E.164; the desk types digits with spaces or dashes.
+                ->when(PhoneNumber::digits($search) !== '', fn (Builder $phones) => $phones->orWhere('phone', 'like', '%'.PhoneNumber::digits($search).'%'))
                 ->orWhereHas('unitMemberships', fn (Builder $membership) => $membership->active()
                     ->when($locationId, fn (Builder $inner) => $inner->where('location_id', $locationId))
                     ->whereHas('unit', fn (Builder $unit) => $unit->searchLike(['unit_number'], $search)))))
@@ -98,6 +101,9 @@ class ResidentController extends Controller
         Gate::authorize('createInAccount', [Resident::class, $account]);
 
         $validated = $this->validateResidentPayload($request, $account);
+        $country = Unit::query()->where('account_id', $account->id)->find($validated['memberships'][0]['unit_id'] ?? null)?->location?->country ?? PhoneNumber::FALLBACK_COUNTRY;
+        $request->validate(['phone' => PhoneNumber::rules($country)]);
+        $validated['phone'] = PhoneNumber::normalize($validated['phone'] ?? null, $country);
 
         /** @var User $user */
         $user = $request->user();
@@ -201,13 +207,17 @@ class ResidentController extends Controller
     {
         Gate::authorize('update', $resident);
 
+        $country = $resident->phoneCountry();
         $validated = $request->validate([
             'first_name' => ['sometimes', 'required', 'string', 'max:255'],
             'last_name' => ['sometimes', 'required', 'string', 'max:255'],
-            'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'phone' => ['sometimes', ...PhoneNumber::rules($country)],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'status' => ['sometimes', 'required', Rule::enum(RegistryStatus::class)],
         ]);
+        if (array_key_exists('phone', $validated)) {
+            $validated['phone'] = PhoneNumber::normalize($validated['phone'], $country);
+        }
 
         /** @var User $actor */
         $actor = $request->user();

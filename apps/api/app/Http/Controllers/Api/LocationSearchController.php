@@ -13,6 +13,7 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\Visit;
 use App\Services\AccessAuthorizationService;
+use App\Support\PhoneNumber;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -99,7 +100,9 @@ class LocationSearchController extends Controller
             ->whereHas('unitMemberships', fn (Builder $membership) => $membership
                 ->where('location_id', $location->id)
                 ->where('status', RegistryStatus::Active->value))
-            ->searchLike(['first_name', 'last_name', "first_name || ' ' || last_name", 'phone'], $term)
+            ->where(fn (Builder $who) => $who
+                ->searchLike(['first_name', 'last_name', "first_name || ' ' || last_name"], $term)
+                ->when(PhoneNumber::digits($term) !== '', fn (Builder $phones) => $phones->orWhere('phone', 'like', '%'.PhoneNumber::digits($term).'%')))
             ->with(['unitMemberships' => fn ($query) => $query
                 ->where('location_id', $location->id)
                 ->where('status', RegistryStatus::Active->value)

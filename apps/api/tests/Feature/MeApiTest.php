@@ -310,9 +310,9 @@ test('resident can update own phone through portal endpoint', function () {
             'phone' => '999333444',
         ])
         ->assertOk()
-        ->assertJsonPath('data.phone', '999333444');
+        ->assertJsonPath('data.phone', '+51999333444');
 
-    expect($resident->fresh()->phone)->toBe('999333444')
+    expect($resident->fresh()->phone)->toBe('+51999333444')
         ->and(ActivityLog::query()->sole()->event_type)->toBe(ActivityEventType::ResidentPhoneUpdated);
 });
 

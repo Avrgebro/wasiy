@@ -125,7 +125,7 @@ test('resident create update and inactivate log activity and no-op update does n
 
     $this->actingAs($manager)
         ->patchJson("/api/residents/{$residentId}", [
-            'phone' => '999',
+            'phone' => '987654321',
         ])
         ->assertOk();
 
@@ -139,7 +139,7 @@ test('resident create update and inactivate log activity and no-op update does n
 
     $this->actingAs($manager)
         ->patchJson("/api/residents/{$residentId}", [
-            'phone' => '999',
+            'phone' => '987654321',
         ])
         ->assertOk();
 

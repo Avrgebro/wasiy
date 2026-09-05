@@ -14,6 +14,7 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Visit;
+use App\Support\PhoneNumber;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -67,7 +68,7 @@ class VisitController extends Controller
             'unit_id' => ['required', 'string', 'ulid'],
             'resident_id' => ['sometimes', 'nullable', 'string', 'ulid'],
             'document' => ['sometimes', 'nullable', 'string', 'max:64'],
-            'phone' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'phone' => ['sometimes', ...PhoneNumber::rules($location->country ?? PhoneNumber::FALLBACK_COUNTRY)],
             'confirmation' => ['sometimes', 'nullable', Rule::enum(VisitConfirmation::class)],
             'notes' => ['sometimes', 'nullable', 'string', 'max:1000'],
         ]);
@@ -93,6 +94,7 @@ class VisitController extends Controller
 
         /** @var User $actor */
         $actor = $request->user();
+        $validated['phone'] = PhoneNumber::normalize($validated['phone'] ?? null, $location->country ?? PhoneNumber::FALLBACK_COUNTRY);
 
         $visit = $register->handle($unit, $host, $actor, $validated);
 

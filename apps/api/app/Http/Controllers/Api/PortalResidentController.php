@@ -8,6 +8,7 @@ use App\Http\Resources\ResidentResource;
 use App\Models\User;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,8 +24,9 @@ class PortalResidentController extends Controller
         // The prohibited rules are contract, not paranoia: tests pin that
         // sending any other resident field here is a 422, so partial-update
         // clients fail loudly instead of having fields silently ignored.
+        $resident = $this->access->residentForUser($request->user());
         $validated = $request->validate([
-            'phone' => ['present', 'nullable', 'string', 'max:255'],
+            'phone' => ['present', ...PhoneNumber::rules($resident?->phoneCountry() ?? PhoneNumber::FALLBACK_COUNTRY)],
             'first_name' => ['prohibited'],
             'last_name' => ['prohibited'],
             'email' => ['prohibited'],
@@ -38,12 +40,11 @@ class PortalResidentController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $resident = $this->access->residentForUser($user);
 
         abort_unless($resident && $this->access->activeResidentMembershipsForUser($user)->exists(), 403);
 
         $phoneBefore = $resident->phone;
-        $resident->forceFill(['phone' => $validated['phone']])->save();
+        $resident->forceFill(['phone' => PhoneNumber::normalize($validated['phone'], $resident->phoneCountry())])->save();
 
         if ($phoneBefore !== $resident->phone) {
             $membership = $this->access->activeResidentMembershipsForUser($user)
