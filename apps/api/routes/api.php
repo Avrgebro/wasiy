@@ -15,7 +15,9 @@ use App\Http\Controllers\Api\LocationSettingsController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PhotoController;
+use App\Http\Controllers\Api\PortalAmenityController;
 use App\Http\Controllers\Api\PortalPackageController;
+use App\Http\Controllers\Api\PortalReservationController;
 use App\Http\Controllers\Api\PortalResidentController;
 use App\Http\Controllers\Api\PortalVehicleController;
 use App\Http\Controllers\Api\PortalVisitController;
@@ -160,6 +162,12 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     // roles.
     Route::prefix('portal')->group(function () {
         Route::patch('/resident/phone', [PortalResidentController::class, 'updatePhone']);
+        Route::get('/amenities', [PortalAmenityController::class, 'index']);
+        Route::get('/amenities/{amenity}/availability', [PortalAmenityController::class, 'availability']);
+        Route::get('/reservations', [PortalReservationController::class, 'index']);
+        Route::post('/reservations', [PortalReservationController::class, 'store']);
+        Route::get('/reservations/{reservation}', [PortalReservationController::class, 'show']);
+        Route::post('/reservations/{reservation}/cancel', [PortalReservationController::class, 'cancel']);
         Route::get('/packages', [PortalPackageController::class, 'index']);
         Route::get('/visits', [PortalVisitController::class, 'index']);
         Route::post('/visits', [PortalVisitController::class, 'store']);

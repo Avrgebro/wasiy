@@ -246,6 +246,18 @@ class AccessAuthorizationService
             ->whereHas('unit', fn (Builder $query) => $query->where('status', RegistryStatus::Active));
     }
 
+    /** A resident with an active membership in any unit of the Location (amenities, photos). */
+    public function canResidentAccessLocation(User $user, Location $location): bool
+    {
+        if (! $this->isLiveLocation($location)) {
+            return false;
+        }
+
+        return $this->activeResidentMembershipsForUser($user)
+            ->where('location_id', $location->id)
+            ->exists();
+    }
+
     public function canResidentAccessUnit(User $user, Unit $unit): bool
     {
         if ($unit->status !== RegistryStatus::Active || ! $this->registryRecordLocationMatches($unit->location, $unit->account_id)) {

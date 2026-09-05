@@ -28,6 +28,10 @@ class AmenityPolicy
 
     public function view(User $user, Amenity $amenity): bool
     {
+        if ($this->access->canResidentAccessLocation($user, $amenity->location)) {
+            return true;
+        }
+
         return $this->viewAny($user, $amenity->location);
     }
 
@@ -61,5 +65,11 @@ class AmenityPolicy
     private function isAccountAdmin(User $user, Location $location): bool
     {
         return $this->access->hasAccountRole($user, $location->account, AccountRole::AccountAdmin);
+    }
+
+    /** Portal: residents browse the reservable amenities of their Location. */
+    public function viewAnyAsResident(User $user, Location $location): bool
+    {
+        return $this->access->canResidentAccessLocation($user, $location);
     }
 }
