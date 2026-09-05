@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, NumberInput, Select, TagsInput, Text, Textarea } from '@mantine/core'
+import { Alert, Button, Collapse, NumberInput, Select, TagsInput, Text, Textarea, UnstyledButton } from '@mantine/core'
+import { AltArrowDown } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
@@ -27,7 +28,6 @@ function defaults(unit?: UnitSummary | null): UnitFormValues {
     type: unit?.type ?? 'apartment',
     building_id: unit?.building_id ?? '',
     floor: unit?.floor ?? '',
-    area_m2: unit?.area_m2 ?? '',
     participation_share: unit?.participation_share ?? '',
     maintenance_fee: unit?.maintenance_fee ?? '',
     parking_spots: unit?.parking_spots ?? [],
@@ -62,6 +62,16 @@ export function UnitFormDrawer({
   // Towers are a select only when the location has more than one (ADR 0037).
   const buildings = useQuery({ queryKey: buildingsQueryKey(locationId), queryFn: () => getBuildings(locationId) }).data?.data ?? []
   const hasTowers = buildings.length > 1
+  // Parking, storage and notes are the minority case at creation; they open
+  // on demand, and always when editing a unit that already has them. The
+  // toggle is null until touched, so each opening derives from the unit.
+  const [detailsToggle, setDetailsToggle] = useState<boolean | null>(null)
+  const detailsOpen = detailsToggle ?? Boolean(editing && (editing.parking_spots.length > 0 || editing.storage_rooms.length > 0 || editing.notes))
+
+  function close() {
+    setDetailsToggle(null)
+    onClose()
+  }
 
   useEffect(() => {
     if (opened) {
@@ -79,7 +89,7 @@ export function UnitFormDrawer({
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['registry', 'units'] })
-      onClose()
+      close()
       notifySuccess(t(editing ? 'units.form.saved' : 'units.form.created'))
     },
   })
@@ -92,7 +102,7 @@ export function UnitFormDrawer({
       opened={opened}
       subtitle={editing ? [editing.building_name, editing.unit_number].filter(Boolean).join(' · ') : locationName}
       title={t(editing ? 'units.form.editTitle' : 'units.form.createTitle')}
-      onClose={onClose}
+      onClose={close}
     >
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={form.handleSubmit((values) => submitHandlingServerErrors(form, () => mutation.mutateAsync(values)))}>
         <AppDrawerBody>
@@ -103,22 +113,8 @@ export function UnitFormDrawer({
           ) : null}
 
           <DrawerSection label={t('units.form.identity')} />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
+          <div className={`grid grid-cols-1 gap-5 sm:gap-3.5 ${hasTowers ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
             <FormTextInput control={form.control} label={t('units.form.number')} name="unit_number" />
-            <Controller
-              control={form.control}
-              name="type"
-              render={({ field, fieldState }) => (
-                <Select
-                  {...field}
-                  allowDeselect={false}
-                  data={TYPES.map((value) => ({ value, label: t(`units.types.${value}`) }))}
-                  error={fieldErrorMessage(fieldState.error)}
-                  label={t('units.columns.type')}
-                  onChange={(value) => field.onChange(value ?? 'apartment')}
-                />
-              )}
-            />
             {hasTowers ? (
               <Controller
                 control={form.control}
@@ -137,62 +133,19 @@ export function UnitFormDrawer({
               />
             ) : null}
             <FormTextInput control={form.control} label={t('units.form.floor')} name="floor" />
-            <Controller
-              control={form.control}
-              name="area_m2"
-              render={({ field, fieldState }) => (
-                <NumberInput
-                  {...field}
-                  allowNegative={false}
-                  decimalScale={2}
-                  error={fieldErrorMessage(fieldState.error)}
-                  label={t('units.form.area')}
-                  suffix=" m²"
-                  onChange={number(field)}
-                />
-              )}
-            />
-          </div>
-          {/* One chip per label; Enter or a comma adds the next. */}
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
-            <Controller
-              control={form.control}
-              name="parking_spots"
-              render={({ field, fieldState }) => (
-                <TagsInput
-                  inputWrapperOrder={HINT_BELOW}
-                  {...field}
-                  description={t('units.form.labelsHint')}
-                  error={fieldErrorMessage(fieldState.error)}
-                  label={t('units.form.parking')}
-                  placeholder="E-12"
-                  splitChars={[',', ' ']}
-                  onChange={(value) => field.onChange(value.map((label) => label.trim().toUpperCase()).filter(Boolean))}
-                />
-              )}
-            />
-            <Controller
-              control={form.control}
-              name="storage_rooms"
-              render={({ field, fieldState }) => (
-                <TagsInput
-                  inputWrapperOrder={HINT_BELOW}
-                  {...field}
-                  description={t('units.form.labelsHint')}
-                  error={fieldErrorMessage(fieldState.error)}
-                  label={t('units.form.storage')}
-                  placeholder="D-04"
-                  splitChars={[',', ' ']}
-                  onChange={(value) => field.onChange(value.map((label) => label.trim().toUpperCase()).filter(Boolean))}
-                />
-              )}
-            />
           </div>
           <Controller
             control={form.control}
-            name="notes"
+            name="type"
             render={({ field, fieldState }) => (
-              <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} rows={3} />
+              <Select
+                {...field}
+                allowDeselect={false}
+                data={TYPES.map((value) => ({ value, label: t(`units.types.${value}`) }))}
+                error={fieldErrorMessage(fieldState.error)}
+                label={t('units.columns.type')}
+                onChange={(value) => field.onChange(value ?? 'apartment')}
+              />
             )}
           />
 
@@ -235,6 +188,59 @@ export function UnitFormDrawer({
             />
           </div>
 
+          <UnstyledButton
+            aria-expanded={detailsOpen}
+            className="flex w-full items-center justify-between rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3 text-sm font-semibold"
+            onClick={() => setDetailsToggle(!detailsOpen)}
+          >
+            <span>{t('units.form.moreDetails')}</span>
+            <AltArrowDown aria-hidden className={`transition-transform ${detailsOpen ? 'rotate-180' : ''}`} size={16} />
+          </UnstyledButton>
+          <Collapse expanded={detailsOpen} keepMounted>
+            <div className="flex flex-col gap-5 pt-1">
+              {/* One chip per label; Enter or a comma adds the next. */}
+              <Controller
+                control={form.control}
+                name="parking_spots"
+                render={({ field, fieldState }) => (
+                  <TagsInput
+                    inputWrapperOrder={HINT_BELOW}
+                    {...field}
+                    description={t('units.form.labelsHint')}
+                    error={fieldErrorMessage(fieldState.error)}
+                    label={t('units.form.parking')}
+                    placeholder="E-12"
+                    splitChars={[',', ' ']}
+                    onChange={(value) => field.onChange(value.map((label) => label.trim().toUpperCase()).filter(Boolean))}
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="storage_rooms"
+                render={({ field, fieldState }) => (
+                  <TagsInput
+                    inputWrapperOrder={HINT_BELOW}
+                    {...field}
+                    description={t('units.form.labelsHint')}
+                    error={fieldErrorMessage(fieldState.error)}
+                    label={t('units.form.storage')}
+                    placeholder="D-04"
+                    splitChars={[',', ' ']}
+                    onChange={(value) => field.onChange(value.map((label) => label.trim().toUpperCase()).filter(Boolean))}
+                  />
+                )}
+              />
+              <Controller
+                control={form.control}
+                name="notes"
+                render={({ field, fieldState }) => (
+                  <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} rows={3} />
+                )}
+              />
+            </div>
+          </Collapse>
+
           {editing && onDeactivate && editing.status === 'active' ? (
             <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
               <div className="min-w-0">
@@ -252,7 +258,7 @@ export function UnitFormDrawer({
           ) : null}
         </AppDrawerBody>
         <AppDrawerFooter>
-          <Button variant="default" onClick={onClose}>
+          <Button variant="default" onClick={close}>
             {t('actions.cancel')}
           </Button>
           <Button color="accent" loading={mutation.isPending} type="submit">

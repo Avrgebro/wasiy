@@ -43,7 +43,6 @@ function homeUnit(Location $location, array $attributes = []): Unit
         'building_name' => 'Torre A',
         'floor' => '4',
         'type' => 'apartment',
-        'area_m2' => 118,
         'participation_share' => 1.18,
         'maintenance_fee' => 420,
         'parking_spots' => 'E-23',
@@ -73,12 +72,11 @@ test('a unit is created and updated with the condo fields', function () {
     $id = $this->actingAs($admin)
         ->postJson("/api/locations/{$location->id}/units", [
             'unit_number' => '501', 'type' => 'apartment', 'building_name' => 'Torre A', 'floor' => '5',
-            'area_m2' => 142.5, 'participation_share' => 1.42, 'maintenance_fee' => 520,
+            'participation_share' => 1.42, 'maintenance_fee' => 520,
             'parking_spots' => 'E-12, E-13', 'storage_rooms' => 'D-04',
         ])
         ->assertCreated()
         ->assertJsonPath('data.type', 'apartment')
-        ->assertJsonPath('data.area_m2', 142.5)
         ->assertJsonPath('data.participation_share', 1.42)
         ->assertJsonPath('data.maintenance_fee', 520)
         ->assertJsonPath('data.parking_spots', ['E-12', 'E-13'])

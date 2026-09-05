@@ -152,7 +152,6 @@ function UnitDetailContent({
     unit.building_name,
     unit.floor ? t('units.floorN', { floor: unit.floor }) : null,
     typeLabel(unit.type, t),
-    unit.area_m2 !== null ? `${unit.area_m2} m²` : null,
   ]
     .filter(Boolean)
     .join(' · ')

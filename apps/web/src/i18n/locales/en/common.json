@@ -1131,7 +1131,6 @@
       "number": "Number",
       "building": "Tower / building",
       "floor": "Floor",
-      "area": "Area",
       "parking": "Parking spots",
       "storage": "Storage rooms",
       "labelsHint": "Type a label and press Enter.",
@@ -1142,7 +1141,8 @@
       "sensitiveZone": "Sensitive zone",
       "sensitiveZoneHint": "Deactivating removes the unit from the portal, leaves its vehicles inactive and blocks new reservations. History is kept.",
       "deactivate": "Deactivate unit",
-      "buildingHint": "Pick the tower; units group by it."
+      "buildingHint": "Pick the tower; units group by it.",
+      "moreDetails": "More details"
     },
     "member": {
       "addTitle": "Add resident",

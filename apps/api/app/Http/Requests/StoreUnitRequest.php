@@ -33,7 +33,6 @@ class StoreUnitRequest extends FormRequest
             ],
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
             'type' => ['sometimes', Rule::enum(UnitType::class)],
-            'area_m2' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:999999'],
             'participation_share' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
             'maintenance_fee' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000000'],
             'parking_spots' => ['sometimes', 'nullable', 'string', 'max:255'],

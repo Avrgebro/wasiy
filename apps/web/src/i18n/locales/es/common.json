@@ -1131,7 +1131,6 @@
       "number": "Número",
       "building": "Torre / edificio",
       "floor": "Piso",
-      "area": "Área",
       "parking": "Estacionamientos",
       "storage": "Depósitos",
       "labelsHint": "Escribe una etiqueta y presiona Enter.",
@@ -1142,7 +1141,8 @@
       "sensitiveZone": "Zona sensible",
       "sensitiveZoneHint": "Desactivar quita la unidad del portal, deja sus vehículos inactivos y bloquea nuevas reservas. El historial se conserva.",
       "deactivate": "Desactivar unidad",
-      "buildingHint": "Selecciona la torre; las unidades se agrupan por ella."
+      "buildingHint": "Selecciona la torre; las unidades se agrupan por ella.",
+      "moreDetails": "Más detalles"
     },
     "member": {
       "addTitle": "Agregar residente",

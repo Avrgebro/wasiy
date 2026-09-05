@@ -32,7 +32,6 @@ class DemoRegistrySeeder extends Seeder
         $central101 = $this->unit($account, $centralLocation, '101', [
             'building_name' => 'Torre A',
             'floor' => '1',
-            'area_m2' => 118,
             'participation_share' => 1.18,
             'maintenance_fee' => 420,
             'parking_spots' => 'E-23',
@@ -43,7 +42,6 @@ class DemoRegistrySeeder extends Seeder
         $central102 = $this->unit($account, $centralLocation, '102', [
             'building_name' => 'Torre A',
             'floor' => '1',
-            'area_m2' => 76,
             'participation_share' => 0.76,
             'maintenance_fee' => 380,
             'status' => RegistryStatus::Active,
@@ -52,7 +50,6 @@ class DemoRegistrySeeder extends Seeder
         $central201 = $this->unit($account, $centralLocation, '201', [
             'building_name' => 'Torre B',
             'floor' => '2',
-            'area_m2' => 142,
             'participation_share' => 1.42,
             'maintenance_fee' => 520,
             'parking_spots' => 'E-12, E-13',
@@ -167,7 +164,6 @@ class DemoRegistrySeeder extends Seeder
                 'building_name' => $attributes['building_name'] ?? null,
                 'floor' => $attributes['floor'] ?? null,
                 'type' => $attributes['type'] ?? 'apartment',
-                'area_m2' => $attributes['area_m2'] ?? null,
                 'participation_share' => $attributes['participation_share'] ?? null,
                 'maintenance_fee' => $attributes['maintenance_fee'] ?? null,
                 'parking_spots' => $attributes['parking_spots'] ?? null,

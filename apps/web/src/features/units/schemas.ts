@@ -10,7 +10,6 @@ export const unitSchema = z.object({
   /** Required by the API once the location has two or more buildings. */
   building_id: z.string(),
   floor: z.string().trim().max(255),
-  area_m2: optionalNumber,
   participation_share: optionalNumber.refine((value) => value === '' || Number(value) <= 100, 'validation.shareTooHigh'),
   maintenance_fee: optionalNumber,
   parking_spots: z.array(z.string().trim().min(1).max(30)).max(20),
@@ -25,7 +24,6 @@ export type UnitPayload = {
   type: UnitFormValues['type']
   building_id: string | null
   floor: string | null
-  area_m2: number | null
   participation_share: number | null
   maintenance_fee: number | null
   parking_spots: string | null
@@ -41,7 +39,6 @@ export function toUnitPayload(values: UnitFormValues): UnitPayload {
     type: values.type,
     building_id: values.building_id || null,
     floor: values.floor || null,
-    area_m2: number(values.area_m2),
     participation_share: number(values.participation_share),
     maintenance_fee: number(values.maintenance_fee),
     // Labels travel as the comma-joined string the API stores.

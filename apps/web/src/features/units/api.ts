@@ -22,7 +22,6 @@ export type UnitSummary = {
   building_name: string | null
   building_code: string | null
   floor: string | null
-  area_m2: number | null
   participation_share: number | null
   maintenance_fee: number | null
   parking_spots: string[]

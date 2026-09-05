@@ -114,7 +114,7 @@ class UnitController extends Controller
 
         $unit = DB::transaction(function () use ($request, $location, $actor): Unit {
             $unit = Unit::query()->create([
-                ...$request->safe()->only(['unit_number', 'type', 'building_id', 'floor', 'area_m2', 'participation_share', 'maintenance_fee', 'parking_spots', 'storage_rooms', 'notes']),
+                ...$request->safe()->only(['unit_number', 'type', 'building_id', 'floor', 'participation_share', 'maintenance_fee', 'parking_spots', 'storage_rooms', 'notes']),
                 'account_id' => $location->account_id,
                 'location_id' => $location->id,
                 'type' => $request->safe()->enum('type', UnitType::class) ?? UnitType::Apartment,
@@ -277,7 +277,7 @@ class UnitController extends Controller
 
         DB::transaction(function () use ($request, $unit, $actor): void {
             $unit->fill($request->safe()->only([
-                'unit_number', 'type', 'building_id', 'floor', 'area_m2', 'participation_share',
+                'unit_number', 'type', 'building_id', 'floor', 'participation_share',
                 'maintenance_fee', 'parking_spots', 'storage_rooms', 'status', 'notes',
             ]));
 

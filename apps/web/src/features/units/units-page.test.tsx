@@ -54,7 +54,6 @@ function unit(overrides: Partial<UnitSummary> = {}): UnitSummary {
     building_code: 'TA',
     building_name: 'Torre A',
     floor: '4',
-    area_m2: 118,
     participation_share: 1.18,
     maintenance_fee: 420,
     parking_spots: ['E-23'],
@@ -109,7 +108,7 @@ describe('UnitsPage', () => {
   it('renders units grouped by building with derived states, and opens the detail on row click', async () => {
     const requests = installAdapter([
       unit(),
-      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', area_m2: 88, maintenance_fee: null, parking_spots: ['E-07'], resident_count: 1, occupancy: 'attention', portal_state: 'not_invited', primary_contact: null, vehicle_count: 0 }),
+      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', maintenance_fee: null, parking_spots: ['E-07'], resident_count: 1, occupancy: 'attention', portal_state: 'not_invited', primary_contact: null, vehicle_count: 0 }),
       unit({ id: 'un_609', unit_number: '609', building_name: 'Torre B', floor: '6', resident_count: 0, occupancy: 'vacant', portal_state: null, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
     ])
 
@@ -122,7 +121,7 @@ describe('UnitsPage', () => {
     expect(screen.getAllByText('Torre B')).toHaveLength(1)
     // Identity lines and derived states.
     expect(screen.getByText('E-23')).toBeInTheDocument()
-    expect(screen.getByText('Piso 4 · Depto. · 118 m²')).toBeInTheDocument()
+    expect(screen.getByText('Piso 4 · Depto.')).toBeInTheDocument()
     expect(screen.getByText(/Carlos Mendoza/)).toBeInTheDocument()
     expect(screen.getByText('+2')).toBeInTheDocument()
     expect(screen.getByText('— Sin contacto principal')).toBeInTheDocument()

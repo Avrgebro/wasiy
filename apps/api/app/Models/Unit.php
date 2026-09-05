@@ -24,7 +24,6 @@ use Illuminate\Support\Str;
     // Accepted for mass assignment and resolved to a Building on save.
     'building_name',
     'floor',
-    'area_m2',
     'participation_share',
     'maintenance_fee',
     'parking_spots',
@@ -123,7 +122,6 @@ class Unit extends Model
         return [
             'status' => RegistryStatus::class,
             'type' => UnitType::class,
-            'area_m2' => 'decimal:2',
             'participation_share' => 'decimal:3',
             'maintenance_fee' => 'integer',
         ];

@@ -44,7 +44,7 @@ function detail(): UnitDetailResponse {
   return {
     data: {
       id: 'un_402', account_id: 'acc_1', location_id: 'loc_1', unit_number: '402', type: 'apartment', building_id: 'bd_a', building_name: 'Torre A', building_code: 'TA', floor: '4',
-      area_m2: 118, participation_share: 1.18, maintenance_fee: 420, parking_spots: ['E-23'], storage_rooms: ['D-04'], status: 'active', notes: null,
+      participation_share: 1.18, maintenance_fee: 420, parking_spots: ['E-23'], storage_rooms: ['D-04'], status: 'active', notes: null,
       resident_count: 3, vehicle_count: 2, occupancy: 'occupied', portal_state: 'active', primary_contact: null,
       members: [
         { membership_id: 'um_1', resident_id: 'rs_1', name: 'Carlos Mendoza', email: 'carlos@x.pe', phone: '+51 987 654 321', is_primary_contact: true, started_at: null, portal_state: 'active' },
@@ -114,7 +114,7 @@ describe('UnitDetailPage', () => {
     renderPage()
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Depto. 402' })).toBeInTheDocument()
-    expect(screen.getByText('Torre A · Piso 4 · Departamento · 118 m²')).toBeInTheDocument()
+    expect(screen.getByText('Torre A · Piso 4 · Departamento')).toBeInTheDocument()
     expect(screen.getByText('1.18 %')).toBeInTheDocument()
     expect(screen.getByText('E-23')).toBeInTheDocument()
     expect(screen.getByText('D-04')).toBeInTheDocument()
@@ -168,7 +168,7 @@ describe('UnitDetailPage', () => {
     await waitFor(() => expect(writes).toHaveLength(1))
     expect(writes[0].method).toBe('patch')
     expect(writes[0].url).toBe('/api/units/un_402')
-    expect(writes[0].body).toMatchObject({ unit_number: '402', type: 'apartment', building_id: 'bd_a', area_m2: 118, participation_share: 1.18, maintenance_fee: 450, parking_spots: 'E-23', storage_rooms: 'D-04' })
+    expect(writes[0].body).toMatchObject({ unit_number: '402', type: 'apartment', building_id: 'bd_a', participation_share: 1.18, maintenance_fee: 450, parking_spots: 'E-23', storage_rooms: 'D-04' })
   })
 
   it('adds a new person to the unit with role, primary contact and invitation', async () => {

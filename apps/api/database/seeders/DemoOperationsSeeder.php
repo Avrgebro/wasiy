@@ -117,7 +117,6 @@ class DemoOperationsSeeder extends Seeder
                     'building_name' => $tower,
                     'floor' => (string) $floor,
                     'type' => 'apartment',
-                    'area_m2' => $area,
                     'participation_share' => round($area / 100, 2),
                     'maintenance_fee' => $fee,
                     'parking_spots' => $floor % 2 === 0 ? 'E-'.(10 + $floor * 2 + ($number[-1] === '1' ? 0 : 1)) : null,
@@ -130,7 +129,7 @@ class DemoOperationsSeeder extends Seeder
 
         $units->put($this->key('Torre A', 'L-01'), Unit::query()->updateOrCreate(
             ['account_id' => $this->account->id, 'location_id' => $this->central->id, 'unit_number' => 'L-01'],
-            ['building_name' => 'Torre A', 'floor' => '1', 'type' => 'commercial', 'area_m2' => 64, 'participation_share' => 0.64, 'maintenance_fee' => 350, 'status' => RegistryStatus::Active, 'notes' => 'Local comercial · farmacia.'],
+            ['building_name' => 'Torre A', 'floor' => '1', 'type' => 'commercial', 'participation_share' => 0.64, 'maintenance_fee' => 350, 'status' => RegistryStatus::Active, 'notes' => 'Local comercial · farmacia.'],
         ));
 
         return $units;

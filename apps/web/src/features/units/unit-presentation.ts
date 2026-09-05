@@ -14,12 +14,11 @@ export function typeLabel(type: UnitType, t: TFunction, short = false): string {
   return t(`units.types${short ? 'Short' : ''}.${type}`)
 }
 
-/** "Piso 4 · Depto. · 118 m²" — the second identity line. */
+/** "Piso 4 · Depto." — the second identity line. */
 export function unitDescriptor(unit: UnitSummary, t: TFunction): string {
   return [
     unit.floor ? t('units.floorN', { floor: unit.floor }) : null,
     typeLabel(unit.type, t, true),
-    unit.area_m2 !== null ? `${unit.area_m2} m²` : null,
   ]
     .filter(Boolean)
     .join(' · ')
