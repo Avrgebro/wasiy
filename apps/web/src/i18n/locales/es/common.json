@@ -7,7 +7,8 @@
     "search": "Buscar",
     "import": "Importar",
     "cancel": "Cancelar",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "close": "Cerrar"
   },
   "common": {
     "loading": "Cargando",
@@ -1140,7 +1141,8 @@
       "shareHint": "Alícuota según reglamento interno.",
       "sensitiveZone": "Zona sensible",
       "sensitiveZoneHint": "Desactivar quita la unidad del portal, deja sus vehículos inactivos y bloquea nuevas reservas. El historial se conserva.",
-      "deactivate": "Desactivar unidad"
+      "deactivate": "Desactivar unidad",
+      "buildingHint": "Selecciona la torre; las unidades se agrupan por ella."
     },
     "member": {
       "addTitle": "Agregar residente",
@@ -1369,5 +1371,26 @@
       "visits": "Visitantes",
       "packages": "Paquetes"
     }
+  },
+  "buildings": {
+    "title": "Torres",
+    "name": "Nombre",
+    "namePlaceholder": "Torre B",
+    "code": "Código",
+    "unnamed": "Sin nombre",
+    "add": "Agregar torre",
+    "added": "Torre agregada",
+    "saved": "Torre guardada",
+    "removed": "Torre eliminada",
+    "delete": "Eliminar {{name}}",
+    "lastOne": "Una ubicación conserva al menos una torre.",
+    "inUse_one": "{{count}} unidad vive en esta torre; muévela antes de eliminarla.",
+    "inUse_other": "{{count}} unidades viven en esta torre; muévelas antes de eliminarla.",
+    "unitsCount_one": "{{count}} unidad",
+    "unitsCount_other": "{{count}} unidades",
+    "singleHint": "Una sola torre: las unidades no muestran torre. Agrega otra cuando la ubicación tenga más de un edificio.",
+    "multiHint": "Cada unidad pertenece a una torre. Renombrar aquí actualiza todas sus unidades.",
+    "confirmDeleteTitle": "¿Eliminar la torre {{name}}?",
+    "confirmDeleteBody": "Solo se eliminan torres sin unidades. Esta acción no se puede deshacer."
   }
 }

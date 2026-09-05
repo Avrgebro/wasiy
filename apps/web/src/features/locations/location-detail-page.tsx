@@ -23,6 +23,7 @@ import { LocationDeactivateModal } from './location-deactivate-modal'
 import { LocationFormDrawer } from './location-form-drawer'
 import { LocationInfoTab } from './location-info-tab'
 import { LocationStaffTab } from './location-staff-tab'
+import { BuildingsList } from '../buildings/buildings-list'
 import { OperationalSettingsPanel } from './operational-settings'
 import type { LocationDetailTab } from './schemas'
 
@@ -261,6 +262,10 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
           <LocationStaffTab accountId={accountId} locationId={location.id} />
         </Tabs.Panel>
         <Tabs.Panel pt="lg" value="settings">
+          <section className="mb-6 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
+            <h3 className="m-0 mb-3 font-display text-base font-semibold text-[var(--mantine-color-text)]">{t('buildings.title')}</h3>
+            <BuildingsList locationId={location.id} readOnly={deactivated} />
+          </section>
           <OperationalSettingsPanel
             fetchSettings={() => getLocationSettings(accountId, location.id)}
             level="location"

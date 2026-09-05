@@ -7,7 +7,8 @@ const optionalNumber = z.union([z.number(), z.literal('')])
 export const unitSchema = z.object({
   unit_number: z.string().trim().min(1, 'validation.unitRequired').max(255),
   type: z.enum(['apartment', 'house', 'commercial', 'office']),
-  building_name: z.string().trim().max(255),
+  /** Required by the API once the location has two or more buildings. */
+  building_id: z.string(),
   floor: z.string().trim().max(255),
   area_m2: optionalNumber,
   participation_share: optionalNumber.refine((value) => value === '' || Number(value) <= 100, 'validation.shareTooHigh'),
@@ -22,7 +23,7 @@ export type UnitFormValues = z.infer<typeof unitSchema>
 export type UnitPayload = {
   unit_number: string
   type: UnitFormValues['type']
-  building_name: string | null
+  building_id: string | null
   floor: string | null
   area_m2: number | null
   participation_share: number | null
@@ -38,7 +39,7 @@ export function toUnitPayload(values: UnitFormValues): UnitPayload {
   return {
     unit_number: values.unit_number,
     type: values.type,
-    building_name: values.building_name || null,
+    building_id: values.building_id || null,
     floor: values.floor || null,
     area_m2: number(values.area_m2),
     participation_share: number(values.participation_share),

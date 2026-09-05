@@ -7,7 +7,8 @@
     "search": "Search",
     "import": "Import",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "close": "Close"
   },
   "common": {
     "loading": "Loading",
@@ -1140,7 +1141,8 @@
       "shareHint": "Share per the building bylaws.",
       "sensitiveZone": "Sensitive zone",
       "sensitiveZoneHint": "Deactivating removes the unit from the portal, leaves its vehicles inactive and blocks new reservations. History is kept.",
-      "deactivate": "Deactivate unit"
+      "deactivate": "Deactivate unit",
+      "buildingHint": "Pick the tower; units group by it."
     },
     "member": {
       "addTitle": "Add resident",
@@ -1369,5 +1371,26 @@
       "visits": "Visitors",
       "packages": "Packages"
     }
+  },
+  "buildings": {
+    "title": "Buildings",
+    "name": "Name",
+    "namePlaceholder": "Tower B",
+    "code": "Code",
+    "unnamed": "Unnamed",
+    "add": "Add building",
+    "added": "Building added",
+    "saved": "Building saved",
+    "removed": "Building removed",
+    "delete": "Delete {{name}}",
+    "lastOne": "A location keeps at least one building.",
+    "inUse_one": "{{count}} unit lives in this building; move it before deleting.",
+    "inUse_other": "{{count}} units live in this building; move them before deleting.",
+    "unitsCount_one": "{{count}} unit",
+    "unitsCount_other": "{{count}} units",
+    "singleHint": "A single building: units show no tower. Add another when the location has more than one.",
+    "multiHint": "Every unit belongs to a building. Renaming here updates all its units.",
+    "confirmDeleteTitle": "Delete building {{name}}?",
+    "confirmDeleteBody": "Only buildings without units can be deleted. This cannot be undone."
   }
 }

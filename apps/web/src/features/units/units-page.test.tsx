@@ -50,6 +50,8 @@ function unit(overrides: Partial<UnitSummary> = {}): UnitSummary {
     location_id: 'loc_1',
     unit_number: '402',
     type: 'apartment',
+    building_id: 'bd_a',
+    building_code: 'TA',
     building_name: 'Torre A',
     floor: '4',
     area_m2: 118,
@@ -74,6 +76,7 @@ function installAdapter(rows: UnitSummary[]) {
     const url = config.url ?? ''
     requests.push(url)
     if (url === '/api/me') return Promise.resolve(axiosResponse(config, meResponse()))
+    if (url === '/api/locations/loc_1/buildings') return Promise.resolve(axiosResponse(config, { data: [{ id: 'bd_a', location_id: 'loc_1', name: 'Torre A', code: 'TA', sort_order: 1, units_count: 3 }, { id: 'bd_b', location_id: 'loc_1', name: 'Torre B', code: null, sort_order: 2, units_count: 0 }] }))
     if (url.includes('/units')) {
       return Promise.resolve(axiosResponse(config, { data: rows, meta: { current_page: 1, last_page: 1, per_page: 15, total: rows.length } }))
     }

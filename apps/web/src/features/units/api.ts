@@ -18,7 +18,9 @@ export type UnitSummary = {
   location_id: string
   unit_number: string
   type: UnitType
+  building_id: string
   building_name: string | null
+  building_code: string | null
   floor: string | null
   area_m2: number | null
   participation_share: number | null

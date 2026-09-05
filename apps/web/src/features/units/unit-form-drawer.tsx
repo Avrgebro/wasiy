@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, NumberInput, Select, TagsInput, Text, Textarea } from '@mantine/core'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +9,7 @@ import { DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
+import { buildingsQueryKey, getBuildings } from '../buildings/api'
 import { createUnit, updateUnit, type UnitSummary } from './api'
 import { toUnitPayload, unitSchema, type UnitFormValues } from './schemas'
 
@@ -24,7 +25,7 @@ function defaults(unit?: UnitSummary | null): UnitFormValues {
   return {
     unit_number: unit?.unit_number ?? '',
     type: unit?.type ?? 'apartment',
-    building_name: unit?.building_name ?? '',
+    building_id: unit?.building_id ?? '',
     floor: unit?.floor ?? '',
     area_m2: unit?.area_m2 ?? '',
     participation_share: unit?.participation_share ?? '',
@@ -58,6 +59,9 @@ export function UnitFormDrawer({
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
   const form = useForm<UnitFormValues>({ defaultValues: defaults(editing), resolver: zodResolver(unitSchema) })
+  // Towers are a select only when the location has more than one (ADR 0037).
+  const buildings = useQuery({ queryKey: buildingsQueryKey(locationId), queryFn: () => getBuildings(locationId) }).data?.data ?? []
+  const hasTowers = buildings.length > 1
 
   useEffect(() => {
     if (opened) {
@@ -67,8 +71,12 @@ export function UnitFormDrawer({
   }, [opened, editing?.id])
 
   const mutation = useMutation({
-    mutationFn: (values: UnitFormValues) =>
-      editing ? updateUnit(editing.id, toUnitPayload(values)) : createUnit(locationId, toUnitPayload(values)),
+    mutationFn: (values: UnitFormValues) => {
+      const payload = toUnitPayload(values)
+      if (!hasTowers) payload.building_id = null
+
+      return editing ? updateUnit(editing.id, payload) : createUnit(locationId, payload)
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['registry', 'units'] })
       onClose()
@@ -111,7 +119,23 @@ export function UnitFormDrawer({
                 />
               )}
             />
-            <FormTextInput control={form.control} label={t('units.form.building')} name="building_name" />
+            {hasTowers ? (
+              <Controller
+                control={form.control}
+                name="building_id"
+                render={({ field, fieldState }) => (
+                  <Select
+                    {...field}
+                    allowDeselect={false}
+                    data={buildings.map((building) => ({ value: building.id, label: building.name ?? t('buildings.unnamed') }))}
+                    error={fieldErrorMessage(fieldState.error)}
+                    label={t('units.form.building')}
+                    required
+                    onChange={(value) => field.onChange(value ?? '')}
+                  />
+                )}
+              />
+            ) : null}
             <FormTextInput control={form.control} label={t('units.form.floor')} name="floor" />
             <Controller
               control={form.control}

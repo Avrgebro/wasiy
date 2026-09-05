@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddCircle, Buildings } from '@solar-icons/react'
 import { useState } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -14,6 +14,7 @@ import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
 import { chipParams, UNIT_CHIPS, type UnitsSearchValues } from './schemas'
 import { occupancyColor, portalColor, unitDescriptor, unitLabelsLine } from './unit-presentation'
+import { BuildingsDrawer } from '../buildings/buildings-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { UnitsFilters } from './units-filters'
 
@@ -41,14 +42,15 @@ export function UnitsPage() {
     )
   }
 
-  return <UnitsContent canManage={can(me, 'registry.manage')} locationId={location.id} locationName={location.name} />
+  return <UnitsContent canManage={can(me, 'registry.manage')} canManageBuildings={can(me, 'location.settings')} locationId={location.id} locationName={location.name} />
 }
 
-function UnitsContent({ canManage, locationId, locationName }: { canManage: boolean; locationId: string; locationName: string }) {
+function UnitsContent({ canManage, canManageBuildings, locationId, locationName }: { canManage: boolean; canManageBuildings: boolean; locationId: string; locationName: string }) {
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
   const [creating, setCreating] = useState(false)
+  const [managingBuildings, setManagingBuildings] = useState(false)
 
   const listQuery = useQuery({
     queryKey: ['registry', 'units', locationId, search],
@@ -168,6 +170,11 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
         </div>
         {canManage ? (
           <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
+            {canManageBuildings ? (
+              <Button className="w-full sm:w-auto" leftSection={<Buildings size={18} />} variant="default" onClick={() => setManagingBuildings(true)}>
+                {t('buildings.title')}
+              </Button>
+            ) : null}
             <ImportRegistryButton />
             <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setCreating(true)}>
               {t('units.form.createTitle')}
@@ -231,6 +238,7 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
         opened={creating}
         onClose={() => setCreating(false)}
       />
+      <BuildingsDrawer locationId={locationId} locationName={locationName} opened={managingBuildings} onClose={() => setManagingBuildings(false)} />
     </div>
   )
 }
