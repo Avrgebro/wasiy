@@ -156,7 +156,7 @@ describe('ResidentsPage', () => {
     expect(within(drawer).queryByLabelText(/Correo/)).not.toBeInTheDocument()
     await user.type(within(drawer).getByLabelText('Nombres'), 'Elena')
     await user.type(within(drawer).getByLabelText('Apellidos'), 'Vargas')
-    await user.type(within(drawer).getByRole('textbox', { name: 'Número de teléfono' }), '977105630')
+    await user.type(within(drawer).getByRole('textbox', { name: 'Teléfono (opcional)' }), '977105630')
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
     await user.click(await screen.findByRole('option', { name: 'Torre A / 402' }))
     await user.click(within(drawer).getByRole('button', { name: 'Crear persona' }))

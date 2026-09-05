@@ -1394,6 +1394,7 @@
   },
   "phone": {
     "country": "País",
-    "number": "Número de teléfono"
+    "searchCountry": "Buscar país…",
+    "noCountry": "Ningún país coincide."
   }
 }

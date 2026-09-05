@@ -19,12 +19,24 @@ function renderInput(value = '', country = 'PE') {
 }
 
 describe('PhoneInput', () => {
+  it('switches country from the left-section picker and re-emits', async () => {
+    const onChange = renderInput('+51987654321')
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: 'País' }))
+    await user.type(screen.getByPlaceholderText('Buscar país…'), 'chile')
+    await user.click(await screen.findByRole('option', { name: /Chile/ }))
+
+    expect(screen.getByRole('button', { name: 'País' })).toHaveTextContent('🇨🇱+56')
+    expect(onChange).toHaveBeenLastCalledWith('+56987654321')
+  })
+
   it('emits E.164 for a national number typed in the location country', async () => {
     const onChange = renderInput()
     const user = userEvent.setup()
 
-    expect(screen.getByRole('combobox', { name: 'País' })).toHaveValue('🇵🇪 +51 Perú')
-    await user.type(screen.getByRole('textbox', { name: 'Número de teléfono' }), '987654321')
+    expect(screen.getByRole('button', { name: 'País' })).toHaveTextContent('🇵🇪+51')
+    await user.type(screen.getByRole('textbox', { name: 'Teléfono' }), '987654321')
 
     expect(onChange).toHaveBeenLastCalledWith('+51987654321')
   })
@@ -32,8 +44,8 @@ describe('PhoneInput', () => {
   it('seeds the selector and national digits from a stored value', () => {
     renderInput('+56987654321')
 
-    expect(screen.getByRole('combobox', { name: 'País' })).toHaveValue('🇨🇱 +56 Chile')
-    expect(screen.getByRole('textbox', { name: 'Número de teléfono' })).toHaveValue('9 8765 4321')
+    expect(screen.getByRole('button', { name: 'País' })).toHaveTextContent('🇨🇱+56')
+    expect(screen.getByRole('textbox', { name: 'Teléfono' })).toHaveValue('9 8765 4321')
   })
 })
 
