@@ -1133,16 +1133,15 @@
       "floor": "Piso",
       "parking": "Estacionamientos",
       "storage": "Depósitos",
-      "labelsHint": "Escribe una etiqueta y presiona Enter.",
       "feeSection": "Cuota y participación",
-      "feeHint": "Monto mensual; se usa al generar las cuotas del mes.",
       "share": "Porcentaje de participación",
-      "shareHint": "Alícuota según reglamento interno.",
       "sensitiveZone": "Zona sensible",
       "sensitiveZoneHint": "Desactivar quita la unidad del portal, deja sus vehículos inactivos y bloquea nuevas reservas. El historial se conserva.",
       "deactivate": "Desactivar unidad",
       "buildingHint": "Selecciona la torre; las unidades se agrupan por ella.",
-      "moreDetails": "Más detalles"
+      "moreDetails": "Más detalles",
+      "feeSectionHint": "La cuota mensual se usa al generar las cuotas del mes. La participación es la alícuota del reglamento interno y reparte los gastos comunes.",
+      "moreDetailsHint": "Estacionamientos y depósitos como etiquetas (Enter agrega otra) y notas internas."
     },
     "member": {
       "addTitle": "Agregar residente",

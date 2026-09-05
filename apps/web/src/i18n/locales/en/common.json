@@ -1133,16 +1133,15 @@
       "floor": "Floor",
       "parking": "Parking spots",
       "storage": "Storage rooms",
-      "labelsHint": "Type a label and press Enter.",
       "feeSection": "Fee and share",
-      "feeHint": "Monthly amount; used when generating the month's dues.",
       "share": "Participation share",
-      "shareHint": "Share per the building bylaws.",
       "sensitiveZone": "Sensitive zone",
       "sensitiveZoneHint": "Deactivating removes the unit from the portal, leaves its vehicles inactive and blocks new reservations. History is kept.",
       "deactivate": "Deactivate unit",
       "buildingHint": "Pick the tower; units group by it.",
-      "moreDetails": "More details"
+      "moreDetails": "More details",
+      "feeSectionHint": "The monthly fee feeds the month's dues. The share is the bylaws' quota and splits common expenses.",
+      "moreDetailsHint": "Parking and storage as labels (Enter adds another) and internal notes."
     },
     "member": {
       "addTitle": "Add resident",

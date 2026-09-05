@@ -23,11 +23,18 @@ export function DrawerFacts({ children }: { children: ReactNode }) {
   return <dl className="m-0 grid grid-cols-2 gap-x-5 gap-y-4">{children}</dl>
 }
 
-export function DrawerSection({ label }: { label: string }) {
+/**
+ * Section header; the optional description says what the section is for once,
+ * so the fields under it can drop their own hints and stay aligned.
+ */
+export function DrawerSection({ label, description }: { label: string; description?: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--wa-interactive)]">{label}</span>
-      <span className="h-px flex-1 bg-[var(--mantine-color-default-border)]" />
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center gap-3">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--wa-interactive)]">{label}</span>
+        <span className="h-px flex-1 bg-[var(--mantine-color-default-border)]" />
+      </div>
+      {description ? <p className="m-0 text-xs leading-relaxed text-[var(--mantine-color-dimmed)]">{description}</p> : null}
     </div>
   )
 }

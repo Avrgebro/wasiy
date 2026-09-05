@@ -16,12 +16,6 @@ import { toUnitPayload, unitSchema, type UnitFormValues } from './schemas'
 
 const TYPES = ['apartment', 'house', 'commercial', 'office'] as const
 
-/**
- * Hints go under the input, not between label and input: side-by-side fields
- * with hints of different lengths would otherwise misalign their inputs.
- */
-const HINT_BELOW: Array<'label' | 'input' | 'description' | 'error'> = ['label', 'input', 'description', 'error']
-
 function defaults(unit?: UnitSummary | null): UnitFormValues {
   return {
     unit_number: unit?.unit_number ?? '',
@@ -149,18 +143,16 @@ export function UnitFormDrawer({
             )}
           />
 
-          <DrawerSection label={t('units.form.feeSection')} />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
+          <DrawerSection description={t('units.form.feeSectionHint')} label={t('units.form.feeSection')} />
+          <div className="flex flex-col gap-5">
             <Controller
               control={form.control}
               name="maintenance_fee"
               render={({ field, fieldState }) => (
                 <NumberInput
-                  inputWrapperOrder={HINT_BELOW}
                   {...field}
                   allowDecimal={false}
                   allowNegative={false}
-                  description={t('units.form.feeHint')}
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('units.detail.monthlyFee')}
                   prefix="S/ "
@@ -174,11 +166,9 @@ export function UnitFormDrawer({
               name="participation_share"
               render={({ field, fieldState }) => (
                 <NumberInput
-                  inputWrapperOrder={HINT_BELOW}
                   {...field}
                   allowNegative={false}
                   decimalScale={3}
-                  description={t('units.form.shareHint')}
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('units.form.share')}
                   suffix=" %"
@@ -193,7 +183,10 @@ export function UnitFormDrawer({
             className="flex w-full items-center justify-between rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3 text-sm font-semibold"
             onClick={() => setDetailsToggle(!detailsOpen)}
           >
-            <span>{t('units.form.moreDetails')}</span>
+            <span className="flex flex-col items-start gap-0.5 text-left">
+              <span>{t('units.form.moreDetails')}</span>
+              <span className="text-xs font-normal text-[var(--mantine-color-dimmed)]">{t('units.form.moreDetailsHint')}</span>
+            </span>
             <AltArrowDown aria-hidden className={`transition-transform ${detailsOpen ? 'rotate-180' : ''}`} size={16} />
           </UnstyledButton>
           <Collapse expanded={detailsOpen} keepMounted>
@@ -204,9 +197,7 @@ export function UnitFormDrawer({
                 name="parking_spots"
                 render={({ field, fieldState }) => (
                   <TagsInput
-                    inputWrapperOrder={HINT_BELOW}
                     {...field}
-                    description={t('units.form.labelsHint')}
                     error={fieldErrorMessage(fieldState.error)}
                     label={t('units.form.parking')}
                     placeholder="E-12"
@@ -220,9 +211,7 @@ export function UnitFormDrawer({
                 name="storage_rooms"
                 render={({ field, fieldState }) => (
                   <TagsInput
-                    inputWrapperOrder={HINT_BELOW}
                     {...field}
-                    description={t('units.form.labelsHint')}
                     error={fieldErrorMessage(fieldState.error)}
                     label={t('units.form.storage')}
                     placeholder="D-04"
