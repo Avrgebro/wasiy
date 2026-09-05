@@ -52,7 +52,7 @@ The resident-facing side of Wasiy: a mobile-first web app where a resident sees 
 ## Milestones (value order)
 
 - **P0 Two builds, one codebase (done 2026-09-05, ADR 0038)** — separate route trees and artifacts per surface, import boundary, unified login without the audience switcher, manifests per host.
-- **P1 Shell and visitors** — portal shell with bottom tabs and unit switcher; home board (visitors and packages parts); visitor pre-registration and history; desk-side "Esperados hoy" and arrival confirmation. Closes the M12 second phase.
+- **P1 Shell and visitors (built 2026-09-05)** — portal shell with bottom tabs and unit switcher; home board (visitors and packages parts); visitor pre-registration and history; desk-side "Esperados hoy" and arrival confirmation. Closes the M12 second phase.
 - **P2 Reservations and packages** — amenity browsing, booking requests, my reservations with cancellation; packages list; home board gains next reservation.
 - **P3 Alerts** — notification center and email; preferences in the profile.
 - **P4 My unit and profile** — members management for the primary contact, vehicles UI, estado de cuenta; phone, email, password.
@@ -66,3 +66,10 @@ Each milestone: backend slice with tests, frontend slice with tests, mockups fir
 - Incident reports (needs a staff module to receive and resolve).
 - Shared documents (reglamento, actas).
 - Building contacts card (cheap; can ride along with P1 if a mockup includes it).
+
+## P1 notes (2026-09-05)
+
+- Pre-registrations are visits in status `expected` (columns `expected_on`, `expected_time`, `pre_registered_by`, `pre_registered_at`, `cancelled_at`; check-in columns nullable). Desk confirmation moves them to `inside` with confirmation `pre_registered`; the resident's cancellation to `cancelled`. Walk-ins unchanged.
+- API: `POST /portal/visits`, `GET /portal/visits?unit_id&scope=expected|today|history`, `POST /portal/visits/{id}/cancel`, `GET /portal/packages?unit_id&status`; staff `GET /locations/{id}/visits?expected=1&unit_id=` and `POST /visits/{id}/confirm-arrival`. The staff list hides expected rows unless asked (the door log stays the door log).
+- Portal shell: header with unit pill (switcher sheet), tab bar Inicio · Visitas · Perfil (Reservas and Mi unidad arrive with P2/P4), no bell until P3. Active unit persisted in localStorage.
+- Staff: Visitantes gains the "Esperados hoy" chip; the register drawer follows 16c (unit first, Esperados hoy band, Confirmar llegada, read-only Pre-registrado pill).

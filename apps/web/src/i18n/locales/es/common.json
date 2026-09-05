@@ -8,7 +8,8 @@
     "import": "Importar",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "back": "Volver"
   },
   "common": {
     "loading": "Cargando",
@@ -157,7 +158,81 @@
     "primaryUnit": "Acceso activo para {{unit}}",
     "savePhone": "Guardar teléfono",
     "summary": "Resumen de tus unidades y datos de contacto.",
-    "title": "Portal de residentes"
+    "title": "Portal de residentes",
+    "home": "Inicio",
+    "noUnit": "Aún no tienes una unidad activa en el portal.",
+    "greeting": "Hola, {{name}}",
+    "viewAll": "Ver todo",
+    "tabs": {
+      "home": "Inicio",
+      "visits": "Visitas",
+      "profile": "Perfil"
+    },
+    "unit": {
+      "mine": "Mis unidades",
+      "switch": "Cambiar unidad",
+      "switchHint": "Todo lo que ves en el portal corresponde a la unidad activa."
+    },
+    "visits": {
+      "preRegister": "Pre-registrar visita",
+      "registered": "Visita pre-registrada",
+      "cancelled": "Pre-registro cancelado",
+      "expectedToday": "Visitantes esperados hoy",
+      "noneToday": "Nadie esperado hoy.",
+      "today": "Hoy",
+      "noTime": "sin hora",
+      "arrivedAt": "Llegó {{time}}",
+      "chips": {
+        "expected": "Esperados",
+        "history": "Historial"
+      },
+      "emptyExpected": "No tienes visitas pre-registradas.",
+      "emptyHistory": "Todavía no hay visitas registradas para esta unidad.",
+      "status": {
+        "label": "Estado",
+        "expected": "Esperado",
+        "arrived": "Llegó",
+        "cancelled": "Cancelado"
+      },
+      "cancel": "Cancelar pre-registro",
+      "cancelHint": "Disponible solo mientras el estado sea «Esperado».",
+      "cancelTitle": "¿Cancelar el pre-registro de {{name}}?",
+      "cancelBody": "Recepción dejará de esperar a esta persona. Podrás registrarla de nuevo cuando quieras.",
+      "timeline": {
+        "preRegistered": "Pre-registrado",
+        "arrived": "Llegó",
+        "byDesk": "recepción {{name}}",
+        "left": "Salió",
+        "leftAuto": "Salida automática",
+        "cancelled": "Cancelado"
+      },
+      "form": {
+        "intro": "Recepción verá este aviso y confirmará la llegada. Puedes cancelarlo mientras no haya llegado.",
+        "visitor": "Nombre del visitante",
+        "document": "Documento",
+        "documentOptional": "Documento (opcional)",
+        "documentPlaceholder": "DNI o carné",
+        "date": "Fecha",
+        "otherDay": "Otro día",
+        "whichDay": "¿Qué día?",
+        "timeOptional": "Hora aproximada (opcional)",
+        "note": "Nota para recepción",
+        "noteOptional": "Nota para recepción (opcional)",
+        "notePlaceholder": "Ej. viene a recoger unas llaves"
+      }
+    },
+    "packages": {
+      "atDesk": "Paquetes en recepción",
+      "none": "No tienes paquetes por recoger.",
+      "toCollect": "Por recoger",
+      "package": "Paquete"
+    },
+    "age": {
+      "today": "hoy",
+      "yesterday": "ayer",
+      "days_one": "hace {{count}} día",
+      "days_other": "hace {{count}} días"
+    }
   },
   "nav": {
     "activity": "Actividad",
@@ -1298,7 +1373,8 @@
     "chips": {
       "inside": "Dentro",
       "today": "Hoy",
-      "all": "Todos"
+      "all": "Todos",
+      "expected": "Esperados hoy"
     },
     "columns": {
       "checkIn": "Ingreso",
@@ -1308,18 +1384,22 @@
     },
     "statuses": {
       "inside": "Dentro",
-      "left": "Salió"
+      "left": "Salió",
+      "expected": "Esperado",
+      "cancelled": "Cancelado"
     },
     "confirmations": {
       "none": "Sin confirmar",
       "intercom": "Intercom",
       "phone": "Teléfono",
-      "management": "Administración"
+      "management": "Administración",
+      "pre_registered": "Pre-registrado"
     },
     "empty": {
       "inside": "No hay visitantes dentro del edificio.",
       "today": "Aún no hay visitas hoy.",
-      "all": "Aún no hay visitas registradas."
+      "all": "Aún no hay visitas registradas.",
+      "expected": "Ningún residente pre-registró visitas para hoy."
     },
     "emptyFiltered": "Ninguna visita coincide.",
     "duration": {
@@ -1354,7 +1434,19 @@
       "out": "Salida registrada",
       "autoOut": "Salida automática (sin registro de salida)",
       "confirmed": "Confirmada por {{method}}",
-      "confirmedWith": "Confirmada por {{method}} con {{name}}"
+      "confirmedWith": "Confirmada por {{method}} con {{name}}",
+      "preRegistered": "Pre-registrado por el residente"
+    },
+    "expected": {
+      "band": "Esperados hoy",
+      "bandHint": "Solo pre-registros de hoy para esta unidad. Confirmar una llegada no impide registrar a otro visitante.",
+      "pickUnit": "Elige la unidad para ver sus visitas esperadas.",
+      "none": "Sin visitantes esperados para esta unidad hoy.",
+      "noTime": "sin hora",
+      "by": "pre-registrado por {{name}}",
+      "confirm": "Confirmar llegada",
+      "chosen": "Elegido",
+      "confirmationLocked": "El residente ya autorizó la visita: el método queda fijo."
     }
   },
   "search": {

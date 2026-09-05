@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const VISIT_CHIPS = ['inside', 'today', 'all'] as const
+export const VISIT_CHIPS = ['inside', 'today', 'expected', 'all'] as const
 export type VisitChip = (typeof VISIT_CHIPS)[number]
 export const VISIT_CONFIRMATIONS = ['none', 'intercom', 'phone', 'management'] as const
 

@@ -157,12 +157,17 @@ function timeline(visit: VisitSummary, timezone: string, t: (key: string, option
     })
   }
 
-  items.push({ id: 'in', when: shortDateTime(visit.checked_in_at, timezone), label: t('visits.timeline.in'), actor: visit.checked_in_by_name ?? '—' })
+  if (visit.pre_registered_at) {
+    items.push({ id: 'pre', when: shortDateTime(visit.pre_registered_at, timezone), label: t('visits.timeline.preRegistered'), actor: visit.pre_registered_by_name ?? '—' })
+  }
+  if (visit.checked_in_at) {
+    items.push({ id: 'in', when: shortDateTime(visit.checked_in_at, timezone), label: t('visits.timeline.in'), actor: visit.checked_in_by_name ?? '—' })
+  }
 
   if (visit.confirmation !== 'none') {
     items.push({
       id: 'confirmed',
-      when: shortDateTime(visit.checked_in_at, timezone),
+      when: shortDateTime(visit.checked_in_at ?? visit.pre_registered_at ?? '', timezone),
       label: visit.resident_name
         ? t('visits.timeline.confirmedWith', { method: t(`visits.confirmations.${visit.confirmation}`), name: visit.resident_name })
         : t('visits.timeline.confirmed', { method: t(`visits.confirmations.${visit.confirmation}`) }),

@@ -47,12 +47,12 @@ function visit(overrides: Partial<VisitSummary> = {}): VisitSummary {
   return {
     id: 'vs_1', account_id: 'acc_1', location_id: 'loc_1', unit_id: 'un_402', unit_number: '402', building_name: 'Torre A',
     resident_id: 'rs_1', resident_name: 'Carlos Mendoza', resident_phone: '+51 987 654 321', visitor_name: 'Elena Vargas', document: 'DNI 45872213', phone: null,
-    confirmation: 'intercom', notes: 'Madre del residente', status: 'inside', checked_in_at: new Date(Date.now() - 2 * 3_600_000 - 12 * 60_000).toISOString(),
+    confirmation: 'intercom', notes: 'Madre del residente', status: 'inside', expected_on: null, expected_time: null, pre_registered_at: null, cancelled_at: null, checked_in_at: new Date(Date.now() - 2 * 3_600_000 - 12 * 60_000).toISOString(),
     checked_in_by_name: 'A. Quispe', checked_out_at: null, checked_out_by_name: null, checkout_notes: null, auto_checked_out: false, ...overrides,
   }
 }
 
-function installAdapter(rows: VisitSummary[], onWrite?: (url: string, body: unknown) => void) {
+function installAdapter(rows: VisitSummary[], onWrite?: (url: string, body: unknown) => void, expected: VisitSummary[] = []) {
   const requests: string[] = []
   apiClient.defaults.adapter = vi.fn<AxiosAdapter>((config) => {
     const url = config.url ?? ''
@@ -60,14 +60,15 @@ function installAdapter(rows: VisitSummary[], onWrite?: (url: string, body: unkn
     if (url === '/api/me') return Promise.resolve(axiosResponse(config, meResponse()))
     if (config.method === 'post') {
       onWrite?.(url, JSON.parse(config.data as string))
-      return Promise.resolve(axiosResponse(config, { data: visit({ status: url.endsWith('/check-out') ? 'left' : 'inside' }) }, 201))
+      return Promise.resolve(axiosResponse(config, { data: visit({ status: url.endsWith('/check-out') ? 'left' : 'inside' }) }, url.endsWith('/visits') ? 201 : 200))
     }
     if (url.includes('/units?')) return Promise.resolve(axiosResponse(config, { data: [{ id: 'un_402', unit_number: '402', building_name: 'Torre A' }] }))
     if (url.includes('/residents?')) {
       return Promise.resolve(axiosResponse(config, { data: [{ id: 'rs_1', name: 'Carlos Mendoza', phone: '+51 987 654 321', memberships: [{ id: 'um_1', unit_id: 'un_402', location_id: 'loc_1', status: 'active', is_primary_contact: true }] }] }))
     }
     if (url.includes('/visits')) {
-      return Promise.resolve(axiosResponse(config, { data: rows, meta: { current_page: 1, last_page: 1, per_page: 15, total: rows.length } }))
+      const list = url.includes('expected=1') ? expected : rows
+      return Promise.resolve(axiosResponse(config, { data: list, meta: { current_page: 1, last_page: 1, per_page: 15, total: list.length } }))
     }
     return Promise.reject(new Error(`Unexpected request: ${url}`))
   })
@@ -139,5 +140,35 @@ describe('VisitsPage', () => {
     await waitFor(() => expect(writes).toHaveLength(1))
     expect(writes[0].url).toBe('/api/locations/loc_1/visits')
     expect(writes[0].body).toEqual({ visitor_name: 'Elena Vargas', unit_id: 'un_402', resident_id: 'rs_1', document: 'DNI 45872213', phone: null, confirmation: 'intercom', notes: 'Madre del residente' })
+  })
+
+  it('confirms a pre-registered visitor from the Esperados hoy band, locking the confirmation method', async () => {
+    const writes: { url: string; body: unknown }[] = []
+    const expected = visit({ id: 'vs_7', visitor_name: 'Jorge Peña', document: '41290877', status: 'expected', confirmation: 'pre_registered', expected_on: '2026-09-05', expected_time: '19:00', pre_registered_by_name: 'Carlos Mendoza', pre_registered_at: '2026-09-05T13:12:00Z', checked_in_at: null, notes: 'Viene a recoger unas llaves.' })
+    installAdapter([], (url, body) => writes.push({ url, body }), [expected])
+    renderPage()
+    const user = userEvent.setup()
+
+    await user.click(await screen.findByRole('button', { name: 'Registrar visita' }))
+    const drawer = await screen.findByRole('dialog')
+    expect(within(drawer).getByText('Elige la unidad para ver sus visitas esperadas.')).toBeInTheDocument()
+    await user.click(within(drawer).getByRole('combobox', { name: /Unidad/ }))
+    await user.click(await screen.findByRole('option', { name: 'Torre A / 402' }))
+
+    expect(await within(drawer).findByText('Jorge Peña')).toBeInTheDocument()
+    expect(within(drawer).getByText('19:00 · pre-registrado por Carlos Mendoza')).toBeInTheDocument()
+    await user.click(within(drawer).getByRole('button', { name: 'Confirmar llegada' }))
+
+    // Name and document filled from the pre-registration; the method is a read-only pill.
+    expect(within(drawer).getByLabelText('Nombre')).toHaveValue('Jorge Peña')
+    expect(within(drawer).getByLabelText('Documento (opcional)')).toHaveValue('41290877')
+    expect(within(drawer).getByText('Elegido')).toBeInTheDocument()
+    expect(within(drawer).getByText('Pre-registrado')).toBeInTheDocument()
+    expect(within(drawer).queryByRole('radio', { name: 'Intercom' })).not.toBeInTheDocument()
+
+    await user.click(within(drawer).getByRole('button', { name: 'Registrar ingreso' }))
+    await waitFor(() => expect(writes).toHaveLength(1))
+    expect(writes[0].url).toBe('/api/visits/vs_7/confirm-arrival')
+    expect(writes[0].body).toEqual({ visitor_name: 'Jorge Peña', document: '41290877', phone: null, notes: 'Viene a recoger unas llaves.' })
   })
 })

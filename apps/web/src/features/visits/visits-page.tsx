@@ -61,11 +61,13 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
         confirmation: search.confirmation,
         status: search.chip === 'inside' ? 'inside' : undefined,
         today: search.chip === 'today' ? 1 : undefined,
+        expected: search.chip === 'expected' ? 1 : undefined,
       }),
     placeholderData: keepPreviousData,
   })
   const insideCount = useQuery({ queryKey: ['visits', locationId, 'inside-count'], queryFn: () => getVisits(locationId, { status: 'inside', per_page: 1 }) }).data?.meta.total
   const todayCount = useQuery({ queryKey: ['visits', locationId, 'today-count'], queryFn: () => getVisits(locationId, { today: 1, per_page: 1 }) }).data?.meta.total
+  const expectedCount = useQuery({ queryKey: ['visits', locationId, 'expected-count'], queryFn: () => getVisits(locationId, { expected: 1, per_page: 1 }) }).data?.meta.total
 
   function updateSearch(next: Partial<VisitsSearchValues>) {
     void navigate({ search: (current) => ({ ...current, ...next, page: next.page ?? 1 }) })
@@ -84,7 +86,11 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
       accessorKey: 'checked_in_at',
       header: t('visits.columns.checkIn'),
       meta: { className: 'whitespace-nowrap' },
-      cell: ({ row }) => <span className="font-mono text-xs text-[var(--wa-text-3)]">{checkInLabel(row.original.checked_in_at, timezone, now)}</span>,
+      cell: ({ row }) => (
+        <span className="font-mono text-xs text-[var(--wa-text-3)]">
+          {row.original.status === 'expected' ? (row.original.expected_time ?? t('visits.expected.noTime')) : checkInLabel(row.original.checked_in_at, timezone, now)}
+        </span>
+      ),
     },
     {
       accessorKey: 'visitor_name',
@@ -136,7 +142,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
       accessorKey: 'status',
       header: t('packages.columns.status'),
       cell: ({ row }) => (
-        <Badge color={row.original.status === 'inside' ? 'success' : 'gray'} radius="xl" size="sm" variant="light">
+        <Badge color={row.original.status === 'inside' ? 'success' : row.original.status === 'expected' ? 'info' : 'gray'} radius="xl" size="sm" variant="light">
           {t(`visits.statuses.${row.original.status}`)}
         </Badge>
       ),
@@ -145,7 +151,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
   ]
 
   const chipLabel = (key: (typeof VISIT_CHIPS)[number]) => {
-    const count = key === 'inside' ? insideCount : key === 'today' ? todayCount : undefined
+    const count = key === 'inside' ? insideCount : key === 'today' ? todayCount : key === 'expected' ? expectedCount : undefined
 
     return count !== undefined ? `${t(`visits.chips.${key}`)} · ${count}` : t(`visits.chips.${key}`)
   }

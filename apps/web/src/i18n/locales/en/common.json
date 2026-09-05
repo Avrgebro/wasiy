@@ -8,7 +8,8 @@
     "import": "Import",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "back": "Back"
   },
   "common": {
     "loading": "Loading",
@@ -157,7 +158,81 @@
     "primaryUnit": "Active access for {{unit}}",
     "savePhone": "Save phone",
     "summary": "Summary of your units and contact details.",
-    "title": "Resident portal"
+    "title": "Resident portal",
+    "home": "Home",
+    "noUnit": "You have no active unit in the portal yet.",
+    "greeting": "Hi, {{name}}",
+    "viewAll": "View all",
+    "tabs": {
+      "home": "Home",
+      "visits": "Visits",
+      "profile": "Profile"
+    },
+    "unit": {
+      "mine": "My units",
+      "switch": "Switch unit",
+      "switchHint": "Everything in the portal refers to the active unit."
+    },
+    "visits": {
+      "preRegister": "Pre-register a visit",
+      "registered": "Visit pre-registered",
+      "cancelled": "Pre-registration cancelled",
+      "expectedToday": "Visitors expected today",
+      "noneToday": "Nobody expected today.",
+      "today": "Today",
+      "noTime": "no time",
+      "arrivedAt": "Arrived {{time}}",
+      "chips": {
+        "expected": "Expected",
+        "history": "History"
+      },
+      "emptyExpected": "You have no pre-registered visits.",
+      "emptyHistory": "No visits recorded for this unit yet.",
+      "status": {
+        "label": "Status",
+        "expected": "Expected",
+        "arrived": "Arrived",
+        "cancelled": "Cancelled"
+      },
+      "cancel": "Cancel pre-registration",
+      "cancelHint": "Available only while the status is “Expected”.",
+      "cancelTitle": "Cancel the pre-registration for {{name}}?",
+      "cancelBody": "The desk will stop expecting this person. You can register them again any time.",
+      "timeline": {
+        "preRegistered": "Pre-registered",
+        "arrived": "Arrived",
+        "byDesk": "desk {{name}}",
+        "left": "Left",
+        "leftAuto": "Automatic check-out",
+        "cancelled": "Cancelled"
+      },
+      "form": {
+        "intro": "The desk will see this notice and confirm the arrival. You can cancel it until they arrive.",
+        "visitor": "Visitor name",
+        "document": "Document",
+        "documentOptional": "Document (optional)",
+        "documentPlaceholder": "ID number",
+        "date": "Date",
+        "otherDay": "Another day",
+        "whichDay": "Which day?",
+        "timeOptional": "Approximate time (optional)",
+        "note": "Note for the desk",
+        "noteOptional": "Note for the desk (optional)",
+        "notePlaceholder": "E.g. coming to pick up some keys"
+      }
+    },
+    "packages": {
+      "atDesk": "Packages at the desk",
+      "none": "No packages waiting for you.",
+      "toCollect": "To collect",
+      "package": "Package"
+    },
+    "age": {
+      "today": "today",
+      "yesterday": "yesterday",
+      "days_one": "{{count}} day ago",
+      "days_other": "{{count}} days ago"
+    }
   },
   "nav": {
     "activity": "Activity",
@@ -1298,7 +1373,8 @@
     "chips": {
       "inside": "Inside",
       "today": "Today",
-      "all": "All"
+      "all": "All",
+      "expected": "Expected today"
     },
     "columns": {
       "checkIn": "Check-in",
@@ -1308,18 +1384,22 @@
     },
     "statuses": {
       "inside": "Inside",
-      "left": "Left"
+      "left": "Left",
+      "expected": "Expected",
+      "cancelled": "Cancelled"
     },
     "confirmations": {
       "none": "Not confirmed",
       "intercom": "Intercom",
       "phone": "Phone",
-      "management": "Management"
+      "management": "Management",
+      "pre_registered": "Pre-registered"
     },
     "empty": {
       "inside": "No visitors inside the building.",
       "today": "No visits today yet.",
-      "all": "No visits registered yet."
+      "all": "No visits registered yet.",
+      "expected": "No resident pre-registered visits for today."
     },
     "emptyFiltered": "No visit matches.",
     "duration": {
@@ -1354,7 +1434,19 @@
       "out": "Check-out registered",
       "autoOut": "Automatic check-out (no check-out recorded)",
       "confirmed": "Confirmed by {{method}}",
-      "confirmedWith": "Confirmed by {{method}} with {{name}}"
+      "confirmedWith": "Confirmed by {{method}} with {{name}}",
+      "preRegistered": "Pre-registered by the resident"
+    },
+    "expected": {
+      "band": "Expected today",
+      "bandHint": "Only today's pre-registrations for this unit. Confirming an arrival does not prevent registering someone else.",
+      "pickUnit": "Pick the unit to see its expected visitors.",
+      "none": "No visitors expected for this unit today.",
+      "noTime": "no time",
+      "by": "pre-registered by {{name}}",
+      "confirm": "Confirm arrival",
+      "chosen": "Chosen",
+      "confirmationLocked": "The resident already authorised the visit: the method is fixed."
     }
   },
   "search": {
