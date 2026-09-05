@@ -54,7 +54,7 @@ The resident-facing side of Wasiy: a mobile-first web app where a resident sees 
 - **P0 Two builds, one codebase (done 2026-09-05, ADR 0038)** — separate route trees and artifacts per surface, import boundary, unified login without the audience switcher, manifests per host.
 - **P1 Shell and visitors (built 2026-09-05)** — portal shell with bottom tabs and unit switcher; home board (visitors and packages parts); visitor pre-registration and history; desk-side "Esperados hoy" and arrival confirmation. Closes the M12 second phase.
 - **P2 Reservations and packages (built 2026-09-05)** — amenity browsing, booking requests, my reservations with cancellation; packages list; home board gains next reservation.
-- **P3 Alerts** — notification center and email; preferences in the profile.
+- **P3 Alerts (built 2026-09-05)** — bell with unread count, Alertas list, branded alert email, per-family email switches in Perfil.
 - **P4 My unit and profile** — members management for the primary contact, vehicles UI, estado de cuenta; phone, email, password.
 - **P5 Announcements** — admin Anuncios module plus the portal feed; home board gains the latest announcement.
 
@@ -71,6 +71,19 @@ Each milestone: backend slice with tests, frontend slice with tests, mockups fir
 
 1. Backend — portal amenities list, availability per day, reservations list (upcoming/past), request, cancel inside the window, detail with history; resident policies; tests.
 2. Frontend — Reservas tab (Mis reservas / Amenidades), amenity detail sheet, day strip + slots sheet, reservation detail sheet with cancel, home "Próxima reserva" card and "Reservar" quick action.
+
+## P3 decisions (2026-09-05)
+
+- One `resident_alerts` row per recipient resident (not Laravel's `notifications` table): unit-scoped, typed `kind`, a morph to the reservation, package or visit, personal `read_at`.
+- Fan-out: every active member of the unit with portal access gets the in-app row; email goes to everyone with an address (login email first, registry email otherwise) whose family switch is on. A package addressed to one person alerts only that person.
+- Kinds: reservation approved/observed/rejected, package received/delivered, visit arrived (any check-in for the unit, walk-in included), announcement published (emitted from P5).
+- Preferences live on the resident as `email_alerts` JSON (null = all on), four families: reservations, packages, visitors, announcements.
+- The list and the badge follow the active unit like the rest of the portal. Badge polls once a minute.
+- Email: one `ResidentAlertNotification` (`mail.resident-alert`, theme `wasiy`, published `layout.blade.php` carrying the dark-mode media query since the inliner drops it). Dark is best effort: Gmail and Outlook ignore it. Links use `WASIY_PORTAL_URL`.
+- Retention: `alerts:prune` daily deletes read alerts older than `WASIY_ALERT_RETENTION_DAYS` (90).
+- API: `GET /portal/alerts?unit_id&scope=new|all`, `GET /portal/alerts/unread-count`, `POST /portal/alerts/{id}/read`, `POST /portal/alerts/read-all`, `GET /portal/resident`, `PATCH /portal/resident/email-alerts`.
+- Portal: bell in the header → `/portal/alertas` (chips Nuevas · n / Todas, Marcar todo como leído, rows open the booking sheet via `?reserva=`, the home for packages, Visitas for arrivals). Perfil gains "Notificaciones por correo".
+- Left for P4: the "Mi hogar" member list drawn in mockup 03c (needs the members endpoint), editable login email.
 
 ## Parked
 

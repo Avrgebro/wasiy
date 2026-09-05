@@ -12,7 +12,7 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\UnitMembership;
 use App\Models\User;
-use App\Notifications\PackageReceivedNotification;
+use App\Notifications\ResidentAlertNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 
@@ -59,13 +59,13 @@ test('front desk registers a package for a named resident, who is notified', fun
         ->assertJsonPath('data.received_by_name', $frontDesk->name)
         ->assertJsonPath('data.notified_email', 'laura@x.pe');
 
-    Notification::assertSentOnDemand(PackageReceivedNotification::class, fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === 'laura@x.pe');
+    Notification::assertSentOnDemand(ResidentAlertNotification::class, fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === 'laura@x.pe');
     Notification::assertCount(1);
     expect(ActivityLog::query()->where('event_type', ActivityEventType::PackageReceived->value)->where('subject_id', $response->json('data.id'))->exists())->toBeTrue()
         ->and($carlos->email)->toBe('carlos@x.pe');
 });
 
-test('without a named resident the primary contact is notified, and nobody when there is no email', function () {
+test('without a named resident every member with an email is notified, and nobody when there is no email', function () {
     Notification::fake();
     [$account, $location, $unit, $frontDesk] = packageWorld();
     memberOf($unit, ['first_name' => 'Carlos', 'last_name' => 'Mendoza', 'email' => 'carlos@x.pe'], primary: true);
@@ -75,7 +75,7 @@ test('without a named resident the primary contact is notified, and nobody when 
         ->assertCreated()
         ->assertJsonPath('data.resident_id', null)
         ->assertJsonPath('data.notified_email', 'carlos@x.pe');
-    Notification::assertSentOnDemand(PackageReceivedNotification::class);
+    Notification::assertSentOnDemand(ResidentAlertNotification::class);
 
     $silent = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id, 'unit_number' => '305']);
     memberOf($silent, ['email' => null], primary: true);

@@ -28,6 +28,8 @@ class ResidentResource extends JsonResource
             'phone' => $this->phone,
             // Front desk sees phones, never emails (M11). The person always sees their own.
             'email' => $this->when($this->emailVisibleTo($request->user()), $this->email),
+            'email_alerts' => $this->when($request->user()?->id === $this->user_id, fn () => $this->emailAlerts()),
+            'login_email' => $this->when($request->user()?->id === $this->user_id, fn () => $request->user()->email),
             'status' => $this->status->value,
             'portal_state' => $this->portalState(),
             'active_membership_count' => $this->relationLoaded('unitMemberships')

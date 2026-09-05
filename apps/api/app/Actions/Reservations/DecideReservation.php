@@ -8,7 +8,9 @@ use App\Enums\ReservationStatus;
 use App\Models\Amenity;
 use App\Models\Reservation;
 use App\Models\User;
+use App\Enums\ResidentAlertKind;
 use App\Services\ActivityLogger;
+use App\Services\ResidentAlerts;
 use App\Services\SettingsResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -25,6 +27,7 @@ class DecideReservation
         private readonly ActivityLogger $activityLogger,
         private readonly SettingsResolver $settings,
         private readonly SyncReservationMovements $movements,
+        private readonly ResidentAlerts $alerts,
     ) {}
 
     public function approve(Reservation $reservation, User $actor): Reservation
@@ -48,6 +51,8 @@ class DecideReservation
             // Approval is when a booking starts owing money (ADR 0034).
             $this->movements->openFor($approved, $actor);
 
+            $this->alert($approved, ResidentAlertKind::ReservationApproved, 'Tu reserva fue aprobada', null);
+
             return $approved;
         });
     }
@@ -56,16 +61,26 @@ class DecideReservation
     {
         $this->assertOpen($reservation);
 
-        return $this->transition($reservation, $actor, ReservationStatus::Rejected, $note, ActivityEventType::ReservationRejected,
-            "Se rechazó la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
+        return DB::transaction(function () use ($reservation, $actor, $note): Reservation {
+            $rejected = $this->transition($reservation, $actor, ReservationStatus::Rejected, $note, ActivityEventType::ReservationRejected,
+                "Se rechazó la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
+            $this->alert($rejected, ResidentAlertKind::ReservationRejected, 'Tu reserva fue rechazada', $note);
+
+            return $rejected;
+        });
     }
 
     public function observe(Reservation $reservation, User $actor, string $note): Reservation
     {
         $this->assertOpen($reservation);
 
-        return $this->transition($reservation, $actor, ReservationStatus::Observed, $note, ActivityEventType::ReservationObserved,
-            "Se observó la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
+        return DB::transaction(function () use ($reservation, $actor, $note): Reservation {
+            $observed = $this->transition($reservation, $actor, ReservationStatus::Observed, $note, ActivityEventType::ReservationObserved,
+                "Se observó la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
+            $this->alert($observed, ResidentAlertKind::ReservationObserved, 'Tu reserva fue observada', $note);
+
+            return $observed;
+        });
     }
 
     /**
@@ -101,6 +116,39 @@ class DecideReservation
 
             return $cancelled;
         });
+    }
+
+    /** Decisions reach the unit's residents in the portal and, if they kept the switch on, by email (P3). */
+    private function alert(Reservation $reservation, ResidentAlertKind $kind, string $title, ?string $note): void
+    {
+        $reservation->loadMissing(['amenity', 'unit.location']);
+        $timezone = $reservation->unit->location->timezone;
+        $starts = $reservation->starts_at->setTimezone($timezone)->locale('es');
+        $ends = $reservation->ends_at->setTimezone($timezone);
+
+        $this->alerts->send(
+            unit: $reservation->unit,
+            kind: $kind,
+            title: $title,
+            body: $reservation->amenity->name.' · '.$starts->isoFormat('ddd D MMM, HH:mm').'–'.$ends->format('H:i').($note ? " · {$note}" : ''),
+            subject: $reservation,
+            facts: array_values(array_filter([
+                ['label' => 'Amenidad', 'value' => $reservation->amenity->name],
+                ['label' => 'Fecha', 'value' => ucfirst($starts->isoFormat('dddd D [de] MMMM'))],
+                ['label' => 'Horario', 'value' => $starts->format('H:i').' – '.$ends->format('H:i')],
+                ['label' => 'Unidad', 'value' => $reservation->unit->label()],
+                $reservation->fee_snapshot ? ['label' => 'Costo', 'value' => 'S/ '.number_format((float) $reservation->fee_snapshot, 0)] : null,
+                $reservation->deposit_snapshot ? ['label' => 'Depósito', 'value' => 'S/ '.number_format((float) $reservation->deposit_snapshot, 0)] : null,
+                $note ? ['label' => 'Nota', 'value' => $note] : null,
+            ])),
+            intro: match ($kind) {
+                ResidentAlertKind::ReservationApproved => 'Administración confirmó tu solicitud. Estos son los datos de la reserva.',
+                ResidentAlertKind::ReservationObserved => 'Administración observó tu solicitud y necesita algo más antes de aprobarla.',
+                default => 'Administración no aprobó tu solicitud.',
+            },
+            actionLabel: 'Ver reserva',
+            actionPath: '/portal/reservas',
+        );
     }
 
     private function assertOpen(Reservation $reservation): void

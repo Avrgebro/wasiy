@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\ActivityEventType;
+use App\Enums\ResidentAlertFamily;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentResource;
 use App\Models\User;
@@ -18,6 +19,31 @@ class PortalResidentController extends Controller
         private readonly AccessAuthorizationService $access,
         private readonly ActivityLogger $activityLogger,
     ) {}
+
+    /** Me as a resident: name, phone, login email and email switches (mockup 03c). */
+    public function show(Request $request): JsonResource
+    {
+        $resident = $this->access->residentForUser($request->user());
+        abort_unless($resident && $this->access->activeResidentMembershipsForUser($request->user())->exists(), 403);
+
+        return new ResidentResource($resident->loadSummary());
+    }
+
+    public function updateEmailAlerts(Request $request): JsonResource
+    {
+        $resident = $this->access->residentForUser($request->user());
+        abort_unless($resident && $this->access->activeResidentMembershipsForUser($request->user())->exists(), 403);
+
+        $validated = $request->validate(
+            collect(ResidentAlertFamily::cases())
+                ->mapWithKeys(fn (ResidentAlertFamily $family) => [$family->value => ['required', 'boolean']])
+                ->all(),
+        );
+
+        $resident->forceFill(['email_alerts' => [...$resident->emailAlerts(), ...$validated]])->save();
+
+        return new ResidentResource($resident->loadSummary());
+    }
 
     public function updatePhone(Request $request): JsonResource
     {

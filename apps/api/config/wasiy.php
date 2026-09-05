@@ -16,6 +16,14 @@ return [
             env('WASIY_SPA_URL', 'http://localhost:5174').'/invitations/staff/{token}',
         ),
     ],
+    'portal' => [
+        // Where alert emails send residents (mockup 03d "Ver reserva").
+        'url' => env('WASIY_PORTAL_URL', 'http://localhost:5175'),
+    ],
+    'alerts' => [
+        // Read alerts older than this are pruned by alerts:prune.
+        'retention_days' => (int) env('WASIY_ALERT_RETENTION_DAYS', 90),
+    ],
     'photos' => [
         'disk' => env('WASIY_PHOTO_DISK', 'local'),
         // JPG and PNG at up to 10 MB, per the dropzone contract in the

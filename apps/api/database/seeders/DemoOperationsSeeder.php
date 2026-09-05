@@ -14,6 +14,8 @@ use App\Enums\VisitStatus;
 use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Amenity;
+use App\Enums\ResidentAlertKind;
+use App\Models\ResidentAlert;
 use App\Models\FinancialMovement;
 use App\Models\Location;
 use App\Models\Package;
@@ -74,6 +76,7 @@ class DemoOperationsSeeder extends Seeder
         $this->seedReservations($residents);
         $this->seedPackages($residents);
         $this->seedVisits($residents);
+        $this->seedAlerts($residents);
     }
 
     /**
@@ -534,6 +537,47 @@ class DemoOperationsSeeder extends Seeder
         $this->activity(ActivityEventType::MovementRecorded, "Se registró un movimiento: {$movement->concept} (S/ {$movement->amount}).", $this->admin, $recordedAt, 'financial_movement', $movement->id, ['status' => MovementStatus::Pending->value, 'unit_id' => $movement->unit_id]);
         if ($paidAt) {
             $this->activity(ActivityEventType::MovementStatusChanged, "El movimiento {$movement->concept} pasó de pending a paid.", $this->manager, $paidAt->setTime(10, 0), 'financial_movement', $movement->id, ['status' => 'paid', 'previous_status' => 'pending', 'unit_id' => $movement->unit_id]);
+        }
+    }
+
+    /**
+     * Portal P3 (mockup 03b): the portal residents open the bell to a few
+     * unread alerts and some history. Idempotent on kind + title + time.
+     *
+     * @param  Collection<string, Resident>  $primaries
+     */
+    private function seedAlerts(Collection $primaries): void
+    {
+        $rows = [
+            // [unit key, kind, title, body, hours ago, read?]
+            ['Torre A-202', ResidentAlertKind::ReservationApproved, 'Tu reserva fue aprobada', 'Salón de eventos · sáb · 19:00–21:00', 2, false],
+            ['Torre A-202', ResidentAlertKind::PackageReceived, 'Paquete recibido', 'Recepción tiene un paquete para tu unidad · Urbano · caja mediana.', 5, false],
+            ['Torre A-202', ResidentAlertKind::VisitArrived, 'Visitante llegó', 'Jorge Peña ingresó a tu unidad.', 26, false],
+            ['Torre A-202', ResidentAlertKind::ReservationObserved, 'Tu reserva fue observada', 'Parrilla · dom · 13:00–16:00 · Confirmar el número de invitados antes de aprobar.', 30, true],
+            ['Torre A-202', ResidentAlertKind::PackageDelivered, 'Paquete entregado', 'Tu paquete fue retirado de recepción.', 24 * 4, true],
+            ['Torre B-1001', ResidentAlertKind::PackageDelivered, 'Paquete entregado', 'Tu paquete fue retirado de recepción. · Amazon · sobre', 24 * 3, false],
+            ['Torre B-1001', ResidentAlertKind::VisitArrived, 'Visitante llegó', 'Delivery Rappi ingresó a tu unidad.', 24 * 6, true],
+        ];
+
+        foreach ($rows as [$unitKey, $kind, $title, $body, $hoursAgo, $read]) {
+            $unit = $this->units->get($unitKey);
+            $resident = $primaries->get($unitKey);
+            if (! $unit || ! $resident || $resident->user_id === null) {
+                continue;
+            }
+            $at = $this->now->subHours($hoursAgo);
+
+            ResidentAlert::query()->updateOrCreate(
+                ['resident_id' => $resident->id, 'kind' => $kind->value, 'title' => $title, 'created_at' => $at->utc()],
+                [
+                    'account_id' => $this->account->id,
+                    'location_id' => $this->central->id,
+                    'unit_id' => $unit->id,
+                    'body' => $body,
+                    'read_at' => $read ? $at->addHours(1)->utc() : null,
+                    'updated_at' => $at->utc(),
+                ],
+            );
         }
     }
 

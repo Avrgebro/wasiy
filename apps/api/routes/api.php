@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\LocationSettingsController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PhotoController;
+use App\Http\Controllers\Api\PortalAlertController;
 use App\Http\Controllers\Api\PortalAmenityController;
 use App\Http\Controllers\Api\PortalPackageController;
 use App\Http\Controllers\Api\PortalReservationController;
@@ -161,7 +162,13 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     // Resident portal: gated by resident-membership policies, never staff
     // roles.
     Route::prefix('portal')->group(function () {
+        Route::get('/resident', [PortalResidentController::class, 'show']);
         Route::patch('/resident/phone', [PortalResidentController::class, 'updatePhone']);
+        Route::patch('/resident/email-alerts', [PortalResidentController::class, 'updateEmailAlerts']);
+        Route::get('/alerts', [PortalAlertController::class, 'index']);
+        Route::get('/alerts/unread-count', [PortalAlertController::class, 'unreadCount']);
+        Route::post('/alerts/read-all', [PortalAlertController::class, 'markAllRead']);
+        Route::post('/alerts/{alert}/read', [PortalAlertController::class, 'markRead']);
         Route::get('/amenities', [PortalAmenityController::class, 'index']);
         Route::get('/amenities/{amenity}/availability', [PortalAmenityController::class, 'availability']);
         Route::get('/reservations', [PortalReservationController::class, 'index']);

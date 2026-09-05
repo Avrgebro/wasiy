@@ -9,13 +9,16 @@ use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Visit;
+use App\Enums\ResidentAlertKind;
 use App\Services\ActivityLogger;
+use App\Services\ResidentAlerts;
 use Illuminate\Support\Facades\DB;
 
 class RegisterVisit
 {
     public function __construct(
         private readonly ActivityLogger $activityLogger,
+        private readonly ResidentAlerts $alerts,
     ) {}
 
     /**
@@ -59,6 +62,22 @@ class RegisterVisit
                 actor: $actor,
                 subjectType: 'visit',
                 subjectId: $visit->id,
+            );
+
+            $this->alerts->send(
+                unit: $unit,
+                kind: ResidentAlertKind::VisitArrived,
+                title: 'Visitante llegó',
+                body: "{$visit->visitor_name} ingresó a tu unidad.",
+                subject: $visit,
+                facts: [
+                    ['label' => 'Visitante', 'value' => $visit->visitor_name],
+                    ['label' => 'Unidad', 'value' => $unit->label()],
+                    ['label' => 'Ingreso', 'value' => $visit->checked_in_at->setTimezone($unit->location->timezone)->locale('es')->isoFormat('D [de] MMMM, HH:mm')],
+                ],
+                intro: 'Recepción registró el ingreso de un visitante a tu unidad.',
+                actionLabel: 'Ver visitas',
+                actionPath: '/portal/visitas',
             );
 
             return $visit;

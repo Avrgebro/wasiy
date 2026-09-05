@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RegistryStatus;
+use App\Enums\ResidentAlertFamily;
 use App\Support\PhoneNumber;
 use Database\Factories\ResidentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
-#[Fillable(['account_id', 'user_id', 'first_name', 'last_name', 'phone', 'email', 'status'])]
+#[Fillable(['account_id', 'user_id', 'first_name', 'last_name', 'phone', 'email', 'email_alerts', 'status'])]
 class Resident extends Model
 {
     /** @use HasFactory<ResidentFactory> */
@@ -28,7 +29,24 @@ class Resident extends Model
     {
         return [
             'status' => RegistryStatus::class,
+            'email_alerts' => 'array',
         ];
+    }
+
+    /**
+     * Which alert families also reach this person's inbox (mockup 03c).
+     * Null means nothing was ever switched: everything on.
+     *
+     * @return array<string, bool>
+     */
+    public function emailAlerts(): array
+    {
+        return [...ResidentAlertFamily::allOn(), ...($this->email_alerts ?? [])];
+    }
+
+    public function wantsEmailFor(ResidentAlertFamily $family): bool
+    {
+        return $this->emailAlerts()[$family->value] ?? true;
     }
 
     /**
