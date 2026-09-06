@@ -1,7 +1,8 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { ActionIcon, Alert, Button, Group, Skeleton, Text } from '@mantine/core'
 import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon, ArrowDownIcon, InfoCircleIcon } from '@solar-icons/react/linear'
 import type { TFunction } from 'i18next'
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
@@ -92,7 +93,7 @@ function FinancesContent({
   const summaryQuery = useQuery({
     queryKey: ['finances', 'summary', accountId, locationId, month],
     queryFn: () => getFinanceSummary(accountId, locationId, month),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['finances', 'summary', accountId, locationId]),
   })
   const listQuery = useQuery({
     queryKey: ['finances', 'movements', accountId, locationId, month, chip ?? 'all', search.search, search.category, search.status, search.sort, search.page],
@@ -107,7 +108,7 @@ function FinancesContent({
         ...(search.category ? { category: search.category } : {}),
         ...(search.status ? { status: search.status } : {}),
       }),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['finances', 'movements', accountId, locationId]),
   })
 
   const dues = useMutation({

@@ -1,7 +1,8 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Alert, Button, Select, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
@@ -66,7 +67,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
         today: search.chip === 'today' ? 1 : undefined,
         expected: search.chip === 'expected' ? 1 : undefined,
       }),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['visits', locationId]),
   })
   const insideCount = useQuery({ queryKey: ['visits', locationId, 'inside-count'], queryFn: () => getVisits(locationId, { status: 'inside', per_page: 1 }) }).data?.meta.total
   const todayCount = useQuery({ queryKey: ['visits', locationId, 'today-count'], queryFn: () => getVisits(locationId, { today: 1, per_page: 1 }) }).data?.meta.total

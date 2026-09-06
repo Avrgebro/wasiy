@@ -1,7 +1,8 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { ActionIcon, Alert, Button, Group, Select, Skeleton, Text } from '@mantine/core'
 import { QuickFilters } from '../../components/table/quick-filters'
 import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/react/linear'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -106,7 +107,7 @@ function ReservationsContent({
   const weekQuery = useQuery({
     queryKey: ['reservations', 'week', accountId, locationId, weekStart],
     queryFn: () => getReservations(accountId, locationId, { from: weekStart, to: weekEnd }),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['reservations', 'week', accountId, locationId]),
   })
   // One future-facing query feeds the queue (pending/observed become cards)
   // and the advisory conflict pool (its approved rows).

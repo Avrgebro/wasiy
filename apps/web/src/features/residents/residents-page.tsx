@@ -1,7 +1,8 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Alert, Button, Select, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
@@ -84,7 +85,7 @@ function ResidentsContent({
         portal: search.portal,
         status: search.status,
       }),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['registry', 'residents', locationId]),
   })
 
   function updateSearch(next: Partial<ResidentsSearchValues>) {

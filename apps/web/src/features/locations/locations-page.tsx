@@ -1,6 +1,7 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { ActionIcon, Alert, Button, Group, Skeleton, Text } from '@mantine/core'
 import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/react/linear'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -58,8 +59,8 @@ function LocationsPageContent({
     queryKey: ['locations', 'list', accountId, listSearch],
     queryFn: () => getLocations(accountId, listSearch),
     // Page/filter changes swap tiles in place instead of dropping to a
-    // loader; only the very first load shows skeletons.
-    placeholderData: keepPreviousData,
+    // loader; initial loads and account changes show skeletons.
+    placeholderData: keepContextData(['locations', 'list', accountId]),
   })
 
   function updateSearch(next: Partial<typeof search>) {

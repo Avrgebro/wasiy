@@ -1,6 +1,7 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { Alert, Button, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -60,7 +61,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
     queryFn: () => getStaff(accountId, search),
     // Page/filter changes produce a new cache key; keeping the previous
     // response swaps rows in place instead of dropping to a loader.
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['staff', 'list', accountId]),
   })
   const invitationsQuery = useQuery({
     queryKey: ['staff', 'invitations', accountId],

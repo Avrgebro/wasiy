@@ -1,11 +1,14 @@
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { sessionQueryKey } from '../auth/query-options'
+import type { Session } from '../auth/types'
+import { applyAuthenticatedMe } from '../auth/hooks'
 import { ADMIN_CAPABILITIES } from '../auth/access'
 import '../../i18n'
 import type { UnitSummary } from './api'
@@ -83,8 +86,7 @@ function installAdapter(rows: UnitSummary[]) {
   return requests
 }
 
-function renderPage() {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+function renderPage(queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
   return render(
     <MantineProvider env="test">
       <Notifications />
@@ -152,4 +154,34 @@ describe('UnitsPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Quitar filtro Atención: Sin cuota definida' }))
     expect(navigateSpy.mock.calls.at(-1)![0].search({ page: 4 })).toEqual({ attention: undefined, page: 1 })
   })
+})
+
+it.each([false, true])('does not carry old location results into a pending context (populated=%s)', async (populated) => {
+  installAdapter(populated ? [unit()] : [])
+  const original = apiClient.defaults.adapter as AxiosAdapter
+  let release: (() => void) | undefined
+  apiClient.defaults.adapter = (config) => {
+    if (config.url?.includes('/locations/loc_2/units')) {
+      return new Promise((resolve) => { release = () => resolve(axiosResponse(config, {
+        data: [unit({ location_id: 'loc_2', unit_number: '905' })],
+        meta: { current_page: 1, last_page: 1, per_page: 15, total: 1 },
+      })) })
+    }
+    return original(config)
+  }
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  renderPage(client)
+  await screen.findByText(populated ? '402' : 'Aún no hay unidades en Edificio Central')
+  const session = client.getQueryData<Session>(sessionQueryKey)
+  if (session?.status !== 'authenticated') throw new Error('Expected authenticated session')
+  const me = session.me
+  const location = me.active_location
+  if (!location) throw new Error('Expected active location')
+  await act(async () => applyAuthenticatedMe(client, { ...me, active_location: { ...location, id: 'loc_2', name: 'Nueva ubicación' } }))
+  await waitFor(() => expect(release).toBeDefined())
+  expect(screen.queryByText('Aún no hay unidades en Nueva ubicación')).not.toBeInTheDocument()
+  expect(screen.queryByText('402')).not.toBeInTheDocument()
+  expect(client.getQueryState(['registry', 'units', 'loc_2', currentSearch])?.fetchStatus).toBe('fetching')
+  await act(async () => release!())
+  expect(await screen.findByText('905')).toBeInTheDocument()
 })

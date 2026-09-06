@@ -1,6 +1,7 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { Alert, Button, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
@@ -59,7 +60,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
         search: search.search,
         status: search.chip === 'all' ? undefined : search.chip,
       }),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['packages', locationId]),
   })
   // The En recepción count is the number the desk cares about; it is the
   // list's own total while that chip is active and unfiltered.

@@ -1,6 +1,7 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { Alert, Badge, Button, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
@@ -55,7 +56,7 @@ function AnnouncementsContent({ canManage, locationId, locationName, timezone }:
   const listQuery = useQuery({
     queryKey: ['announcements', locationId, search],
     queryFn: () => getAnnouncements(locationId, { page: search.page, search: search.search, status: search.chip === 'all' ? undefined : search.chip }),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['announcements', locationId]),
   })
   const activeCount = useQuery({
     queryKey: ['announcements', locationId, 'active-count'],

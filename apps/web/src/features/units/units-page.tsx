@@ -1,7 +1,8 @@
+import { keepContextData } from '../../lib/keep-context-data'
 import { Alert, Avatar, Badge, Button, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { useState } from 'react'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
@@ -59,7 +60,7 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
         status: search.status,
         ...attentionParams(search.attention),
       }),
-    placeholderData: keepPreviousData,
+    placeholderData: keepContextData(['registry', 'units', locationId]),
   })
 
   function updateSearch(next: Partial<UnitsSearchValues>) {
