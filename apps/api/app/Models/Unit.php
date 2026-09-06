@@ -274,8 +274,6 @@ class Unit extends Model
         return [
             'activeUnitMemberships',
             'vehicles',
-            'portalMemberships',
-            'invitedMemberships',
         ];
     }
 

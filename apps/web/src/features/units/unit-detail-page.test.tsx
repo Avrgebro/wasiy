@@ -45,7 +45,7 @@ function detail(): UnitDetailResponse {
     data: {
       id: 'un_402', account_id: 'acc_1', location_id: 'loc_1', unit_number: '402', type: 'apartment', building_id: 'bd_a', building_name: 'Torre A', building_code: 'TA', floor: '4',
       participation_share: 1.18, maintenance_fee: 420, parking_spots: ['E-23'], storage_rooms: ['D-04'], status: 'active', notes: null,
-      resident_count: 3, vehicle_count: 2, occupancy: 'occupied', portal_state: 'active', primary_contact: null,
+      resident_count: 3, vehicle_count: 2, primary_contact: null,
       members: [
         { membership_id: 'um_1', resident_id: 'rs_1', name: 'Carlos Mendoza', email: 'carlos@x.pe', phone: '+51 987 654 321', is_primary_contact: true, started_at: null, portal_state: 'active' },
         { membership_id: 'um_2', resident_id: 'rs_2', name: 'Laura Mendoza', email: 'laura@x.pe', phone: null, is_primary_contact: false, started_at: null, portal_state: 'active' },

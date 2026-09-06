@@ -81,8 +81,6 @@ test('a unit is created and updated with the condo fields', function () {
         ->assertJsonPath('data.maintenance_fee', 520)
         ->assertJsonPath('data.parking_spots', ['E-12', 'E-13'])
         ->assertJsonPath('data.storage_rooms', ['D-04'])
-        ->assertJsonPath('data.occupancy', 'vacant')
-        ->assertJsonPath('data.portal_state', null)
         ->json('data.id');
 
     $this->actingAs($admin)
@@ -97,7 +95,7 @@ test('a unit is created and updated with the condo fields', function () {
         ->assertJsonValidationErrors('type');
 });
 
-test('occupancy and portal state are derived and filterable, and search reaches residents and plates', function () {
+test('occupancy and portal filters resolve from memberships, and search reaches residents and plates', function () {
     [$account, $location, $admin] = unitWorld();
 
     $occupied = homeUnit($location);
@@ -123,9 +121,7 @@ test('occupancy and portal state are derived and filterable, and search reaches 
         ->and($numbers('search=torre b'))->toBe(['305', '609']);
 
     $row = collect($this->actingAs($admin)->getJson($base)->json('data'))->firstWhere('unit_number', '402');
-    expect($row['occupancy'])->toBe('occupied')->and($row['portal_state'])->toBe('active')->and($row['vehicle_count'])->toBe(1);
-    $row = collect($this->actingAs($admin)->getJson($base)->json('data'))->firstWhere('unit_number', '305');
-    expect($row['occupancy'])->toBe('attention')->and($row['portal_state'])->toBe('not_invited');
+    expect($row['vehicle_count'])->toBe(1)->and($row)->not->toHaveKeys(['occupancy', 'portal_state']);
 });
 
 test('show returns members, vehicles, upcoming reservations, this month charges, balance and notes', function () {
@@ -159,7 +155,6 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
     $this->actingAs($admin)
         ->getJson("/api/units/{$unit->id}")
         ->assertOk()
-        ->assertJsonPath('data.occupancy', 'occupied')
         ->assertJsonCount(2, 'data.members')
         ->assertJsonPath('data.members.0.is_primary_contact', true)
         ->assertJsonPath('data.members.0.name', 'Carlos Mendoza')

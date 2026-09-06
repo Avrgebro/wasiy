@@ -62,8 +62,6 @@ function unit(overrides: Partial<UnitSummary> = {}): UnitSummary {
     notes: null,
     resident_count: 3,
     vehicle_count: 1,
-    occupancy: 'occupied',
-    portal_state: 'active',
     primary_contact: { name: 'Carlos Mendoza', phone: null, email: null, resident_id: 'rs_1', unit_membership_id: 'um_1' },
     ...overrides,
   }
@@ -108,14 +106,15 @@ describe('UnitsPage', () => {
   it('renders units grouped by building with derived states, and opens the detail on row click', async () => {
     const requests = installAdapter([
       unit(),
-      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', maintenance_fee: null, parking_spots: ['E-07'], resident_count: 1, occupancy: 'attention', portal_state: 'not_invited', primary_contact: null, vehicle_count: 0 }),
-      unit({ id: 'un_609', unit_number: '609', building_name: 'Torre B', floor: '6', resident_count: 0, occupancy: 'vacant', portal_state: null, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
+      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', maintenance_fee: null, parking_spots: ['E-07'], resident_count: 1, primary_contact: null, vehicle_count: 0 }),
+      unit({ id: 'un_609', unit_number: '609', building_name: 'Torre B', floor: '6', resident_count: 0, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
+      unit({ id: 'un_701', unit_number: '701', building_name: 'Torre B', floor: '7', status: 'inactive', resident_count: 0, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
     ])
 
     renderPage()
 
     expect(await screen.findByText('402')).toBeInTheDocument()
-    expect(screen.getByText('3 unidades · Edificio Central')).toBeInTheDocument()
+    expect(screen.getByText('4 unidades · Edificio Central')).toBeInTheDocument()
     // Building bands.
     expect(screen.getByText('Torre A')).toBeInTheDocument()
     expect(screen.getAllByText('Torre B')).toHaveLength(1)
@@ -125,10 +124,11 @@ describe('UnitsPage', () => {
     expect(screen.getByText(/Carlos Mendoza/)).toBeInTheDocument()
     expect(screen.getByText('+2')).toBeInTheDocument()
     expect(screen.getByText('— Sin contacto principal')).toBeInTheDocument()
-    expect(screen.getByText('— Sin residentes')).toBeInTheDocument()
-    expect(screen.getByText('Ocupada')).toBeInTheDocument()
-    expect(screen.getByText('Atención')).toBeInTheDocument()
-    expect(screen.getByText('Vacía')).toBeInTheDocument()
+    expect(screen.getAllByText('— Sin residentes')).toHaveLength(2)
+    // No occupancy column: the Residentes cell carries that. Deactivation is the one state the row shows.
+    expect(screen.queryByText('Ocupada')).not.toBeInTheDocument()
+    expect(screen.getByText('Desactivada')).toBeInTheDocument()
+    expect(screen.getByText('701').closest('tr')).toHaveClass('opacity-60')
     expect(screen.queryByText('En el portal')).not.toBeInTheDocument()
     expect(requests.some((url) => url.includes('/api/locations/loc_1/units?page=1'))).toBe(true)
 

@@ -13,7 +13,7 @@ import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
 import { attentionParams, type UnitsSearchValues } from './schemas'
-import { occupancyColor, unitDescriptor, unitLabelsLine } from './unit-presentation'
+import { unitDescriptor, unitLabelsLine } from './unit-presentation'
 import { BuildingsDrawer } from '../buildings/buildings-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { UnitsFilters } from './units-filters'
@@ -84,7 +84,14 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
 
         return (
           <div className="flex flex-col">
-            <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
+            <span className="flex items-center gap-2">
+              <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
+              {row.original.status === 'inactive' ? (
+                <Badge color="gray" radius="xl" size="xs" variant="light">
+                  {t('units.statuses.inactive')}
+                </Badge>
+              ) : null}
+            </span>
             {labels ? <span className="text-[11.5px] text-[var(--wa-text-3)]">{labels}</span> : null}
           </div>
         )
@@ -123,15 +130,6 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         <span className="font-mono text-[13px] font-semibold text-[var(--mantine-color-dimmed)]">
           {row.original.maintenance_fee !== null ? formatMoney(row.original.maintenance_fee) : '—'}
         </span>
-      ),
-    },
-    {
-      id: 'occupancy',
-      header: t('units.columns.status'),
-      cell: ({ row }) => (
-        <Badge color={occupancyColor(row.original.occupancy)} radius="xl" size="sm" variant="light">
-          {t(`units.occupancy.${row.original.occupancy}`)}
-        </Badge>
       ),
     },
     {
@@ -191,6 +189,7 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         groupBy={(unit) => unit.building_name}
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
+        rowClassName={(unit) => (unit.status === 'inactive' ? 'opacity-60' : undefined)}
         sort={search.sort}
         toolbar={<UnitsFilters search={search} onChange={updateSearch} />}
         onPageChange={(page) => updateSearch({ page })}

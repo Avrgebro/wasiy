@@ -1291,7 +1291,6 @@
       "vehicles": "Vehicles",
       "fee": "Fee",
       "portal": "Portal",
-      "status": "Status",
       "type": "Type"
     },
     "floorN": "Floor {{floor}}",
@@ -1306,11 +1305,6 @@
       "house": "House",
       "commercial": "Commercial",
       "office": "Office"
-    },
-    "occupancy": {
-      "occupied": "Occupied",
-      "vacant": "Vacant",
-      "attention": "Attention"
     },
     "portal": {
       "active": "On the portal",
@@ -1504,7 +1498,6 @@
     "subtitle_other": "{{count}} people · {{location}}",
     "searchPlaceholder": "Search by name, phone or unit…",
     "allPortalStates": "All",
-    "allStatuses": "All",
     "primaryContactShort": "primary contact",
     "deactivated": "Person deactivated",
     "reactivated": "Person reactivated",
@@ -1545,7 +1538,8 @@
       "confirmDeactivate": "Deactivate {{name}}?",
       "confirmDeactivateBody": "They lose portal access. History is kept and you can reactivate them later.",
       "portalHint": "The email is asked only here and kept to send the invitation."
-    }
+    },
+    "searchInactive": "Search deactivated people"
   },
   "visits": {
     "title": "Visitors",

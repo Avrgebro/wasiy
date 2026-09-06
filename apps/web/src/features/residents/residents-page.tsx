@@ -175,9 +175,17 @@ function ResidentsContent({
         data={rows}
         emptyState={
           <div className="grid min-h-40 place-items-center px-6 text-center">
-            <Text c="dimmed" size="sm">
-              {t(isFiltered ? 'residents.emptyFiltered' : 'residents.empty', { location: locationName })}
-            </Text>
+            <div className="flex flex-col items-center gap-2">
+              <Text c="dimmed" size="sm">
+                {t(isFiltered ? 'residents.emptyFiltered' : 'residents.empty', { location: locationName })}
+              </Text>
+              {/* The list is active people only; a name that finds nobody may have been deactivated. */}
+              {search.search && !search.status ? (
+                <Button size="compact-sm" variant="subtle" onClick={() => updateSearch({ status: 'inactive' })}>
+                  {t('residents.searchInactive')}
+                </Button>
+              ) : null}
+            </div>
           </div>
         }
         fetching={listQuery.isPlaceholderData}
@@ -204,7 +212,7 @@ function ResidentsContent({
                   comboboxProps={{ withinPortal: false }}
                   data={statusOptions}
                   label={t('registry.status')}
-                  placeholder={t('residents.allStatuses')}
+                  placeholder={t('registry.statuses.active')}
                   value={search.status || null}
                   onChange={(value) => updateSearch({ status: value ?? '' })}
                 />

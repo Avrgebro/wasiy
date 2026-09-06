@@ -1291,7 +1291,6 @@
       "vehicles": "Vehículos",
       "fee": "Cuota",
       "portal": "Portal",
-      "status": "Estado",
       "type": "Tipo"
     },
     "floorN": "Piso {{floor}}",
@@ -1306,11 +1305,6 @@
       "house": "Casa",
       "commercial": "Local",
       "office": "Oficina"
-    },
-    "occupancy": {
-      "occupied": "Ocupada",
-      "vacant": "Vacía",
-      "attention": "Atención"
     },
     "portal": {
       "active": "En el portal",
@@ -1504,7 +1498,6 @@
     "subtitle_other": "{{count}} personas · {{location}}",
     "searchPlaceholder": "Buscar por nombre, teléfono o unidad…",
     "allPortalStates": "Todos",
-    "allStatuses": "Todos",
     "primaryContactShort": "contacto principal",
     "deactivated": "Persona desactivada",
     "reactivated": "Persona reactivada",
@@ -1545,7 +1538,8 @@
       "confirmDeactivate": "¿Desactivar a {{name}}?",
       "confirmDeactivateBody": "Pierde el acceso al portal. Su historial se conserva y puedes reactivarla después.",
       "portalHint": "El correo solo se pide aquí y se guarda para enviar la invitación."
-    }
+    },
+    "searchInactive": "Buscar entre desactivados"
   },
   "visits": {
     "title": "Visitantes",

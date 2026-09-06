@@ -9,8 +9,7 @@ import type { VehicleSummary } from '../vehicles/api'
 import type { MembershipPayload, UnitPayload } from './schemas'
 
 export type UnitType = 'apartment' | 'house' | 'commercial' | 'office'
-export type UnitOccupancy = 'occupied' | 'vacant' | 'attention'
-export type UnitPortalState = 'active' | 'invited' | 'not_invited' | null
+export type UnitPortalState = 'active' | 'invited' | 'not_invited'
 
 export type UnitSummary = {
   id: string
@@ -30,8 +29,6 @@ export type UnitSummary = {
   notes: string | null
   resident_count: number
   vehicle_count: number
-  occupancy: UnitOccupancy
-  portal_state: UnitPortalState
   primary_contact: {
     name: string
     phone: string | null

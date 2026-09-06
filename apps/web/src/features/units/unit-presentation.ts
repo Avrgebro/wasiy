@@ -1,11 +1,7 @@
 import type { TFunction } from 'i18next'
-import type { UnitOccupancy, UnitPortalState, UnitSummary, UnitType } from './api'
+import type { UnitPortalState, UnitSummary, UnitType } from './api'
 
 /** Colors and labels shared by the list, the header and the drawers. */
-export function occupancyColor(occupancy: UnitOccupancy): string {
-  return { occupied: 'success', vacant: 'gray', attention: 'warning' }[occupancy]
-}
-
 export function portalColor(state: UnitPortalState): string {
   return state === 'active' ? 'success' : state === 'invited' ? 'info' : 'gray'
 }

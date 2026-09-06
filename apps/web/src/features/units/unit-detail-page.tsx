@@ -26,7 +26,7 @@ import { addUnitNote, deactivateUnit, getUnit, reactivateUnit, type UnitMember, 
 import { MemberDrawer } from './member-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { VehicleDrawer } from './vehicle-drawer'
-import { occupancyColor, portalColor, typeLabel } from './unit-presentation'
+import { portalColor, typeLabel } from './unit-presentation'
 
 const routeApi = getRouteApi('/_authenticated/admin/registry/units_/$unitId')
 
@@ -176,14 +176,6 @@ function UnitDetailContent({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="m-0 font-display text-2xl font-semibold tracking-tight text-[var(--mantine-color-text)]">{title}</h1>
-              <Badge color={occupancyColor(unit.occupancy)} radius="xl" size="sm" variant="light">
-                {t(`units.occupancy.${unit.occupancy}`)}
-              </Badge>
-              {unit.portal_state ? (
-                <Badge color={portalColor(unit.portal_state)} radius="xl" size="sm" variant="light">
-                  {t(`units.portal.${unit.portal_state}`)}
-                </Badge>
-              ) : null}
               {unit.status === 'inactive' ? (
                 <Badge color="gray" radius="xl" size="sm" variant="light">
                   {t('units.statuses.inactive')}

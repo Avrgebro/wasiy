@@ -124,6 +124,17 @@ describe('ResidentsPage', () => {
     expect(requests.some((url) => url.includes('/api/accounts/acc_1/residents?location_id=loc_1'))).toBe(true)
   })
 
+  it('offers to search deactivated people when a name finds nobody in the active list', async () => {
+    currentSearch.search = 'torres'
+    installAdapter('account_admin', [])
+
+    renderPage()
+
+    expect(await screen.findByText('Ninguna persona coincide.')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Buscar entre desactivados' }))
+    expect(navigateSpy.mock.calls.at(-1)![0].search({ page: 2, search: 'torres' })).toEqual({ search: 'torres', status: 'inactive', page: 1 })
+  })
+
   it('opens the person drawer, invites with an email asked at that moment, and blocks deactivation while housed', async () => {
     const writes: { url: string; body: unknown }[] = []
     installAdapter('account_admin', [person({ user_id: null, email: null, portal_state: 'not_invited' })], (url, body) => writes.push({ url, body }))

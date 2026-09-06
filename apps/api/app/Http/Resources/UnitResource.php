@@ -20,8 +20,6 @@ class UnitResource extends JsonResource
         /** @var UnitMembership|null $primaryContactMembership */
         $primaryContactMembership = $this->whenLoaded('primaryContactMembership');
         $residentCount = $this->active_unit_memberships_count ?? $this->unitMemberships()->active()->count();
-        $portalCount = $this->portal_memberships_count ?? $this->portalMemberships()->count();
-        $invitedCount = $this->invited_memberships_count ?? $this->invitedMemberships()->count();
 
         return [
             'id' => $this->id,
@@ -43,9 +41,6 @@ class UnitResource extends JsonResource
             'notes' => $this->notes,
             'resident_count' => $residentCount,
             'vehicle_count' => $this->vehicles_count ?? $this->vehicles()->count(),
-            // Derived, never stored: how the list and the header read the unit.
-            'occupancy' => $residentCount === 0 ? 'vacant' : ($primaryContactMembership instanceof UnitMembership ? 'occupied' : 'attention'),
-            'portal_state' => $portalCount > 0 ? 'active' : ($invitedCount > 0 ? 'invited' : ($residentCount > 0 ? 'not_invited' : null)),
             'members' => $this->whenLoaded('activeUnitMemberships', fn () => $this->activeUnitMemberships
                 ->map(fn (UnitMembership $membership): array => [
                     'membership_id' => $membership->id,

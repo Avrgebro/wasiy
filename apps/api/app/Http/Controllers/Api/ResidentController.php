@@ -50,10 +50,12 @@ class ResidentController extends Controller
         ]);
 
         $locationId = $validated['location_id'] ?? null;
+        // A directory of who is here: deactivated people only on request, as with units.
+        $status = $validated['status'] ?? RegistryStatus::Active->value;
 
         $residents = Resident::query()
             ->where('account_id', $account->id)
-            ->when($validated['status'] ?? null, fn (Builder $query, string $status) => $query->where('status', $status))
+            ->where('status', $status)
             // The directory's one box: name, phone, or the unit they live in.
             ->when($validated['search'] ?? null, fn (Builder $query, string $search) => $query->where(fn (Builder $group) => $group
                 ->searchLike(['first_name', 'last_name', "first_name || ' ' || last_name", 'email'], $search)

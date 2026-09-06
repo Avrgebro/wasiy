@@ -58,11 +58,15 @@ test('the directory filters by portal state and "sin unidad", and searches by un
     livesIn($lucia, $u118);
     $rodrigo = person($location, 'Rodrigo', 'Salas');
     livesIn($rodrigo, $u402, active: false);
+    $ana = person($location, 'Ana', 'Torres', ['status' => RegistryStatus::Inactive]);
+    livesIn($ana, $u118);
 
     $base = "/api/accounts/{$account->id}/residents?location_id={$location->id}";
     $names = fn (string $query = ''): array => collect($this->actingAs($manager)->getJson($base.$query)->assertOk()->json('data'))->pluck('last_name')->sort()->values()->all();
 
+    // Deactivated people are left out unless asked for, as with units.
     expect($names())->toBe(['Mendoza', 'Ramírez', 'Salas'])
+        ->and($names('&status=inactive'))->toBe(['Torres'])
         ->and($names('&portal=active'))->toBe(['Mendoza'])
         ->and($names('&portal=not_invited'))->toBe(['Ramírez', 'Salas'])
         ->and($names('&search=118'))->toBe(['Mendoza', 'Ramírez'])
