@@ -3,11 +3,11 @@
 namespace App\Actions\Visits;
 
 use App\Enums\ActivityEventType;
+use App\Enums\ResidentAlertKind;
 use App\Enums\VisitConfirmation;
 use App\Enums\VisitStatus;
 use App\Models\User;
 use App\Models\Visit;
-use App\Enums\ResidentAlertKind;
 use App\Services\ActivityLogger;
 use App\Services\ResidentAlerts;
 use Illuminate\Support\Facades\DB;

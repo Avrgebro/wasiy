@@ -4,11 +4,11 @@ namespace App\Actions\Packages;
 
 use App\Enums\ActivityEventType;
 use App\Enums\PackageStatus;
+use App\Enums\ResidentAlertKind;
 use App\Models\Package;
 use App\Models\Resident;
 use App\Models\Unit;
 use App\Models\User;
-use App\Enums\ResidentAlertKind;
 use App\Services\ActivityLogger;
 use App\Services\ResidentAlerts;
 use Illuminate\Support\Facades\DB;

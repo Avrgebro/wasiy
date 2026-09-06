@@ -7,7 +7,6 @@ use App\Enums\ReservationStatus;
 use App\Enums\ResidentAlertKind;
 use App\Models\Amenity;
 use App\Models\Location;
-use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Resident;
 use App\Models\ResidentAlert;
