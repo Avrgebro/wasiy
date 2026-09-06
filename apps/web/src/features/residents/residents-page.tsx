@@ -1,3 +1,4 @@
+import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Alert, Button, Select, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
@@ -196,10 +197,10 @@ function ResidentsContent({
           <TableToolbar
             appliedChips={filterChips}
             filters={
-              <FilterButton activeCount={filterChips.length}>
+              <FilterButton activeCount={filterChips.length} onClearAll={() => updateSearch({ portal: '', status: '' })}>
                 <Select
                   clearable
-                  comboboxProps={{ withinPortal: false }}
+                  comboboxProps={FILTER_COMBOBOX_PROPS}
                   data={portalOptions}
                   label={t('units.columns.portal')}
                   placeholder={t('residents.allPortalStates')}
@@ -208,7 +209,7 @@ function ResidentsContent({
                 />
                 <Select
                   clearable
-                  comboboxProps={{ withinPortal: false }}
+                  comboboxProps={FILTER_COMBOBOX_PROPS}
                   data={statusOptions}
                   label={t('registry.status')}
                   placeholder={t('registry.statuses.active')}

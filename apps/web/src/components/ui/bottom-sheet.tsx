@@ -1,5 +1,5 @@
 import { Button, Drawer, Text } from '@mantine/core'
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 /**
@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
  */
 export function BottomSheet({
   children,
+  keyboardAware = false,
   footer,
   footerDivider = false,
   leading,
@@ -25,6 +26,8 @@ export function BottomSheet({
   title,
 }: {
   children: ReactNode
+  /** Keep input sheets inside the visible viewport when the keyboard opens. */
+  keyboardAware?: boolean
   footer?: ReactNode
   footerDivider?: boolean
   /** An avatar or icon before the title (04d). */
@@ -36,6 +39,22 @@ export function BottomSheet({
   pill?: ReactNode
   title: ReactNode
 }) {
+  const [viewport, setViewport] = useState<{ height: number; bottom: number } | null>(null)
+  useEffect(() => {
+    const visual = window.visualViewport
+    if (!keyboardAware || !opened || !visual) return
+    const update = () => setViewport({
+      height: visual.height,
+      bottom: Math.max(0, window.innerHeight - visual.height - visual.offsetTop),
+    })
+    update()
+    visual.addEventListener('resize', update)
+    visual.addEventListener('scroll', update)
+    return () => {
+      visual.removeEventListener('resize', update)
+      visual.removeEventListener('scroll', update)
+    }
+  }, [keyboardAware, opened])
   const shown = lines.filter((line): line is string => Boolean(line))
 
   return (
@@ -45,7 +64,7 @@ export function BottomSheet({
       padding={0}
       position="bottom"
       styles={{
-        inner: { justifyContent: 'center' },
+        inner: { justifyContent: 'center', ...(keyboardAware && viewport ? { bottom: viewport.bottom } : {}) },
         content: {
           // Mantine maps size="auto" to a non-existent --drawer-size-auto, so
           // the height rule is stated here: content-sized, capped at 60dvh.
@@ -58,7 +77,7 @@ export function BottomSheet({
           borderTopRightRadius: '20px',
           borderTop: '1px solid var(--mantine-color-default-border)',
           boxShadow: '0 -18px 44px rgba(28, 43, 44, 0.22)',
-          maxHeight: '60dvh',
+          maxHeight: keyboardAware && viewport ? viewport.height * 0.9 : '60dvh',
           display: 'flex',
           flexDirection: 'column',
         },

@@ -1,3 +1,4 @@
+import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { MultiSelect, Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { FilterButton } from '../../components/table/filter-button'
@@ -49,10 +50,10 @@ export function FinancesFilters({
     <TableToolbar
       appliedChips={chips}
       filters={
-        <FilterButton activeCount={chips.length}>
+        <FilterButton activeCount={chips.length} onClearAll={() => onChange({ category: '', status: '' })}>
             <Select
               clearable
-              comboboxProps={{ withinPortal: false }}
+              comboboxProps={FILTER_COMBOBOX_PROPS}
               data={statusOptions}
               label={t('finances.columns.status')}
               placeholder={t('finances.allStatuses')}
@@ -61,7 +62,7 @@ export function FinancesFilters({
             />
             <MultiSelect
               clearable
-              comboboxProps={{ withinPortal: false }}
+              comboboxProps={FILTER_COMBOBOX_PROPS}
               data={groups}
               label={t('finances.columns.category')}
               placeholder={selected.length === 0 ? t('finances.allCategories') : undefined}

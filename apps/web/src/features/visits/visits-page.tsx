@@ -1,3 +1,4 @@
+import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Alert, Button, Select, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
@@ -190,10 +191,10 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
           <TableToolbar
             appliedChips={filterChips}
             filters={
-              <FilterButton activeCount={filterChips.length}>
+              <FilterButton activeCount={filterChips.length} onClearAll={() => updateSearch({ confirmation: '' })}>
                   <Select
                     clearable
-                    comboboxProps={{ withinPortal: false }}
+                    comboboxProps={FILTER_COMBOBOX_PROPS}
                     data={confirmationOptions}
                     label={t('visits.columns.confirmation')}
                     placeholder={t('visits.allConfirmations')}

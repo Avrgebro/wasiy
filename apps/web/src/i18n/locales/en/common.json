@@ -674,6 +674,7 @@
     "previousPage": "Previous page",
     "nextPage": "Next page",
     "filters": "Filters",
+    "filtersDone": "Done",
     "clearFilters": "Clear filters",
     "removeFilter": "Remove filter {{filter}}",
     "sortBy": "Sort by this column",

@@ -1,3 +1,4 @@
+import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { FilterButton } from '../../components/table/filter-button'
@@ -69,10 +70,10 @@ export function StaffFilters({
     <TableToolbar
       appliedChips={chips}
       filters={
-        <FilterButton activeCount={chips.length}>
+        <FilterButton activeCount={chips.length} onClearAll={() => onChange({ role: '', location_id: '', status: '' })}>
           <Select
             clearable
-            comboboxProps={{ withinPortal: false }}
+            comboboxProps={FILTER_COMBOBOX_PROPS}
             data={roleOptions}
             label={t('staff.role')}
             placeholder={t('staff.allRoles')}
@@ -81,7 +82,7 @@ export function StaffFilters({
           />
           <Select
             clearable
-            comboboxProps={{ withinPortal: false }}
+            comboboxProps={FILTER_COMBOBOX_PROPS}
             data={locations}
             label={t('staff.location')}
             placeholder={t('staff.allLocations')}
@@ -90,7 +91,7 @@ export function StaffFilters({
           />
           <Select
             clearable
-            comboboxProps={{ withinPortal: false }}
+            comboboxProps={FILTER_COMBOBOX_PROPS}
             data={statusOptions}
             label={t('registry.status')}
             placeholder={t('staff.allStatuses')}

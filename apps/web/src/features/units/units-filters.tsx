@@ -1,3 +1,4 @@
+import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
@@ -39,10 +40,10 @@ export function UnitsFilters({
     <TableToolbar
       appliedChips={chips}
       filters={
-        <FilterButton activeCount={chips.length}>
+        <FilterButton activeCount={chips.length} onClearAll={() => onChange({ type: '', status: '', attention: undefined })}>
             <Select
               clearable
-              comboboxProps={{ withinPortal: false }}
+              comboboxProps={FILTER_COMBOBOX_PROPS}
               data={typeOptions}
               label={t('units.columns.type')}
               placeholder={t('units.allTypes')}
@@ -51,7 +52,7 @@ export function UnitsFilters({
             />
             <Select
               clearable
-              comboboxProps={{ withinPortal: false }}
+              comboboxProps={FILTER_COMBOBOX_PROPS}
               data={statusOptions}
               label={t('registry.status')}
               placeholder={t('units.statuses.active')}
@@ -60,7 +61,7 @@ export function UnitsFilters({
             />
             <Select
               clearable
-              comboboxProps={{ withinPortal: false }}
+              comboboxProps={FILTER_COMBOBOX_PROPS}
               data={attentionOptions}
               label={t('units.attention.label')}
               placeholder={t('units.attention.any')}

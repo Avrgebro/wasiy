@@ -2,7 +2,7 @@ import { Drawer, Group, ScrollArea, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import type { ReactNode } from 'react'
 
-/** One width for every sheet; below the laptop breakpoint it takes the screen. */
+/** Default form width; below the laptop breakpoint it takes the screen. */
 const DRAWER_WIDTH = 620
 const LAPTOP_UP = '(min-width: 64rem)'
 
@@ -17,9 +17,8 @@ const INSET = '1.5rem'
  * The app's standard right-side sheet: 620px on laptops and up, the full
  * viewport on tablets and phones, a header with optional subtitle, and a
  * column layout where AppDrawerBody scrolls and AppDrawerFooter stays
- * pinned to the bottom. Every drawer shares the width on purpose: forms
- * were designed for two columns at this size and a narrower sheet made
- * them wrap.
+ * pinned to the bottom. Forms use the default width for two columns;
+ * compact panels such as filters can override it.
  *
  * Compose the pieces inside your own <form> when the footer submits:
  *
@@ -35,12 +34,15 @@ export function AppDrawer({
   onClose,
   opened,
   subtitle,
+  width = DRAWER_WIDTH,
   title,
 }: {
   children: ReactNode
   onClose: () => void
   opened: boolean
   subtitle?: string
+  /** Desktop width; forms default to 620px. */
+  width?: number
   title: ReactNode
 }) {
   const laptopUp = useMediaQuery(LAPTOP_UP, true, { getInitialValueInEffect: false })
@@ -50,7 +52,7 @@ export function AppDrawer({
       opened={opened}
       position="right"
       padding={0}
-      size={laptopUp ? DRAWER_WIDTH : '100%'}
+      size={laptopUp ? width : '100%'}
       styles={{
         content: { display: 'flex', flexDirection: 'column', maxWidth: '100vw' },
         header: {

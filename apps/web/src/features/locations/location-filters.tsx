@@ -1,3 +1,4 @@
+import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { FilterButton } from '../../components/table/filter-button'
@@ -53,10 +54,10 @@ export function LocationFilters({
         placeholder={t('locations.searchPlaceholder')}
         onApply={(value) => onChange({ search: value })}
       />
-      <FilterButton activeCount={chips.length}>
+      <FilterButton activeCount={chips.length} onClearAll={() => onChange({ status: '', type: '' })}>
         <Select
           clearable
-          comboboxProps={{ withinPortal: false }}
+          comboboxProps={FILTER_COMBOBOX_PROPS}
           data={statusOptions}
           label={t('registry.status')}
           placeholder={t('locations.allStatuses')}
@@ -65,7 +66,7 @@ export function LocationFilters({
         />
         <Select
           clearable
-          comboboxProps={{ withinPortal: false }}
+          comboboxProps={FILTER_COMBOBOX_PROPS}
           data={typeOptions}
           label={t('locations.type')}
           placeholder={t('locations.allTypes')}
