@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Text } from '@mantine/core'
+import { Alert, Button, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -6,6 +6,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
+import { TintChip } from '../../components/ui/chips'
 import { SearchInput } from '../../components/table/search-input'
 import { TableToolbar } from '../../components/table/table-toolbar'
 import { QuickFilters } from '../../components/table/quick-filters'
@@ -120,9 +121,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
       accessorKey: 'status',
       header: t('packages.columns.status'),
       cell: ({ row }) => (
-        <Badge color={row.original.status === 'pending' ? 'warning' : 'success'} radius="xl" size="sm" variant="light">
-          {t(`packages.statuses.${row.original.status}`)}
-        </Badge>
+        <TintChip color={row.original.status === 'pending' ? 'warning' : 'success'}>{t(`packages.statuses.${row.original.status}`)}</TintChip>
       ),
     },
     { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span> },

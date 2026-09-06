@@ -125,7 +125,7 @@ export function DataTable<TRow extends { id: string }>({
                     {headerGroup.headers.map((header) => (
                       <Table.Th
                         key={header.id}
-                        className={`text-xs uppercase tracking-wider ${columnClasses(header.column.columnDef.meta)}`}
+                        className={`whitespace-nowrap text-xs uppercase tracking-wider ${columnClasses(header.column.columnDef.meta)}`}
                       >
                         {header.column.columnDef.meta?.sortKey && onSortChange ? (
                           <SortHeader
@@ -178,7 +178,7 @@ export function DataTable<TRow extends { id: string }>({
                     {row.getVisibleCells().map((cell) => (
                       <Table.Td
                         key={cell.id}
-                        className={columnClasses(cell.column.columnDef.meta)}
+                        className={`whitespace-nowrap ${columnClasses(cell.column.columnDef.meta)}`}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </Table.Td>

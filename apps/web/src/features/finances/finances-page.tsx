@@ -1,4 +1,4 @@
-import { ActionIcon, Alert, Badge, Button, Group, Skeleton, Text } from '@mantine/core'
+import { ActionIcon, Alert, Button, Group, Skeleton, Text } from '@mantine/core'
 import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon, ArrowDownIcon, InfoCircleIcon } from '@solar-icons/react/linear'
 import type { TFunction } from 'i18next'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -7,6 +7,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
+import { TintChip } from '../../components/ui/chips'
 import { StatCard } from '../../components/ui/stat-card'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
@@ -141,17 +142,17 @@ function FinancesContent({
       accessorKey: 'concept',
       header: t('finances.columns.concept'),
       cell: ({ row }) => (
-        <div className="flex min-w-0 flex-col">
-          <span className="flex items-center gap-2 font-semibold">
+        <div className="flex min-w-0 max-w-80 flex-col">
+          <span className="flex min-w-0 items-center gap-2 font-semibold">
             {row.original.direction === 'expense' ? (
               <span className="grid size-4 shrink-0 place-items-center rounded-[5px] bg-[var(--mantine-color-error-light)] text-[var(--wa-error)]">
                 <ArrowDownIcon size={10} />
               </span>
             ) : null}
-            {row.original.concept}
+            <span className="truncate">{row.original.concept}</span>
           </span>
           {row.original.detail ? (
-            <span className="text-xs text-[var(--wa-text-3)]">{row.original.detail}</span>
+            <span className="truncate text-xs text-[var(--wa-text-3)]">{row.original.detail}</span>
           ) : null}
         </div>
       ),
@@ -191,9 +192,7 @@ function FinancesContent({
       header: t('finances.columns.status'),
       meta: { sortKey: 'status' },
       cell: ({ row }) => (
-        <Badge color={statusColor(row.original.status)} radius="xl" size="sm" variant="light">
-          {statusLabel(row.original, t)}
-        </Badge>
+        <TintChip color={statusColor(row.original.status)}>{statusLabel(row.original, t)}</TintChip>
       ),
     },
     {

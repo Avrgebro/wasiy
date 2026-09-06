@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Select, Text } from '@mantine/core'
+import { Alert, Button, Select, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { DataTable } from '../../components/table/data-table'
+import { TintChip } from '../../components/ui/chips'
 import { FilterButton } from '../../components/table/filter-button'
 import { TableToolbar } from '../../components/table/table-toolbar'
 import { SearchInput } from '../../components/table/search-input'
@@ -140,9 +141,7 @@ function ResidentsContent({
       header: t('registry.status'),
       meta: { hideBelow: 'lg' },
       cell: ({ row }) => (
-        <Badge color={row.original.status === 'active' ? 'success' : 'gray'} radius="xl" size="sm" variant="light">
-          {t(`registry.statuses.${row.original.status}`)}
-        </Badge>
+        <TintChip color={row.original.status === 'active' ? 'success' : 'gray'}>{t(`registry.statuses.${row.original.status}`)}</TintChip>
       ),
     },
     { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span> },
