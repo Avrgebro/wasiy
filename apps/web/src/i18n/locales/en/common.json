@@ -816,6 +816,7 @@
     "title": "Reservations",
     "subtitle": "{{location}} amenities",
     "noLocation": "Select a location to see its reservations.",
+    "searchPlaceholder": "Search by unit or resident…",
     "currentWeek": "Current week",
     "previousWeek": "Previous week",
     "nextWeek": "Next week",

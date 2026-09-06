@@ -1,3 +1,7 @@
+import { SearchInput } from '../../components/table/search-input'
+import { TableToolbar } from '../../components/table/table-toolbar'
+import { FilterButton } from '../../components/table/filter-button'
+import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { keepContextData } from '../../lib/keep-context-data'
 import { ActionIcon, Alert, Button, Group, Select, Skeleton, Text } from '@mantine/core'
 import { QuickFilters } from '../../components/table/quick-filters'
@@ -120,9 +124,11 @@ function ReservationsContent({
     queryFn: () => getAmenities(accountId, locationId),
   })
 
+  const searchText = normalizeSearch(search.search ?? '')
   const weekReservations = (weekQuery.data?.data ?? []).filter(
     (reservation) =>
       matchesChip(reservation, chip) &&
+      (!searchText || [reservation.unit_number, reservation.resident_name].some((value) => normalizeSearch(value ?? '').includes(searchText))) &&
       (!search.amenity_id || reservation.amenity_id === search.amenity_id),
   )
   const futureReservations = queueQuery.data?.data ?? []
@@ -169,18 +175,7 @@ function ReservationsContent({
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
-        <QuickFilters label={t('table.quickFilters')} options={chips} value={chip} onChange={(key) => updateSearch({ status: key === 'all' ? undefined : key })} />
-        <Select
-          clearable
-          aria-label={t('reservations.allAmenities')}
-          className="w-full sm:ml-auto sm:w-64"
-          data={amenityOptions}
-          placeholder={t('reservations.allAmenities')}
-          value={search.amenity_id ?? null}
-          onChange={(value) => updateSearch({ amenity_id: value ?? undefined })}
-        />
-      </div>
+
 
       {weekQuery.isError ? (
         <Alert color="error" title={t('errors.loadFailed')}>
@@ -220,18 +215,39 @@ function ReservationsContent({
               </ActionIcon>
             </Group>
           </div>
-          {weekQuery.isLoading ? (
-            <Skeleton height={320} radius="lg" />
-          ) : (
-            <div className={weekQuery.isPlaceholderData ? 'opacity-60' : undefined}>
-              <ReservationWeekList
-                reservations={weekReservations}
-                timezone={timezone}
-                today={today}
-                onSelect={select}
+          <ReservationWeekList
+            loading={weekQuery.isLoading}
+            fetching={weekQuery.isPlaceholderData}
+            toolbar={
+              <TableToolbar
+                search={<SearchInput defaultValue={search.search} placeholder={t('reservations.searchPlaceholder')} onApply={(value) => updateSearch({ search: value.trim() || undefined })} />}
+                quickFilters={<QuickFilters label={t('table.quickFilters')} options={chips} value={chip} onChange={(key) => updateSearch({ status: key === 'all' ? undefined : key })} />}
+                filters={
+                  <FilterButton activeCount={search.amenity_id ? 1 : 0} onClearAll={() => updateSearch({ amenity_id: undefined })}>
+                    <Select
+                      clearable
+                      comboboxProps={FILTER_COMBOBOX_PROPS}
+                      label={t('reservations.columns.amenity')}
+                      data={amenityOptions}
+                      placeholder={t('reservations.allAmenities')}
+                      value={search.amenity_id ?? null}
+                      onChange={(value) => updateSearch({ amenity_id: value ?? undefined })}
+                    />
+                  </FilterButton>
+                }
+                appliedChips={search.amenity_id ? [{
+                  key: 'amenity',
+                  label: `${t('reservations.columns.amenity')}: ${amenityOptions.find((option) => option.value === search.amenity_id)?.label ?? t('reservations.columns.amenity')}`,
+                  onRemove: () => updateSearch({ amenity_id: undefined }),
+                }] : []}
+                onClearAll={() => updateSearch({ amenity_id: undefined })}
               />
-            </div>
-          )}
+            }
+            reservations={weekReservations}
+            timezone={timezone}
+            today={today}
+            onSelect={select}
+          />
         </div>
         {queueQuery.isLoading ? (
           <Skeleton height={220} radius="lg" />
@@ -263,4 +279,9 @@ function ReservationsContent({
       />
     </div>
   )
+}
+
+/** Search names consistently regardless of capitalization or accents. */
+function normalizeSearch(value: string): string {
+  return value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 }

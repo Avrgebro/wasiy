@@ -13,6 +13,7 @@ export const reservationsSearchSchema = z.object({
     .catch(undefined),
   status: z.enum(['pending', 'approved', 'completed']).optional().catch(undefined),
   amenity_id: z.string().optional().catch(undefined),
+  search: z.string().trim().optional().catch(undefined),
   /** Opens the detail drawer for this booking; deep-linked from Finanzas. */
   reservation: z.string().optional().catch(undefined),
 })

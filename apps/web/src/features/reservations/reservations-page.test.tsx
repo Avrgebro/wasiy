@@ -476,3 +476,39 @@ describe('ReservationsPage', () => {
     expect(within(drawer).getByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
   })
 })
+
+it('opens the amenity filter from the agenda header and updates the URL selection', async () => {
+  installAdapter([reservation()])
+  renderPage()
+  await screen.findByText('Por aprobar')
+  const user = userEvent.setup()
+  expect(screen.queryByRole('combobox', { name: 'Amenidad' })).not.toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Filtros' }))
+  const panel = screen.getByRole('dialog', { name: 'Filtros' })
+  await user.click(within(panel).getByRole('combobox', { name: 'Amenidad' }))
+  await user.click(await screen.findByRole('option', { name: 'Parrilla / terraza' }))
+  expect(navigateSpy.mock.calls.at(-1)![0].search({ date: '2026-08-10' })).toEqual({ date: '2026-08-10', amenity_id: 'am_1' })
+})
+
+it.each(['704', '  JOSE  '])('searches weekly reservations by unit or resident: %s', async (query) => {
+  currentSearch.search = query
+  installAdapter([
+    reservation({ resident_name: 'José Torres' }),
+    reservation({ id: 'res_other', unit_number: 'Depto. 305', resident_name: null }),
+  ])
+  renderPage()
+  expect(await screen.findByText('José Torres')).toBeInTheDocument()
+  expect(screen.queryByText('Depto. 305')).not.toBeInTheDocument()
+})
+
+it('applies the header search to the URL while preserving other filters', async () => {
+  installAdapter([reservation()])
+  renderPage()
+  const user = userEvent.setup()
+  const input = await screen.findByPlaceholderText('Buscar por unidad o residente…')
+  await user.type(input, '704{Enter}')
+  expect(navigateSpy.mock.calls.at(-1)![0].search({ amenity_id: 'am_1' })).toEqual({ amenity_id: 'am_1', search: '704' })
+  await user.clear(input)
+  await user.keyboard('{Enter}')
+  expect(navigateSpy.mock.calls.at(-1)![0].search({ search: '704' })).toEqual({ search: undefined })
+})
