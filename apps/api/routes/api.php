@@ -37,154 +37,302 @@ use App\Http\Controllers\Api\VisitController;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
-// Guest invitation flows: the emailed token is the credential.
-Route::get('/resident-invitations/{token}', [ResidentInvitationController::class, 'show']);
-Route::post('/resident-invitations/{token}/claim', [ResidentInvitationController::class, 'claim']);
-Route::get('/staff-invitations/{token}', [StaffInvitationController::class, 'show']);
-Route::post('/staff-invitations/{token}/accept', [StaffInvitationController::class, 'accept']);
+/*
+|--------------------------------------------------------------------------
+| Guest invitation flows
+|--------------------------------------------------------------------------
+| The emailed token is the credential.
+*/
+
+Route::controller(ResidentInvitationController::class)->group(function () {
+    Route::get('/resident-invitations/{token}', 'show');
+    Route::post('/resident-invitations/{token}/claim', 'claim');
+});
+
+Route::controller(StaffInvitationController::class)->group(function () {
+    Route::get('/staff-invitations/{token}', 'show');
+    Route::post('/staff-invitations/{token}/accept', 'accept');
+});
 
 Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function () {
-    // Session and access context.
+    /*
+    |----------------------------------------------------------------------
+    | Session and access context
+    |----------------------------------------------------------------------
+    */
+
     Route::get('/me', MeController::class);
     Route::patch('/me/password', [PasswordController::class, 'update']);
-    Route::post('/context/account', [AccessContextController::class, 'selectAccount']);
-    Route::post('/context/location', [AccessContextController::class, 'selectLocation']);
-    Route::delete('/context', [AccessContextController::class, 'clear']);
 
-    // Staff management: Account Admins only, enforced once on the group.
-    Route::middleware('can:manageStaff,account')->group(function () {
-        Route::get('/accounts/{account}/staff', [AccountStaffController::class, 'index']);
-        Route::get('/accounts/{account}/staff/invitations', [StaffInvitationController::class, 'index']);
-        Route::post('/accounts/{account}/staff/invitations', [StaffInvitationController::class, 'store']);
-        Route::delete('/accounts/{account}/staff/invitations/{invitation}', [StaffInvitationController::class, 'destroy']);
-        Route::post('/accounts/{account}/staff/invitations/{invitation}/resend', [StaffInvitationController::class, 'resend']);
-        Route::patch('/accounts/{account}/staff/{user}/access', [AccountStaffController::class, 'updateAccess']);
-        Route::post('/accounts/{account}/staff/{user}/deactivate', [AccountStaffController::class, 'deactivate']);
-        Route::post('/accounts/{account}/staff/{user}/reactivate', [AccountStaffController::class, 'reactivate']);
+    Route::controller(AccessContextController::class)->group(function () {
+        Route::post('/context/account', 'selectAccount');
+        Route::post('/context/location', 'selectLocation');
+        Route::delete('/context', 'clear');
     });
 
-    // Location management: cross-account probes 404 in the controllers,
-    // role-level rules live in LocationPolicy / AccountPolicy. Scoped
-    // bindings resolve {location} inside {account}, so a Location reached
-    // through the wrong Account 404s before any policy runs.
-    Route::scopeBindings()->group(function () {
-        Route::get('/accounts/{account}/locations', [LocationController::class, 'index']);
-        Route::post('/accounts/{account}/locations', [LocationController::class, 'store']);
-        Route::get('/accounts/{account}/locations/{location}', [LocationController::class, 'show']);
-        Route::patch('/accounts/{account}/locations/{location}', [LocationController::class, 'update']);
-        Route::post('/accounts/{account}/locations/{location}/deactivate', [LocationController::class, 'deactivate']);
-        Route::post('/accounts/{account}/locations/{location}/reactivate', [LocationController::class, 'reactivate']);
-        Route::post('/accounts/{account}/locations/{location}/photos', [LocationPhotoController::class, 'store']);
-        Route::put('/accounts/{account}/locations/{location}/photos/order', [LocationPhotoController::class, 'reorder']);
-        Route::delete('/accounts/{account}/locations/{location}/photos/{photo}', [LocationPhotoController::class, 'destroy']);
-        Route::post('/accounts/{account}/locations/{location}/photos/{photo}/cover', [LocationPhotoController::class, 'cover']);
-        Route::get('/accounts/{account}/locations/{location}/amenities', [AmenityController::class, 'index']);
-        Route::post('/accounts/{account}/locations/{location}/amenities', [AmenityController::class, 'store']);
-        Route::get('/accounts/{account}/locations/{location}/amenities/{amenity}', [AmenityController::class, 'show']);
-        Route::patch('/accounts/{account}/locations/{location}/amenities/{amenity}', [AmenityController::class, 'update']);
-        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/deactivate', [AmenityController::class, 'deactivate']);
-        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/reactivate', [AmenityController::class, 'reactivate']);
-        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/photos', [AmenityPhotoController::class, 'store']);
-        Route::put('/accounts/{account}/locations/{location}/amenities/{amenity}/photos/order', [AmenityPhotoController::class, 'reorder']);
-        Route::delete('/accounts/{account}/locations/{location}/amenities/{amenity}/photos/{photo}', [AmenityPhotoController::class, 'destroy']);
-        Route::post('/accounts/{account}/locations/{location}/amenities/{amenity}/photos/{photo}/cover', [AmenityPhotoController::class, 'cover']);
-        Route::get('/accounts/{account}/locations/{location}/reservations', [ReservationController::class, 'index']);
-        Route::post('/accounts/{account}/locations/{location}/reservations', [ReservationController::class, 'store']);
-        Route::get('/accounts/{account}/reservations/{reservation}', [ReservationController::class, 'show']);
-        Route::post('/accounts/{account}/reservations/{reservation}/approve', [ReservationController::class, 'approve']);
-        Route::post('/accounts/{account}/reservations/{reservation}/reject', [ReservationController::class, 'reject']);
-        Route::post('/accounts/{account}/reservations/{reservation}/observe', [ReservationController::class, 'observe']);
-        Route::post('/accounts/{account}/reservations/{reservation}/cancel', [ReservationController::class, 'cancel']);
-        Route::get('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'index']);
-        Route::get('/accounts/{account}/locations/{location}/finances/summary', [FinancialMovementController::class, 'summary']);
-        Route::post('/accounts/{account}/locations/{location}/finances/movements', [FinancialMovementController::class, 'store']);
-        Route::post('/accounts/{account}/locations/{location}/finances/dues', [FinancialMovementController::class, 'generateDues']);
-        Route::get('/accounts/{account}/finances/movements/{financialMovement}', [FinancialMovementController::class, 'show']);
-        Route::post('/accounts/{account}/finances/movements/{financialMovement}/status', [FinancialMovementController::class, 'transition']);
-        Route::get('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'show']);
-        Route::put('/accounts/{account}/locations/{location}/settings', [LocationSettingsController::class, 'update']);
+    /*
+    |----------------------------------------------------------------------
+    | Account
+    |----------------------------------------------------------------------
+    | Staff management is Account Admins only, enforced once on the group.
+    */
+
+    Route::prefix('accounts/{account}')->group(function () {
+        Route::middleware('can:manageStaff,account')->group(function () {
+            Route::controller(AccountStaffController::class)->group(function () {
+                Route::get('/staff', 'index');
+                Route::patch('/staff/{user}/access', 'updateAccess');
+                Route::post('/staff/{user}/deactivate', 'deactivate');
+                Route::post('/staff/{user}/reactivate', 'reactivate');
+            });
+
+            Route::controller(StaffInvitationController::class)->group(function () {
+                Route::get('/staff/invitations', 'index');
+                Route::post('/staff/invitations', 'store');
+                Route::delete('/staff/invitations/{invitation}', 'destroy');
+                Route::post('/staff/invitations/{invitation}/resend', 'resend');
+            });
+        });
+
+        Route::controller(AccountSettingsController::class)->group(function () {
+            Route::get('/settings', 'show');
+            Route::put('/settings', 'update');
+        });
     });
+
+    /*
+    |----------------------------------------------------------------------
+    | Account-scoped location tree
+    |----------------------------------------------------------------------
+    | Cross-account probes 404 in the controllers, role-level rules live in
+    | LocationPolicy / AccountPolicy. Scoped bindings resolve {location}
+    | inside {account}, so a Location reached through the wrong Account
+    | 404s before any policy runs.
+    */
+
+    Route::scopeBindings()->prefix('accounts/{account}')->group(function () {
+        // Locations
+        Route::controller(LocationController::class)->group(function () {
+            Route::get('/locations', 'index');
+            Route::post('/locations', 'store');
+            Route::get('/locations/{location}', 'show');
+            Route::patch('/locations/{location}', 'update');
+            Route::post('/locations/{location}/deactivate', 'deactivate');
+            Route::post('/locations/{location}/reactivate', 'reactivate');
+        });
+
+        Route::prefix('locations/{location}')->group(function () {
+            // Location settings
+            Route::controller(LocationSettingsController::class)->group(function () {
+                Route::get('/settings', 'show');
+                Route::put('/settings', 'update');
+            });
+
+            // Location photos
+            Route::controller(LocationPhotoController::class)->group(function () {
+                Route::post('/photos', 'store');
+                Route::put('/photos/order', 'reorder');
+                Route::delete('/photos/{photo}', 'destroy');
+                Route::post('/photos/{photo}/cover', 'cover');
+            });
+
+            // Amenities
+            Route::controller(AmenityController::class)->group(function () {
+                Route::get('/amenities', 'index');
+                Route::post('/amenities', 'store');
+                Route::get('/amenities/{amenity}', 'show');
+                Route::patch('/amenities/{amenity}', 'update');
+                Route::post('/amenities/{amenity}/deactivate', 'deactivate');
+                Route::post('/amenities/{amenity}/reactivate', 'reactivate');
+            });
+
+            // Amenity photos
+            Route::controller(AmenityPhotoController::class)->group(function () {
+                Route::post('/amenities/{amenity}/photos', 'store');
+                Route::put('/amenities/{amenity}/photos/order', 'reorder');
+                Route::delete('/amenities/{amenity}/photos/{photo}', 'destroy');
+                Route::post('/amenities/{amenity}/photos/{photo}/cover', 'cover');
+            });
+
+            // Reservations (collection)
+            Route::controller(ReservationController::class)->group(function () {
+                Route::get('/reservations', 'index');
+                Route::post('/reservations', 'store');
+            });
+
+            // Finances (collection)
+            Route::controller(FinancialMovementController::class)->group(function () {
+                Route::get('/finances/movements', 'index');
+                Route::post('/finances/movements', 'store');
+                Route::get('/finances/summary', 'summary');
+                Route::post('/finances/dues', 'generateDues');
+            });
+        });
+
+        // Reservations (member)
+        Route::controller(ReservationController::class)->group(function () {
+            Route::get('/reservations/{reservation}', 'show');
+            Route::post('/reservations/{reservation}/approve', 'approve');
+            Route::post('/reservations/{reservation}/reject', 'reject');
+            Route::post('/reservations/{reservation}/observe', 'observe');
+            Route::post('/reservations/{reservation}/cancel', 'cancel');
+        });
+
+        // Finances (member)
+        Route::controller(FinancialMovementController::class)->group(function () {
+            Route::get('/finances/movements/{financialMovement}', 'show');
+            Route::post('/finances/movements/{financialMovement}/status', 'transition');
+        });
+    });
+
     // Photo bytes: authorization delegates to the owner's view policy.
     Route::get('/photos/{photo}', [PhotoController::class, 'show']);
-    Route::get('/accounts/{account}/settings', [AccountSettingsController::class, 'show']);
-    Route::put('/accounts/{account}/settings', [AccountSettingsController::class, 'update']);
 
-    // Staff registry surface: fine-grained authorization lives in the
-    // controllers' gates and FormRequests.
+    /*
+    |----------------------------------------------------------------------
+    | Location-scoped operations
+    |----------------------------------------------------------------------
+    | Staff surface. Fine-grained authorization lives in the controllers'
+    | gates and FormRequests. Each block reads collection → member →
+    | actions → sub-resources.
+    */
+
+    // Dashboard and search
     Route::get('/locations/{location}/dashboard', LocationDashboardController::class)
         ->can('view', 'location');
     Route::get('/locations/{location}/search', LocationSearchController::class);
-    Route::get('/locations/{location}/buildings', [BuildingController::class, 'index']);
-    Route::post('/locations/{location}/buildings', [BuildingController::class, 'store']);
-    Route::patch('/buildings/{building}', [BuildingController::class, 'update']);
-    Route::delete('/buildings/{building}', [BuildingController::class, 'destroy']);
-    Route::get('/locations/{location}/units', [UnitController::class, 'index']);
-    Route::post('/locations/{location}/units', [UnitController::class, 'store']);
-    Route::get('/locations/{location}/vehicles', [VehicleController::class, 'index']);
-    Route::post('/locations/{location}/vehicles', [VehicleController::class, 'store']);
-    Route::get('/locations/{location}/packages', [PackageController::class, 'index']);
-    Route::post('/locations/{location}/packages', [PackageController::class, 'store']);
-    Route::post('/packages/{package}/deliver', [PackageController::class, 'deliver']);
-    Route::get('/locations/{location}/announcements', [AnnouncementController::class, 'index']);
-    Route::post('/locations/{location}/announcements', [AnnouncementController::class, 'store']);
-    Route::get('/announcements/{announcement}', [AnnouncementController::class, 'show']);
-    Route::patch('/announcements/{announcement}', [AnnouncementController::class, 'update']);
-    Route::post('/announcements/{announcement}/archive', [AnnouncementController::class, 'archive']);
-    Route::get('/locations/{location}/visits', [VisitController::class, 'index']);
-    Route::post('/locations/{location}/visits', [VisitController::class, 'store']);
-    Route::post('/visits/{visit}/check-out', [VisitController::class, 'checkOut']);
-    Route::post('/visits/{visit}/confirm-arrival', [VisitController::class, 'confirmArrival']);
-    Route::get('/units/{unit}', [UnitController::class, 'show']);
-    Route::post('/units/{unit}/notes', [UnitController::class, 'storeNote']);
-    Route::post('/units/{unit}/deactivate', [UnitController::class, 'deactivate']);
-    Route::post('/units/{unit}/reactivate', [UnitController::class, 'reactivate']);
-    Route::patch('/units/{unit}', [UnitController::class, 'update']);
-    Route::delete('/units/{unit}', [UnitController::class, 'destroy']);
-    Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show']);
-    Route::patch('/vehicles/{vehicle}', [VehicleController::class, 'update']);
-    Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy']);
-    Route::get('/accounts/{account}/residents', [ResidentController::class, 'index']);
-    Route::post('/accounts/{account}/residents', [ResidentController::class, 'store']);
-    Route::get('/residents/{resident}', [ResidentController::class, 'show']);
-    Route::patch('/residents/{resident}', [ResidentController::class, 'update']);
-    Route::delete('/residents/{resident}', [ResidentController::class, 'destroy']);
-    Route::post('/residents/{resident}/deactivate', [ResidentController::class, 'deactivate']);
-    Route::post('/residents/{resident}/reactivate', [ResidentController::class, 'reactivate']);
-    Route::post('/residents/{resident}/invitations', [ResidentInvitationController::class, 'store']);
-    Route::delete('/residents/{resident}/invitations/{invitation}', [ResidentInvitationController::class, 'destroy']);
-    Route::post('/residents/{resident}/invitations/{invitation}/resend', [ResidentInvitationController::class, 'resend']);
-    Route::post('/residents/{resident}/memberships', [UnitMembershipController::class, 'store']);
-    Route::patch('/unit-memberships/{membership}', [UnitMembershipController::class, 'update']);
-    Route::delete('/unit-memberships/{membership}', [UnitMembershipController::class, 'destroy']);
 
-    // Resident portal: gated by resident-membership policies, never staff
-    // roles.
+    // Buildings
+    Route::controller(BuildingController::class)->group(function () {
+        Route::get('/locations/{location}/buildings', 'index');
+        Route::post('/locations/{location}/buildings', 'store');
+        Route::patch('/buildings/{building}', 'update');
+        Route::delete('/buildings/{building}', 'destroy');
+    });
+
+    // Units
+    Route::controller(UnitController::class)->group(function () {
+        Route::get('/locations/{location}/units', 'index');
+        Route::post('/locations/{location}/units', 'store');
+        Route::get('/units/{unit}', 'show');
+        Route::patch('/units/{unit}', 'update');
+        Route::delete('/units/{unit}', 'destroy');
+        Route::post('/units/{unit}/deactivate', 'deactivate');
+        Route::post('/units/{unit}/reactivate', 'reactivate');
+        Route::post('/units/{unit}/notes', 'storeNote');
+    });
+
+    // Vehicles
+    Route::controller(VehicleController::class)->group(function () {
+        Route::get('/locations/{location}/vehicles', 'index');
+        Route::post('/locations/{location}/vehicles', 'store');
+        Route::get('/vehicles/{vehicle}', 'show');
+        Route::patch('/vehicles/{vehicle}', 'update');
+        Route::delete('/vehicles/{vehicle}', 'destroy');
+    });
+
+    // Residents
+    Route::controller(ResidentController::class)->group(function () {
+        Route::get('/accounts/{account}/residents', 'index');
+        Route::post('/accounts/{account}/residents', 'store');
+        Route::get('/residents/{resident}', 'show');
+        Route::patch('/residents/{resident}', 'update');
+        Route::delete('/residents/{resident}', 'destroy');
+        Route::post('/residents/{resident}/deactivate', 'deactivate');
+        Route::post('/residents/{resident}/reactivate', 'reactivate');
+    });
+
+    Route::controller(ResidentInvitationController::class)->group(function () {
+        Route::post('/residents/{resident}/invitations', 'store');
+        Route::delete('/residents/{resident}/invitations/{invitation}', 'destroy');
+        Route::post('/residents/{resident}/invitations/{invitation}/resend', 'resend');
+    });
+
+    Route::controller(UnitMembershipController::class)->group(function () {
+        Route::post('/residents/{resident}/memberships', 'store');
+        Route::patch('/unit-memberships/{membership}', 'update');
+        Route::delete('/unit-memberships/{membership}', 'destroy');
+    });
+
+    // Packages
+    Route::controller(PackageController::class)->group(function () {
+        Route::get('/locations/{location}/packages', 'index');
+        Route::post('/locations/{location}/packages', 'store');
+        Route::post('/packages/{package}/deliver', 'deliver');
+    });
+
+    // Visits
+    Route::controller(VisitController::class)->group(function () {
+        Route::get('/locations/{location}/visits', 'index');
+        Route::post('/locations/{location}/visits', 'store');
+        Route::post('/visits/{visit}/check-out', 'checkOut');
+        Route::post('/visits/{visit}/confirm-arrival', 'confirmArrival');
+    });
+
+    // Announcements
+    Route::controller(AnnouncementController::class)->group(function () {
+        Route::get('/locations/{location}/announcements', 'index');
+        Route::post('/locations/{location}/announcements', 'store');
+        Route::get('/announcements/{announcement}', 'show');
+        Route::patch('/announcements/{announcement}', 'update');
+        Route::post('/announcements/{announcement}/archive', 'archive');
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | Resident portal
+    |----------------------------------------------------------------------
+    | Gated by resident-membership policies, never staff roles.
+    */
+
     Route::prefix('portal')->group(function () {
-        Route::get('/resident', [PortalResidentController::class, 'show']);
-        Route::patch('/resident/phone', [PortalResidentController::class, 'updatePhone']);
-        Route::patch('/resident/email-alerts', [PortalResidentController::class, 'updateEmailAlerts']);
-        Route::get('/household', [PortalHouseholdController::class, 'index']);
-        Route::post('/household', [PortalHouseholdController::class, 'store']);
-        Route::delete('/household/{membership}', [PortalHouseholdController::class, 'destroy']);
-        Route::post('/household/{membership}/resend-invitation', [PortalHouseholdController::class, 'resendInvitation']);
+        Route::controller(PortalResidentController::class)->group(function () {
+            Route::get('/resident', 'show');
+            Route::patch('/resident/phone', 'updatePhone');
+            Route::patch('/resident/email-alerts', 'updateEmailAlerts');
+        });
+
+        Route::controller(PortalHouseholdController::class)->group(function () {
+            Route::get('/household', 'index');
+            Route::post('/household', 'store');
+            Route::delete('/household/{membership}', 'destroy');
+            Route::post('/household/{membership}/resend-invitation', 'resendInvitation');
+        });
+
         Route::get('/ledger', [PortalLedgerController::class, 'index']);
-        Route::get('/alerts', [PortalAlertController::class, 'index']);
-        Route::get('/alerts/unread-count', [PortalAlertController::class, 'unreadCount']);
-        Route::post('/alerts/read-all', [PortalAlertController::class, 'markAllRead']);
-        Route::post('/alerts/{alert}/read', [PortalAlertController::class, 'markRead']);
-        Route::get('/amenities', [PortalAmenityController::class, 'index']);
-        Route::get('/amenities/{amenity}/availability', [PortalAmenityController::class, 'availability']);
-        Route::get('/reservations', [PortalReservationController::class, 'index']);
-        Route::post('/reservations', [PortalReservationController::class, 'store']);
-        Route::get('/reservations/{reservation}', [PortalReservationController::class, 'show']);
-        Route::post('/reservations/{reservation}/cancel', [PortalReservationController::class, 'cancel']);
+
+        Route::controller(PortalAlertController::class)->group(function () {
+            Route::get('/alerts', 'index');
+            Route::get('/alerts/unread-count', 'unreadCount');
+            Route::post('/alerts/read-all', 'markAllRead');
+            Route::post('/alerts/{alert}/read', 'markRead');
+        });
+
+        Route::controller(PortalAmenityController::class)->group(function () {
+            Route::get('/amenities', 'index');
+            Route::get('/amenities/{amenity}/availability', 'availability');
+        });
+
+        Route::controller(PortalReservationController::class)->group(function () {
+            Route::get('/reservations', 'index');
+            Route::post('/reservations', 'store');
+            Route::get('/reservations/{reservation}', 'show');
+            Route::post('/reservations/{reservation}/cancel', 'cancel');
+        });
+
         Route::get('/packages', [PortalPackageController::class, 'index']);
-        Route::get('/visits', [PortalVisitController::class, 'index']);
-        Route::post('/visits', [PortalVisitController::class, 'store']);
-        Route::post('/visits/{visit}/cancel', [PortalVisitController::class, 'cancel']);
-        Route::get('/vehicles', [PortalVehicleController::class, 'index']);
-        Route::post('/vehicles', [PortalVehicleController::class, 'store']);
-        Route::patch('/vehicles/{vehicle}', [PortalVehicleController::class, 'update']);
-        Route::delete('/vehicles/{vehicle}', [PortalVehicleController::class, 'destroy']);
+
+        Route::controller(PortalVisitController::class)->group(function () {
+            Route::get('/visits', 'index');
+            Route::post('/visits', 'store');
+            Route::post('/visits/{visit}/cancel', 'cancel');
+        });
+
+        Route::controller(PortalVehicleController::class)->group(function () {
+            Route::get('/vehicles', 'index');
+            Route::post('/vehicles', 'store');
+            Route::patch('/vehicles/{vehicle}', 'update');
+            Route::delete('/vehicles/{vehicle}', 'destroy');
+        });
     });
 });
