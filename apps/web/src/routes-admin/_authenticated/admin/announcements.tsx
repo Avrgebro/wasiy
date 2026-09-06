@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { PagePlaceholder } from '../../../components/ui/page-placeholder'
+import { announcementsSearchSchema } from '../../../features/announcements/schemas'
+import { AnnouncementsPage } from '../../../features/announcements/announcements-page'
 import { hasCapability } from '../../../features/auth/access'
 import { checkSurfaceAccess } from '../../../features/auth/guards'
 
@@ -9,5 +10,6 @@ export const Route = createFileRoute('/_authenticated/admin/announcements')({
   beforeLoad: ({ context }) => {
     checkSurfaceAccess(context.me, hasCapability('announcements.manage'))
   },
-  component: () => <PagePlaceholder titleKey="nav.announcements" />,
+  component: AnnouncementsPage,
+  validateSearch: announcementsSearchSchema,
 })

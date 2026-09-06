@@ -15,6 +15,7 @@ use App\Enums\VisitStatus;
 use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Amenity;
+use App\Models\Announcement;
 use App\Models\FinancialMovement;
 use App\Models\Location;
 use App\Models\Package;
@@ -78,6 +79,7 @@ class DemoOperationsSeeder extends Seeder
         $this->seedPackages($residents);
         $this->seedVisits($residents);
         $this->seedAlerts($residents);
+        $this->seedAnnouncements($residents);
         $this->seedVehicles();
     }
 
@@ -608,6 +610,53 @@ class DemoOperationsSeeder extends Seeder
     /**
      * @param  array<string, mixed>  $metadata
      */
+    /**
+     * Mockup 18: two live posts (one important), one scheduled, one expired.
+     *
+     * @param  Collection<string, Resident>  $primaries
+     */
+    private function seedAnnouncements(Collection $primaries): void
+    {
+        $rows = [
+            // [title, body, important, days ago published (null = scheduled in 2 days), expires in days from now]
+            ['Corte de agua programado', "El martes cortaremos el agua de 09:00 a 13:00 para el mantenimiento anual de la cisterna.\n\nDurante esas horas no habrá servicio en ningún piso de ambas torres.\n\n- Almacenen agua la noche anterior.\n- No usen lavadoras ni lavavajillas.\n- El agua vuelve gradualmente desde el piso 1.", true, 1, 4],
+            ['Mantenimiento de ascensores Torre B', "El ascensor 2 de Torre B estará fuera de servicio de lunes a miércoles por cambio de cables.\n\nEl ascensor 1 atenderá todos los pisos.", false, 3, 7],
+            ['Nuevo horario de recepción', "Desde el 1 de septiembre recepción atiende de 7:00 a 23:00.\n\nFuera de ese horario, el intercomunicador deriva al servicio de vigilancia.", false, 8, null],
+            ['Fumigación de áreas comunes', 'Se fumigarán jardines y estacionamientos durante la mañana. Eviten transitar por esas zonas hasta el mediodía.', false, null, null],
+            ['Reglamento de piscina 2026', "Recuerden que el uso de la piscina es de 8:00 a 20:00 y los menores deben estar acompañados.\n\nEl reglamento completo está en recepción.", false, 40, -6],
+        ];
+        $residents = $primaries->count();
+
+        foreach ($rows as [$title, $body, $important, $daysAgo, $expiresIn]) {
+            $publishAt = $daysAgo === null ? $this->now->addDays(2)->setTime(8, 0) : $this->now->subDays($daysAgo)->setTime(18, 20);
+            $announcement = Announcement::query()->updateOrCreate(
+                ['location_id' => $this->central->id, 'title' => $title],
+                [
+                    'account_id' => $this->account->id,
+                    'author_user_id' => $this->manager->id,
+                    'body_md' => $body,
+                    'excerpt' => Announcement::excerptOf($body),
+                    'is_important' => $important,
+                    'publish_at' => $publishAt->utc(),
+                    'published_at' => $daysAgo === null ? null : $publishAt->utc(),
+                    'expires_on' => $expiresIn === null ? null : $this->now->addDays($expiresIn)->toDateString(),
+                    'notified_count' => $daysAgo === null ? 0 : $residents,
+                    'emailed_count' => 0,
+                ],
+            );
+
+            $this->activity(
+                $daysAgo === null ? ActivityEventType::AnnouncementScheduled : ActivityEventType::AnnouncementPublished,
+                ($daysAgo === null ? 'Anuncio programado: ' : 'Anuncio publicado: ')."«{$title}».",
+                $this->manager,
+                $daysAgo === null ? $this->now->subHours(5) : $publishAt,
+                'announcement',
+                $announcement->id,
+                ['title' => $title],
+            );
+        }
+    }
+
     private function activity(ActivityEventType $eventType, string $summary, ?User $actor, CarbonImmutable $at, string $subjectType, string $subjectId, array $metadata = []): void
     {
         ActivityLog::query()->updateOrCreate(

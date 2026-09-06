@@ -60,4 +60,8 @@ enum ActivityEventType: string
     case LocationSettingsChanged = 'location.settings_changed';
     case LocationBuildingsChanged = 'location.buildings_changed';
     case AccountSettingsChanged = 'account.settings_changed';
+    case AnnouncementScheduled = 'announcement.scheduled';
+    case AnnouncementPublished = 'announcement.published';
+    case AnnouncementUpdated = 'announcement.updated';
+    case AnnouncementArchived = 'announcement.archived';
 }

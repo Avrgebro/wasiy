@@ -7,7 +7,8 @@
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "close": "Cerrar",
-    "back": "Volver"
+    "back": "Volver",
+    "saveChanges": "Guardar cambios"
   },
   "common": {
     "loading": "Cargando",
@@ -574,7 +575,12 @@
     "visitorNameRequired": "Ingresa el nombre del visitante.",
     "plateRequired": "Ingresa la placa.",
     "currentPasswordRequired": "Ingresa tu contraseña actual.",
-    "passwordMin": "La contraseña debe tener al menos 8 caracteres."
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres.",
+    "titleRequired": "Escribe un título.",
+    "titleTooLong": "El título no puede superar 160 caracteres.",
+    "bodyRequired": "Escribe el contenido.",
+    "bodyTooLong": "El contenido no puede superar 5000 caracteres.",
+    "timeRequired": "Elige la hora."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",
@@ -1608,5 +1614,92 @@
     "country": "País",
     "searchCountry": "Buscar país…",
     "noCountry": "Ningún país coincide."
+  },
+  "announcements": {
+    "title": "Anuncios",
+    "subtitle": "{{location}} · {{active}} vigentes · {{scheduled}} programados",
+    "create": "Nuevo anuncio",
+    "searchPlaceholder": "Buscar por título…",
+    "important": "Importante",
+    "chips": {
+      "active": "Vigentes",
+      "scheduled": "Programados",
+      "all": "Todos"
+    },
+    "columns": {
+      "title": "Título",
+      "status": "Estado",
+      "validity": "Vigencia",
+      "published": "Publicado",
+      "notified": "Notificados"
+    },
+    "statuses": {
+      "scheduled": "Programado",
+      "active": "Vigente",
+      "expired": "Vencido",
+      "archived": "Archivado"
+    },
+    "validity": {
+      "until": "hasta {{date}}",
+      "none": "sin vencimiento",
+      "publishes": "publica {{date}}",
+      "expired": "venció {{date}}",
+      "archived": "archivado {{date}}"
+    },
+    "empty": {
+      "active": "No hay anuncios vigentes en {{location}}.",
+      "scheduled": "No hay anuncios programados.",
+      "all": "Aún no hay anuncios en {{location}}."
+    },
+    "emptyFiltered": "Ningún anuncio coincide con la búsqueda.",
+    "published": "Anuncio publicado · {{count}} residentes notificados",
+    "scheduled": "Anuncio programado",
+    "saved": "Anuncio guardado",
+    "archived": "Anuncio archivado",
+    "form": {
+      "createTitle": "Nuevo anuncio",
+      "editTitle": "Editar anuncio",
+      "subtitle": "Los residentes de {{location}} lo verán en el portal y recibirán una alerta.",
+      "title": "Título",
+      "titlePlaceholder": "ej. Corte de agua programado",
+      "body": "Contenido",
+      "bodyHint": "El primer párrafo es el resumen que llega por alerta y WhatsApp.",
+      "important": "Importante",
+      "importantHint": "Se fija arriba en el portal y se resalta en ámbar.",
+      "publication": "Publicación",
+      "publishNow": "Publicar ahora",
+      "schedule": "Programar",
+      "date": "Fecha",
+      "time": "Hora",
+      "scheduleHint": "Se publica y notifica a esa hora, en la zona horaria de la ubicación.",
+      "validity": "Vigencia",
+      "expiresOn": "Vigente hasta",
+      "expiresHint": "Al vencer desaparece del portal; queda en el historial.",
+      "submitPublish": "Publicar",
+      "submitSchedule": "Programar"
+    },
+    "editor": {
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "bulletList": "Lista",
+      "orderedList": "Lista numerada",
+      "link": "Enlace",
+      "unlink": "Quitar enlace",
+      "linkUrl": "Dirección del enlace"
+    },
+    "detail": {
+      "notified": "Notificados",
+      "notifiedValue": "{{count}} residentes",
+      "email": "Correo",
+      "emailValue": "Enviado a {{count}}",
+      "emailNone": "Sin envío",
+      "actions": "Acciones",
+      "archive": "Archivar",
+      "archiveHint": "Archivar lo quita del portal; el historial y las alertas ya enviadas se conservan.",
+      "publishedBy": "publicado {{date}} por {{name}}",
+      "scheduledFor": "programado para {{date}}",
+      "confirmArchiveTitle": "Archivar «{{title}}»",
+      "confirmArchiveBody": "El anuncio deja de mostrarse en el portal. Las alertas ya enviadas se conservan."
+    }
   }
 }

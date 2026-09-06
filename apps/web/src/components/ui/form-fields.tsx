@@ -11,6 +11,8 @@ type FormFieldProps<T extends FieldValues> = {
   leftSection?: ReactNode
   name: Path<T>
   placeholder?: string
+  /** Marks the label with the required asterisk; validation itself lives in the schema. */
+  withAsterisk?: boolean
 }
 
 /**
@@ -25,6 +27,7 @@ export function FormTextInput<T extends FieldValues>({
   name,
   placeholder,
   styles,
+  withAsterisk,
 }: FormFieldProps<T> & { styles?: TextInputProps['styles'] }) {
   return (
     <Controller
@@ -39,6 +42,7 @@ export function FormTextInput<T extends FieldValues>({
           leftSection={leftSection}
           placeholder={placeholder}
           styles={styles}
+          withAsterisk={withAsterisk}
         />
       )}
     />

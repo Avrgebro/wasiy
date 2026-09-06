@@ -4,14 +4,18 @@ namespace App\Services;
 
 use App\Enums\RegistryStatus;
 use App\Enums\ResidentAlertKind;
+use App\Models\Announcement;
+use App\Models\Location;
 use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Resident;
 use App\Models\ResidentAlert;
 use App\Models\Unit;
+use App\Models\UnitMembership;
 use App\Models\Visit;
 use App\Notifications\ResidentAlertNotification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
@@ -57,14 +61,65 @@ class ResidentAlerts
                 ->unique('id')
                 ->values();
 
-        foreach ($recipients as $resident) {
+        $this->deliver($unit->location, $recipients->map(fn (Resident $resident) => [$resident, $unit->id]), $kind, $title, $body, $subject, $facts, $intro, $actionLabel, $actionPath, email: true);
+    }
+
+    /**
+     * Location-wide fan-out (announcements): every active resident of every
+     * active unit hears once, under their first unit. `$email` is the
+     * location's "correo a residentes por anuncio nuevo" switch; a resident's
+     * own family switch still applies on top.
+     *
+     * @param  array<int, array{label: string, value: string}>  $facts
+     * @return array{recipients: int, alerts: int, emails: int}
+     */
+    public function broadcast(
+        Location $location,
+        ResidentAlertKind $kind,
+        string $title,
+        ?string $body,
+        Model $subject,
+        array $facts = [],
+        ?string $intro = null,
+        ?string $actionLabel = null,
+        ?string $actionPath = null,
+        bool $email = true,
+    ): array {
+        $location->loadMissing('account');
+
+        $pairs = UnitMembership::query()
+            ->where('location_id', $location->id)
+            ->where('status', RegistryStatus::Active)
+            ->whereHas('unit', fn ($unit) => $unit->where('status', RegistryStatus::Active->value))
+            ->with('resident.user')
+            ->orderBy('id')
+            ->get()
+            ->filter(fn (UnitMembership $membership) => $membership->resident !== null && $membership->resident->status === RegistryStatus::Active)
+            ->unique(fn (UnitMembership $membership) => $membership->resident_id)
+            ->map(fn (UnitMembership $membership) => [$membership->resident, $membership->unit_id])
+            ->values();
+
+        return $this->deliver($location, $pairs, $kind, $title, $body, $subject, $facts, $intro, $actionLabel, $actionPath, $email);
+    }
+
+    /**
+     * @param  Collection<int, array{0: Resident, 1: string}>  $pairs  resident and the unit the alert files under
+     * @param  array<int, array{label: string, value: string}>  $facts
+     * @return array{recipients: int, alerts: int, emails: int}
+     */
+    private function deliver($location, $pairs, ResidentAlertKind $kind, string $title, ?string $body, Model $subject, array $facts, ?string $intro, ?string $actionLabel, ?string $actionPath, bool $email): array
+    {
+        $alerts = 0;
+        $emails = 0;
+
+        foreach ($pairs as [$resident, $unitId]) {
             $alert = null;
 
             if ($resident->user_id !== null) {
                 $alert = ResidentAlert::query()->create([
-                    'account_id' => $unit->account_id,
-                    'location_id' => $unit->location_id,
-                    'unit_id' => $unit->id,
+                    'account_id' => $location->account_id,
+                    'location_id' => $location->id,
+                    'unit_id' => $unitId,
                     'resident_id' => $resident->id,
                     'kind' => $kind,
                     'title' => $title,
@@ -73,17 +128,19 @@ class ResidentAlerts
                         $subject instanceof Reservation => 'reservation',
                         $subject instanceof Package => 'package',
                         $subject instanceof Visit => 'visit',
+                        $subject instanceof Announcement => 'announcement',
                         default => null,
                     },
                     'subject_id' => $subject->getKey(),
                 ]);
+                $alerts++;
             }
 
-            $email = $resident->user?->email ?: $resident->email;
+            $address = $resident->user?->email ?: $resident->email;
 
-            if ($email && $resident->wantsEmailFor($kind->family())) {
+            if ($email && $address && $resident->wantsEmailFor($kind->family())) {
                 $notification = new ResidentAlertNotification(
-                    locationName: $unit->location->name,
+                    locationName: $location->name,
                     recipientName: $resident->first_name,
                     title: $title,
                     intro: $intro,
@@ -94,8 +151,11 @@ class ResidentAlerts
                     actionUrl: $actionPath !== null ? rtrim((string) config('wasiy.portal.url'), '/').$actionPath : null,
                     alertId: $alert?->id,
                 );
-                DB::afterCommit(fn () => Notification::route('mail', $email)->notify($notification));
+                DB::afterCommit(fn () => Notification::route('mail', $address)->notify($notification));
+                $emails++;
             }
         }
+
+        return ['recipients' => count($pairs), 'alerts' => $alerts, 'emails' => $emails];
     }
 }

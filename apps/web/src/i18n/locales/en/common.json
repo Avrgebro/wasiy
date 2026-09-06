@@ -7,7 +7,8 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "close": "Close",
-    "back": "Back"
+    "back": "Back",
+    "saveChanges": "Save changes"
   },
   "common": {
     "loading": "Loading",
@@ -574,7 +575,12 @@
     "visitorNameRequired": "Enter the visitor's name.",
     "plateRequired": "Enter the plate.",
     "currentPasswordRequired": "Enter your current password.",
-    "passwordMin": "The password must be at least 8 characters."
+    "passwordMin": "The password must be at least 8 characters.",
+    "titleRequired": "Enter a title.",
+    "titleTooLong": "The title cannot exceed 160 characters.",
+    "bodyRequired": "Enter the content.",
+    "bodyTooLong": "The content cannot exceed 5000 characters.",
+    "timeRequired": "Pick the time."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",
@@ -1608,5 +1614,92 @@
     "country": "Country",
     "searchCountry": "Search country…",
     "noCountry": "No country matches."
+  },
+  "announcements": {
+    "title": "Announcements",
+    "subtitle": "{{location}} · {{active}} active · {{scheduled}} scheduled",
+    "create": "New announcement",
+    "searchPlaceholder": "Search by title…",
+    "important": "Important",
+    "chips": {
+      "active": "Active",
+      "scheduled": "Scheduled",
+      "all": "All"
+    },
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "validity": "Validity",
+      "published": "Published",
+      "notified": "Notified"
+    },
+    "statuses": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "expired": "Expired",
+      "archived": "Archived"
+    },
+    "validity": {
+      "until": "until {{date}}",
+      "none": "no expiry",
+      "publishes": "publishes {{date}}",
+      "expired": "expired {{date}}",
+      "archived": "archived {{date}}"
+    },
+    "empty": {
+      "active": "No active announcements in {{location}}.",
+      "scheduled": "No scheduled announcements.",
+      "all": "No announcements in {{location}} yet."
+    },
+    "emptyFiltered": "No announcement matches the search.",
+    "published": "Announcement published · {{count}} residents notified",
+    "scheduled": "Announcement scheduled",
+    "saved": "Announcement saved",
+    "archived": "Announcement archived",
+    "form": {
+      "createTitle": "New announcement",
+      "editTitle": "Edit announcement",
+      "subtitle": "Residents of {{location}} will see it in the portal and receive an alert.",
+      "title": "Title",
+      "titlePlaceholder": "e.g. Scheduled water cut",
+      "body": "Content",
+      "bodyHint": "The first paragraph is the summary sent by alert and WhatsApp.",
+      "important": "Important",
+      "importantHint": "Pinned to the top of the portal and highlighted in amber.",
+      "publication": "Publication",
+      "publishNow": "Publish now",
+      "schedule": "Schedule",
+      "date": "Date",
+      "time": "Time",
+      "scheduleHint": "Published and notified at that time, in the location’s timezone.",
+      "validity": "Validity",
+      "expiresOn": "Valid until",
+      "expiresHint": "On expiry it leaves the portal and stays in the history.",
+      "submitPublish": "Publish",
+      "submitSchedule": "Schedule"
+    },
+    "editor": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "bulletList": "Bullet list",
+      "orderedList": "Numbered list",
+      "link": "Link",
+      "unlink": "Remove link",
+      "linkUrl": "Link address"
+    },
+    "detail": {
+      "notified": "Notified",
+      "notifiedValue": "{{count}} residents",
+      "email": "Email",
+      "emailValue": "Sent to {{count}}",
+      "emailNone": "Not sent",
+      "actions": "Actions",
+      "archive": "Archive",
+      "archiveHint": "Archiving removes it from the portal; the history and alerts already sent are kept.",
+      "publishedBy": "published {{date}} by {{name}}",
+      "scheduledFor": "scheduled for {{date}}",
+      "confirmArchiveTitle": "Archive “{{title}}”",
+      "confirmArchiveBody": "The announcement stops showing in the portal. Alerts already sent are kept."
+    }
   }
 }
