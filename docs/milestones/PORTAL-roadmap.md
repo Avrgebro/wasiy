@@ -85,6 +85,13 @@ Each milestone: backend slice with tests, frontend slice with tests, mockups fir
 - Portal: bell in the header → `/portal/alertas` (chips Nuevas · n / Todas, Marcar todo como leído, rows open the booking sheet via `?reserva=`, the home for packages, Visitas for arrivals). Perfil gains "Notificaciones por correo".
 - Left for P4: the "Mi hogar" member list drawn in mockup 03c (needs the members endpoint), editable login email.
 
+## P4 decisions (2026-09-05)
+
+- Fifth tab "Mi unidad" (Inicio · Visitas · Reservas · Mi unidad · Perfil) holding Mi hogar, Vehículos and Estado de cuenta.
+- Mi hogar: every member sees the list (avatar initials, name, phone, "Tú"). The primary contact can add a person (creates resident + membership, sends the portal invitation), remove one, and resend an invitation. Nobody edits another person's phone; each member does that in Perfil.
+- Estado de cuenta: primary contact only. Balance on top, movements grouped by month, read only, no detail sheet, no payments.
+- Perfil: password change. Login email change is deferred (needs verification flow), so the P3 "cambiar en Perfil" line stays informational.
+
 ## Parked
 
 - WhatsApp alerts.

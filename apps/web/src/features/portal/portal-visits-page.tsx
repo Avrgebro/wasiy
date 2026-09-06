@@ -4,8 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BottomSheet } from '../../components/ui/bottom-sheet'
-import { ConfirmDialog, DrawerFact, DrawerFacts, DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
+import { BottomSheet, ConfirmSheet, SheetAction, SheetTile, SheetTiles } from '../../components/ui/bottom-sheet'
+import { DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
 import { getErrorMessage } from '../../lib/errors'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
@@ -136,36 +136,39 @@ export function PortalVisitsPage() {
       </ActionIcon>
 
       <BottomSheet
-        description={selected ? `${active.unit_label} · ${selected.checked_in_at ? doorLabel(selected, timezone) : expectedLabel(selected, now, timezone, t)}` : undefined}
+        footer={
+          selected?.status === 'expected' ? (
+            <SheetAction hint={t('portal.visits.cancelHint')}>
+              <Button className="w-full" color="error" size="md" variant="default" onClick={() => setConfirmingCancel(true)}>
+                {t('portal.visits.cancel')}
+              </Button>
+            </SheetAction>
+          ) : undefined
+        }
+        lines={selected ? [selected.checked_in_at ? doorLabel(selected, timezone) : expectedLabel(selected, now, timezone, t), active.unit_label] : []}
         opened={selected !== null}
+        pill={selected ? <StatusPill color={statusTone(selected.status)}>{pillFor(selected)}</StatusPill> : undefined}
         title={selected?.visitor_name ?? ''}
         onClose={() => setSelectedId(null)}
       >
         {selected ? (
-          <div className="flex flex-col gap-4">
-            <DrawerFacts>
-              <DrawerFact label={t('portal.visits.status.label')} value={<StatusPill color={statusTone(selected.status)}>{pillFor(selected)}</StatusPill>} />
-              {selected.document ? <DrawerFact label={t('portal.visits.form.document')} value={selected.document} /> : null}
-              {selected.notes ? <DrawerFact label={t('portal.visits.form.note')} value={selected.notes} wide /> : null}
-            </DrawerFacts>
-            <DrawerTimeline items={timeline} />
-            {selected.status === 'expected' ? (
-              <>
-                <Button className="w-full" color="error" variant="default" onClick={() => setConfirmingCancel(true)}>
-                  {t('portal.visits.cancel')}
-                </Button>
-                <Text c="dimmed" size="xs">
-                  {t('portal.visits.cancelHint')}
-                </Text>
-              </>
+          <div className="flex flex-col gap-2.5">
+            {selected.document || selected.notes ? (
+              <SheetTiles>
+                {selected.document ? <SheetTile label={t('portal.visits.form.document')} value={selected.document} wide={!selected.notes} /> : null}
+                {selected.notes ? <SheetTile label={t('portal.visits.form.note')} value={selected.notes} wide={!selected.document} /> : null}
+              </SheetTiles>
             ) : null}
+            <DrawerTimeline items={timeline} />
           </div>
         ) : null}
       </BottomSheet>
 
-      <ConfirmDialog
+      <ConfirmSheet
         body={t('portal.visits.cancelBody')}
+        confirmLabel={t('portal.visits.cancel')}
         opened={confirmingCancel}
+        pending={cancel.isPending}
         title={t('portal.visits.cancelTitle', { name: selected?.visitor_name ?? '' })}
         onCancel={() => setConfirmingCancel(false)}
         onConfirm={() => selected && cancel.mutate(selected)}

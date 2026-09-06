@@ -117,7 +117,7 @@ function PortalShell({ children, navItems }: PortalLayoutProps) {
         </ul>
       </nav>
 
-      <BottomSheet description={t('portal.unit.switchHint')} opened={switching} title={t('portal.unit.mine')} onClose={() => setSwitching(false)}>
+      <BottomSheet lines={[t('portal.unit.switchHint')]} opened={switching} title={t('portal.unit.mine')} onClose={() => setSwitching(false)}>
         <ul className="m-0 flex list-none flex-col gap-2 p-0" role="radiogroup" aria-label={t('portal.unit.mine')}>
           {units.map((unit) => {
             const selected = unit.unit_id === active?.unit_id

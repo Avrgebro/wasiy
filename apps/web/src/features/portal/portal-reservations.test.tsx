@@ -77,7 +77,9 @@ describe('portal reservations', () => {
     expect(within(sheet).getByText('Solicitada')).toBeInTheDocument()
 
     await user.click(within(sheet).getByRole('button', { name: 'Cancelar reserva' }))
-    await user.click(await screen.findByRole('button', { name: 'Confirmar' }))
+    const confirm = (await screen.findAllByRole('dialog')).at(-1)!
+    expect(within(confirm).getByText('¿Cancelar la reserva de Salón de eventos?')).toBeInTheDocument()
+    await user.click(within(confirm).getByRole('button', { name: 'Cancelar reserva' }))
     await waitFor(() => expect(writes).toEqual(['/api/portal/reservations/rv_1/cancel']))
   })
 

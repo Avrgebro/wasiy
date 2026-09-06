@@ -108,7 +108,10 @@ describe('portal visits', () => {
     expect(within(sheet).getByText('Pre-registrado')).toBeInTheDocument()
 
     await user.click(within(sheet).getByRole('button', { name: 'Cancelar pre-registro' }))
-    await user.click(await screen.findByRole('button', { name: 'Confirmar' }))
+    // The confirm sheet stacks on the detail sheet and repeats the action as its red button.
+    const confirm = (await screen.findAllByRole('dialog')).at(-1)!
+    expect(within(confirm).getByText('¿Cancelar el pre-registro de Jorge Peña?')).toBeInTheDocument()
+    await user.click(within(confirm).getByRole('button', { name: 'Cancelar pre-registro' }))
     await waitFor(() => expect(writes).toEqual(['/api/portal/visits/vs_1/cancel']))
   })
 

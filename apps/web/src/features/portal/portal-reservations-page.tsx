@@ -1,11 +1,11 @@
 import { ActionIcon, Button, Loader, Text } from '@mantine/core'
-import { AddCircle, InfoCircle } from '@solar-icons/react'
+import { AddCircle } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BottomSheet } from '../../components/ui/bottom-sheet'
-import { ConfirmDialog, DrawerFact, DrawerFacts, DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
+import { BottomSheet, ConfirmSheet, SheetAction, SheetNote, SheetTile, SheetTiles } from '../../components/ui/bottom-sheet'
+import { DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { notifyError, notifySuccess } from '../../lib/notify'
@@ -153,45 +153,38 @@ export function PortalReservationsPage() {
       ) : null}
 
       <BottomSheet
-        description={selected ? `${reservationLongRange(selected.starts_at, selected.ends_at, timezone)} · ${active.unit_label}` : undefined}
+        footer={
+          selected && ['pending', 'observed', 'approved'].includes(selected.status) && !selected.is_completed ? (
+            <SheetAction
+              hint={
+                detail.data?.can_cancel
+                  ? detail.data.cancellation_window_hours
+                    ? t('portal.reservations.cancelWindow', { hours: detail.data.cancellation_window_hours })
+                    : t('portal.reservations.cancelAnytime')
+                  : t('portal.reservations.cancelClosed')
+              }
+            >
+              <Button className="w-full" color="error" disabled={!detail.data?.can_cancel} size="md" variant="default" onClick={() => setConfirmingCancel(true)}>
+                {t('portal.reservations.cancel')}
+              </Button>
+            </SheetAction>
+          ) : undefined
+        }
+        lines={selected ? [reservationLongRange(selected.starts_at, selected.ends_at, timezone), active.unit_label] : []}
         opened={selectedId !== null}
+        pill={selected ? <StatusPill color={reservationTone(selected.status, selected.is_completed)}>{statusLabel(selected)}</StatusPill> : undefined}
         title={selected?.amenity_name ?? ''}
         onClose={() => setSelectedId(null)}
       >
         {selected ? (
-          <div className="flex flex-col gap-4">
-            <DrawerFacts>
-              <DrawerFact label={t('portal.visits.status.label')} value={<StatusPill color={reservationTone(selected.status, selected.is_completed)}>{statusLabel(selected)}</StatusPill>} />
-              <DrawerFact label={t('portal.reservations.fee')} value={selected.fee_snapshot ? formatMoney(selected.fee_snapshot) : t('portal.reservations.free')} />
-              <DrawerFact label={t('portal.reservations.deposit')} value={selected.deposit_snapshot ? formatMoney(selected.deposit_snapshot) : '—'} />
-              <DrawerFact label={t('portal.reservations.requestedBy')} value={selected.resident_name ?? selected.created_by_name ?? '—'} />
-            </DrawerFacts>
-            {selected.status_note ? (
-              <div className="flex gap-2 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
-                <InfoCircle className="mt-0.5 shrink-0 text-[var(--wa-info)]" size={16} />
-                <div>
-                  <Text fw={600} size="xs">
-                    {t('portal.reservations.staffNote')}
-                  </Text>
-                  <Text size="sm">{selected.status_note}</Text>
-                </div>
-              </div>
-            ) : null}
+          <div className="flex flex-col gap-2.5">
+            <SheetTiles>
+              <SheetTile label={t('portal.reservations.fee')} value={selected.fee_snapshot ? formatMoney(selected.fee_snapshot) : t('portal.reservations.free')} />
+              <SheetTile label={t('portal.reservations.deposit')} value={selected.deposit_snapshot ? formatMoney(selected.deposit_snapshot) : '—'} />
+              <SheetTile label={t('portal.reservations.requestedBy')} value={selected.resident_name ?? selected.created_by_name ?? '—'} wide />
+            </SheetTiles>
+            {selected.status_note ? <SheetNote label={t('portal.reservations.staffNote')}>{selected.status_note}</SheetNote> : null}
             <DrawerTimeline items={timeline} />
-            {['pending', 'observed', 'approved'].includes(selected.status) && !selected.is_completed ? (
-              <>
-                <Button className="w-full" color="error" disabled={!detail.data?.can_cancel} variant="default" onClick={() => setConfirmingCancel(true)}>
-                  {t('portal.reservations.cancel')}
-                </Button>
-                <Text c="dimmed" size="xs">
-                  {detail.data?.can_cancel
-                    ? detail.data.cancellation_window_hours
-                      ? t('portal.reservations.cancelWindow', { hours: detail.data.cancellation_window_hours })
-                      : t('portal.reservations.cancelAnytime')
-                    : t('portal.reservations.cancelClosed')}
-                </Text>
-              </>
-            ) : null}
           </div>
         ) : (
           <div className="grid min-h-24 place-items-center">
@@ -200,9 +193,11 @@ export function PortalReservationsPage() {
         )}
       </BottomSheet>
 
-      <ConfirmDialog
+      <ConfirmSheet
         body={t('portal.reservations.cancelBody')}
+        confirmLabel={t('portal.reservations.cancel')}
         opened={confirmingCancel}
+        pending={cancel.isPending}
         title={t('portal.reservations.cancelTitle', { amenity: selected?.amenity_name ?? '' })}
         onCancel={() => setConfirmingCancel(false)}
         onConfirm={() => selected && cancel.mutate(selected.id)}

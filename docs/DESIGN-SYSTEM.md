@@ -296,11 +296,12 @@ Patterns in use:
 - **Detail drawer** (same `AppDrawer`, pieces from `components/ui/detail-drawer-parts.tsx`): the row's home. Inner cards inside a drawer (unit list, portal block, member header, slot band) are filled with `--wa-surface-2` and bordered, never border-only on the drawer surface. Sections in order: header value and status badge, `DrawerFacts` (uppercase label over value, two columns), `DrawerSection` rules, `DrawerTimeline` (Historial, newest first; derived events drawn with a hollow dot and dimmed), Acciones with one optional note field and the action row. Footer: only `Cerrar`. Used for movements and reservations; deep-linked by a URL param (`movement`, `reservation`).
 - **Confirmation** (`ConfirmDialog`): irreversible moves only — void, retain, cancel a reservation. Names the consequence, `Cancelar` + `Confirmar` in `error`.
 - **Small modal**: a prompt that needs one field before acting (the queue's observe/reject note).
+- **Bottom sheet** (`BottomSheet` in `components/ui/bottom-sheet.tsx`, portal only, Portal 02e): the phone-side overlay for lists, details, short forms and confirmations. Chrome: grab handle, no close button, `20px` shoulders, top border, upward shadow, dark scrim, `16px` side padding matching the page. Every sheet caps at `60dvh`: header and footer fixed, body scrolls. Header: title, up to two dimmed `lines`, optional `pill` on the right (status lives here, not in the body). Body parts: `SheetTiles`/`SheetTile` (filled `--wa-surface-2` tiles, two columns, `wide` for one), `SheetNote` (tinted label with the "i" circle), `DrawerTimeline` reused. Footer: `SheetAction` with the one action and its centered hint. `ConfirmSheet` stacks on the sheet that opened it and repeats the action label on its red button; the portal never uses `ConfirmDialog`.
 - **Full page**: CSV import preview, location detail with tabs.
 
 Rules:
 
-- Do not use nested modals.
+- Do not use nested modals. A `ConfirmSheet` over a `BottomSheet` is the one allowed stack, on the portal.
 - Keep destructive actions visually distinct.
 - Long overlay forms should have clear sticky actions when scrolling is likely.
 
