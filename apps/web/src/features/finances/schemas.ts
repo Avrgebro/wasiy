@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import type { MovementsSearch } from './api'
 
-export const FINANCE_CHIPS = ['income', 'expense', 'pending', 'paid', 'deposits', 'refunded'] as const
+/** Quick views: direction and the open queue. Status and category live behind Filtros. */
+export const FINANCE_CHIPS = ['income', 'expense', 'pending'] as const
 
 export type FinanceChip = (typeof FINANCE_CHIPS)[number]
 
@@ -17,6 +18,7 @@ export const financesSearchSchema = z.object({
     .optional()
     .catch(undefined),
   chip: z.enum(FINANCE_CHIPS).optional().catch(undefined),
+  status: z.string().catch(''),
   search: z.string().catch(''),
   /** Comma-separated category set from the Filtros popover. */
   category: z.string().catch(''),
@@ -36,12 +38,6 @@ export function chipParams(chip: FinanceChip | undefined): Pick<MovementsSearch,
       return { direction: 'expense' }
     case 'pending':
       return { status: 'pending' }
-    case 'paid':
-      return { status: 'paid' }
-    case 'deposits':
-      return { category: 'reservation_deposit' }
-    case 'refunded':
-      return { status: 'refunded' }
     default:
       return {}
   }

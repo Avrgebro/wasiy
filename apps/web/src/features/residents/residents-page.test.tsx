@@ -122,9 +122,6 @@ describe('ResidentsPage', () => {
     expect(screen.getByText('En el portal')).toBeInTheDocument()
     expect(screen.getAllByText('Sin unidad').length).toBeGreaterThan(0)
     expect(requests.some((url) => url.includes('/api/accounts/acc_1/residents?location_id=loc_1'))).toBe(true)
-
-    await userEvent.click(screen.getByRole('button', { name: 'Sin unidad' }))
-    expect(navigateSpy.mock.calls.at(-1)![0].search({ page: 3 })).toEqual({ chip: 'no_unit', page: 1 })
   })
 
   it('opens the person drawer, invites with an email asked at that moment, and blocks deactivation while housed', async () => {

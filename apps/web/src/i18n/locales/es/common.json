@@ -734,7 +734,8 @@
     "removeFilter": "Quitar filtro {{filter}}",
     "sortBy": "Ordenar por esta columna",
     "sortedAsc": "Ordenado ascendente, clic para descendente",
-    "sortedDesc": "Ordenado descendente, clic para quitar el orden"
+    "sortedDesc": "Ordenado descendente, clic para quitar el orden",
+    "quickFilters": "Vistas rápidas"
   },
   "locations": {
     "title": "Ubicaciones",
@@ -1141,10 +1142,7 @@
       "all": "Todo",
       "income": "Ingresos",
       "expense": "Egresos",
-      "pending": "Pendientes",
-      "paid": "Pagados",
-      "deposits": "Depósitos",
-      "refunded": "Devueltos"
+      "pending": "Pendientes"
     },
     "tiles": {
       "income": "Ingresos del mes",
@@ -1280,7 +1278,8 @@
       "confirmTitle": "¿Generar las cuotas de {{month}}?",
       "confirmBody": "Se creará una cuota de mantenimiento pendiente por cada unidad activa con cuota definida. Las unidades que ya tienen su cuota de este mes se omiten, así que puedes repetirlo sin duplicar.",
       "done": "{{created}} cuotas generadas · {{skipped}} ya existían"
-    }
+    },
+    "allStatuses": "Todos los estados"
   },
   "units": {
     "title": "Unidades",
@@ -1292,8 +1291,6 @@
       "all": "Todas",
       "occupied": "Ocupadas",
       "vacant": "Vacías",
-      "attention": "Sin contacto principal",
-      "no_portal": "Sin portal",
       "no_fee": "Sin cuota"
     },
     "columns": {
@@ -1446,6 +1443,12 @@
       "deactivateHint": "Un vehículo inactivo deja de aparecer en recepción y en la búsqueda por placa. Su historial se conserva.",
       "confirmDeactivate": "¿Desactivar el vehículo {{plate}}?",
       "confirmDeactivateBody": "Dejará de aparecer en recepción y en la búsqueda por placa. Puedes reactivarlo después."
+    },
+    "attention": {
+      "label": "Atención",
+      "any": "Cualquiera",
+      "no_contact": "Sin contacto principal",
+      "no_portal": "Sin portal"
     }
   },
   "packages": {
@@ -1513,7 +1516,6 @@
     "deactivated": "Persona desactivada",
     "reactivated": "Persona reactivada",
     "chips": {
-      "all": "Todos",
       "no_unit": "Sin unidad"
     },
     "columns": {

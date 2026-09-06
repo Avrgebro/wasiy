@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { DataTable } from '../../components/table/data-table'
 import { FilterButton } from '../../components/table/filter-button'
-import { FilterChips } from '../../components/table/filter-chips'
+import { TableToolbar } from '../../components/table/table-toolbar'
 import { SearchInput } from '../../components/table/search-input'
 import { getErrorMessage } from '../../lib/errors'
 import { telHref } from '../../lib/phone'
@@ -18,7 +18,7 @@ import { portalColor } from '../units/unit-presentation'
 import { getResidents, type ResidentSummary } from './api'
 import { PersonDrawer } from './person-drawer'
 import { PersonFormDrawer } from './person-form-drawer'
-import { RESIDENT_CHIPS, type ResidentsSearchValues } from './schemas'
+import type { ResidentsSearchValues } from './schemas'
 
 const routeApi = getRouteApi('/_authenticated/admin/registry/residents')
 
@@ -73,7 +73,6 @@ function ResidentsContent({
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [form, setForm] = useState<{ open: boolean; editing: ResidentSummary | null }>({ open: false, editing: null })
 
-  const chip = search.chip
   const listQuery = useQuery({
     queryKey: ['registry', 'residents', locationId, search],
     queryFn: () =>
@@ -83,7 +82,6 @@ function ResidentsContent({
         search: search.search,
         portal: search.portal,
         status: search.status,
-        no_unit: chip === 'no_unit' ? 1 : undefined,
       }),
     placeholderData: keepPreviousData,
   })
@@ -94,7 +92,7 @@ function ResidentsContent({
 
   const rows = listQuery.data?.data ?? []
   const total = listQuery.data?.meta.total
-  const isFiltered = Boolean(chip || search.search || search.portal || search.status)
+  const isFiltered = Boolean(search.search || search.portal || search.status)
 
   const portalOptions = (['active', 'invited', 'not_invited'] as const).map((value) => ({ value, label: t(`units.portal.${value}`) }))
   const statusOptions = [
@@ -177,17 +175,6 @@ function ResidentsContent({
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
-        <ChipButton
-          active={chip === undefined}
-          label={total !== undefined && !isFiltered ? `${t('residents.chips.all')} · ${total}` : t('residents.chips.all')}
-          onClick={() => updateSearch({ chip: undefined })}
-        />
-        {RESIDENT_CHIPS.map((key) => (
-          <ChipButton key={key} active={chip === key} label={t(`residents.chips.${key}`)} onClick={() => updateSearch({ chip: key })} />
-        ))}
-      </div>
-
       {listQuery.isError ? (
         <Alert color="error" title={t('errors.loadFailed')}>
           {getErrorMessage(listQuery.error)}
@@ -210,30 +197,33 @@ function ResidentsContent({
         rowClassName={(person) => (person.status === 'inactive' ? 'opacity-60' : undefined)}
         selectedId={selectedId}
         toolbar={
-          <div className="flex flex-wrap items-center gap-2.5 p-3.5 sm:px-5">
-            <SearchInput defaultValue={search.search} placeholder={t('residents.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />
-            <FilterButton activeCount={filterChips.length}>
-              <Select
-                clearable
-                comboboxProps={{ withinPortal: false }}
-                data={portalOptions}
-                label={t('units.columns.portal')}
-                placeholder={t('residents.allPortalStates')}
-                value={search.portal || null}
-                onChange={(value) => updateSearch({ portal: value ?? '' })}
-              />
-              <Select
-                clearable
-                comboboxProps={{ withinPortal: false }}
-                data={statusOptions}
-                label={t('registry.status')}
-                placeholder={t('residents.allStatuses')}
-                value={search.status || null}
-                onChange={(value) => updateSearch({ status: value ?? '' })}
-              />
-            </FilterButton>
-            <FilterChips chips={filterChips} onClearAll={() => updateSearch({ portal: '', status: '' })} />
-          </div>
+          <TableToolbar
+            appliedChips={filterChips}
+            filters={
+              <FilterButton activeCount={filterChips.length}>
+                <Select
+                  clearable
+                  comboboxProps={{ withinPortal: false }}
+                  data={portalOptions}
+                  label={t('units.columns.portal')}
+                  placeholder={t('residents.allPortalStates')}
+                  value={search.portal || null}
+                  onChange={(value) => updateSearch({ portal: value ?? '' })}
+                />
+                <Select
+                  clearable
+                  comboboxProps={{ withinPortal: false }}
+                  data={statusOptions}
+                  label={t('registry.status')}
+                  placeholder={t('residents.allStatuses')}
+                  value={search.status || null}
+                  onChange={(value) => updateSearch({ status: value ?? '' })}
+                />
+              </FilterButton>
+            }
+            search={<SearchInput defaultValue={search.search} placeholder={t('residents.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />}
+            onClearAll={() => updateSearch({ portal: '', status: '' })}
+          />
         }
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={(person) => setSelectedId(person.id)}
@@ -259,22 +249,6 @@ function ResidentsContent({
   )
 }
 
-function ChipButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
-  return (
-    <button
-      aria-pressed={active}
-      className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
-        active
-          ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
-          : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'
-      }`}
-      type="button"
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  )
-}
 
 function monogram(name: string): string {
   return name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('')

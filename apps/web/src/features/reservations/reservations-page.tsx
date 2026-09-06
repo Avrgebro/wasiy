@@ -1,4 +1,5 @@
 import { ActionIcon, Alert, Button, Group, Select, Skeleton, Text } from '@mantine/core'
+import { QuickFilters } from '../../components/table/quick-filters'
 import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -139,15 +140,9 @@ function ReservationsContent({
     void navigate({ search: (current) => ({ ...current, ...next }) })
   }
 
-  const chips: { key: StatusChip; label: string }[] = [
+  const chips: { key: StatusChip; label: string; count?: number }[] = [
     { key: 'all', label: t('reservations.chips.all') },
-    {
-      key: 'pending',
-      label:
-        pendingCount > 0
-          ? `${t('reservations.chips.pending')} · ${pendingCount}`
-          : t('reservations.chips.pending'),
-    },
+    { key: 'pending', label: t('reservations.chips.pending'), count: pendingCount > 0 ? pendingCount : undefined },
     { key: 'approved', label: t('reservations.chips.approved') },
     { key: 'completed', label: t('reservations.chips.completed') },
   ]
@@ -174,22 +169,7 @@ function ReservationsContent({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
-        {chips.map((entry) => (
-          <button
-            key={entry.key}
-            className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
-              chip === entry.key
-                ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
-                : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'
-            }`}
-            type="button"
-            onClick={() =>
-              updateSearch({ status: entry.key === 'all' ? undefined : entry.key })
-            }
-          >
-            {entry.label}
-          </button>
-        ))}
+        <QuickFilters label={t('table.quickFilters')} options={chips} value={chip} onChange={(key) => updateSearch({ status: key === 'all' ? undefined : key })} />
         <Select
           clearable
           aria-label={t('reservations.allAmenities')}

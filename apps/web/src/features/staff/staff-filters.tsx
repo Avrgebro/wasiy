@@ -2,7 +2,7 @@ import { Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { FilterButton } from '../../components/table/filter-button'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
-import { FilterChips } from '../../components/table/filter-chips'
+import { TableToolbar } from '../../components/table/table-toolbar'
 import { SearchInput } from '../../components/table/search-input'
 import { accountRoles, getRoleLabelKey, locationRoles } from '../auth/access'
 import type { StaffSearchValues } from './schemas'
@@ -66,45 +66,41 @@ export function StaffFilters({
   ])
 
   return (
-    <div className="flex flex-wrap items-center gap-2.5 p-3.5 sm:px-5">
-      <SearchInput
-        defaultValue={search.search}
-        placeholder={t('staff.searchPlaceholder')}
-        onApply={(value) => onChange({ search: value })}
-      />
-      <FilterButton activeCount={chips.length}>
-        <Select
-          clearable
-          comboboxProps={{ withinPortal: false }}
-          data={roleOptions}
-          label={t('staff.role')}
-          placeholder={t('staff.allRoles')}
-          value={search.role || null}
-          onChange={(value) => onChange({ role: value ?? '' })}
-        />
-        <Select
-          clearable
-          comboboxProps={{ withinPortal: false }}
-          data={locations}
-          label={t('staff.location')}
-          placeholder={t('staff.allLocations')}
-          value={search.location_id || null}
-          onChange={(value) => onChange({ location_id: value ?? '' })}
-        />
-        <Select
-          clearable
-          comboboxProps={{ withinPortal: false }}
-          data={statusOptions}
-          label={t('registry.status')}
-          placeholder={t('staff.allStatuses')}
-          value={search.status || null}
-          onChange={(value) => onChange({ status: value ?? '' })}
-        />
-      </FilterButton>
-      <FilterChips
-        chips={chips}
-        onClearAll={() => onChange({ role: '', location_id: '', status: '' })}
-      />
-    </div>
+    <TableToolbar
+      appliedChips={chips}
+      filters={
+        <FilterButton activeCount={chips.length}>
+          <Select
+            clearable
+            comboboxProps={{ withinPortal: false }}
+            data={roleOptions}
+            label={t('staff.role')}
+            placeholder={t('staff.allRoles')}
+            value={search.role || null}
+            onChange={(value) => onChange({ role: value ?? '' })}
+          />
+          <Select
+            clearable
+            comboboxProps={{ withinPortal: false }}
+            data={locations}
+            label={t('staff.location')}
+            placeholder={t('staff.allLocations')}
+            value={search.location_id || null}
+            onChange={(value) => onChange({ location_id: value ?? '' })}
+          />
+          <Select
+            clearable
+            comboboxProps={{ withinPortal: false }}
+            data={statusOptions}
+            label={t('registry.status')}
+            placeholder={t('staff.allStatuses')}
+            value={search.status || null}
+            onChange={(value) => onChange({ status: value ?? '' })}
+          />
+        </FilterButton>
+      }
+      search={<SearchInput defaultValue={search.search} placeholder={t('staff.searchPlaceholder')} onApply={(value) => onChange({ search: value })} />}
+      onClearAll={() => onChange({ role: '', location_id: '', status: '' })}
+    />
   )
 }

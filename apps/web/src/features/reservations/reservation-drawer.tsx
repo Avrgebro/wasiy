@@ -286,6 +286,7 @@ function Charges({
                   movement: movement.id,
                   chip: undefined,
                   search: '',
+                  status: '',
                   category: '',
                   sort: '',
                   page: 1,

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const PACKAGE_CHIPS = ['pending', 'delivered', 'all'] as const
+export const PACKAGE_CHIPS = ['all', 'pending', 'delivered'] as const
 export type PackageChip = (typeof PACKAGE_CHIPS)[number]
 
 /** URL contract for /admin/packages (mockup 14). Default chip: En recepción. */

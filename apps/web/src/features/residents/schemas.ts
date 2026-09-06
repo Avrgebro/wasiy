@@ -1,13 +1,9 @@
 import { z } from 'zod'
 
-export const RESIDENT_CHIPS = ['no_unit'] as const
-export type ResidentChip = (typeof RESIDENT_CHIPS)[number]
-
 /** URL contract for /admin/registry/residents (mockup 15). */
 export const residentsSearchSchema = z.object({
   page: z.coerce.number().int().positive().catch(1),
   search: z.string().catch(''),
-  chip: z.enum(RESIDENT_CHIPS).optional().catch(undefined),
   portal: z.string().catch(''),
   status: z.string().catch(''),
 })

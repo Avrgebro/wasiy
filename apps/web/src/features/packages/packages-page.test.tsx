@@ -99,7 +99,7 @@ describe('PackagesPage', () => {
     const user = userEvent.setup()
 
     expect(await screen.findByText('Caja mediana, frágil')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'En recepción · 2' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'En recepción 2' })).toBeInTheDocument()
     expect(screen.getAllByText('Contacto principal').length).toBeGreaterThan(0)
     expect(screen.getAllByText('15 ago · 10:24').length).toBeGreaterThan(0)
 

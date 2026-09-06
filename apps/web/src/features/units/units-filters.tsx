@@ -2,21 +2,24 @@ import { Select } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { FilterButton } from '../../components/table/filter-button'
-import { FilterChips } from '../../components/table/filter-chips'
+import { TableToolbar } from '../../components/table/table-toolbar'
 import { SearchInput } from '../../components/table/search-input'
-import type { UnitsSearchValues } from './schemas'
+import { QuickFilters } from '../../components/table/quick-filters'
+import { UNIT_ATTENTION, UNIT_CHIPS, type UnitsSearchValues } from './schemas'
 
 const TYPES = ['apartment', 'house', 'commercial', 'office'] as const
 
 /**
- * Toolbar: one search box that reaches unit, building, residents and plates
- * (the vehicles page is gone), and Tipo / Estado behind Filtros. Occupancy,
- * portal and fee stay on the chip row above and are not repeated here.
+ * Toolbar: the quick views (Todas, Ocupadas, Vacías, Sin cuota), one search
+ * box that reaches unit, building, residents and plates, and Tipo / Estado /
+ * Atención behind Filtros.
  */
 export function UnitsFilters({
+  noFeeCount,
   onChange,
   search,
 }: {
+  noFeeCount?: number
   onChange: (next: Partial<UnitsSearchValues>) => void
   search: UnitsSearchValues
 }) {
@@ -27,39 +30,55 @@ export function UnitsFilters({
     { value: 'inactive', label: t('units.statuses.inactive') },
   ]
 
+  const attentionOptions = UNIT_ATTENTION.map((value) => ({ value, label: t(`units.attention.${value}`) }))
+  const quickOptions = [
+    { key: 'all' as const, label: t('units.chips.all') },
+    ...UNIT_CHIPS.map((key) => ({ key, label: t(`units.chips.${key}`), count: key === 'no_fee' ? noFeeCount : undefined })),
+  ]
+
   const chips = buildFilterChips([
     { key: 'type', label: t('units.columns.type'), value: search.type, options: typeOptions, onRemove: () => onChange({ type: '' }) },
     { key: 'status', label: t('registry.status'), value: search.status, options: statusOptions, onRemove: () => onChange({ status: '' }) },
+    { key: 'attention', label: t('units.attention.label'), value: search.attention ?? '', options: attentionOptions, onRemove: () => onChange({ attention: undefined }) },
   ])
 
   return (
-    <div className="flex flex-wrap items-center gap-2.5 p-3.5 sm:px-5">
-      <SearchInput
-        defaultValue={search.search}
-        placeholder={t('units.searchPlaceholder')}
-        onApply={(value) => onChange({ search: value })}
-      />
-      <FilterButton activeCount={chips.length}>
-        <Select
-          clearable
-          comboboxProps={{ withinPortal: false }}
-          data={typeOptions}
-          label={t('units.columns.type')}
-          placeholder={t('units.allTypes')}
-          value={search.type || null}
-          onChange={(value) => onChange({ type: value ?? '' })}
-        />
-        <Select
-          clearable
-          comboboxProps={{ withinPortal: false }}
-          data={statusOptions}
-          label={t('registry.status')}
-          placeholder={t('units.statuses.active')}
-          value={search.status || null}
-          onChange={(value) => onChange({ status: value ?? '' })}
-        />
-      </FilterButton>
-      <FilterChips chips={chips} onClearAll={() => onChange({ type: '', status: '' })} />
-    </div>
+    <TableToolbar
+      appliedChips={chips}
+      filters={
+        <FilterButton activeCount={chips.length}>
+            <Select
+              clearable
+              comboboxProps={{ withinPortal: false }}
+              data={typeOptions}
+              label={t('units.columns.type')}
+              placeholder={t('units.allTypes')}
+              value={search.type || null}
+              onChange={(value) => onChange({ type: value ?? '' })}
+            />
+            <Select
+              clearable
+              comboboxProps={{ withinPortal: false }}
+              data={statusOptions}
+              label={t('registry.status')}
+              placeholder={t('units.statuses.active')}
+              value={search.status || null}
+              onChange={(value) => onChange({ status: value ?? '' })}
+            />
+            <Select
+              clearable
+              comboboxProps={{ withinPortal: false }}
+              data={attentionOptions}
+              label={t('units.attention.label')}
+              placeholder={t('units.attention.any')}
+              value={search.attention ?? null}
+              onChange={(value) => onChange({ attention: (value as UnitsSearchValues['attention']) ?? undefined })}
+            />
+        </FilterButton>
+      }
+      quickFilters={<QuickFilters label={t('table.quickFilters')} options={quickOptions} value={search.chip ?? 'all'} onChange={(key) => onChange({ chip: key === 'all' ? undefined : key })} />}
+      search={<SearchInput defaultValue={search.search} placeholder={t('units.searchPlaceholder')} onApply={(value) => onChange({ search: value })} />}
+      onClearAll={() => onChange({ type: '', status: '', attention: undefined })}
+    />
   )
 }

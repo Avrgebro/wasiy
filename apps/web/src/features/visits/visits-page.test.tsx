@@ -101,7 +101,7 @@ describe('VisitsPage', () => {
     const user = userEvent.setup()
 
     expect(await screen.findByText('Elena Vargas')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Dentro · 2' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dentro 2' })).toBeInTheDocument()
     expect(screen.getByText('DNI 45872213')).toBeInTheDocument()
     expect(screen.getByText('Unidad 402')).toBeInTheDocument()
     expect(screen.getByText('Intercom')).toBeInTheDocument()

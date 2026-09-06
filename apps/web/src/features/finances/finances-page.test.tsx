@@ -270,7 +270,7 @@ describe('FinancesPage', () => {
     expect(screen.getByText(money(-1940))).toBeInTheDocument()
     expect(screen.getByText('· S/ 900 en garantía')).toBeInTheDocument()
     // Pending chip carries receivable + payable counts.
-    expect(screen.getByRole('button', { name: 'Pendientes · 4' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pendientes 4' })).toBeInTheDocument()
 
     expect(screen.getByText('Agua · áreas comunes')).toBeInTheDocument()
     expect(screen.getByText('Sedapal')).toBeInTheDocument()

@@ -230,7 +230,7 @@ describe('ReservationsPage', () => {
     expect(screen.getByText('Aprobar')).toBeInTheDocument()
     expect(screen.getByText(/conflicto: ninguno/)).toBeInTheDocument()
     // Chips show the pending count.
-    expect(screen.getByText('Pendientes · 1')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pendientes 1' })).toBeInTheDocument()
   })
 
   it('flags a conflict when a pending request overlaps an approved booking', async () => {

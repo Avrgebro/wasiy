@@ -91,12 +91,15 @@ export const vehicleFormSchema = z.object({
 
 export type VehicleFormValues = z.infer<typeof vehicleFormSchema>
 
-export const UNIT_CHIPS = ['occupied', 'vacant', 'attention', 'no_portal', 'no_fee'] as const
+export const UNIT_CHIPS = ['occupied', 'vacant', 'no_fee'] as const
+/** Data-quality views behind Filtros: units missing a primary contact, or with residents but no one on the portal. */
+export const UNIT_ATTENTION = ['no_contact', 'no_portal'] as const
+export type UnitAttention = (typeof UNIT_ATTENTION)[number]
 export type UnitChip = (typeof UNIT_CHIPS)[number]
 
 /**
  * URL contract for /admin/registry/units (mockup 11). `chip` is the quick
- * filter row; `type` and `status` live behind Filtros; `search` reaches
+ * filter row; `type`, `status` and `attention` live behind Filtros; `search` reaches
  * unit, building, resident names and plates on the server.
  */
 export const unitsSearchSchema = z.object({
@@ -106,23 +109,22 @@ export const unitsSearchSchema = z.object({
   chip: z.enum(UNIT_CHIPS).optional().catch(undefined),
   type: z.string().catch(''),
   status: z.string().catch(''),
+  attention: z.enum(UNIT_ATTENTION).optional().catch(undefined),
 })
 
 export type UnitsSearchValues = z.infer<typeof unitsSearchSchema>
 
-export function chipParams(chip: UnitChip | undefined): Pick<UnitsSearch, 'occupancy' | 'portal' | 'fee'> {
+export function chipParams(chip: UnitChip | undefined, attention?: UnitAttention): Pick<UnitsSearch, 'occupancy' | 'portal' | 'fee'> {
+  const extra: Pick<UnitsSearch, 'occupancy' | 'portal'> = attention === 'no_contact' ? { occupancy: 'attention' } : attention === 'no_portal' ? { portal: 'none' } : {}
+
   switch (chip) {
     case 'occupied':
-      return { occupancy: 'occupied' }
+      return { ...extra, occupancy: 'occupied' }
     case 'vacant':
-      return { occupancy: 'vacant' }
-    case 'attention':
-      return { occupancy: 'attention' }
-    case 'no_portal':
-      return { portal: 'none' }
+      return { ...extra, occupancy: 'vacant' }
     case 'no_fee':
-      return { fee: 'missing' }
+      return { ...extra, fee: 'missing' }
     default:
-      return {}
+      return extra
   }
 }

@@ -7,6 +7,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
 import { SearchInput } from '../../components/table/search-input'
+import { TableToolbar } from '../../components/table/table-toolbar'
+import { QuickFilters } from '../../components/table/quick-filters'
 import { getErrorMessage } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 import { shortDateTime } from '../finances/month'
@@ -140,24 +142,6 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
-        {PACKAGE_CHIPS.map((key) => (
-          <button
-            key={key}
-            aria-pressed={search.chip === key}
-            className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
-              search.chip === key
-                ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
-                : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'
-            }`}
-            type="button"
-            onClick={() => updateSearch({ chip: key })}
-          >
-            {key === 'pending' && pendingCount !== undefined ? `${t('packages.chips.pending')} · ${pendingCount}` : t(`packages.chips.${key}`)}
-          </button>
-        ))}
-      </div>
-
       {listQuery.isError ? (
         <Alert color="error" title={t('errors.loadFailed')}>
           {getErrorMessage(listQuery.error)}
@@ -179,9 +163,17 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
         meta={listQuery.data?.meta}
         selectedId={current?.id ?? null}
         toolbar={
-          <div className="flex flex-wrap items-center gap-2.5 p-3.5 sm:px-5">
-            <SearchInput defaultValue={search.search} placeholder={t('packages.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />
-          </div>
+          <TableToolbar
+            quickFilters={
+              <QuickFilters
+                label={t('table.quickFilters')}
+                options={PACKAGE_CHIPS.map((key) => ({ key, label: t(`packages.chips.${key}`), count: key === 'pending' ? pendingCount : undefined }))}
+                value={search.chip}
+                onChange={(chip) => updateSearch({ chip })}
+              />
+            }
+            search={<SearchInput defaultValue={search.search} placeholder={t('packages.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />}
+          />
         }
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={setSelected}

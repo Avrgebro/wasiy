@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { DataTable } from '../../components/table/data-table'
 import { FilterButton } from '../../components/table/filter-button'
-import { FilterChips } from '../../components/table/filter-chips'
+import { TableToolbar } from '../../components/table/table-toolbar'
+import { QuickFilters } from '../../components/table/quick-filters'
 import { SearchInput } from '../../components/table/search-input'
 import { getErrorMessage } from '../../lib/errors'
 import { useMe, usePhoneFormat } from '../auth/hooks'
@@ -150,11 +151,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
     { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span> },
   ]
 
-  const chipLabel = (key: (typeof VISIT_CHIPS)[number]) => {
-    const count = key === 'inside' ? insideCount : key === 'today' ? todayCount : key === 'expected' ? expectedCount : undefined
-
-    return count !== undefined ? `${t(`visits.chips.${key}`)} · ${count}` : t(`visits.chips.${key}`)
-  }
+  const chipCount = (key: (typeof VISIT_CHIPS)[number]) => (key === 'inside' ? insideCount : key === 'today' ? todayCount : key === 'expected' ? expectedCount : undefined)
 
   return (
     <div className="@container flex flex-col gap-5">
@@ -168,24 +165,6 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
         <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setRegistering(true)}>
           {t('visits.register')}
         </Button>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
-        {VISIT_CHIPS.map((key) => (
-          <button
-            key={key}
-            aria-pressed={search.chip === key}
-            className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
-              search.chip === key
-                ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
-                : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'
-            }`}
-            type="button"
-            onClick={() => updateSearch({ chip: key })}
-          >
-            {chipLabel(key)}
-          </button>
-        ))}
       </div>
 
       {listQuery.isError ? (
@@ -209,21 +188,32 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
         meta={listQuery.data?.meta}
         selectedId={selectedId}
         toolbar={
-          <div className="flex flex-wrap items-center gap-2.5 p-3.5 sm:px-5">
-            <SearchInput defaultValue={search.search} placeholder={t('visits.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />
-            <FilterButton activeCount={filterChips.length}>
-              <Select
-                clearable
-                comboboxProps={{ withinPortal: false }}
-                data={confirmationOptions}
-                label={t('visits.columns.confirmation')}
-                placeholder={t('visits.allConfirmations')}
-                value={search.confirmation || null}
-                onChange={(value) => updateSearch({ confirmation: value ?? '' })}
+          <TableToolbar
+            appliedChips={filterChips}
+            filters={
+              <FilterButton activeCount={filterChips.length}>
+                  <Select
+                    clearable
+                    comboboxProps={{ withinPortal: false }}
+                    data={confirmationOptions}
+                    label={t('visits.columns.confirmation')}
+                    placeholder={t('visits.allConfirmations')}
+                    value={search.confirmation || null}
+                    onChange={(value) => updateSearch({ confirmation: value ?? '' })}
+                  />
+              </FilterButton>
+            }
+            quickFilters={
+              <QuickFilters
+                label={t('table.quickFilters')}
+                options={VISIT_CHIPS.map((key) => ({ key, label: t(`visits.chips.${key}`), count: chipCount(key) }))}
+                value={search.chip}
+                onChange={(chip) => updateSearch({ chip })}
               />
-            </FilterButton>
-            <FilterChips chips={filterChips} onClearAll={() => updateSearch({ confirmation: '' })} />
-          </div>
+            }
+            search={<SearchInput defaultValue={search.search} placeholder={t('visits.searchPlaceholder')} onApply={(value) => updateSearch({ search: value })} />}
+            onClearAll={() => updateSearch({ confirmation: '' })}
+          />
         }
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={(visit) => setSelectedId(visit.id)}

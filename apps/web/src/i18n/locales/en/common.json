@@ -734,7 +734,8 @@
     "removeFilter": "Remove filter {{filter}}",
     "sortBy": "Sort by this column",
     "sortedAsc": "Sorted ascending, click for descending",
-    "sortedDesc": "Sorted descending, click to clear sorting"
+    "sortedDesc": "Sorted descending, click to clear sorting",
+    "quickFilters": "Quick views"
   },
   "locations": {
     "title": "Locations",
@@ -1141,10 +1142,7 @@
       "all": "All",
       "income": "Income",
       "expense": "Expenses",
-      "pending": "Pending",
-      "paid": "Paid",
-      "deposits": "Deposits",
-      "refunded": "Refunded"
+      "pending": "Pending"
     },
     "tiles": {
       "income": "Income this month",
@@ -1280,7 +1278,8 @@
       "confirmTitle": "Generate dues for {{month}}?",
       "confirmBody": "One pending maintenance dues movement is created for every active unit with a fee. Units already issued this month are skipped, so it is safe to run again.",
       "done": "{{created}} dues generated · {{skipped}} already existed"
-    }
+    },
+    "allStatuses": "All statuses"
   },
   "units": {
     "title": "Units",
@@ -1292,8 +1291,6 @@
       "all": "All",
       "occupied": "Occupied",
       "vacant": "Vacant",
-      "attention": "No primary contact",
-      "no_portal": "No portal",
       "no_fee": "No fee"
     },
     "columns": {
@@ -1446,6 +1443,12 @@
       "deactivateHint": "An inactive vehicle disappears from the front desk and plate search. History is kept.",
       "confirmDeactivate": "Deactivate vehicle {{plate}}?",
       "confirmDeactivateBody": "It disappears from the front desk and plate search. You can reactivate it later."
+    },
+    "attention": {
+      "label": "Attention",
+      "any": "Any",
+      "no_contact": "No primary contact",
+      "no_portal": "No portal"
     }
   },
   "packages": {
@@ -1513,7 +1516,6 @@
     "deactivated": "Person deactivated",
     "reactivated": "Person reactivated",
     "chips": {
-      "all": "All",
       "no_unit": "No unit"
     },
     "columns": {

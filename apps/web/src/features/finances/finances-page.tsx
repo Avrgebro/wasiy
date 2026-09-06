@@ -19,7 +19,7 @@ import { FinancesFilters } from './finances-filters'
 import { MovementDrawer } from './movement-drawer'
 import { MovementFormDrawer } from './movement-form-drawer'
 import { amountClassName, statusColor, statusLabel } from './movement-presentation'
-import { chipParams, FINANCE_CHIPS, type FinancesSearchValues } from './schemas'
+import { chipParams, type FinancesSearchValues } from './schemas'
 
 const routeApi = getRouteApi('/_authenticated/admin/finances')
 
@@ -94,7 +94,7 @@ function FinancesContent({
     placeholderData: keepPreviousData,
   })
   const listQuery = useQuery({
-    queryKey: ['finances', 'movements', accountId, locationId, month, chip ?? 'all', search.search, search.category, search.sort, search.page],
+    queryKey: ['finances', 'movements', accountId, locationId, month, chip ?? 'all', search.search, search.category, search.status, search.sort, search.page],
     queryFn: () =>
       getMovements(accountId, locationId, {
         month,
@@ -102,8 +102,9 @@ function FinancesContent({
         search: search.search,
         sort: search.sort,
         ...chipParams(chip),
-        // An explicit category filter wins over the Depósitos chip.
+        // Explicit Filtros win over the quick view they overlap.
         ...(search.category ? { category: search.category } : {}),
+        ...(search.status ? { status: search.status } : {}),
       }),
     placeholderData: keepPreviousData,
   })
@@ -257,21 +258,8 @@ function FinancesContent({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
-        <ChipButton active={chip === undefined} label={t('finances.chips.all')} onClick={() => updateSearch({ chip: undefined })} />
-        {FINANCE_CHIPS.map((key) => (
-          <ChipButton
-            key={key}
-            active={chip === key}
-            label={
-              key === 'pending' && pendingCount > 0
-                ? `${t(`finances.chips.${key}`)} · ${pendingCount}`
-                : t(`finances.chips.${key}`)
-            }
-            onClick={() => updateSearch({ chip: key })}
-          />
-        ))}
-        <Group className="w-full sm:ml-auto sm:w-auto" gap={6} wrap="nowrap">
+      <div className="flex flex-wrap items-center justify-end gap-2 pointer-coarse:gap-3">
+        <Group className="w-full sm:w-auto" gap={6} wrap="nowrap">
           <ActionIcon
             aria-label={t('finances.previousMonth')}
             radius="md"
@@ -313,7 +301,7 @@ function FinancesContent({
         emptyState={
           <div className="grid min-h-40 place-items-center px-6 text-center">
             <Text c="dimmed" size="sm">
-              {t(chip || search.search || search.category ? 'finances.emptyFiltered' : 'finances.emptyMonth', { month: monthLabel(month) })}
+              {t(chip || search.search || search.category || search.status ? 'finances.emptyFiltered' : 'finances.emptyMonth', { month: monthLabel(month) })}
             </Text>
           </div>
         }
@@ -322,7 +310,7 @@ function FinancesContent({
         meta={listQuery.data?.meta}
         selectedId={selectedId}
         sort={search.sort}
-        toolbar={<FinancesFilters search={search} onChange={updateSearch} />}
+        toolbar={<FinancesFilters pendingCount={pendingCount} search={search} onChange={updateSearch} />}
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={(movement) => setSelectedId(movement.id)}
         onSortChange={(sort) => updateSearch({ sort })}
@@ -345,22 +333,6 @@ function FinancesContent({
   )
 }
 
-function ChipButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
-  return (
-    <button
-      aria-pressed={active}
-      className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
-        active
-          ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
-          : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'
-      }`}
-      type="button"
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  )
-}
 
 /** Sublines are statistics only: breakdowns and comparisons, never claims. */
 function byCategoryLine(rows: CategoryTotal[], t: TFunction, withAmount: boolean, limit = 3): string {

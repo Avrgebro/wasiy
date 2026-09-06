@@ -12,7 +12,7 @@ import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
-import { chipParams, UNIT_CHIPS, type UnitsSearchValues } from './schemas'
+import { chipParams, type UnitsSearchValues } from './schemas'
 import { occupancyColor, portalColor, unitDescriptor, unitLabelsLine } from './unit-presentation'
 import { BuildingsDrawer } from '../buildings/buildings-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
@@ -61,7 +61,7 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         sort: search.sort,
         type: search.type,
         status: search.status,
-        ...chipParams(search.chip),
+        ...chipParams(search.chip, search.attention),
       }),
     placeholderData: keepPreviousData,
   })
@@ -72,7 +72,12 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
 
   const rows = listQuery.data?.data ?? []
   const total = listQuery.data?.meta.total
-  const isFiltered = Boolean(search.chip || search.search || search.type || search.status)
+  const isFiltered = Boolean(search.chip || search.search || search.type || search.status || search.attention)
+  // The Sin cuota count is the admin's to-do before generating dues.
+  const noFeeCount = useQuery({
+    queryKey: ['registry', 'units', locationId, 'no-fee-count'],
+    queryFn: () => getUnits(locationId, { fee: 'missing', per_page: 1 }),
+  }).data?.meta.total
 
   const columns: ColumnDef<UnitSummary>[] = [
     {
@@ -183,22 +188,6 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pointer-coarse:gap-3">
-        <ChipButton
-          active={search.chip === undefined}
-          label={total !== undefined && !isFiltered ? `${t('units.chips.all')} · ${total}` : t('units.chips.all')}
-          onClick={() => updateSearch({ chip: undefined })}
-        />
-        {UNIT_CHIPS.map((key) => (
-          <ChipButton
-            key={key}
-            active={search.chip === key}
-            label={t(`units.chips.${key}`)}
-            onClick={() => updateSearch({ chip: key })}
-          />
-        ))}
-      </div>
-
       {listQuery.isError ? (
         <Alert color="error" title={t('errors.loadFailed')}>
           {getErrorMessage(listQuery.error)}
@@ -223,7 +212,7 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
         sort={search.sort}
-        toolbar={<UnitsFilters search={search} onChange={updateSearch} />}
+        toolbar={<UnitsFilters noFeeCount={noFeeCount} search={search} onChange={updateSearch} />}
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={(unit) =>
           void navigate({ to: '/admin/registry/units/$unitId', params: { unitId: unit.id } })
@@ -243,22 +232,6 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
   )
 }
 
-function ChipButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
-  return (
-    <button
-      aria-pressed={active}
-      className={`cursor-pointer rounded-full border px-[15px] py-[7px] text-xs font-semibold transition-colors pointer-coarse:min-h-11 pointer-coarse:px-5 ${
-        active
-          ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]'
-          : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'
-      }`}
-      type="button"
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  )
-}
 
 /** Primary contact plus a "+N" for the rest; the states the mockup calls out otherwise. */
 function ResidentsCell({ unit }: { unit: UnitSummary }) {

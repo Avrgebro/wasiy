@@ -267,7 +267,7 @@ function UnitDetailContent({
             action={
               <Link
                 className="text-[13px] font-medium text-[var(--wa-interactive)] no-underline hover:underline"
-                search={{ month, chip: undefined, search: '', category: '', sort: '', page: 1, movement: undefined }}
+                search={{ month, chip: undefined, search: '', category: '', status: '', sort: '', page: 1, movement: undefined }}
                 to="/admin/finances"
               >
                 {t('units.detail.viewInFinances')}
