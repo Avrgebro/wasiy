@@ -94,10 +94,6 @@ Resident-facing capabilities that allow Residents to maintain limited personal a
 
 A record of sensitive operational events, such as role changes, resident invitations, unit membership changes, visitor check-ins, reservation decisions, amenity setting changes, announcements, and manual reservation fee status changes.
 
-### Export
-
-A downloadable CSV report generated from operational data. Initial exports include units and residents, vehicles, visitor check-ins, reservations, reservation fees and deposits, and activity log entries.
-
 ### Maintenance Request
 
 A request to repair, inspect, or resolve an issue related to a Unit, Amenity, common area, or Location.
@@ -157,7 +153,3 @@ A person who lives in a Unit. Residents belong to an Account, and their Location
 ### Resident Invitation
 
 An invitation that allows a Resident to claim login access to the resident-facing portal for their Unit. In M3, a Resident Invitation is a token-based claim flow that links a Resident to a User and enables portal access for that Resident.
-
-### CSV Import
-
-A bulk onboarding method used by Account Admins or Location Managers to create Units, Residents, and related registry data for a Location.

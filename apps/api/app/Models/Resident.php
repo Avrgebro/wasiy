@@ -67,7 +67,7 @@ class Resident extends Model
     }
 
     /**
-     * Case-insensitive email identity used by registry imports.
+     * Case-insensitive email identity: a known address means a known person.
      *
      * @param  Builder<Resident>  $query
      */

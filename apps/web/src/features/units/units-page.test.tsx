@@ -62,6 +62,7 @@ function unit(overrides: Partial<UnitSummary> = {}): UnitSummary {
     notes: null,
     resident_count: 3,
     vehicle_count: 1,
+    lead_resident: 'Carlos Mendoza',
     primary_contact: { name: 'Carlos Mendoza', phone: null, email: null, resident_id: 'rs_1', unit_membership_id: 'um_1' },
     ...overrides,
   }
@@ -106,9 +107,9 @@ describe('UnitsPage', () => {
   it('renders units grouped by building with derived states, and opens the detail on row click', async () => {
     const requests = installAdapter([
       unit(),
-      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', maintenance_fee: null, parking_spots: ['E-07'], resident_count: 1, primary_contact: null, vehicle_count: 0 }),
-      unit({ id: 'un_609', unit_number: '609', building_name: 'Torre B', floor: '6', resident_count: 0, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
-      unit({ id: 'un_701', unit_number: '701', building_name: 'Torre B', floor: '7', status: 'inactive', resident_count: 0, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
+      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', maintenance_fee: null, parking_spots: ['E-07'], resident_count: 1, lead_resident: 'Sofía Gutiérrez', primary_contact: null, vehicle_count: 0 }),
+      unit({ id: 'un_609', unit_number: '609', building_name: 'Torre B', floor: '6', resident_count: 0, lead_resident: null, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
+      unit({ id: 'un_701', unit_number: '701', building_name: 'Torre B', floor: '7', status: 'inactive', resident_count: 0, lead_resident: null, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
     ])
 
     renderPage()
@@ -118,12 +119,15 @@ describe('UnitsPage', () => {
     // Building bands.
     expect(screen.getByText('Torre A')).toBeInTheDocument()
     expect(screen.getAllByText('Torre B')).toHaveLength(1)
-    // Identity lines and derived states.
-    expect(screen.getByText('E-23')).toBeInTheDocument()
-    expect(screen.getByText('Piso 4 · Depto.')).toBeInTheDocument()
+    // A directory row: number, floor, who lives there. Parking and type live on the detail page.
+    expect(screen.queryByText('E-23')).not.toBeInTheDocument()
+    expect(screen.queryByText('Piso 4 · Depto.')).not.toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: /Piso/ })).toBeInTheDocument()
     expect(screen.getByText(/Carlos Mendoza/)).toBeInTheDocument()
     expect(screen.getByText('+2')).toBeInTheDocument()
-    expect(screen.getByText('— Sin contacto principal')).toBeInTheDocument()
+    // No primary contact: the cell still names someone; the gap is the Atención filter's job.
+    expect(screen.getByText('Sofía Gutiérrez')).toBeInTheDocument()
+    expect(screen.queryByText('— Sin contacto principal')).not.toBeInTheDocument()
     expect(screen.getAllByText('— Sin residentes')).toHaveLength(2)
     // No occupancy column: the Residentes cell carries that. Deactivation is the one state the row shows.
     expect(screen.queryByText('Ocupada')).not.toBeInTheDocument()

@@ -120,8 +120,12 @@ test('occupancy and portal filters resolve from memberships, and search reaches 
         ->and($numbers('search=axb'))->toBe(['402'])
         ->and($numbers('search=torre b'))->toBe(['305', '609']);
 
-    $row = collect($this->actingAs($admin)->getJson($base)->json('data'))->firstWhere('unit_number', '402');
-    expect($row['vehicle_count'])->toBe(1)->and($row)->not->toHaveKeys(['occupancy', 'portal_state']);
+    $rows = collect($this->actingAs($admin)->getJson($base)->json('data'));
+    $row = $rows->firstWhere('unit_number', '402');
+    expect($row['vehicle_count'])->toBe(1)->and($row['lead_resident'])->toBe('Carlos Mendoza')->and($row)->not->toHaveKeys(['occupancy', 'portal_state']);
+    // No primary contact: the list still names someone.
+    expect($rows->firstWhere('unit_number', '305')['lead_resident'])->toBe('Sofía Gutiérrez')
+        ->and($rows->firstWhere('unit_number', '609')['lead_resident'])->toBeNull();
 });
 
 test('show returns members, vehicles, upcoming reservations, this month charges, balance and notes', function () {

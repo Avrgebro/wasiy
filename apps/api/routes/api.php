@@ -25,8 +25,6 @@ use App\Http\Controllers\Api\PortalReservationController;
 use App\Http\Controllers\Api\PortalResidentController;
 use App\Http\Controllers\Api\PortalVehicleController;
 use App\Http\Controllers\Api\PortalVisitController;
-use App\Http\Controllers\Api\RegistryExportController;
-use App\Http\Controllers\Api\RegistryImportController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\ResidentController;
 use App\Http\Controllers\Api\ResidentInvitationController;
@@ -123,7 +121,6 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::post('/locations/{location}/units', [UnitController::class, 'store']);
     Route::get('/locations/{location}/vehicles', [VehicleController::class, 'index']);
     Route::post('/locations/{location}/vehicles', [VehicleController::class, 'store']);
-    Route::post('/locations/{location}/registry-imports', [RegistryImportController::class, 'store']);
     Route::get('/locations/{location}/packages', [PackageController::class, 'index']);
     Route::post('/locations/{location}/packages', [PackageController::class, 'store']);
     Route::post('/packages/{package}/deliver', [PackageController::class, 'deliver']);
@@ -153,15 +150,6 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::post('/residents/{resident}/memberships', [UnitMembershipController::class, 'store']);
     Route::patch('/unit-memberships/{membership}', [UnitMembershipController::class, 'update']);
     Route::delete('/unit-memberships/{membership}', [UnitMembershipController::class, 'destroy']);
-    Route::get('/exports', [RegistryExportController::class, 'index']);
-    Route::post('/exports', [RegistryExportController::class, 'store']);
-    Route::get('/exports/{export}', [RegistryExportController::class, 'show']);
-    Route::get('/exports/{export}/download', [RegistryExportController::class, 'download']);
-    Route::get('/registry-imports', [RegistryImportController::class, 'index']);
-    Route::get('/registry-imports/{import}', [RegistryImportController::class, 'show']);
-    Route::get('/registry-imports/{import}/rows', [RegistryImportController::class, 'rows']);
-    Route::post('/registry-imports/{import}/confirm', [RegistryImportController::class, 'confirm']);
-    Route::post('/registry-imports/{import}/retry', [RegistryImportController::class, 'retry']);
 
     // Resident portal: gated by resident-membership policies, never staff
     // roles.

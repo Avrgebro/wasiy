@@ -29,6 +29,8 @@ export type UnitSummary = {
   notes: string | null
   resident_count: number
   vehicle_count: number
+  /** Primary contact, else the earliest active member; null when empty. */
+  lead_resident: string | null
   primary_contact: {
     name: string
     phone: string | null

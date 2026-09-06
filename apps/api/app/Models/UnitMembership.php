@@ -75,7 +75,7 @@ class UnitMembership extends Model
 
     /**
      * The active membership linking a unit and a resident, scoped to the
-     * unit's tenant. Shared identity rule for registry imports.
+     * unit's tenant.
      *
      * @param  Builder<UnitMembership>  $query
      */

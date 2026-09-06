@@ -26,7 +26,7 @@ import { addUnitNote, deactivateUnit, getUnit, reactivateUnit, type UnitMember, 
 import { MemberDrawer } from './member-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { VehicleDrawer } from './vehicle-drawer'
-import { portalColor, typeLabel } from './unit-presentation'
+import { typeLabel } from './unit-presentation'
 
 const routeApi = getRouteApi('/_authenticated/admin/registry/units_/$unitId')
 
@@ -458,9 +458,6 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void
           {[member.email, formatPhone(member.phone)].filter(Boolean).join(' · ') || '—'}
         </Text>
       </div>
-      <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="light">
-        {t(`units.portal.${member.portal_state}`)}
-      </Badge>
       {onOpen ? <span className="text-[15px] text-[var(--wa-text-3)]">›</span> : null}
     </div>
   )

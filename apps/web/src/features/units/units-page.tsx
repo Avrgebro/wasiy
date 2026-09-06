@@ -1,5 +1,5 @@
-import { Alert, Badge, Button, Text } from '@mantine/core'
-import { AddIcon, BuildingsIcon } from '@solar-icons/react/linear'
+import { Alert, Avatar, Badge, Button, Text } from '@mantine/core'
+import { AddIcon } from '@solar-icons/react/linear'
 import { useState } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -10,11 +10,8 @@ import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
-import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
 import { attentionParams, type UnitsSearchValues } from './schemas'
-import { unitDescriptor, unitLabelsLine } from './unit-presentation'
-import { BuildingsDrawer } from '../buildings/buildings-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { UnitsFilters } from './units-filters'
 
@@ -42,15 +39,14 @@ export function UnitsPage() {
     )
   }
 
-  return <UnitsContent canManage={can(me, 'registry.manage')} canManageBuildings={can(me, 'location.settings')} locationId={location.id} locationName={location.name} />
+  return <UnitsContent canManage={can(me, 'registry.manage')} locationId={location.id} locationName={location.name} />
 }
 
-function UnitsContent({ canManage, canManageBuildings, locationId, locationName }: { canManage: boolean; canManageBuildings: boolean; locationId: string; locationName: string }) {
+function UnitsContent({ canManage, locationId, locationName }: { canManage: boolean; locationId: string; locationName: string }) {
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const search = routeApi.useSearch()
   const [creating, setCreating] = useState(false)
-  const [managingBuildings, setManagingBuildings] = useState(false)
 
   const listQuery = useQuery({
     queryKey: ['registry', 'units', locationId, search],
@@ -79,31 +75,24 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
       accessorKey: 'unit_number',
       header: t('units.columns.unit'),
       meta: { sortKey: 'unit_number', className: 'whitespace-nowrap' },
-      cell: ({ row }) => {
-        const labels = unitLabelsLine(row.original)
-
-        return (
-          <div className="flex flex-col">
-            <span className="flex items-center gap-2">
-              <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
-              {row.original.status === 'inactive' ? (
-                <Badge color="gray" radius="xl" size="xs" variant="light">
-                  {t('units.statuses.inactive')}
-                </Badge>
-              ) : null}
-            </span>
-            {labels ? <span className="text-[11.5px] text-[var(--wa-text-3)]">{labels}</span> : null}
-          </div>
-        )
-      },
+      cell: ({ row }) => (
+        <span className="flex items-center gap-2">
+          <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
+          {row.original.status === 'inactive' ? (
+            <Badge color="gray" radius="xl" size="xs" variant="light">
+              {t('units.statuses.inactive')}
+            </Badge>
+          ) : null}
+        </span>
+      ),
     },
     {
-      id: 'descriptor',
-      header: t('units.columns.floorType'),
-      meta: { hideBelow: 'md', className: 'whitespace-nowrap' },
+      accessorKey: 'floor',
+      header: t('units.columns.floor'),
+      meta: { hideBelow: 'md', sortKey: 'floor', className: 'whitespace-nowrap' },
       cell: ({ row }) => (
         <Text c="dimmed" size="sm">
-          {unitDescriptor(row.original, t)}
+          {row.original.floor ?? '—'}
         </Text>
       ),
     },
@@ -153,12 +142,6 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         </div>
         {canManage ? (
           <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
-            {canManageBuildings ? (
-              <Button className="w-full sm:w-auto" leftSection={<BuildingsIcon size={18} />} variant="default" onClick={() => setManagingBuildings(true)}>
-                {t('buildings.title')}
-              </Button>
-            ) : null}
-            <ImportRegistryButton />
             <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setCreating(true)}>
               {t('units.form.createTitle')}
             </Button>
@@ -206,7 +189,6 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         opened={creating}
         onClose={() => setCreating(false)}
       />
-      <BuildingsDrawer locationId={locationId} locationName={locationName} opened={managingBuildings} onClose={() => setManagingBuildings(false)} />
     </div>
   )
 }
@@ -224,15 +206,10 @@ function ResidentsCell({ unit }: { unit: UnitSummary }) {
     )
   }
 
-  if (!unit.primary_contact) {
-    return (
-      <Text c="warning" size="sm">
-        — {t('units.noPrimaryContact')}
-      </Text>
-    )
-  }
-
-  const initials = unit.primary_contact.name
+  // The lead is the primary contact when there is one; a missing primary is
+  // a data gap surfaced by the Atención filter, not by this cell.
+  const lead = unit.lead_resident ?? ''
+  const initials = lead
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
@@ -242,11 +219,11 @@ function ResidentsCell({ unit }: { unit: UnitSummary }) {
 
   return (
     <div className="flex min-w-0 items-center gap-2.5">
-      <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[var(--wa-secondary)] text-[11px] font-semibold text-[#F7F5F0]">
+      <Avatar color="secondary" radius="xl" size={28}>
         {initials}
-      </span>
+      </Avatar>
       <Text className="min-w-0 truncate" size="sm">
-        {unit.primary_contact.name}
+        {lead}
         {others > 0 ? <span className="text-[var(--mantine-color-dimmed)]"> +{others}</span> : null}
       </Text>
     </div>

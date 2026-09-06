@@ -14,7 +14,7 @@ enum Capability: string
     /** Read units, residents (phones, never emails for the desk), vehicles. */
     case ViewRegistry = 'registry.view';
 
-    /** Create and edit units, residents, memberships, vehicles; import and export. */
+    /** Create and edit units, residents, memberships, vehicles. */
     case ManageRegistry = 'registry.manage';
 
     /** Register visits and packages, check out, deliver. */

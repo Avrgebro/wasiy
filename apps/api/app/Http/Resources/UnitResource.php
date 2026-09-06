@@ -19,6 +19,8 @@ class UnitResource extends JsonResource
     {
         /** @var UnitMembership|null $primaryContactMembership */
         $primaryContactMembership = $this->whenLoaded('primaryContactMembership');
+        /** @var UnitMembership|null $firstActiveMembership */
+        $firstActiveMembership = $this->whenLoaded('firstActiveMembership');
         $residentCount = $this->active_unit_memberships_count ?? $this->unitMemberships()->active()->count();
 
         return [
@@ -40,6 +42,8 @@ class UnitResource extends JsonResource
             'status' => $this->status->value,
             'notes' => $this->notes,
             'resident_count' => $residentCount,
+            // Who the list names for the unit: the primary contact, else the earliest active member.
+            'lead_resident' => ($primaryContactMembership instanceof UnitMembership ? $primaryContactMembership : ($firstActiveMembership instanceof UnitMembership ? $firstActiveMembership : null))?->resident?->name,
             'vehicle_count' => $this->vehicles_count ?? $this->vehicles()->count(),
             'members' => $this->whenLoaded('activeUnitMemberships', fn () => $this->activeUnitMemberships
                 ->map(fn (UnitMembership $membership): array => [

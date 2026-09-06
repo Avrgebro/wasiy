@@ -60,11 +60,4 @@ enum ActivityEventType: string
     case LocationSettingsChanged = 'location.settings_changed';
     case LocationBuildingsChanged = 'location.buildings_changed';
     case AccountSettingsChanged = 'account.settings_changed';
-    case ExportRequested = 'export.requested';
-    case ExportCompleted = 'export.completed';
-    case ExportFailed = 'export.failed';
-    case ImportUploaded = 'import.uploaded';
-    case ImportValidationFailed = 'import.validation_failed';
-    case ImportCompleted = 'import.completed';
-    case ImportFailed = 'import.failed';
 }

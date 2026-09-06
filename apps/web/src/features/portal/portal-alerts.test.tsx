@@ -1,7 +1,7 @@
 import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter } from 'axios'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
 import '../../i18n'
 import type { PortalAlert } from './api'
@@ -67,7 +67,14 @@ function install(alerts: PortalAlert[], onWrite?: (url: string, body: unknown) =
   })
 }
 
+// The age labels depend on the calendar day: an alert from two hours ago is
+// "ayer" between midnight and 2am, so the clock is pinned to midday.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-09-05T17:00:00Z') })
+})
+
 afterEach(() => {
+  vi.useRealTimers()
   cleanup()
   apiClient.defaults.adapter = originalAdapter
   navigateSpy.mockReset()

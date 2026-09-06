@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Str;
 
 #[Fillable([
     'account_id',
@@ -128,21 +127,6 @@ class Unit extends Model
     }
 
     /**
-     * Case-insensitive unit identity used by registry imports. Must stay in
-     * lockstep with importMatchKey() and
-     * NormalizedRegistryRow::unitMatchKey().
-     *
-     * @param  Builder<Unit>  $query
-     */
-    public function scopeMatchingImportIdentity(Builder $query, ?string $unitNumber, ?string $buildingName): void
-    {
-        $query
-            ->whereRaw('LOWER(unit_number) = ?', [Str::lower((string) $unitNumber)])
-            ->whereHas('building', fn (Builder $building) => $building
-                ->whereRaw("LOWER(COALESCE(name, '')) = ?", [Str::lower((string) $buildingName)]));
-    }
-
-    /**
      * Canonical display label: "building / number", omitting blank parts.
      */
     public function label(): string
@@ -150,14 +134,6 @@ class Unit extends Model
         return collect([$this->building_name, $this->unit_number])
             ->filter(fn (?string $part): bool => is_string($part) && trim($part) !== '')
             ->implode(' / ');
-    }
-
-    /**
-     * The in-memory counterpart of scopeMatchingImportIdentity.
-     */
-    public function importMatchKey(): string
-    {
-        return Str::lower((string) $this->unit_number).'|'.Str::lower((string) ($this->building_name ?? ''));
     }
 
     /**
@@ -208,6 +184,19 @@ class Unit extends Model
         return $this->hasOne(UnitMembership::class)
             ->active()
             ->where('is_primary_contact', true);
+    }
+
+    /**
+     * The earliest active membership; the list names this person when no one
+     * is marked primary contact.
+     *
+     * @return HasOne<UnitMembership, $this>
+     */
+    public function firstActiveMembership(): HasOne
+    {
+        return $this->hasOne(UnitMembership::class)
+            ->active()
+            ->ofMany('id', 'min');
     }
 
     /**
@@ -263,6 +252,7 @@ class Unit extends Model
     {
         return [
             'primaryContactMembership.resident',
+            'firstActiveMembership.resident',
         ];
     }
 

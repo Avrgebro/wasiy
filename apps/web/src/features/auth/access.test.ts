@@ -193,9 +193,6 @@ describe('access helpers', () => {
     expect(serialized).not.toContain('nav.reception')
     expect(serialized).toContain('/admin/registry/residents')
 
-    // Imports is reached from the pages it loads, not from the sidebar.
-    expect(serialized).not.toContain('/admin/registry/imports')
-
     // Manage-only entries and the whole administration section.
     expect(serialized).toContain('/admin/announcements')
     expect(serialized).toContain('/admin/finances')
