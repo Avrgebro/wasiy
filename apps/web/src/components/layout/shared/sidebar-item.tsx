@@ -7,7 +7,7 @@ import type { LayoutNavCollapsible, LayoutNavItem, LayoutNavLeaf } from './types
 
 /** Duotone icons get the amber second tone (see .wa-duotone-accent in index.css). */
 function iconClassName(item: { iconWeight?: string }) {
-  return item.iconWeight?.includes('Duotone') ? 'hidden sm:block wa-duotone-accent' : 'hidden sm:block'
+  return item.iconWeight?.includes('Duotone') ? 'shrink-0 wa-duotone-accent' : 'shrink-0'
 }
 
 type SidebarItemProps = {

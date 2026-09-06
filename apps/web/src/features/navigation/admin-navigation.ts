@@ -1,5 +1,5 @@
 import type { LayoutNavEntry } from '../../components/layout/shared/types'
-import { BoxIcon, BuildingsIcon, CalendarIcon, ClipboardListIcon, HouseIcon, SettingsIcon, SpeakerIcon, UserCheckRoundedIcon, UserPlusRoundedIcon, UsersGroupRoundedIcon, WalletIcon, Widget5Icon } from '@solar-icons/react/dynamic'
+import { BoxIcon, BuildingsIcon, CalendarIcon, HouseIcon, SettingsIcon, SpeakerIcon, UserCheckRoundedIcon, UserPlusRoundedIcon, UsersGroupRoundedIcon, WalletIcon, Widget5Icon } from '@solar-icons/react/dynamic'
 import { hasCapability, isAccountAdmin } from '../auth/access'
 import type { MeResponse } from '../auth/types'
 import { PendingReservationsBadge } from '../reservations/pending-reservations-badge'
@@ -62,7 +62,6 @@ const administrationNavigationGroup: NavGroupSpec = {
   items: [
     { icon: BuildingsIcon, labelKey: 'nav.locations', to: '/admin/locations' },
     { icon: UsersGroupRoundedIcon, labelKey: 'nav.staff', to: '/admin/staff' },
-    { icon: ClipboardListIcon, labelKey: 'nav.activity', to: '/admin/activity' },
     { icon: SettingsIcon, labelKey: 'nav.settings', to: '/admin/settings' },
   ],
 }
