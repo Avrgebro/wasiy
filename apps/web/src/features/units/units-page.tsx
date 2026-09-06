@@ -13,7 +13,7 @@ import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
 import { attentionParams, type UnitsSearchValues } from './schemas'
-import { occupancyColor, portalColor, unitDescriptor, unitLabelsLine } from './unit-presentation'
+import { occupancyColor, unitDescriptor, unitLabelsLine } from './unit-presentation'
 import { BuildingsDrawer } from '../buildings/buildings-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { UnitsFilters } from './units-filters'
@@ -124,21 +124,6 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
           {row.original.maintenance_fee !== null ? formatMoney(row.original.maintenance_fee) : '—'}
         </span>
       ),
-    },
-    {
-      id: 'portal',
-      header: t('units.columns.portal'),
-      meta: { hideBelow: 'lg' },
-      cell: ({ row }) =>
-        row.original.portal_state ? (
-          <Badge color={portalColor(row.original.portal_state)} radius="xl" size="sm" variant="light">
-            {t(`units.portal.${row.original.portal_state}`)}
-          </Badge>
-        ) : (
-          <Text c="dimmed" size="sm">
-            —
-          </Text>
-        ),
     },
     {
       id: 'occupancy',

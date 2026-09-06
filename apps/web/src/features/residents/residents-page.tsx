@@ -14,7 +14,6 @@ import { getErrorMessage } from '../../lib/errors'
 import { telHref } from '../../lib/phone'
 import { can } from '../auth/access'
 import { useMe, usePhoneFormat } from '../auth/hooks'
-import { portalColor } from '../units/unit-presentation'
 import { getResidents, type ResidentSummary } from './api'
 import { PersonDrawer } from './person-drawer'
 import { PersonFormDrawer } from './person-form-drawer'
@@ -135,16 +134,6 @@ function ResidentsContent({
       id: 'units',
       header: t('units.title'),
       cell: ({ row }) => <UnitsCell locationId={locationId} person={row.original} />,
-    },
-    {
-      id: 'portal',
-      header: t('units.columns.portal'),
-      meta: { hideBelow: 'md' },
-      cell: ({ row }) => (
-        <Badge color={portalColor(row.original.portal_state)} radius="xl" size="sm" variant="light">
-          {t(`units.portal.${row.original.portal_state}`)}
-        </Badge>
-      ),
     },
     {
       accessorKey: 'status',

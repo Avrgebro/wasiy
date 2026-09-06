@@ -35,7 +35,6 @@ export type ResidentsSearch = RegistrySearch & {
   unit_id?: string
   role?: string
   portal?: string
-  no_unit?: number
 }
 
 export function getResidents(accountId: string, search: ResidentsSearch) {

@@ -47,7 +47,6 @@ class ResidentController extends Controller
             'location_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('locations', 'id')->where('account_id', $account->id)->whereNull('deleted_at')],
             'unit_id' => ['sometimes', 'nullable', 'string', 'ulid', Rule::exists('units', 'id')->where('account_id', $account->id)],
             'portal' => ['sometimes', 'nullable', Rule::in(['active', 'invited', 'not_invited'])],
-            'no_unit' => ['sometimes', 'nullable', 'boolean'],
         ]);
 
         $locationId = $validated['location_id'] ?? null;
@@ -67,10 +66,7 @@ class ResidentController extends Controller
                 'active' => $query->whereNotNull('user_id'),
                 'invited' => $query->whereNull('user_id')->whereHas('userInvitations', fn (Builder $invitation) => $invitation->where('status', 'pending')),
                 default => $query->whereNull('user_id')->whereDoesntHave('userInvitations', fn (Builder $invitation) => $invitation->where('status', 'pending')),
-            })
-            // "Sin unidad": known here, but every membership in the location has ended.
-            ->when((bool) ($validated['no_unit'] ?? false), fn (Builder $query) => $query->whereDoesntHave('unitMemberships', fn (Builder $membership) => $membership
-                ->active()->when($locationId, fn (Builder $inner) => $inner->where('location_id', $locationId))));
+            });
 
         $accessibleLocationIds = $this->access->accessibleLocationsForAccount($request->user(), $account)->pluck('id');
 

@@ -129,8 +129,7 @@ describe('UnitsPage', () => {
     expect(screen.getByText('Ocupada')).toBeInTheDocument()
     expect(screen.getByText('Atención')).toBeInTheDocument()
     expect(screen.getByText('Vacía')).toBeInTheDocument()
-    expect(screen.getByText('En el portal')).toBeInTheDocument()
-    expect(screen.getByText('Sin invitar')).toBeInTheDocument()
+    expect(screen.queryByText('En el portal')).not.toBeInTheDocument()
     expect(requests.some((url) => url.includes('/api/locations/loc_1/units?page=1'))).toBe(true)
 
     await userEvent.click(screen.getByText('305'))

@@ -65,7 +65,6 @@ test('the directory filters by portal state and "sin unidad", and searches by un
     expect($names())->toBe(['Mendoza', 'Ramírez', 'Salas'])
         ->and($names('&portal=active'))->toBe(['Mendoza'])
         ->and($names('&portal=not_invited'))->toBe(['Ramírez', 'Salas'])
-        ->and($names('&no_unit=1'))->toBe(['Salas'])
         ->and($names('&search=118'))->toBe(['Mendoza', 'Ramírez'])
         ->and($names('&search=402'))->toBe(['Mendoza']);
 

@@ -105,7 +105,7 @@ afterEach(() => {
 })
 
 describe('ResidentsPage', () => {
-  it('lists people with unit pills, portal state and phone, scoped to the location', async () => {
+  it('lists people with unit pills and phone, scoped to the location', async () => {
     const requests = installAdapter('account_admin', [
       person(),
       person({ id: 'rs_2', user_id: null, name: 'Rodrigo Salas', first_name: 'Rodrigo', last_name: 'Salas', email: null, phone: null, status: 'inactive', portal_state: 'not_invited', active_membership_count: 0, memberships: [] }),
@@ -119,7 +119,7 @@ describe('ResidentsPage', () => {
     expect(screen.getByRole('link', { name: '987 654 321' })).toHaveAttribute('href', 'tel:+51987654321')
     expect(screen.getByText('402')).toBeInTheDocument()
     expect(screen.getByText('118')).toBeInTheDocument()
-    expect(screen.getByText('En el portal')).toBeInTheDocument()
+    expect(screen.queryByText('En el portal')).not.toBeInTheDocument()
     expect(screen.getAllByText('Sin unidad').length).toBeGreaterThan(0)
     expect(requests.some((url) => url.includes('/api/accounts/acc_1/residents?location_id=loc_1'))).toBe(true)
   })
