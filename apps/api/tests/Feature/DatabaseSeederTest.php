@@ -467,3 +467,16 @@ test('it seeds the m6 locations settings amenity matrix and photos', function ()
     expect(Amenity::query()->where('location_id', $central->id)->count())->toBe(5)
         ->and($central->photos()->count())->toBe(2);
 });
+
+test('demo reservations respect availability on different seed days', function (string $date) {
+    $this->travelTo(\Carbon\CarbonImmutable::parse($date, 'America/Lima')->utc());
+    $this->seed();
+    $reservations = \App\Models\Reservation::with('amenity.location')->get();
+    expect($reservations)->not->toBeEmpty();
+    foreach ($reservations as $reservation) {
+        $start = $reservation->starts_at->setTimezone($reservation->amenity->location->timezone);
+        $end = $reservation->ends_at->setTimezone($reservation->amenity->location->timezone);
+        $windows = $reservation->amenity->availability_schedule->windowsFor(strtolower($start->englishDayOfWeek));
+        $this->assertTrue(collect($windows)->contains(fn ($window) => $start->format('H:i') >= $window['start'] && $end->format('H:i') <= $window['end']), $reservation->amenity->name.' '.$start->toIso8601String().' '.$end->toIso8601String());
+    }
+})->with(['2026-09-04 12:00', '2026-09-06 12:00']);

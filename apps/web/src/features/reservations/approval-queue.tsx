@@ -3,8 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getErrorMessage } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import {
   approveReservation,
   observeReservation,
@@ -12,7 +11,7 @@ import {
   type ReservationSummary,
 } from './api'
 import { ReservationField, ReservationSlotBand } from './reservation-modal-parts'
-import { formatTimeRange, localDateString, overlaps, shortDayLabel } from './week'
+import { formatTimeRange, localDateString, shortDayLabel } from './week'
 
 type NoteAction = { kind: 'reject' | 'observe'; reservation: ReservationSummary }
 
@@ -20,12 +19,14 @@ type NoteAction = { kind: 'reject' | 'observe'; reservation: ReservationSummary 
 // must not dwarf the agenda when requests pile up.
 const QUEUE_PREVIEW_COUNT = 3
 
-function waitingDays(reservation: ReservationSummary): number {
+function waitingDays(reservation: ReservationSummary, timezone: string): number | null {
   if (!reservation.created_at) {
-    return 0
+    return null
   }
 
-  return Math.floor((Date.now() - new Date(reservation.created_at).getTime()) / 86_400_000)
+  const received = localDateString(new Date(reservation.created_at), timezone)
+  const today = localDateString(new Date(Date.now()), timezone)
+  return Math.max(0, Math.round((Date.parse(today) - Date.parse(received)) / 86_400_000))
 }
 
 function feeLine(reservation: ReservationSummary, t: TFunction<'common'>) {
@@ -41,20 +42,17 @@ function feeLine(reservation: ReservationSummary, t: TFunction<'common'>) {
 }
 
 /**
- * The "Por aprobar" rail of mockup 08. The conflict line is advisory and
- * client-computed against the approved reservations currently loaded; the
- * approve endpoint re-validates inside the amenity lock either way.
+ * The "Por aprobar" rail. Availability is validated by the approval endpoint
+ * inside the amenity lock.
  */
 export function ApprovalQueue({
   accountId,
-  approvedPool,
   canDecide,
   requests,
   timezone,
   onSelect,
 }: {
   accountId: string
-  approvedPool: ReservationSummary[]
   canDecide: boolean
   requests: ReservationSummary[]
   timezone: string
@@ -77,7 +75,6 @@ export function ApprovalQueue({
       await invalidate()
       notifySuccess(t('reservations.toasts.approved'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const noteMutation = useMutation({
@@ -91,18 +88,8 @@ export function ApprovalQueue({
       setNote('')
       notifySuccess(t(`reservations.toasts.${action.kind === 'reject' ? 'rejected' : 'observed'}`))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
-  function conflictLabel(request: ReservationSummary): string | null {
-    const collision = approvedPool.find(
-      (approved) => approved.amenity_id === request.amenity_id && overlaps(approved, request),
-    )
-
-    return collision
-      ? t('reservations.queue.conflictWith', { label: collision.unit_number ?? '' })
-      : null
-  }
 
   return (
     <section className="overflow-hidden rounded-surface border border-[var(--wa-warning)]/40 bg-[var(--mantine-color-default)]">
@@ -122,8 +109,7 @@ export function ApprovalQueue({
           </Text>
         ) : (
           (expanded ? requests : requests.slice(0, QUEUE_PREVIEW_COUNT)).map((request) => {
-            const conflict = conflictLabel(request)
-            const days = waitingDays(request)
+            const days = waitingDays(request, timezone)
 
             return (
               <div
@@ -145,10 +131,11 @@ export function ApprovalQueue({
                     .filter(Boolean)
                     .join(' · ')}
                 </Text>
-                <Text c={conflict ? 'error' : 'dimmed'} mt={3} size="xs">
-                  {t('reservations.queue.waiting', { count: days })} ·{' '}
-                  {conflict ?? t('reservations.queue.conflictNone')}
-                </Text>
+                {days !== null ? (
+                  <Text c="dimmed" mt={3} size="xs">
+                    {days === 0 ? t('reservations.queue.receivedToday') : t('reservations.queue.waiting', { count: days })}
+                  </Text>
+                ) : null}
                 {request.status === 'observed' && request.status_note ? (
                   <Text c="info" mt={3} size="xs">
                     {t('reservations.statuses.observed')}: {request.status_note}

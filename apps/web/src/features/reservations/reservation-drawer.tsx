@@ -16,7 +16,7 @@ import {
 import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { transitionMovement, type MovementStatus, type MovementSummary } from '../finances/api'
 import { shortDateTime } from '../finances/month'
 import {
@@ -100,7 +100,6 @@ export function ReservationDrawer({
       setNote('')
       notifySuccess(t(`reservations.toasts.${kind === 'approve' ? 'approved' : kind === 'observe' ? 'observed' : kind === 'reject' ? 'rejected' : 'cancelled'}`))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const settle = useMutation({
@@ -110,7 +109,6 @@ export function ReservationDrawer({
       await invalidate()
       notifySuccess(t('finances.updated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const reservation = detailQuery.data?.data

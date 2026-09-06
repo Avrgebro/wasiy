@@ -113,8 +113,7 @@ function ReservationsContent({
     queryFn: () => getReservations(accountId, locationId, { from: weekStart, to: weekEnd }),
     placeholderData: keepContextData(['reservations', 'week', accountId, locationId]),
   })
-  // One future-facing query feeds the queue (pending/observed become cards)
-  // and the advisory conflict pool (its approved rows).
+  // Future pending/observed requests feed the approval queue.
   const queueQuery = useQuery({
     queryKey: ['reservations', 'queue', accountId, locationId, today],
     queryFn: () => getReservations(accountId, locationId, { from: today }),
@@ -135,7 +134,6 @@ function ReservationsContent({
   const requests = futureReservations.filter(
     (reservation) => reservation.status === 'pending' || reservation.status === 'observed',
   )
-  const approvedPool = futureReservations.filter((reservation) => reservation.status === 'approved')
   const pendingCount = requests.length
 
   const amenityOptions = (amenitiesQuery.data?.data ?? []).map((amenity) => ({
@@ -254,7 +252,6 @@ function ReservationsContent({
         ) : (
           <ApprovalQueue
             accountId={accountId}
-            approvedPool={approvedPool}
             canDecide={canDecide}
             requests={requests}
             timezone={timezone}

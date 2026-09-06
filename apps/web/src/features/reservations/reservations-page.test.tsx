@@ -228,12 +228,12 @@ describe('ReservationsPage', () => {
     })
     expect(screen.getAllByText('Parrilla / terraza').length).toBeGreaterThan(0)
     expect(screen.getByText('Aprobar')).toBeInTheDocument()
-    expect(screen.getByText(/conflicto: ninguno/)).toBeInTheDocument()
+    expect(screen.queryByText(/conflicto:/)).not.toBeInTheDocument()
     // Chips show the pending count.
     expect(screen.getByRole('button', { name: 'Pendientes 1' })).toBeInTheDocument()
   })
 
-  it('flags a conflict when a pending request overlaps an approved booking', async () => {
+  it('keeps overlapping requests actionable without a speculative conflict label', async () => {
     installAdapter([
       reservation({ starts_at: tomorrowAt(18), ends_at: tomorrowAt(20) }),
       reservation({
@@ -247,7 +247,8 @@ describe('ReservationsPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText(/conflicto: se cruza con Depto\. 704/)).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Aprobar' })).toBeEnabled()
+    expect(screen.queryByText(/conflicto:/)).not.toBeInTheDocument()
   })
 
   it('approves a request from the queue', async () => {

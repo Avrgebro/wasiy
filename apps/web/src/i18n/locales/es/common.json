@@ -849,10 +849,9 @@
     "queue": {
       "title": "Por aprobar",
       "empty": "No hay solicitudes pendientes.",
-      "waiting_one": "Esperando hace {{count}} día",
-      "waiting_other": "Esperando hace {{count}} días",
-      "conflictNone": "conflicto: ninguno",
-      "conflictWith": "conflicto: se cruza con {{label}}",
+      "receivedToday": "Recibida hoy",
+      "waiting_one": "En espera desde hace {{count}} día",
+      "waiting_other": "En espera desde hace {{count}} días",
       "fee": "cuota S/ {{amount}}",
       "deposit": "depósito S/ {{amount}}",
       "free": "sin costo",

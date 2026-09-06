@@ -95,8 +95,3 @@ export function weekRangeLabel(weekStart: string): string {
 
   return `${startLabel} – ${endLabel}`
 }
-
-/** True when two reservations overlap in time (half-open intervals). */
-export function overlaps(a: ReservationSummary, b: ReservationSummary): boolean {
-  return a.starts_at < b.ends_at && a.ends_at > b.starts_at
-}

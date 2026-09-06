@@ -351,7 +351,7 @@ class DemoOperationsSeeder extends Seeder
             [$squash, 'Torre B-1001', 1, 7, 8, ReservationStatus::Approved, null, null],
             [$eventRoom, 'Torre A-501', 2, 18, 22, ReservationStatus::Pending, 150, 300],
             [$rooftop, 'Torre B-1202', 3, 13, 15, ReservationStatus::Observed, 50, null],
-            [$eventRoom, 'Torre B-1501', -3, 18, 23, ReservationStatus::Approved, 150, 300],
+            [$eventRoom, 'Torre B-1501', -3, 17, 22, ReservationStatus::Approved, 150, 300],
             [$rooftop, 'Torre A-302', -6, 12, 15, ReservationStatus::Approved, 50, null],
             [$eventRoom, 'Torre A-601', -9, 17, 22, ReservationStatus::Cancelled, 150, 300],
             [$gym, 'Torre B-201', -1, 6, 7, ReservationStatus::Rejected, null, null],
@@ -364,6 +364,20 @@ class DemoOperationsSeeder extends Seeder
             }
             $resident = $primaries->get($unitKey);
             $startsAt = $today->addDays($offset)->setTime($startHour, 0);
+            $duration = ($endHour - $startHour) * 60;
+            // Preserve historical/future intent while finding an open day.
+            for ($attempt = 0; $attempt < 7; $attempt++) {
+                $windows = $amenity->availability_schedule->windowsFor(strtolower($startsAt->englishDayOfWeek));
+                $fits = collect($windows)->contains(fn (array $window): bool => $startsAt->format('H:i') >= $window['start']
+                    && $startsAt->addMinutes($duration)->format('H:i') <= $window['end']);
+                if ($fits) {
+                    break;
+                }
+                $startsAt = $startsAt->addDays($offset < 0 ? -1 : 1);
+            }
+            if (! $fits) {
+                throw new \LogicException("No demo reservation window fits {$amenity->name}.");
+            }
             $decided = $status !== ReservationStatus::Pending;
 
             $reservation = Reservation::query()->updateOrCreate(
@@ -372,7 +386,7 @@ class DemoOperationsSeeder extends Seeder
                     'account_id' => $this->account->id,
                     'location_id' => $this->central->id,
                     'resident_id' => $resident?->id,
-                    'ends_at' => $today->addDays($offset)->setTime($endHour, 0)->utc(),
+                    'ends_at' => $startsAt->addMinutes($duration)->utc(),
                     'status' => $status,
                     'status_note' => match ($status) {
                         ReservationStatus::Observed => 'Confirmar el número de invitados antes de aprobar.',

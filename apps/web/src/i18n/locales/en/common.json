@@ -849,10 +849,9 @@
     "queue": {
       "title": "Awaiting approval",
       "empty": "No pending requests.",
+      "receivedToday": "Received today",
       "waiting_one": "Waiting for {{count}} day",
       "waiting_other": "Waiting for {{count}} days",
-      "conflictNone": "conflict: none",
-      "conflictWith": "conflict: overlaps {{label}}",
       "fee": "fee S/ {{amount}}",
       "deposit": "deposit S/ {{amount}}",
       "free": "no charge",
