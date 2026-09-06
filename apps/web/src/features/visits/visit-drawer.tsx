@@ -82,7 +82,7 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
               <DrawerFact
                 label={t('packages.columns.unit')}
                 value={
-                  <Link className="text-[var(--wa-interactive)] no-underline hover:underline" params={{ unitId: visit.unit_id }} to="/admin/registry/units/$unitId">
+                  <Link className="text-[var(--wa-interactive)] no-underline hover:underline" params={{ unitId: visit.unit_id }} to="/admin/units/$unitId">
                     {[visit.unit_number, visit.building_name].filter(Boolean).join(' · ')} →
                   </Link>
                 }

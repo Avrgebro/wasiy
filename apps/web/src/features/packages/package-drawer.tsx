@@ -67,7 +67,7 @@ export function PackageDrawer({
               <DrawerFact
                 label={t('packages.columns.unit')}
                 value={
-                  <Link className="text-[var(--wa-interactive)] no-underline hover:underline" params={{ unitId: pkg.unit_id }} to="/admin/registry/units/$unitId">
+                  <Link className="text-[var(--wa-interactive)] no-underline hover:underline" params={{ unitId: pkg.unit_id }} to="/admin/units/$unitId">
                     {[pkg.unit_number, pkg.building_name].filter(Boolean).join(' · ')} →
                   </Link>
                 }

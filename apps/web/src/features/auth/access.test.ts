@@ -184,14 +184,14 @@ describe('access helpers', () => {
 
     expect(serialized).toContain('navGroups.location')
     expect(serialized).toContain('/admin')
-    expect(serialized).toContain('/admin/registry/units')
+    expect(serialized).toContain('/admin/units')
     // Vehicles live inside units since M9; no standalone entry.
     expect(serialized).not.toContain('/admin/registry/vehicles')
 
     // Recepción is its own section, not a collapsible inside Ubicación.
     expect(serialized).toContain('navGroups.reception')
     expect(serialized).not.toContain('nav.reception')
-    expect(serialized).toContain('/admin/registry/residents')
+    expect(serialized).toContain('/admin/residents')
 
     // Manage-only entries and the whole administration section.
     expect(serialized).toContain('/admin/announcements')
@@ -235,7 +235,7 @@ describe('access helpers', () => {
 
     // A manager manages the registry, so the manage-only entries stay.
     expect(can(me, 'registry.manage')).toBe(true)
-    expect(serialized).toContain('/admin/registry/units')
+    expect(serialized).toContain('/admin/units')
     expect(serialized).toContain('/admin/announcements')
     expect(serialized).toContain('/admin/finances')
 
@@ -273,9 +273,9 @@ describe('access helpers', () => {
 
     const serialized = JSON.stringify(getAdminNavigation(frontDeskMe))
     expect(serialized).toContain('/admin/visitors')
-    expect(serialized).toContain('/admin/registry/residents')
+    expect(serialized).toContain('/admin/residents')
     expect(serialized).toContain('/admin/reservations')
-    expect(serialized).not.toContain('/admin/registry/units')
+    expect(serialized).not.toContain('/admin/units')
     expect(serialized).not.toContain('/admin/finances')
     expect(serialized).not.toContain('/admin/announcements')
   })
@@ -412,7 +412,7 @@ describe('navigation filtering', () => {
     const serialized = JSON.stringify(getAdminNavigation(me))
     expect(serialized).toContain('/admin/reservations')
     // Unidades carries the ledger; the desk finds people through Residentes.
-    expect(serialized).not.toContain('/admin/registry/units')
+    expect(serialized).not.toContain('/admin/units')
     expect(serialized).not.toContain('/admin/finances')
     expect(serialized).not.toContain('/admin/announcements')
     expect(serialized).not.toContain('/admin/staff')

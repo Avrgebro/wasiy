@@ -5,7 +5,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 export const Route = createFileRoute('/_authenticated/admin/registry/vehicles')({
   beforeLoad: () => {
     throw redirect({
-      to: '/admin/registry/units',
+      to: '/admin/units',
       search: { page: 1, search: '', sort: '', type: '', status: '', attention: undefined },
     })
   },

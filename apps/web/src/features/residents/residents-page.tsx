@@ -19,7 +19,7 @@ import { PersonDrawer } from './person-drawer'
 import { PersonFormDrawer } from './person-form-drawer'
 import type { ResidentsSearchValues } from './schemas'
 
-const routeApi = getRouteApi('/_authenticated/admin/registry/residents')
+const routeApi = getRouteApi('/_authenticated/admin/residents')
 
 export function ResidentsPage() {
   const { t } = useTranslation('common')

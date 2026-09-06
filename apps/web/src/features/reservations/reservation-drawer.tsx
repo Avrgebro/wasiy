@@ -146,7 +146,7 @@ export function ReservationDrawer({
                     <Link
                       className="text-[var(--wa-interactive)] no-underline hover:underline"
                       params={{ unitId: reservation.unit_id }}
-                      to="/admin/registry/units/$unitId"
+                      to="/admin/units/$unitId"
                     >
                       {reservation.unit_number} →
                     </Link>

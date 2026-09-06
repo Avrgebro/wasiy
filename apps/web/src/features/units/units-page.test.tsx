@@ -137,7 +137,7 @@ describe('UnitsPage', () => {
     expect(requests.some((url) => url.includes('/api/locations/loc_1/units?page=1'))).toBe(true)
 
     await userEvent.click(screen.getByText('305'))
-    expect(navigateSpy).toHaveBeenLastCalledWith({ to: '/admin/registry/units/$unitId', params: { unitId: 'un_305' } })
+    expect(navigateSpy).toHaveBeenLastCalledWith({ to: '/admin/units/$unitId', params: { unitId: 'un_305' } })
   })
 
   it('the Atención filter and search land on the request; clearing the filter chip drops it', async () => {

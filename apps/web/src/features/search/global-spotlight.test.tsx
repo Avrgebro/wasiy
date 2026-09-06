@@ -102,6 +102,6 @@ describe('GlobalSpotlight', () => {
     await waitFor(() => expect(urls.some((url) => url.includes('search?q=nu%C3%B1ez'))).toBe(true))
 
     await user.click(screen.getByText('Patricia Núñez'))
-    expect(navigateSpy).toHaveBeenCalledWith(expect.objectContaining({ to: '/admin/registry/residents', search: expect.objectContaining({ search: 'Patricia Núñez' }) }))
+    expect(navigateSpy).toHaveBeenCalledWith(expect.objectContaining({ to: '/admin/residents', search: expect.objectContaining({ search: 'Patricia Núñez' }) }))
   })
 })

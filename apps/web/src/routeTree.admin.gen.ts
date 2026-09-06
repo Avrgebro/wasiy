@@ -18,14 +18,17 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes-admin/_aut
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes-admin/_authenticated/admin/index'
 import { Route as InvitationsStaffTokenRouteImport } from './routes-admin/invitations/staff.$token'
 import { Route as AuthenticatedAdminVisitorsRouteImport } from './routes-admin/_authenticated/admin/visitors'
+import { Route as AuthenticatedAdminUnitsRouteImport } from './routes-admin/_authenticated/admin/units'
 import { Route as AuthenticatedAdminStaffRouteImport } from './routes-admin/_authenticated/admin/staff'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes-admin/_authenticated/admin/settings'
+import { Route as AuthenticatedAdminResidentsRouteImport } from './routes-admin/_authenticated/admin/residents'
 import { Route as AuthenticatedAdminReservationsRouteImport } from './routes-admin/_authenticated/admin/reservations'
 import { Route as AuthenticatedAdminPackagesRouteImport } from './routes-admin/_authenticated/admin/packages'
 import { Route as AuthenticatedAdminLocationsRouteImport } from './routes-admin/_authenticated/admin/locations'
 import { Route as AuthenticatedAdminFinancesRouteImport } from './routes-admin/_authenticated/admin/finances'
 import { Route as AuthenticatedAdminAnnouncementsRouteImport } from './routes-admin/_authenticated/admin/announcements'
 import { Route as AuthenticatedAdminActivityRouteImport } from './routes-admin/_authenticated/admin/activity'
+import { Route as AuthenticatedAdminUnitsUnitIdRouteImport } from './routes-admin/_authenticated/admin/units_.$unitId'
 import { Route as AuthenticatedAdminRegistryVehiclesRouteImport } from './routes-admin/_authenticated/admin/registry/vehicles'
 import { Route as AuthenticatedAdminRegistryUnitsRouteImport } from './routes-admin/_authenticated/admin/registry/units'
 import { Route as AuthenticatedAdminRegistryResidentsRouteImport } from './routes-admin/_authenticated/admin/registry/residents'
@@ -78,6 +81,11 @@ const AuthenticatedAdminVisitorsRoute =
     path: '/visitors',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminUnitsRoute = AuthenticatedAdminUnitsRouteImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 const AuthenticatedAdminStaffRoute = AuthenticatedAdminStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -87,6 +95,12 @@ const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
     path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminResidentsRoute =
+  AuthenticatedAdminResidentsRouteImport.update({
+    id: '/residents',
+    path: '/residents',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminReservationsRoute =
@@ -123,6 +137,12 @@ const AuthenticatedAdminActivityRoute =
   AuthenticatedAdminActivityRouteImport.update({
     id: '/activity',
     path: '/activity',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminUnitsUnitIdRoute =
+  AuthenticatedAdminUnitsUnitIdRouteImport.update({
+    id: '/units_/$unitId',
+    path: '/units/$unitId',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminRegistryVehiclesRoute =
@@ -168,8 +188,10 @@ export interface FileRoutesByFullPath {
   '/admin/locations': typeof AuthenticatedAdminLocationsRoute
   '/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/admin/reservations': typeof AuthenticatedAdminReservationsRoute
+  '/admin/residents': typeof AuthenticatedAdminResidentsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/admin/units': typeof AuthenticatedAdminUnitsRoute
   '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -177,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
   '/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
   '/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
+  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/registry/units/$unitId': typeof AuthenticatedAdminRegistryUnitsUnitIdRoute
 }
 export interface FileRoutesByTo {
@@ -190,8 +213,10 @@ export interface FileRoutesByTo {
   '/admin/locations': typeof AuthenticatedAdminLocationsRoute
   '/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/admin/reservations': typeof AuthenticatedAdminReservationsRoute
+  '/admin/residents': typeof AuthenticatedAdminResidentsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/admin/units': typeof AuthenticatedAdminUnitsRoute
   '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -199,6 +224,7 @@ export interface FileRoutesByTo {
   '/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
   '/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
   '/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
+  '/admin/units/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/admin/registry/units/$unitId': typeof AuthenticatedAdminRegistryUnitsUnitIdRoute
 }
 export interface FileRoutesById {
@@ -215,8 +241,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/locations': typeof AuthenticatedAdminLocationsRoute
   '/_authenticated/admin/packages': typeof AuthenticatedAdminPackagesRoute
   '/_authenticated/admin/reservations': typeof AuthenticatedAdminReservationsRoute
+  '/_authenticated/admin/residents': typeof AuthenticatedAdminResidentsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/_authenticated/admin/units': typeof AuthenticatedAdminUnitsRoute
   '/_authenticated/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -224,6 +252,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/registry/residents': typeof AuthenticatedAdminRegistryResidentsRoute
   '/_authenticated/admin/registry/units': typeof AuthenticatedAdminRegistryUnitsRoute
   '/_authenticated/admin/registry/vehicles': typeof AuthenticatedAdminRegistryVehiclesRoute
+  '/_authenticated/admin/units_/$unitId': typeof AuthenticatedAdminUnitsUnitIdRoute
   '/_authenticated/admin/registry/units_/$unitId': typeof AuthenticatedAdminRegistryUnitsUnitIdRoute
 }
 export interface FileRouteTypes {
@@ -240,8 +269,10 @@ export interface FileRouteTypes {
     | '/admin/locations'
     | '/admin/packages'
     | '/admin/reservations'
+    | '/admin/residents'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/units'
     | '/admin/visitors'
     | '/invitations/staff/$token'
     | '/admin/'
@@ -249,6 +280,7 @@ export interface FileRouteTypes {
     | '/admin/registry/residents'
     | '/admin/registry/units'
     | '/admin/registry/vehicles'
+    | '/admin/units/$unitId'
     | '/admin/registry/units/$unitId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -262,8 +294,10 @@ export interface FileRouteTypes {
     | '/admin/locations'
     | '/admin/packages'
     | '/admin/reservations'
+    | '/admin/residents'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/units'
     | '/admin/visitors'
     | '/invitations/staff/$token'
     | '/admin'
@@ -271,6 +305,7 @@ export interface FileRouteTypes {
     | '/admin/registry/residents'
     | '/admin/registry/units'
     | '/admin/registry/vehicles'
+    | '/admin/units/$unitId'
     | '/admin/registry/units/$unitId'
   id:
     | '__root__'
@@ -286,8 +321,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/locations'
     | '/_authenticated/admin/packages'
     | '/_authenticated/admin/reservations'
+    | '/_authenticated/admin/residents'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/staff'
+    | '/_authenticated/admin/units'
     | '/_authenticated/admin/visitors'
     | '/invitations/staff/$token'
     | '/_authenticated/admin/'
@@ -295,6 +332,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/registry/residents'
     | '/_authenticated/admin/registry/units'
     | '/_authenticated/admin/registry/vehicles'
+    | '/_authenticated/admin/units_/$unitId'
     | '/_authenticated/admin/registry/units_/$unitId'
   fileRoutesById: FileRoutesById
 }
@@ -371,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminVisitorsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/units': {
+      id: '/_authenticated/admin/units'
+      path: '/units'
+      fullPath: '/admin/units'
+      preLoaderRoute: typeof AuthenticatedAdminUnitsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/staff': {
       id: '/_authenticated/admin/staff'
       path: '/staff'
@@ -383,6 +428,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/residents': {
+      id: '/_authenticated/admin/residents'
+      path: '/residents'
+      fullPath: '/admin/residents'
+      preLoaderRoute: typeof AuthenticatedAdminResidentsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/reservations': {
@@ -425,6 +477,13 @@ declare module '@tanstack/react-router' {
       path: '/activity'
       fullPath: '/admin/activity'
       preLoaderRoute: typeof AuthenticatedAdminActivityRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/units_/$unitId': {
+      id: '/_authenticated/admin/units_/$unitId'
+      path: '/units/$unitId'
+      fullPath: '/admin/units/$unitId'
+      preLoaderRoute: typeof AuthenticatedAdminUnitsUnitIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/registry/vehicles': {
@@ -472,14 +531,17 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminLocationsRoute: typeof AuthenticatedAdminLocationsRoute
   AuthenticatedAdminPackagesRoute: typeof AuthenticatedAdminPackagesRoute
   AuthenticatedAdminReservationsRoute: typeof AuthenticatedAdminReservationsRoute
+  AuthenticatedAdminResidentsRoute: typeof AuthenticatedAdminResidentsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminStaffRoute: typeof AuthenticatedAdminStaffRoute
+  AuthenticatedAdminUnitsRoute: typeof AuthenticatedAdminUnitsRoute
   AuthenticatedAdminVisitorsRoute: typeof AuthenticatedAdminVisitorsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminLocationsLocationIdRoute: typeof AuthenticatedAdminLocationsLocationIdRoute
   AuthenticatedAdminRegistryResidentsRoute: typeof AuthenticatedAdminRegistryResidentsRoute
   AuthenticatedAdminRegistryUnitsRoute: typeof AuthenticatedAdminRegistryUnitsRoute
   AuthenticatedAdminRegistryVehiclesRoute: typeof AuthenticatedAdminRegistryVehiclesRoute
+  AuthenticatedAdminUnitsUnitIdRoute: typeof AuthenticatedAdminUnitsUnitIdRoute
   AuthenticatedAdminRegistryUnitsUnitIdRoute: typeof AuthenticatedAdminRegistryUnitsUnitIdRoute
 }
 
@@ -491,8 +553,10 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminLocationsRoute: AuthenticatedAdminLocationsRoute,
     AuthenticatedAdminPackagesRoute: AuthenticatedAdminPackagesRoute,
     AuthenticatedAdminReservationsRoute: AuthenticatedAdminReservationsRoute,
+    AuthenticatedAdminResidentsRoute: AuthenticatedAdminResidentsRoute,
     AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
     AuthenticatedAdminStaffRoute: AuthenticatedAdminStaffRoute,
+    AuthenticatedAdminUnitsRoute: AuthenticatedAdminUnitsRoute,
     AuthenticatedAdminVisitorsRoute: AuthenticatedAdminVisitorsRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
     AuthenticatedAdminLocationsLocationIdRoute:
@@ -502,6 +566,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminRegistryUnitsRoute: AuthenticatedAdminRegistryUnitsRoute,
     AuthenticatedAdminRegistryVehiclesRoute:
       AuthenticatedAdminRegistryVehiclesRoute,
+    AuthenticatedAdminUnitsUnitIdRoute: AuthenticatedAdminUnitsUnitIdRoute,
     AuthenticatedAdminRegistryUnitsUnitIdRoute:
       AuthenticatedAdminRegistryUnitsUnitIdRoute,
   }

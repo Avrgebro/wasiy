@@ -15,9 +15,9 @@ const locationNavigationGroup: NavGroupSpec = {
   titleKey: 'navGroups.location',
   items: [
     { icon: Widget5Icon, iconWeight: 'LineDuotone', labelKey: 'nav.dashboard', to: '/admin' },
-    { icon: UserCheckRoundedIcon, labelKey: 'nav.residents', to: '/admin/registry/residents' },
+    { icon: UserCheckRoundedIcon, labelKey: 'nav.residents', to: '/admin/residents' },
     // The desk finds people through Residentes; Unidades carries the ledger.
-    { icon: HouseIcon, labelKey: 'nav.units', to: '/admin/registry/units', visibleTo: hasCapability('registry.manage') },
+    { icon: HouseIcon, labelKey: 'nav.units', to: '/admin/units', visibleTo: hasCapability('registry.manage') },
     {
       badge: PendingReservationsBadge,
       icon: CalendarIcon,

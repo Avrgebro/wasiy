@@ -1,14 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { hasCapability } from '../../../../features/auth/access'
-import { checkSurfaceAccess } from '../../../../features/auth/guards'
-import { unitsSearchSchema } from '../../../../features/units/schemas'
-import { UnitsPage } from '../../../../features/units/units-page'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
+// Units moved to /admin/units on 2026-09-06; old links land on the new list.
 export const Route = createFileRoute('/_authenticated/admin/registry/units')({
-  // Hidden from the desk's sidebar, and a typed URL is turned away too.
-  beforeLoad: ({ context }) => {
-    checkSurfaceAccess(context.me, hasCapability('registry.manage'))
+  beforeLoad: () => {
+    throw redirect({ to: '/admin/units', search: { page: 1, search: '', sort: '', type: '', status: '', attention: undefined } })
   },
-  component: UnitsPage,
-  validateSearch: unitsSearchSchema,
 })

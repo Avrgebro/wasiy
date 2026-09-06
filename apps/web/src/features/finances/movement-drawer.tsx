@@ -116,7 +116,7 @@ export function MovementDrawer({
                     <Link
                       className="text-[var(--wa-interactive)] no-underline hover:underline"
                       params={{ unitId: movement.unit_id }}
-                      to="/admin/registry/units/$unitId"
+                      to="/admin/units/$unitId"
                     >
                       {movement.unit_number} →
                     </Link>

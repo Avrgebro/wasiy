@@ -102,7 +102,7 @@ export const UNIT_ATTENTION = ['no_residents', 'no_contact', 'no_portal', 'no_fe
 export type UnitAttention = (typeof UNIT_ATTENTION)[number]
 
 /**
- * URL contract for /admin/registry/units (mockup 11). `type`, `status` and
+ * URL contract for /admin/units (mockup 11). `type`, `status` and
  * `attention` live behind Filtros; `search` reaches unit, building,
  * resident names and plates on the server.
  */

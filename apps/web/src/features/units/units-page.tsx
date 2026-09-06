@@ -15,7 +15,7 @@ import { attentionParams, type UnitsSearchValues } from './schemas'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { UnitsFilters } from './units-filters'
 
-const routeApi = getRouteApi('/_authenticated/admin/registry/units')
+const routeApi = getRouteApi('/_authenticated/admin/units')
 
 export function UnitsPage() {
   const { t } = useTranslation('common')
@@ -177,7 +177,7 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
         toolbar={<UnitsFilters search={search} onChange={updateSearch} />}
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={(unit) =>
-          void navigate({ to: '/admin/registry/units/$unitId', params: { unitId: unit.id } })
+          void navigate({ to: '/admin/units/$unitId', params: { unitId: unit.id } })
         }
         onSortChange={(sort) => updateSearch({ sort })}
       />

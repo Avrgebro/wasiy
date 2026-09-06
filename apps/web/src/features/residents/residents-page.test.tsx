@@ -144,7 +144,7 @@ describe('ResidentsPage', () => {
     await user.click(await screen.findByText('Carlos Mendoza'))
     const drawer = await screen.findByRole('dialog')
     expect(await within(drawer).findByText(/Paquete recibido/)).toBeInTheDocument()
-    expect(within(drawer).getByRole('link', { name: /402 · Torre A/ })).toHaveAttribute('href', '/admin/registry/units/$unitId')
+    expect(within(drawer).getByRole('link', { name: /402 · Torre A/ })).toHaveAttribute('href', '/admin/units/$unitId')
     expect(within(drawer).getByRole('button', { name: 'Desactivar persona' })).toBeDisabled()
 
     await user.click(within(drawer).getByRole('button', { name: 'Invitar al portal' }))

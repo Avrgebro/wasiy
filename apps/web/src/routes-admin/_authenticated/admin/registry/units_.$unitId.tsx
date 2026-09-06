@@ -1,11 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { hasCapability } from '../../../../features/auth/access'
-import { checkSurfaceAccess } from '../../../../features/auth/guards'
-import { UnitDetailPage } from '../../../../features/units/unit-detail-page'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
+// Unit detail moved to /admin/units/$unitId on 2026-09-06.
 export const Route = createFileRoute('/_authenticated/admin/registry/units_/$unitId')({
-  beforeLoad: ({ context }) => {
-    checkSurfaceAccess(context.me, hasCapability('registry.manage'))
+  beforeLoad: ({ params }) => {
+    throw redirect({ to: '/admin/units/$unitId', params: { unitId: params.unitId } })
   },
-  component: UnitDetailPage,
 })

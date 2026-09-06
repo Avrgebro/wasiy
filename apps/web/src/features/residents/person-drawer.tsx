@@ -162,7 +162,7 @@ export function PersonDrawer({
                       key={membership.id}
                       className={`flex items-center gap-3 px-3.5 py-2.5 text-sm no-underline text-[var(--mantine-color-text)] hover:bg-[var(--mantine-color-default-hover)] ${membership.status === 'inactive' ? 'opacity-60' : ''}`}
                       params={{ unitId: membership.unit_id }}
-                      to="/admin/registry/units/$unitId"
+                      to="/admin/units/$unitId"
                     >
                       <span className="font-display font-semibold">
                         {[membership.unit?.unit_number, membership.unit?.building_name].filter(Boolean).join(' · ')}

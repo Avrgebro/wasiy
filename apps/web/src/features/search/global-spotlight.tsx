@@ -53,10 +53,10 @@ export function GlobalSpotlight({ navItems }: { navItems: LayoutNavEntry[] }) {
     spotlight.close()
     switch (hit.to.page) {
       case 'unit':
-        void navigate({ to: '/admin/registry/units/$unitId', params: { unitId: hit.to.unit_id } })
+        void navigate({ to: '/admin/units/$unitId', params: { unitId: hit.to.unit_id } })
         return
       case 'resident':
-        void navigate({ to: '/admin/registry/residents', search: { search: hit.label, page: 1, portal: '', status: '' } })
+        void navigate({ to: '/admin/residents', search: { search: hit.label, page: 1, portal: '', status: '' } })
         return
       case 'visit':
         void navigate({ to: '/admin/visitors', search: { search: hit.label, page: 1, confirmation: '', chip: 'today' } })

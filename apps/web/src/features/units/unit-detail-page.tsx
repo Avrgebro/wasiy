@@ -28,7 +28,7 @@ import { UnitFormDrawer } from './unit-form-drawer'
 import { VehicleDrawer } from './vehicle-drawer'
 import { typeLabel } from './unit-presentation'
 
-const routeApi = getRouteApi('/_authenticated/admin/registry/units_/$unitId')
+const routeApi = getRouteApi('/_authenticated/admin/units_/$unitId')
 
 /** The list's URL contract has defaults for every key; a bare link must spell them out. */
 const UNITS_LIST_SEARCH = { page: 1, search: '', sort: '', type: '', status: '', chip: undefined } as const
@@ -128,7 +128,7 @@ function UnitDetailContent({
             {notFound ? t('units.detail.notFoundBody') : getErrorMessage(detailQuery.error)}
           </Text>
           <Link className="mt-1 font-semibold text-[var(--wa-interactive)] no-underline" search={UNITS_LIST_SEARCH}
-            to="/admin/registry/units">
+            to="/admin/units">
             {t('units.detail.backToList')}
           </Link>
         </div>
@@ -160,7 +160,7 @@ function UnitDetailContent({
     <div className="@container flex flex-col gap-5">
       <nav className="flex items-center gap-2 text-[13.5px] text-[var(--mantine-color-dimmed)]">
         <Link className="text-[var(--wa-interactive)] no-underline" search={UNITS_LIST_SEARCH}
-            to="/admin/registry/units">
+            to="/admin/units">
           {t('units.title')}
         </Link>
         <span>/</span>

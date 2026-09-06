@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-/** URL contract for /admin/registry/residents (mockup 15). */
+/** URL contract for /admin/residents (mockup 15). */
 export const residentsSearchSchema = z.object({
   page: z.coerce.number().int().positive().catch(1),
   search: z.string().catch(''),
