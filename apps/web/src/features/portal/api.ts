@@ -223,3 +223,95 @@ export function requestReservation(payload: { unit_id: string; amenity_id: strin
 export function cancelPortalReservation(reservationId: string) {
   return apiRequest<{ data: PortalReservation }>(`/api/portal/reservations/${reservationId}/cancel`, { method: 'POST' })
 }
+
+/** Mi hogar (Portal 04): the unit's active members as the portal shows them. */
+export type HouseholdMember = {
+  membership_id: string
+  resident_id: string
+  first_name: string
+  last_name: string
+  name: string
+  phone: string | null
+  resident_type: 'owner' | 'tenant' | 'occupant' | 'guest_resident' | null
+  is_primary_contact: boolean
+  is_me: boolean
+  portal_state: 'active' | 'invited' | 'not_invited'
+  status: 'active' | 'inactive'
+  started_at: string | null
+}
+
+export const PORTAL_RESIDENT_TYPES = ['owner', 'tenant', 'occupant'] as const
+export type PortalResidentType = (typeof PORTAL_RESIDENT_TYPES)[number]
+
+export function getPortalHousehold(unitId: string) {
+  return apiRequest<{ data: HouseholdMember[]; can_manage: boolean }>(`/api/portal/household?unit_id=${unitId}`)
+}
+
+export function addHouseholdMember(payload: { unit_id: string; first_name: string; last_name: string; phone: string | null; email: string | null; resident_type: PortalResidentType }) {
+  return apiRequest<{ data: HouseholdMember }>('/api/portal/household', { method: 'POST', data: payload })
+}
+
+export function removeHouseholdMember(membershipId: string) {
+  return apiRequest<{ data: HouseholdMember }>(`/api/portal/household/${membershipId}`, { method: 'DELETE' })
+}
+
+export function resendHouseholdInvitation(membershipId: string) {
+  return apiRequest<{ data: HouseholdMember }>(`/api/portal/household/${membershipId}/resend-invitation`, { method: 'POST' })
+}
+
+/** Vehículos: the unit's, editable by any member. */
+export type PortalVehicle = {
+  id: string
+  unit_id: string
+  vehicle_type: 'car' | 'motorcycle' | 'bicycle' | 'other'
+  plate: string | null
+  make: string | null
+  model: string | null
+  color: string | null
+  status: 'active' | 'inactive'
+}
+
+export type PortalVehiclePayload = { plate: string; make: string | null; model: string | null; color: string | null }
+
+export function getPortalVehicles(unitId: string) {
+  return apiRequest<PaginatedApiResponse<PortalVehicle>>(`/api/portal/vehicles?unit_id=${unitId}&per_page=50`)
+}
+
+export function createPortalVehicle(unitId: string, payload: PortalVehiclePayload) {
+  return apiRequest<{ data: PortalVehicle }>('/api/portal/vehicles', { method: 'POST', data: { unit_id: unitId, vehicle_type: 'car', ...payload } })
+}
+
+export function updatePortalVehicle(vehicleId: string, payload: PortalVehiclePayload) {
+  return apiRequest<{ data: PortalVehicle }>(`/api/portal/vehicles/${vehicleId}`, { method: 'PATCH', data: payload })
+}
+
+export function deletePortalVehicle(vehicleId: string) {
+  return apiRequest<void>(`/api/portal/vehicles/${vehicleId}`, { method: 'DELETE' })
+}
+
+/** Estado de cuenta (Portal 04f), primary contact only. */
+export type LedgerRow = {
+  id: string
+  concept: string
+  detail: string | null
+  category: string
+  occurred_on: string
+  period: string | null
+  amount: number
+  state: 'pending' | 'paid'
+}
+
+export type LedgerResponse = {
+  data: LedgerRow[]
+  balance: number
+  pending_count: number
+  last_dues: { period: string | null; amount: number; settled: boolean } | null
+}
+
+export function getPortalLedger(unitId: string, scope: 'pending' | 'all' = 'all') {
+  return apiRequest<LedgerResponse>(`/api/portal/ledger?unit_id=${unitId}&scope=${scope}`)
+}
+
+export function changePassword(payload: { current_password: string; password: string; password_confirmation: string }) {
+  return apiRequest<void>('/api/me/password', { method: 'PATCH', data: payload })
+}

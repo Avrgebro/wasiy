@@ -55,7 +55,7 @@ The resident-facing side of Wasiy: a mobile-first web app where a resident sees 
 - **P1 Shell and visitors (built 2026-09-05)** — portal shell with bottom tabs and unit switcher; home board (visitors and packages parts); visitor pre-registration and history; desk-side "Esperados hoy" and arrival confirmation. Closes the M12 second phase.
 - **P2 Reservations and packages (built 2026-09-05)** — amenity browsing, booking requests, my reservations with cancellation; packages list; home board gains next reservation.
 - **P3 Alerts (built 2026-09-05)** — bell with unread count, Alertas list, branded alert email, per-family email switches in Perfil.
-- **P4 My unit and profile** — members management for the primary contact, vehicles UI, estado de cuenta; phone, email, password.
+- **P4 My unit and profile (built 2026-09-05)** — Mi unidad tab (Mi hogar, Vehículos, Estado de cuenta), person and vehicle sheets, password change. Login email change deferred.
 - **P5 Announcements** — admin Anuncios module plus the portal feed; home board gains the latest announcement.
 
 Each milestone: backend slice with tests, frontend slice with tests, mockups first.
@@ -91,6 +91,13 @@ Each milestone: backend slice with tests, frontend slice with tests, mockups fir
 - Mi hogar: every member sees the list (avatar initials, name, phone, "Tú"). The primary contact can add a person (creates resident + membership, sends the portal invitation), remove one, and resend an invitation. Nobody edits another person's phone; each member does that in Perfil.
 - Estado de cuenta: primary contact only. Balance on top, movements grouped by month, read only, no detail sheet, no payments.
 - Perfil: password change. Login email change is deferred (needs verification flow), so the P3 "cambiar en Perfil" line stays informational.
+
+## P4 slices
+
+- API: `GET/POST /portal/household`, `DELETE /portal/household/{membership}`, `POST /portal/household/{membership}/resend-invitation` (policy `viewHousehold` for members, `manageHousehold` for the primary contact via `AccessAuthorizationService::isPrimaryContactOf`); `GET /portal/ledger?unit_id&scope=pending|all` (primary contact; income movements, voided hidden, refunds negative, `balance`, `pending_count`, `last_dues`); `PATCH /me/password` (any user, current password required); `GET /portal/vehicles?unit_id` narrows to one unit.
+- Adding a person reuses `CreateUnitMembership` and `InviteResidentUser` (which now accepts a caller-authorized `Location` so the primary contact can invite). A known email in the account attaches instead of duplicating.
+- Portal: fifth tab Mi unidad (`House` icon), `portal-my-unit-page`, `portal-household-sheets` (Persona, Agregar persona), `portal-vehicle-sheet`, `portal-ledger-page` at `/portal/mi-unidad/estado-de-cuenta`, password card in Perfil. Perfil keeps the four email switches (04g drew two).
+- Not in P4: inviting a "Sin acceso" member from the portal (staff action), login email change, ledger row detail.
 
 ## Parked
 

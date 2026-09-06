@@ -1,4 +1,4 @@
-import { UnstyledButton } from '@mantine/core'
+import { MantineThemeProvider, UnstyledButton } from '@mantine/core'
 import { AltArrowDown, Bell, CheckCircle } from '@solar-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouterState } from '@tanstack/react-router'
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { ActiveUnitProvider } from '../../../features/portal/active-unit'
 import { useActiveUnit } from '../../../features/portal/active-unit-context'
 import { getPortalUnreadCount } from '../../../features/portal/api'
+import { portalTheme } from '../../../features/portal/portal-theme'
 import { BottomSheet } from '../../ui/bottom-sheet'
 import { ColorSchemeToggle } from '../shared/color-scheme-toggle'
 import type { LayoutNavEntry, LayoutNavLeaf } from '../shared/types'
@@ -54,9 +55,11 @@ function AlertsBell({ unitId }: { unitId?: string }) {
  */
 export function PortalLayout({ children, navItems }: PortalLayoutProps) {
   return (
-    <ActiveUnitProvider>
-      <PortalShell navItems={navItems}>{children}</PortalShell>
-    </ActiveUnitProvider>
+    <MantineThemeProvider theme={portalTheme}>
+      <ActiveUnitProvider>
+        <PortalShell navItems={navItems}>{children}</PortalShell>
+      </ActiveUnitProvider>
+    </MantineThemeProvider>
   )
 }
 

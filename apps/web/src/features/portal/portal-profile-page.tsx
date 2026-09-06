@@ -2,20 +2,23 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Badge, Button, Loader, Switch } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { sessionQueryKey } from '../auth/query-options'
 import type { MeResponse, Session } from '../auth/types'
+import { FormPasswordInput } from '../../components/ui/form-fields'
 import { FormPhoneInput } from '../../components/ui/phone-input'
-import { ALERT_FAMILIES, getPortalResident, updatePortalEmailAlerts, updatePortalResidentPhone, type AlertFamily, type EmailAlertPreferences } from './api'
+import { ALERT_FAMILIES, changePassword, getPortalResident, updatePortalEmailAlerts, updatePortalResidentPhone, type AlertFamily, type EmailAlertPreferences } from './api'
 import {
+  passwordSchema,
   portalPhoneSchema,
+  type PasswordFormValues,
   type PortalPhoneFormValues,
 } from './schemas'
 import { submitHandlingServerErrors } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 
-/** Perfil (P1, 03c): the household list, the contact phone and which alerts also reach the inbox; email and password arrive in P4. */
+/** Perfil (P1, 03c, 04g): units, contact phone, which alerts also reach the inbox, and the password. The login email changes elsewhere. */
 export function PortalProfilePage() {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -65,6 +68,17 @@ export function PortalProfilePage() {
     queryClient.setQueryData(['portal', 'resident'], { ...resident.data, email_alerts: next })
     emailAlerts.mutate(next, { onError: () => void queryClient.invalidateQueries({ queryKey: ['portal', 'resident'] }) })
   }
+
+  const passwordForm = useForm<PasswordFormValues>({ defaultValues: { current_password: '', password: '', password_confirmation: '' }, resolver: zodResolver(passwordSchema) })
+  const passwordValues = useWatch({ control: passwordForm.control })
+  const passwordReady = (passwordValues.current_password?.length ?? 0) > 0 && (passwordValues.password?.length ?? 0) >= 8 && passwordValues.password === passwordValues.password_confirmation
+  const passwordMutation = useMutation({
+    mutationFn: changePassword,
+    onSuccess: () => {
+      passwordForm.reset()
+      notifySuccess(t('portal.password.changed'))
+    },
+  })
 
   const form = useForm<PortalPhoneFormValues>({
     defaultValues: {
@@ -193,6 +207,28 @@ export function PortalProfilePage() {
             </p>
           ) : null}
         </section>
+
+        <form
+          className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-4"
+          onSubmit={passwordForm.handleSubmit((values) => submitHandlingServerErrors(passwordForm, () => passwordMutation.mutateAsync(values)))}
+        >
+          <h2 className="text-base font-bold text-[var(--mantine-color-text)]">
+            {t('portal.password.title')}
+          </h2>
+          <div className="mt-4 grid gap-4">
+            {passwordForm.formState.errors.root?.message ? (
+              <Alert color="error" title={t('errors.actionFailed')}>
+                {passwordForm.formState.errors.root.message}
+              </Alert>
+            ) : null}
+            <FormPasswordInput autoComplete="current-password" control={passwordForm.control} label={t('portal.password.current')} name="current_password" />
+            <FormPasswordInput autoComplete="new-password" control={passwordForm.control} label={t('portal.password.new')} name="password" placeholder={t('portal.password.newHint')} />
+            <FormPasswordInput autoComplete="new-password" control={passwordForm.control} label={t('portal.password.repeat')} name="password_confirmation" />
+            <Button disabled={!passwordReady} loading={passwordMutation.isPending} type="submit" variant="default">
+              {t('portal.password.submit')}
+            </Button>
+          </div>
+        </form>
       </section>
     </div>
   )

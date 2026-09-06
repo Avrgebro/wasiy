@@ -139,13 +139,14 @@ export function PortalVisitsPage() {
         footer={
           selected?.status === 'expected' ? (
             <SheetAction hint={t('portal.visits.cancelHint')}>
-              <Button className="w-full" color="error" size="md" variant="default" onClick={() => setConfirmingCancel(true)}>
+              <Button className="w-full" color="error" variant="default" onClick={() => setConfirmingCancel(true)}>
                 {t('portal.visits.cancel')}
               </Button>
             </SheetAction>
           ) : undefined
         }
         lines={selected ? [selected.checked_in_at ? doorLabel(selected, timezone) : expectedLabel(selected, now, timezone, t), active.unit_label] : []}
+        footerDivider
         opened={selected !== null}
         pill={selected ? <StatusPill color={statusTone(selected.status)}>{pillFor(selected)}</StatusPill> : undefined}
         title={selected?.visitor_name ?? ''}

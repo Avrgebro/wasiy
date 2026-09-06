@@ -22,6 +22,7 @@ use App\Models\Package;
 use App\Models\Reservation;
 use App\Models\Resident;
 use App\Models\Unit;
+use App\Models\Vehicle;
 use App\Models\UnitMembership;
 use App\Models\User;
 use App\Models\Visit;
@@ -77,6 +78,7 @@ class DemoOperationsSeeder extends Seeder
         $this->seedPackages($residents);
         $this->seedVisits($residents);
         $this->seedAlerts($residents);
+        $this->seedVehicles();
     }
 
     /**
@@ -577,6 +579,28 @@ class DemoOperationsSeeder extends Seeder
                     'read_at' => $read ? $at->addHours(1)->utc() : null,
                     'updated_at' => $at->utc(),
                 ],
+            );
+        }
+    }
+
+    /** Portal P4 (mockup 04): the portal units show a couple of cars. Idempotent on plate. */
+    private function seedVehicles(): void
+    {
+        $rows = [
+            ['Torre A-202', 'ABC-123', 'Toyota', 'Yaris', 'blanco'],
+            ['Torre A-202', 'XYZ-789', 'Hyundai', 'Tucson', 'gris'],
+            ['Torre B-1001', 'DEF-456', 'Kia', 'Sportage', 'negro'],
+        ];
+
+        foreach ($rows as [$unitKey, $plate, $make, $model, $color]) {
+            $unit = $this->units->get($unitKey);
+            if (! $unit) {
+                continue;
+            }
+
+            Vehicle::query()->updateOrCreate(
+                ['unit_id' => $unit->id, 'plate' => $plate],
+                ['account_id' => $this->account->id, 'location_id' => $this->central->id, 'vehicle_type' => 'car', 'make' => $make, 'model' => $model, 'color' => $color, 'status' => 'active'],
             );
         }
     }

@@ -35,13 +35,19 @@ class PortalVehicleController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $validated = $request->validate($this->paginationRules());
+        $validated = $request->validate([...$this->paginationRules(), 'unit_id' => ['sometimes', 'string', 'ulid']]);
 
         /** @var User $user */
         $user = $request->user();
         $unitIds = $this->unitIdsFor($user);
 
         abort_if($unitIds === [], 403);
+
+        // The portal is unit-scoped (P4): a unit_id narrows to that unit, and only if it is mine.
+        if (isset($validated['unit_id'])) {
+            abort_unless(in_array($validated['unit_id'], $unitIds, true), 403);
+            $unitIds = [$validated['unit_id']];
+        }
 
         $vehicles = Vehicle::query()
             ->whereIn('unit_id', $unitIds)

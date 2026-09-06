@@ -86,7 +86,7 @@ export function PortalHomePage() {
       ) : null}
 
       {packages.data ? (
-        <PortalCard count={pendingPackages.length} countColor="accent" empty={t('portal.packages.none')} title={t('portal.packages.atDesk')}>
+        <PortalCard count={pendingPackages.length} empty={t('portal.packages.none')} title={t('portal.packages.atDesk')}>
           {pendingPackages.slice(0, 3).map((pkg) => (
             <PortalRow
               key={pkg.id}

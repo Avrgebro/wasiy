@@ -19,8 +19,10 @@ import { Route as InvitationsResidentTokenRouteImport } from './routes-portal/in
 import { Route as AuthenticatedPortalVisitasRouteImport } from './routes-portal/_authenticated/portal/visitas'
 import { Route as AuthenticatedPortalReservasRouteImport } from './routes-portal/_authenticated/portal/reservas'
 import { Route as AuthenticatedPortalPerfilRouteImport } from './routes-portal/_authenticated/portal/perfil'
+import { Route as AuthenticatedPortalMiUnidadRouteImport } from './routes-portal/_authenticated/portal/mi-unidad'
 import { Route as AuthenticatedPortalAlertasRouteImport } from './routes-portal/_authenticated/portal/alertas'
 import { Route as AuthenticatedPortalVisitasNuevaRouteImport } from './routes-portal/_authenticated/portal/visitas_.nueva'
+import { Route as AuthenticatedPortalMiUnidadEstadoDeCuentaRouteImport } from './routes-portal/_authenticated/portal/mi-unidad_.estado-de-cuenta'
 import { Route as AuthenticatedPortalReservasAmenidadesAmenityIdRouteImport } from './routes-portal/_authenticated/portal/reservas_.amenidades.$amenityId'
 import { Route as AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRouteImport } from './routes-portal/_authenticated/portal/reservas_.amenidades.$amenityId_.horario'
 
@@ -79,6 +81,12 @@ const AuthenticatedPortalPerfilRoute =
     path: '/perfil',
     getParentRoute: () => AuthenticatedPortalRouteRoute,
   } as any)
+const AuthenticatedPortalMiUnidadRoute =
+  AuthenticatedPortalMiUnidadRouteImport.update({
+    id: '/mi-unidad',
+    path: '/mi-unidad',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
 const AuthenticatedPortalAlertasRoute =
   AuthenticatedPortalAlertasRouteImport.update({
     id: '/alertas',
@@ -89,6 +97,12 @@ const AuthenticatedPortalVisitasNuevaRoute =
   AuthenticatedPortalVisitasNuevaRouteImport.update({
     id: '/visitas_/nueva',
     path: '/visitas/nueva',
+    getParentRoute: () => AuthenticatedPortalRouteRoute,
+  } as any)
+const AuthenticatedPortalMiUnidadEstadoDeCuentaRoute =
+  AuthenticatedPortalMiUnidadEstadoDeCuentaRouteImport.update({
+    id: '/mi-unidad_/estado-de-cuenta',
+    path: '/mi-unidad/estado-de-cuenta',
     getParentRoute: () => AuthenticatedPortalRouteRoute,
   } as any)
 const AuthenticatedPortalReservasAmenidadesAmenityIdRoute =
@@ -110,11 +124,13 @@ export interface FileRoutesByFullPath {
   '/no-access': typeof NoAccessRoute
   '/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/portal/alertas': typeof AuthenticatedPortalAlertasRoute
+  '/portal/mi-unidad': typeof AuthenticatedPortalMiUnidadRoute
   '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
   '/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/portal/mi-unidad/estado-de-cuenta': typeof AuthenticatedPortalMiUnidadEstadoDeCuentaRoute
   '/portal/visitas/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
   '/portal/reservas/amenidades/$amenityId': typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
   '/portal/reservas/amenidades/$amenityId/horario': typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
@@ -124,11 +140,13 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/portal/alertas': typeof AuthenticatedPortalAlertasRoute
+  '/portal/mi-unidad': typeof AuthenticatedPortalMiUnidadRoute
   '/portal/perfil': typeof AuthenticatedPortalPerfilRoute
   '/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
+  '/portal/mi-unidad/estado-de-cuenta': typeof AuthenticatedPortalMiUnidadEstadoDeCuentaRoute
   '/portal/visitas/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
   '/portal/reservas/amenidades/$amenityId': typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
   '/portal/reservas/amenidades/$amenityId/horario': typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
@@ -141,11 +159,13 @@ export interface FileRoutesById {
   '/no-access': typeof NoAccessRoute
   '/_authenticated/portal': typeof AuthenticatedPortalRouteRouteWithChildren
   '/_authenticated/portal/alertas': typeof AuthenticatedPortalAlertasRoute
+  '/_authenticated/portal/mi-unidad': typeof AuthenticatedPortalMiUnidadRoute
   '/_authenticated/portal/perfil': typeof AuthenticatedPortalPerfilRoute
   '/_authenticated/portal/reservas': typeof AuthenticatedPortalReservasRoute
   '/_authenticated/portal/visitas': typeof AuthenticatedPortalVisitasRoute
   '/invitations/resident/$token': typeof InvitationsResidentTokenRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/_authenticated/portal/mi-unidad_/estado-de-cuenta': typeof AuthenticatedPortalMiUnidadEstadoDeCuentaRoute
   '/_authenticated/portal/visitas_/nueva': typeof AuthenticatedPortalVisitasNuevaRoute
   '/_authenticated/portal/reservas_/amenidades/$amenityId': typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
   '/_authenticated/portal/reservas_/amenidades/$amenityId_/horario': typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
@@ -158,11 +178,13 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/portal'
     | '/portal/alertas'
+    | '/portal/mi-unidad'
     | '/portal/perfil'
     | '/portal/reservas'
     | '/portal/visitas'
     | '/invitations/resident/$token'
     | '/portal/'
+    | '/portal/mi-unidad/estado-de-cuenta'
     | '/portal/visitas/nueva'
     | '/portal/reservas/amenidades/$amenityId'
     | '/portal/reservas/amenidades/$amenityId/horario'
@@ -172,11 +194,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/portal/alertas'
+    | '/portal/mi-unidad'
     | '/portal/perfil'
     | '/portal/reservas'
     | '/portal/visitas'
     | '/invitations/resident/$token'
     | '/portal'
+    | '/portal/mi-unidad/estado-de-cuenta'
     | '/portal/visitas/nueva'
     | '/portal/reservas/amenidades/$amenityId'
     | '/portal/reservas/amenidades/$amenityId/horario'
@@ -188,11 +212,13 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/_authenticated/portal'
     | '/_authenticated/portal/alertas'
+    | '/_authenticated/portal/mi-unidad'
     | '/_authenticated/portal/perfil'
     | '/_authenticated/portal/reservas'
     | '/_authenticated/portal/visitas'
     | '/invitations/resident/$token'
     | '/_authenticated/portal/'
+    | '/_authenticated/portal/mi-unidad_/estado-de-cuenta'
     | '/_authenticated/portal/visitas_/nueva'
     | '/_authenticated/portal/reservas_/amenidades/$amenityId'
     | '/_authenticated/portal/reservas_/amenidades/$amenityId_/horario'
@@ -278,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalPerfilRouteImport
       parentRoute: typeof AuthenticatedPortalRouteRoute
     }
+    '/_authenticated/portal/mi-unidad': {
+      id: '/_authenticated/portal/mi-unidad'
+      path: '/mi-unidad'
+      fullPath: '/portal/mi-unidad'
+      preLoaderRoute: typeof AuthenticatedPortalMiUnidadRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
     '/_authenticated/portal/alertas': {
       id: '/_authenticated/portal/alertas'
       path: '/alertas'
@@ -290,6 +323,13 @@ declare module '@tanstack/react-router' {
       path: '/visitas/nueva'
       fullPath: '/portal/visitas/nueva'
       preLoaderRoute: typeof AuthenticatedPortalVisitasNuevaRouteImport
+      parentRoute: typeof AuthenticatedPortalRouteRoute
+    }
+    '/_authenticated/portal/mi-unidad_/estado-de-cuenta': {
+      id: '/_authenticated/portal/mi-unidad_/estado-de-cuenta'
+      path: '/mi-unidad/estado-de-cuenta'
+      fullPath: '/portal/mi-unidad/estado-de-cuenta'
+      preLoaderRoute: typeof AuthenticatedPortalMiUnidadEstadoDeCuentaRouteImport
       parentRoute: typeof AuthenticatedPortalRouteRoute
     }
     '/_authenticated/portal/reservas_/amenidades/$amenityId': {
@@ -311,10 +351,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedPortalRouteRouteChildren {
   AuthenticatedPortalAlertasRoute: typeof AuthenticatedPortalAlertasRoute
+  AuthenticatedPortalMiUnidadRoute: typeof AuthenticatedPortalMiUnidadRoute
   AuthenticatedPortalPerfilRoute: typeof AuthenticatedPortalPerfilRoute
   AuthenticatedPortalReservasRoute: typeof AuthenticatedPortalReservasRoute
   AuthenticatedPortalVisitasRoute: typeof AuthenticatedPortalVisitasRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
+  AuthenticatedPortalMiUnidadEstadoDeCuentaRoute: typeof AuthenticatedPortalMiUnidadEstadoDeCuentaRoute
   AuthenticatedPortalVisitasNuevaRoute: typeof AuthenticatedPortalVisitasNuevaRoute
   AuthenticatedPortalReservasAmenidadesAmenityIdRoute: typeof AuthenticatedPortalReservasAmenidadesAmenityIdRoute
   AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute: typeof AuthenticatedPortalReservasAmenidadesAmenityIdHorarioRoute
@@ -323,10 +365,13 @@ interface AuthenticatedPortalRouteRouteChildren {
 const AuthenticatedPortalRouteRouteChildren: AuthenticatedPortalRouteRouteChildren =
   {
     AuthenticatedPortalAlertasRoute: AuthenticatedPortalAlertasRoute,
+    AuthenticatedPortalMiUnidadRoute: AuthenticatedPortalMiUnidadRoute,
     AuthenticatedPortalPerfilRoute: AuthenticatedPortalPerfilRoute,
     AuthenticatedPortalReservasRoute: AuthenticatedPortalReservasRoute,
     AuthenticatedPortalVisitasRoute: AuthenticatedPortalVisitasRoute,
     AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
+    AuthenticatedPortalMiUnidadEstadoDeCuentaRoute:
+      AuthenticatedPortalMiUnidadEstadoDeCuentaRoute,
     AuthenticatedPortalVisitasNuevaRoute: AuthenticatedPortalVisitasNuevaRoute,
     AuthenticatedPortalReservasAmenidadesAmenityIdRoute:
       AuthenticatedPortalReservasAmenidadesAmenityIdRoute,

@@ -6,6 +6,7 @@ use App\Actions\Invitations\IssueUserInvitation;
 use App\Enums\ActivityEventType;
 use App\Enums\RegistryStatus;
 use App\Enums\UserInvitationPurpose;
+use App\Models\Location;
 use App\Models\Resident;
 use App\Models\User;
 use App\Models\UserInvitation;
@@ -28,14 +29,18 @@ class InviteResidentUser
      * @param  array{email?: string|null}  $data
      * @return array{resident: Resident, invitation: UserInvitation}
      */
-    public function handle(Resident $resident, User $actor, array $data): array
+    /**
+     * @param  array{email?: string|null}  $data
+     * @param  Location|null  $location  Already authorized by the caller (the portal's primary contact); staff callers leave it null.
+     */
+    public function handle(Resident $resident, User $actor, array $data, ?Location $location = null): array
     {
-        return DB::transaction(function () use ($resident, $actor, $data): array {
+        return DB::transaction(function () use ($resident, $actor, $data, $location): array {
             $resident->loadMissing(['account', 'unitMemberships.location']);
 
             // Authorize before any state check, so the validation messages below
             // cannot be used to probe residents in other accounts.
-            $location = $this->access->manageableInvitationLocationForResident($actor, $resident);
+            $location ??= $this->access->manageableInvitationLocationForResident($actor, $resident);
 
             if (! $location) {
                 abort(403);

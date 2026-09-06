@@ -75,8 +75,8 @@ test('a resident cannot announce or read visits for a unit they do not live in',
 
 test('the desk lists today\'s expected visitors per unit and confirms an arrival into a normal visit', function () {
     [$location, $unit, $resident, , $desk] = portalVisitWorld();
-    $expected = Visit::factory()->expected()->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'resident_id' => $resident->id, 'pre_registered_by' => $resident->id, 'visitor_name' => 'Jorge Peña', 'document' => '41290877']);
-    Visit::factory()->expected(now()->addDay()->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'visitor_name' => 'Mañana']);
+    $expected = Visit::factory()->expected(now($location->timezone)->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'resident_id' => $resident->id, 'pre_registered_by' => $resident->id, 'visitor_name' => 'Jorge Peña', 'document' => '41290877']);
+    Visit::factory()->expected(now($location->timezone)->addDay()->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'visitor_name' => 'Mañana']);
     Visit::factory()->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'visitor_name' => 'Walk-in']);
 
     // The default log shows the door, not the announcements.
@@ -100,8 +100,8 @@ test('the desk lists today\'s expected visitors per unit and confirms an arrival
 
 test('the home board scope shows today\'s expected visitors and today\'s arrivals, and packages are read per unit', function () {
     [$location, $unit, $resident, $user] = portalVisitWorld();
-    Visit::factory()->expected()->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'resident_id' => $resident->id, 'visitor_name' => 'Jorge Peña', 'expected_time' => '19:00']);
-    Visit::factory()->expected(now()->addDay()->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'visitor_name' => 'Mañana']);
+    Visit::factory()->expected(now($location->timezone)->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'resident_id' => $resident->id, 'visitor_name' => 'Jorge Peña', 'expected_time' => '19:00']);
+    Visit::factory()->expected(now($location->timezone)->addDay()->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'visitor_name' => 'Mañana']);
     Visit::factory()->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'visitor_name' => 'Delivery Rappi', 'checked_in_at' => now()->subHour()]);
     Package::factory()->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'notes' => 'Olva Courier']);
     $other = Unit::factory()->for($location->account)->for($location)->create();

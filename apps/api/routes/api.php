@@ -15,7 +15,10 @@ use App\Http\Controllers\Api\LocationSettingsController;
 use App\Http\Controllers\Api\MeController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\PhotoController;
+use App\Http\Controllers\Api\PasswordController;
 use App\Http\Controllers\Api\PortalAlertController;
+use App\Http\Controllers\Api\PortalHouseholdController;
+use App\Http\Controllers\Api\PortalLedgerController;
 use App\Http\Controllers\Api\PortalAmenityController;
 use App\Http\Controllers\Api\PortalPackageController;
 use App\Http\Controllers\Api\PortalReservationController;
@@ -44,6 +47,7 @@ Route::post('/staff-invitations/{token}/accept', [StaffInvitationController::cla
 Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function () {
     // Session and access context.
     Route::get('/me', MeController::class);
+    Route::patch('/me/password', [PasswordController::class, 'update']);
     Route::post('/context/account', [AccessContextController::class, 'selectAccount']);
     Route::post('/context/location', [AccessContextController::class, 'selectLocation']);
     Route::delete('/context', [AccessContextController::class, 'clear']);
@@ -165,6 +169,11 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::get('/resident', [PortalResidentController::class, 'show']);
         Route::patch('/resident/phone', [PortalResidentController::class, 'updatePhone']);
         Route::patch('/resident/email-alerts', [PortalResidentController::class, 'updateEmailAlerts']);
+        Route::get('/household', [PortalHouseholdController::class, 'index']);
+        Route::post('/household', [PortalHouseholdController::class, 'store']);
+        Route::delete('/household/{membership}', [PortalHouseholdController::class, 'destroy']);
+        Route::post('/household/{membership}/resend-invitation', [PortalHouseholdController::class, 'resendInvitation']);
+        Route::get('/ledger', [PortalLedgerController::class, 'index']);
         Route::get('/alerts', [PortalAlertController::class, 'index']);
         Route::get('/alerts/unread-count', [PortalAlertController::class, 'unreadCount']);
         Route::post('/alerts/read-all', [PortalAlertController::class, 'markAllRead']);

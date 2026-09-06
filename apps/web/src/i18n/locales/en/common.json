@@ -171,7 +171,8 @@
       "home": "Home",
       "visits": "Visits",
       "profile": "Profile",
-      "reservations": "Bookings"
+      "reservations": "Bookings",
+      "myUnit": "My unit"
     },
     "unit": {
       "mine": "My units",
@@ -342,6 +343,85 @@
         "announcementsHint": "published by management",
         "emailLine": "{{email}} · the login email will be editable from Profile soon"
       }
+    },
+    "household": {
+      "title": "My household",
+      "add": "Add person",
+      "addSubmit": "Add",
+      "addHint": "The person shows up in My household and at the desk right away.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "emailOptional": "Email (optional)",
+      "emailHint": "We'll send them the portal invitation.",
+      "type": "Type",
+      "types": {
+        "owner": "Owner",
+        "tenant": "Tenant",
+        "occupant": "Family",
+        "guest_resident": "Guest"
+      },
+      "you": "You",
+      "invited": "Invitation pending",
+      "noAccess": "No access",
+      "noPhone": "No phone",
+      "portalAccess": "Portal access",
+      "portalStates": {
+        "active": "Active",
+        "invited": "Invitation pending",
+        "not_invited": "No access"
+      },
+      "since": "since {{date}}",
+      "resendInvitation": "Resend invitation",
+      "invitationResent": "Invitation resent.",
+      "remove": "Remove from unit",
+      "removeConfirm": "Remove",
+      "removeTitle": "Remove {{name}} from {{unit}}?",
+      "removeBody": "They will lose portal access to this unit.",
+      "removed": "Person removed from the unit.",
+      "added": "{{name}} is now part of My household.",
+      "addedInvited": "{{name}} is now part of My household. We sent them the portal invitation."
+    },
+    "vehicles": {
+      "title": "Vehicles",
+      "add": "Add vehicle",
+      "edit": "Vehicle",
+      "plate": "Plate",
+      "make": "Make",
+      "model": "Model",
+      "color": "Colour",
+      "noDetails": "No details",
+      "saved": "Vehicle saved.",
+      "added": "Vehicle added.",
+      "delete": "Delete vehicle",
+      "deleteTitle": "Delete vehicle {{plate}}?",
+      "deleteBody": "The desk will no longer link it to your unit.",
+      "deleted": "Vehicle deleted.",
+      "empty": "No vehicles registered yet."
+    },
+    "ledger": {
+      "title": "Account statement",
+      "pending": "Pending",
+      "upToDate": "Up to date",
+      "lastDues": "Last fee: {{period}} · {{amount}}",
+      "view": "View movements",
+      "primaryOnly": "Only the primary contact sees the account statement.",
+      "updatedToday": "Updated today",
+      "chips": {
+        "pending": "Pending",
+        "all": "All"
+      },
+      "paid": "Paid",
+      "empty": "No movements for this unit.",
+      "footer": "Payments are recorded by management."
+    },
+    "password": {
+      "title": "Password",
+      "current": "Current password",
+      "new": "New password",
+      "newHint": "At least 8 characters",
+      "repeat": "Repeat password",
+      "submit": "Change password",
+      "changed": "Your password was updated."
     }
   },
   "nav": {
@@ -553,7 +633,10 @@
     "shareTooHigh": "The share cannot exceed 100%.",
     "personRequired": "Select a person.",
     "emailRequiredForInvite": "Enter an email to send the invitation.",
-    "visitorNameRequired": "Enter the visitor's name."
+    "visitorNameRequired": "Enter the visitor's name.",
+    "plateRequired": "Enter the plate.",
+    "currentPasswordRequired": "Enter your current password.",
+    "passwordMin": "The password must be at least 8 characters."
   },
   "invitations": {
     "residentTitle": "Activate your resident portal",

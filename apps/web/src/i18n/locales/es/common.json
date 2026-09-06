@@ -171,7 +171,8 @@
       "home": "Inicio",
       "visits": "Visitas",
       "profile": "Perfil",
-      "reservations": "Reservas"
+      "reservations": "Reservas",
+      "myUnit": "Mi unidad"
     },
     "unit": {
       "mine": "Mis unidades",
@@ -342,6 +343,85 @@
         "announcementsHint": "publicados por administración",
         "emailLine": "{{email}} · el correo de acceso se podrá cambiar pronto desde Perfil"
       }
+    },
+    "household": {
+      "title": "Mi hogar",
+      "add": "Agregar persona",
+      "addSubmit": "Agregar",
+      "addHint": "La persona aparecerá en Mi hogar y en recepción de inmediato.",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "emailOptional": "Correo (opcional)",
+      "emailHint": "Le enviaremos la invitación al portal.",
+      "type": "Tipo",
+      "types": {
+        "owner": "Propietario",
+        "tenant": "Inquilino",
+        "occupant": "Familiar",
+        "guest_resident": "Invitado"
+      },
+      "you": "Tú",
+      "invited": "Invitación pendiente",
+      "noAccess": "Sin acceso",
+      "noPhone": "Sin teléfono",
+      "portalAccess": "Acceso al portal",
+      "portalStates": {
+        "active": "Activo",
+        "invited": "Invitación pendiente",
+        "not_invited": "Sin acceso"
+      },
+      "since": "desde {{date}}",
+      "resendInvitation": "Reenviar invitación",
+      "invitationResent": "Invitación reenviada.",
+      "remove": "Quitar de la unidad",
+      "removeConfirm": "Quitar",
+      "removeTitle": "¿Quitar a {{name}} de {{unit}}?",
+      "removeBody": "Perderá el acceso al portal de esta unidad.",
+      "removed": "Persona quitada de la unidad.",
+      "added": "{{name}} ya forma parte de Mi hogar.",
+      "addedInvited": "{{name}} ya forma parte de Mi hogar. Le enviamos la invitación al portal."
+    },
+    "vehicles": {
+      "title": "Vehículos",
+      "add": "Agregar vehículo",
+      "edit": "Vehículo",
+      "plate": "Placa",
+      "make": "Marca",
+      "model": "Modelo",
+      "color": "Color",
+      "noDetails": "Sin detalles",
+      "saved": "Vehículo guardado.",
+      "added": "Vehículo agregado.",
+      "delete": "Eliminar vehículo",
+      "deleteTitle": "¿Eliminar el vehículo {{plate}}?",
+      "deleteBody": "Recepción dejará de asociarlo a tu unidad.",
+      "deleted": "Vehículo eliminado.",
+      "empty": "Aún no hay vehículos registrados."
+    },
+    "ledger": {
+      "title": "Estado de cuenta",
+      "pending": "Pendiente",
+      "upToDate": "Al día",
+      "lastDues": "Última cuota: {{period}} · {{amount}}",
+      "view": "Ver movimientos",
+      "primaryOnly": "Solo el contacto principal ve el estado de cuenta.",
+      "updatedToday": "Actualizado hoy",
+      "chips": {
+        "pending": "Pendientes",
+        "all": "Todos"
+      },
+      "paid": "Pagado",
+      "empty": "No hay movimientos para esta unidad.",
+      "footer": "Los pagos se registran en administración."
+    },
+    "password": {
+      "title": "Contraseña",
+      "current": "Contraseña actual",
+      "new": "Nueva contraseña",
+      "newHint": "Mínimo 8 caracteres",
+      "repeat": "Repetir contraseña",
+      "submit": "Cambiar contraseña",
+      "changed": "Tu contraseña fue actualizada."
     }
   },
   "nav": {
@@ -553,7 +633,10 @@
     "shareTooHigh": "La participación no puede superar 100 %.",
     "personRequired": "Selecciona una persona.",
     "emailRequiredForInvite": "Ingresa un correo para enviar la invitación.",
-    "visitorNameRequired": "Ingresa el nombre del visitante."
+    "visitorNameRequired": "Ingresa el nombre del visitante.",
+    "plateRequired": "Ingresa la placa.",
+    "currentPasswordRequired": "Ingresa tu contraseña actual.",
+    "passwordMin": "La contraseña debe tener al menos 8 caracteres."
   },
   "invitations": {
     "residentTitle": "Activa tu portal de residentes",

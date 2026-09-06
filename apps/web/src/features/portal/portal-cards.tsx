@@ -3,67 +3,80 @@ import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { TintChip } from '../../components/ui/chips'
 
-/** The home board card: title, count pill, filled rows, optional "Ver todo". */
+/**
+ * The portal card (Portal 01, 04), measured from the artboards: 14px radius,
+ * 11/12/9 padding, 7px between blocks. Header is title then count, side by
+ * side with an 8px gap. Rows are filled, 10px radius, 6px apart. The footer
+ * is a right-aligned link or action with no rule above it.
+ */
 export function PortalCard({
+  action,
   count,
-  countColor = 'teal',
   children,
   empty,
   title,
   to,
   viewAllLabel,
 }: {
+  /** A footer action where "Ver todo" goes (04: Agregar persona, Agregar vehículo). */
+  action?: { label: string; onClick: () => void }
   count?: number
-  countColor?: string
   children: ReactNode
   empty?: string
   title: string
-  to?: '/portal/visitas' | '/portal/perfil' | '/portal/reservas'
+  to?: '/portal/visitas' | '/portal/perfil' | '/portal/reservas' | '/portal/mi-unidad' | '/portal/mi-unidad/estado-de-cuenta'
   viewAllLabel?: string
 }) {
   const isEmpty = empty !== undefined && count === 0
+  const footerClass = 'cursor-pointer border-0 bg-transparent p-0 text-[12.5px] font-semibold text-[var(--wa-interactive)] no-underline'
 
   return (
-    <section className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
-      <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <h2 className="m-0 font-display text-[15px] font-semibold">{title}</h2>
-        {count !== undefined ? <TintChip color={countColor}>{count}</TintChip> : null}
+    <section className="flex flex-col gap-[7px] rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-3 pt-[11px] pb-[9px]">
+      <div className="flex items-center gap-2">
+        <h2 className="m-0 font-display text-[14.5px] font-semibold tracking-tight">{title}</h2>
+        {count !== undefined ? <TintChip color="teal">{count}</TintChip> : null}
       </div>
       {isEmpty ? (
-        <Text c="dimmed" className="px-4 pb-4" size="sm">
+        <Text c="dimmed" size="sm">
           {empty}
         </Text>
       ) : (
-        <ul className="m-0 flex list-none flex-col gap-2 px-3 pb-3">{children}</ul>
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">{children}</ul>
       )}
-      {to && viewAllLabel && !isEmpty ? (
-        <div className="border-t border-[var(--mantine-color-default-border)] px-4 py-2.5">
-          <Link className="text-[12.5px] font-semibold text-[var(--wa-interactive)] no-underline" to={to}>
-            {viewAllLabel}
-          </Link>
+      {(to && viewAllLabel && !isEmpty) || action ? (
+        <div className="flex justify-end">
+          {action ? (
+            <button className={footerClass} type="button" onClick={action.onClick}>
+              {action.label}
+            </button>
+          ) : (
+            <Link className={footerClass} to={to!}>
+              {viewAllLabel}
+            </Link>
+          )}
         </div>
       ) : null}
     </section>
   )
 }
 
-/** A filled row inside a card: primary text, secondary line, and a pill on the right. */
+/** A filled row inside a card (01): primary 13.5px, secondary 11.5px, pill on the right. */
 export function PortalRow({ pill, primary, secondary, onClick }: { pill?: ReactNode; primary: string; secondary?: string | null; onClick?: () => void }) {
   const body = (
     <>
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate text-sm font-semibold">{primary}</span>
-        {secondary ? <span className="truncate text-xs text-[var(--mantine-color-dimmed)]">{secondary}</span> : null}
+        <span className="truncate text-[13.5px] font-semibold">{primary}</span>
+        {secondary ? <span className="mt-0.5 truncate text-[11.5px] text-[var(--mantine-color-dimmed)]">{secondary}</span> : null}
       </span>
       {pill}
     </>
   )
-  const className = 'flex min-h-14 w-full items-center gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-2.5 text-left'
+  const className = 'flex w-full items-center gap-2.5 rounded-[10px] bg-[var(--wa-surface-2)] px-3 py-2.5 text-left'
 
   return (
     <li>
       {onClick ? (
-        <button className={`${className} cursor-pointer`} type="button" onClick={onClick}>
+        <button className={`${className} cursor-pointer border-0`} type="button" onClick={onClick}>
           {body}
         </button>
       ) : (

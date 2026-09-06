@@ -164,13 +164,14 @@ export function PortalReservationsPage() {
                   : t('portal.reservations.cancelClosed')
               }
             >
-              <Button className="w-full" color="error" disabled={!detail.data?.can_cancel} size="md" variant="default" onClick={() => setConfirmingCancel(true)}>
+              <Button className="w-full" color="error" disabled={!detail.data?.can_cancel} variant="default" onClick={() => setConfirmingCancel(true)}>
                 {t('portal.reservations.cancel')}
               </Button>
             </SheetAction>
           ) : undefined
         }
         lines={selected ? [reservationLongRange(selected.starts_at, selected.ends_at, timezone), active.unit_label] : []}
+        footerDivider
         opened={selectedId !== null}
         pill={selected ? <StatusPill color={reservationTone(selected.status, selected.is_completed)}>{statusLabel(selected)}</StatusPill> : undefined}
         title={selected?.amenity_name ?? ''}

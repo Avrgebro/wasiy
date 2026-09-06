@@ -258,6 +258,16 @@ class AccessAuthorizationService
             ->exists();
     }
 
+    /** The household's manager: the active primary contact of the unit (portal P4). */
+    public function isPrimaryContactOf(User $user, Unit $unit): bool
+    {
+        return $this->canResidentAccessUnit($user, $unit)
+            && $this->activeResidentMembershipsForUser($user)
+                ->where('unit_id', $unit->id)
+                ->where('is_primary_contact', true)
+                ->exists();
+    }
+
     public function canResidentAccessUnit(User $user, Unit $unit): bool
     {
         if ($unit->status !== RegistryStatus::Active || ! $this->registryRecordLocationMatches($unit->location, $unit->account_id)) {
