@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Select, Text, Textarea } from '@mantine/core'
+import { Alert, Button, Select, Textarea } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { DangerZone, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
@@ -64,14 +64,6 @@ function toPayload(values: LocationFormValues): LocationPayload {
     contact_email: nullable(values.contact_email),
     access_notes: nullable(values.access_notes),
   }
-}
-
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <div className="pt-1">
-      <DrawerSection label={children} />
-    </div>
-  )
 }
 
 /**
@@ -180,7 +172,7 @@ export function LocationFormDrawer({
               )}
             />
 
-            <SectionLabel>{t('locations.form.addressSection')}</SectionLabel>
+            <DrawerSection label={t('locations.form.addressSection')} />
             <FormTextInput
               control={control}
               label={t('locations.form.addressLine1')}
@@ -193,7 +185,7 @@ export function LocationFormDrawer({
               name="address_line2"
               placeholder={t('locations.form.addressLine2Placeholder')}
             />
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
+            <DrawerRow>
               <FormTextInput control={control} label={t('locations.form.district')} name="district" />
               <FormTextInput control={control} label={t('locations.form.city')} name="city" />
               <FormTextInput control={control} label={t('locations.form.state')} name="state" />
@@ -202,10 +194,10 @@ export function LocationFormDrawer({
                 label={t('locations.form.postalCode')}
                 name="postal_code"
               />
-            </div>
+            </DrawerRow>
             <FormTextInput control={control} label={t('locations.form.country')} name="country" />
 
-            <SectionLabel>{t('locations.form.contactSection')}</SectionLabel>
+            <DrawerSection label={t('locations.form.contactSection')} />
             <FormPhoneInput control={control} defaultCountry={formCountry || 'PE'} label={t('locations.form.phone')} name="phone" placeholder="1 302 4410" />
             <FormTextInput
               control={control}
@@ -228,19 +220,7 @@ export function LocationFormDrawer({
               )}
             />
             {editing && onDeactivate ? (
-              <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
-                <div className="min-w-0">
-                  <Text fw={600} size="sm">
-                    {t('locations.form.sensitiveZone')}
-                  </Text>
-                  <Text c="dimmed" size="xs">
-                    {t('locations.form.sensitiveZoneHint')}
-                  </Text>
-                </div>
-                <Button className="w-full" color="error" variant="light" onClick={onDeactivate}>
-                  {t('locations.deactivate')}
-                </Button>
-              </div>
+              <DangerZone action={<Button className="w-full" color="error" variant="light" onClick={onDeactivate}> {t('locations.deactivate')} </Button>} description={t('locations.form.sensitiveZoneHint')} title={t('locations.form.sensitiveZone')} />
             ) : null}
         </AppDrawerBody>
         <AppDrawerFooter>

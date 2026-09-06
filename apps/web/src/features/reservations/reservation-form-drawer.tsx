@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, Select, Text, TextInput } from '@mantine/core'
+import { DrawerRow } from '../../components/ui/detail-drawer-parts'
 import type { AvailabilityWindow } from '../locations/amenities-api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
@@ -278,7 +279,7 @@ export function ReservationFormDrawer({
           </div>
           {/* 30-minute grid, constrained to the day's windows and the
               amenity's duration limits; the API enforces the same rule. */}
-          <div className="grid gap-3.5 sm:grid-cols-2">
+          <DrawerRow>
             <Controller
               control={form.control}
               name="start"
@@ -314,7 +315,7 @@ export function ReservationFormDrawer({
                 />
               )}
             />
-          </div>
+          </DrawerRow>
         </AppDrawerBody>
         <AppDrawerFooter>
           <Button variant="default" onClick={onClose}>

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePhoneFormat } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { ConfirmDialog, DrawerFact, DrawerFacts, DrawerSection, DrawerTimeline } from '../../components/ui/detail-drawer-parts'
+import { ConfirmDialog, DangerZone, DrawerFact, DrawerFacts, DrawerField, DrawerSection, DrawerTimeline } from '../../components/ui/detail-drawer-parts'
 import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
 import { telHref } from '../../lib/phone'
@@ -150,35 +150,34 @@ export function PersonDrawer({
             </DrawerFacts>
 
             <DrawerSection label={t('units.title')} />
-            {inLocation.length === 0 ? (
-              <Text c="dimmed" size="sm">
-                {t('residents.detail.noUnits')}
-              </Text>
-            ) : (
-              <div className="flex flex-col divide-y divide-[var(--mantine-color-default-border)] overflow-hidden rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)]">
-                {inLocation.map((membership) => (
-                  <Link
-                    key={membership.id}
-                    className={`flex items-center gap-3 px-3.5 py-2.5 text-sm no-underline text-[var(--mantine-color-text)] hover:bg-[var(--mantine-color-default-hover)] ${membership.status === 'inactive' ? 'opacity-60' : ''}`}
-                    params={{ unitId: membership.unit_id }}
-                    to="/admin/registry/units/$unitId"
-                  >
-                    <span className="font-display font-semibold">
-                      {[membership.unit?.unit_number, membership.unit?.building_name].filter(Boolean).join(' · ')}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate text-[var(--mantine-color-dimmed)]">
-                      {[membership.is_primary_contact ? t('units.detail.primaryContact') : null, membership.status === 'inactive' ? t('registry.statuses.inactive') : null]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
-                    <span className="text-[15px] text-[var(--wa-text-3)]">›</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-            <Text c="dimmed" mt={-12} size="xs">
-              {t('residents.detail.membershipsHint')}
-            </Text>
+            <DrawerField note={t('residents.detail.membershipsHint')}>
+              {inLocation.length === 0 ? (
+                <Text c="dimmed" size="sm">
+                  {t('residents.detail.noUnits')}
+                </Text>
+              ) : (
+                <div className="flex flex-col divide-y divide-[var(--mantine-color-default-border)] overflow-hidden rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)]">
+                  {inLocation.map((membership) => (
+                    <Link
+                      key={membership.id}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 text-sm no-underline text-[var(--mantine-color-text)] hover:bg-[var(--mantine-color-default-hover)] ${membership.status === 'inactive' ? 'opacity-60' : ''}`}
+                      params={{ unitId: membership.unit_id }}
+                      to="/admin/registry/units/$unitId"
+                    >
+                      <span className="font-display font-semibold">
+                        {[membership.unit?.unit_number, membership.unit?.building_name].filter(Boolean).join(' · ')}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-[var(--mantine-color-dimmed)]">
+                        {[membership.is_primary_contact ? t('units.detail.primaryContact') : null, membership.status === 'inactive' ? t('registry.statuses.inactive') : null]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                      <span className="text-[15px] text-[var(--wa-text-3)]">›</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </DrawerField>
 
             <DrawerSection description={t('residents.detail.portalHint')} label={t('units.detail.portal')} />
             <div className="flex flex-col gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
@@ -241,29 +240,27 @@ export function PersonDrawer({
                 <Button fullWidth variant="default" onClick={() => onEdit(person)}>
                   {t('residents.detail.edit')}
                 </Button>
-                <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
-                  <div className="min-w-0">
-                    <Text fw={600} size="sm">
-                      {t('units.form.sensitiveZone')}
-                    </Text>
-                    <Text c="dimmed" size="xs">
-                      {person.status === 'inactive'
-                        ? t('residents.detail.reactivateHint')
-                        : person.active_membership_count > 0
-                          ? t('residents.detail.deactivateBlocked')
-                          : t('residents.detail.deactivateHint')}
-                    </Text>
-                  </div>
-                  {person.status === 'inactive' ? (
-                    <Button className="w-full" loading={reactivate.isPending} variant="default" onClick={() => reactivate.mutate()}>
-                      {t('residents.detail.reactivate')}
-                    </Button>
-                  ) : (
-                    <Button className="w-full" color="error" disabled={person.active_membership_count > 0} variant="light" onClick={() => setConfirmingDeactivate(true)}>
-                      {t('residents.detail.deactivate')}
-                    </Button>
-                  )}
-                </div>
+                <DangerZone
+                  action={
+                    person.status === 'inactive' ? (
+                      <Button className="w-full" loading={reactivate.isPending} variant="default" onClick={() => reactivate.mutate()}>
+                        {t('residents.detail.reactivate')}
+                      </Button>
+                    ) : (
+                      <Button className="w-full" color="error" disabled={person.active_membership_count > 0} variant="light" onClick={() => setConfirmingDeactivate(true)}>
+                        {t('residents.detail.deactivate')}
+                      </Button>
+                    )
+                  }
+                  description={
+                    person.status === 'inactive'
+                      ? t('residents.detail.reactivateHint')
+                      : person.active_membership_count > 0
+                        ? t('residents.detail.deactivateBlocked')
+                        : t('residents.detail.deactivateHint')
+                  }
+                  title={t('units.form.sensitiveZone')}
+                />
                 <ConfirmDialog
                   body={t('residents.detail.confirmDeactivateBody')}
                   opened={confirmingDeactivate}

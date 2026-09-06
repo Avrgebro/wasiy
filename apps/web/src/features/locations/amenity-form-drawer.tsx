@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { ApiError } from '../../app/api-client'
 import { getErrorMessage } from '../../lib/errors'
 import { getLocationSettings } from './api'
@@ -27,13 +27,6 @@ const AMENITY_TYPES: AmenityTypeValue[] = [
   'court',
   'rooftop',
   'other',
-]
-
-const INPUT_WRAPPER_ORDER: ('label' | 'input' | 'description' | 'error')[] = [
-  'label',
-  'input',
-  'description',
-  'error',
 ]
 
 type FormState = {
@@ -96,14 +89,6 @@ function toPayload(form: FormState): AmenityPayload {
     fee_amount: form.fee_amount === '' ? null : form.fee_amount,
     deposit_amount: form.deposit_amount === '' ? null : form.deposit_amount,
   }
-}
-
-function SectionLabel({ children }: { children: string }) {
-  return (
-    <div className="pt-1">
-      <DrawerSection label={children} />
-    </div>
-  )
 }
 
 /**
@@ -242,10 +227,9 @@ function AmenityForm({
       }}
     >
       <AppDrawerBody>
-        <div className="flex flex-col gap-3">
           {serverError ? <Alert color="error">{serverError}</Alert> : null}
 
-          <SectionLabel>{t('amenities.sections.basics')}</SectionLabel>
+          <DrawerSection label={t('amenities.sections.basics')} />
           <TextInput
             label={t('amenities.form.name')}
             placeholder={t('amenities.form.namePlaceholder')}
@@ -253,7 +237,7 @@ function AmenityForm({
             value={form.name}
             onChange={(event) => set('name', event.currentTarget.value)}
           />
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <DrawerRow>
             <Select
               allowDeselect={false}
               data={typeOptions}
@@ -270,7 +254,7 @@ function AmenityForm({
               value={form.capacity}
               onChange={(value) => set('capacity', typeof value === 'number' ? value : '')}
             />
-          </div>
+          </DrawerRow>
           <Textarea
             label={t('amenities.form.description')}
             rows={2}
@@ -284,7 +268,7 @@ function AmenityForm({
             onChange={(event) => set('is_reservable', event.currentTarget.checked)}
           />
 
-          <SectionLabel>{t('amenities.sections.availability')}</SectionLabel>
+          <DrawerSection label={t('amenities.sections.availability')} />
           <AmenityAvailabilityEditor
             readOnly={false}
             timezone={timezone}
@@ -294,12 +278,11 @@ function AmenityForm({
 
           {form.is_reservable ? (
             <>
-              <SectionLabel>{t('amenities.sections.policy')}</SectionLabel>
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 sm:[&_.mantine-InputWrapper-label]:min-h-[2.5rem] sm:[&_.mantine-InputWrapper-label]:flex sm:[&_.mantine-InputWrapper-label]:items-end">
+              <DrawerSection label={t('amenities.sections.policy')} />
+              <DrawerRow className="sm:[&_.mantine-InputWrapper-label]:min-h-[2.5rem] sm:[&_.mantine-InputWrapper-label]:flex sm:[&_.mantine-InputWrapper-label]:items-end">
                 <NumberInput
                   allowNegative={false}
                   description={inheritHint('max_advance_days', 'settings.reservations.days')}
-                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('settings.reservations.maxAdvance')}
                   min={1}
                   placeholder={String(locationDefaults?.reservation_max_advance_days ?? '')}
@@ -309,7 +292,6 @@ function AmenityForm({
                 <NumberInput
                   allowNegative={false}
                   description={inheritHint('max_concurrent_per_unit', 'settings.reservations.reservations')}
-                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('settings.reservations.maxConcurrent')}
                   min={1}
                   placeholder={String(locationDefaults?.reservation_max_concurrent_per_unit ?? '')}
@@ -321,7 +303,6 @@ function AmenityForm({
                 <NumberInput
                   allowNegative={false}
                   description={inheritHint('cancellation_window_hours', 'settings.reservations.hours')}
-                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('settings.reservations.cancellationWindow')}
                   min={1}
                   placeholder={String(locationDefaults?.reservation_cancellation_window_hours ?? '')}
@@ -337,7 +318,6 @@ function AmenityForm({
                       ? t('amenities.form.maxDurationHint')
                       : undefined
                   }
-                  inputWrapperOrder={INPUT_WRAPPER_ORDER}
                   label={t('amenities.form.maxDuration')}
                   min={1}
                   placeholder="—"
@@ -345,7 +325,7 @@ function AmenityForm({
                   value={form.max_duration_hours}
                   onChange={(value) => set('max_duration_hours', typeof value === 'number' ? value : '')}
                 />
-              </div>
+              </DrawerRow>
               <Switch
                 checked={form.requires_approval}
                 description={t('amenities.form.approvalHint')}
@@ -353,8 +333,8 @@ function AmenityForm({
                 onChange={(event) => set('requires_approval', event.currentTarget.checked)}
               />
 
-              <SectionLabel>{t('amenities.sections.fees')}</SectionLabel>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <DrawerSection label={t('amenities.sections.fees')} />
+              <DrawerRow>
                 <NumberInput
                   allowDecimal={false}
                   allowNegative={false}
@@ -373,7 +353,7 @@ function AmenityForm({
                   value={form.deposit_amount}
                   onChange={(value) => set('deposit_amount', typeof value === 'number' ? value : '')}
                 />
-              </div>
+              </DrawerRow>
               <Text c="dimmed" size="xs">
                 {t('amenities.form.feesHint')}
               </Text>
@@ -385,7 +365,6 @@ function AmenityForm({
               {t('amenities.form.photosAfterCreate')}
             </Text>
           )}
-        </div>
       </AppDrawerBody>
       <AppDrawerFooter>
         <Button variant="default" onClick={onClose}>

@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useMe } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
@@ -94,10 +94,10 @@ export function PersonFormDrawer({
               {form.formState.errors.root.message}
             </Alert>
           ) : null}
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
+          <DrawerRow>
             <FormTextInput control={form.control} label={t('registry.residents.firstName')} name="first_name" />
             <FormTextInput control={form.control} label={t('registry.residents.lastName')} name="last_name" />
-          </div>
+          </DrawerRow>
           <FormPhoneInput control={form.control} defaultCountry={country} label={t('residents.form.phone')} name="phone" placeholder="987 654 321" />
           {!editing ? (
             <>

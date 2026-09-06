@@ -9,6 +9,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core'
+import { DangerZone, DrawerRow } from '../../components/ui/detail-drawer-parts'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, type ReactNode } from 'react'
@@ -232,7 +233,7 @@ export function StaffAccessDrawer({
         ) : null}
         {editing ? null : (
           <>
-            <div className="grid gap-3.5 sm:grid-cols-2">
+            <DrawerRow>
               <Controller
                 control={form.control}
                 name="first_name"
@@ -255,7 +256,7 @@ export function StaffAccessDrawer({
                   />
                 )}
               />
-            </div>
+            </DrawerRow>
             <Controller
               control={form.control}
               name="email"
@@ -361,19 +362,15 @@ export function StaffAccessDrawer({
           ) : null}
         </div>
         {editing && onDeactivate && !editing.deactivated_at ? (
-          <div className="grid gap-2 border-0 border-t border-solid border-[var(--mantine-color-default-border)] pt-5">
-            <Button
-              className="justify-self-start"
-              color="error"
-              variant="outline"
-              onClick={onDeactivate}
-            >
-              {t('staff.deactivate')}
-            </Button>
-            <Text c="dimmed" size="xs">
-              {t('staff.deactivateHint')}
-            </Text>
-          </div>
+          <DangerZone
+            action={
+              <Button className="w-full" color="error" variant="light" onClick={onDeactivate}>
+                {t('staff.deactivate')}
+              </Button>
+            }
+            description={t('staff.deactivateHint')}
+            title={t('units.form.sensitiveZone')}
+          />
         ) : null}
         </AppDrawerBody>
         <AppDrawerFooter>

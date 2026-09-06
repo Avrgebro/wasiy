@@ -1,11 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, Select, Text, Textarea } from '@mantine/core'
+import { Alert, Button, Select, Textarea } from '@mantine/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
+import { ConfirmDialog, DangerZone, DrawerRow } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifyError, notifySuccess } from '../../lib/notify'
@@ -95,7 +95,7 @@ export function VehicleDrawer({
               {form.formState.errors.root.message}
             </Alert>
           ) : null}
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
+          <DrawerRow>
             <FormTextInput control={form.control} label={t('registry.vehicles.plate')} name="plate" placeholder="AXB-241" styles={{ input: { fontFamily: 'var(--font-mono, ui-monospace, monospace)', textTransform: 'uppercase' } }} />
             <Controller
               control={form.control}
@@ -114,7 +114,7 @@ export function VehicleDrawer({
             <FormTextInput control={form.control} label={t('registry.vehicles.make')} name="make" />
             <FormTextInput control={form.control} label={t('registry.vehicles.model')} name="model" />
             <FormTextInput control={form.control} label={t('registry.vehicles.color')} name="color" />
-          </div>
+          </DrawerRow>
           <Controller
             control={form.control}
             name="notes"
@@ -123,24 +123,7 @@ export function VehicleDrawer({
             )}
           />
           {editing ? (
-            <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
-              <div className="min-w-0">
-                <Text fw={600} size="sm">
-                  {t('units.form.sensitiveZone')}
-                </Text>
-                <Text c="dimmed" size="xs">
-                  {t('units.vehicle.deactivateHint')}
-                </Text>
-              </div>
-              <Button
-                className="w-full"
-                color={editing.status === 'active' ? 'error' : undefined}
-                variant={editing.status === 'active' ? 'light' : 'default'}
-                onClick={() => (editing.status === 'active' ? setConfirming(true) : toggleStatus.mutate())}
-              >
-                {t(editing.status === 'active' ? 'units.vehicle.deactivate' : 'units.vehicle.reactivate')}
-              </Button>
-            </div>
+            <DangerZone action={<Button className="w-full" color={editing.status === 'active' ? 'error' : undefined} variant={editing.status === 'active' ? 'light' : 'default'} onClick={() => (editing.status === 'active' ? setConfirming(true) : toggleStatus.mutate())} > {t(editing.status === 'active' ? 'units.vehicle.deactivate' : 'units.vehicle.reactivate')} </Button>} description={t('units.vehicle.deactivateHint')} title={t('units.form.sensitiveZone')} />
           ) : null}
           <ConfirmDialog
             body={t('units.vehicle.confirmDeactivateBody')}

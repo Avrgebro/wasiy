@@ -24,17 +24,67 @@ export function DrawerFacts({ children }: { children: ReactNode }) {
 }
 
 /**
+ * Drawer spacing scale (UX audit 2026-09-05). AppDrawerBody puts 16px
+ * between blocks; a section adds 8px above its header so groups read as
+ * 24 / 16, hierarchy stated in space, not only in type. Fields inside a
+ * DrawerRow sit 14px apart on wide screens, 16px when stacked.
+ *
  * Section header; the optional description says what the section is for once,
  * so the fields under it can drop their own hints and stay aligned.
  */
 export function DrawerSection({ label, description }: { label: string; description?: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="mt-2 flex flex-col gap-1">
       <div className="flex items-center gap-3">
         <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--wa-interactive)]">{label}</span>
         <span className="h-px flex-1 bg-[var(--mantine-color-default-border)]" />
       </div>
       {description ? <p className="m-0 text-xs leading-relaxed text-[var(--mantine-color-dimmed)]">{description}</p> : null}
+    </div>
+  )
+}
+
+/**
+ * A field (or a DrawerRow of fields) with a note under it, for the cases a
+ * Mantine `description` cannot cover: a note that spans two fields, or one
+ * with a link or a value in it. It replaces the negative-margin dimmed Text
+ * the drawers used to pull up under an input.
+ */
+export function DrawerField({ children, note }: { children: ReactNode; note?: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {children}
+      {note ? (
+        <Text c="dimmed" size="xs">
+          {note}
+        </Text>
+      ) : null}
+    </div>
+  )
+}
+
+/** Two (or three) fields side by side from the sm breakpoint up, stacked below it. */
+export function DrawerRow({ children, className = '', cols = 2 }: { children: ReactNode; className?: string; cols?: 2 | 3 }) {
+  return <div className={`grid grid-cols-1 gap-4 sm:gap-3.5 ${cols === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} ${className}`}>{children}</div>
+}
+
+/**
+ * The red-bordered block that holds the one destructive action a drawer
+ * offers (deactivate, remove). Always last in the body; the button is the
+ * only control inside it.
+ */
+export function DangerZone({ action, description, title }: { action: ReactNode; description: string; title: string }) {
+  return (
+    <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
+      <div className="min-w-0">
+        <Text fw={600} size="sm">
+          {title}
+        </Text>
+        <Text c="dimmed" size="xs">
+          {description}
+        </Text>
+      </div>
+      {action}
     </div>
   )
 }

@@ -1,12 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AltArrowDownIcon } from '@solar-icons/react/linear'
-import { Alert, Button, Collapse, NumberInput, Select, TagsInput, Text, Textarea, UnstyledButton } from '@mantine/core'
+import { Alert, Button, Collapse, NumberInput, Select, TagsInput, Textarea, UnstyledButton } from '@mantine/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { DangerZone, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
@@ -107,7 +107,7 @@ export function UnitFormDrawer({
           ) : null}
 
           <DrawerSection label={t('units.form.identity')} />
-          <div className={`grid grid-cols-1 gap-5 sm:gap-3.5 ${hasTowers ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+          <DrawerRow cols={hasTowers ? 3 : 2}>
             <FormTextInput control={form.control} label={t('units.form.number')} name="unit_number" />
             {hasTowers ? (
               <Controller
@@ -127,7 +127,7 @@ export function UnitFormDrawer({
               />
             ) : null}
             <FormTextInput control={form.control} label={t('units.form.floor')} name="floor" />
-          </div>
+          </DrawerRow>
           <Controller
             control={form.control}
             name="type"
@@ -231,19 +231,7 @@ export function UnitFormDrawer({
           </Collapse>
 
           {editing && onDeactivate && editing.status === 'active' ? (
-            <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
-              <div className="min-w-0">
-                <Text fw={600} size="sm">
-                  {t('units.form.sensitiveZone')}
-                </Text>
-                <Text c="dimmed" size="xs">
-                  {t('units.form.sensitiveZoneHint')}
-                </Text>
-              </div>
-              <Button className="w-full" color="error" variant="light" onClick={onDeactivate}>
-                {t('units.form.deactivate')}
-              </Button>
-            </div>
+            <DangerZone action={<Button className="w-full" color="error" variant="light" onClick={onDeactivate}> {t('units.form.deactivate')} </Button>} description={t('units.form.sensitiveZoneHint')} title={t('units.form.sensitiveZone')} />
           ) : null}
         </AppDrawerBody>
         <AppDrawerFooter>

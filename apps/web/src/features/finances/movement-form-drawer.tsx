@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, NumberInput, SegmentedControl, Select, Textarea, TextInput } from '@mantine/core'
+import { DrawerRow } from '../../components/ui/detail-drawer-parts'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -230,7 +231,7 @@ export function MovementFormDrawer({
               )}
             />
           )}
-          <div className="grid gap-3.5 sm:grid-cols-2">
+          <DrawerRow>
             <Controller
               control={form.control}
               name="occurred_on"
@@ -255,7 +256,7 @@ export function MovementFormDrawer({
                 />
               )}
             />
-          </div>
+          </DrawerRow>
           <Controller
             control={form.control}
             name="status"

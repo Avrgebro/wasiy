@@ -6,7 +6,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useMe, usePhoneFormat } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { DrawerField, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
@@ -133,34 +133,39 @@ export function RegisterVisitDrawer({
               />
             )}
           />
-          <Controller
-            control={form.control}
-            name="resident_id"
-            render={({ field, fieldState }) => (
-              <Select
-                {...field}
-                clearable
-                data={residents.map((resident) => ({ value: resident.id, label: resident.name }))}
-                disabled={unitId === ''}
-                error={fieldErrorMessage(fieldState.error)}
-                label={t('visits.form.host')}
-                onChange={(value) => field.onChange(value ?? '')}
-              />
-            )}
-          />
-          {primary ? (
-            <Text c="dimmed" mt={-12} size="xs">
-              {t('visits.form.primaryContact')}: {primary.name}
-              {primary.phone ? (
+          <DrawerField
+            note={
+              primary ? (
                 <>
-                  {' · '}
-                  <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={telHref(primary.phone)}>
-                    {formatPhone(primary.phone)}
-                  </a>
+                  {t('visits.form.primaryContact')}: {primary.name}
+                  {primary.phone ? (
+                    <>
+                      {' · '}
+                      <a className="text-[var(--wa-interactive)] no-underline hover:underline" href={telHref(primary.phone)}>
+                        {formatPhone(primary.phone)}
+                      </a>
+                    </>
+                  ) : null}
                 </>
-              ) : null}
-            </Text>
-          ) : null}
+              ) : undefined
+            }
+          >
+            <Controller
+              control={form.control}
+              name="resident_id"
+              render={({ field, fieldState }) => (
+                <Select
+                  {...field}
+                  clearable
+                  data={residents.map((resident) => ({ value: resident.id, label: resident.name }))}
+                  disabled={unitId === ''}
+                  error={fieldErrorMessage(fieldState.error)}
+                  label={t('visits.form.host')}
+                  onChange={(value) => field.onChange(value ?? '')}
+                />
+              )}
+            />
+          </DrawerField>
 
           <DrawerSection description={t('visits.expected.bandHint')} label={t('visits.expected.band')} />
           {unitId === '' ? (
@@ -198,34 +203,24 @@ export function RegisterVisitDrawer({
 
           <DrawerSection label={t('visits.form.visitor')} />
           <FormTextInput autoComplete="off" control={form.control} label={t('visits.form.name')} name="visitor_name" />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
-            <Controller
-              control={form.control}
-              name="document"
-              render={() => (
-                <FormTextInput control={form.control} label={t('visits.form.document')} name="document" placeholder="DNI 45872213" />
-              )}
-            />
-            <FormPhoneInput control={form.control} defaultCountry={country} label={t('visits.form.phone')} name="phone" placeholder="987 654 321" />
-          </div>
-          <Text c="dimmed" mt={-12} size="xs">
-            {t('visits.form.documentHint')}
-          </Text>
+          <DrawerField note={t('visits.form.documentHint')}>
+            <DrawerRow>
+              <FormTextInput control={form.control} label={t('visits.form.document')} name="document" placeholder="DNI 45872213" />
+              <FormPhoneInput control={form.control} defaultCountry={country} label={t('visits.form.phone')} name="phone" placeholder="987 654 321" />
+            </DrawerRow>
+          </DrawerField>
 
           <DrawerSection label={t('visits.form.confirmation')} />
           {expected ? (
-            <>
+            <DrawerField note={t('visits.expected.confirmationLocked')}>
               <div>
                 <Badge color="info" radius="xl" size="md" variant="light">
                   {t('visits.confirmations.pre_registered')}
                 </Badge>
               </div>
-              <Text c="dimmed" mt={-12} size="xs">
-                {t('visits.expected.confirmationLocked')}
-              </Text>
-            </>
+            </DrawerField>
           ) : (
-            <>
+            <DrawerField note={t('visits.form.confirmationHint')}>
               <Controller
                 control={form.control}
                 name="confirmation"
@@ -233,10 +228,7 @@ export function RegisterVisitDrawer({
                   <SegmentedControl {...field} data={VISIT_CONFIRMATIONS.map((value) => ({ value, label: t(`visits.confirmations.${value}`) }))} fullWidth />
                 )}
               />
-              <Text c="dimmed" mt={-12} size="xs">
-                {t('visits.form.confirmationHint')}
-              </Text>
-            </>
+            </DrawerField>
           )}
 
           <Controller

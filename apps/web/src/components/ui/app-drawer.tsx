@@ -94,7 +94,7 @@ export function AppDrawerBody({ children }: { children: ReactNode }) {
   return (
     <ScrollArea className="min-h-0 flex-1" offsetScrollbars="y" scrollbarSize="0.5rem" type="auto">
       {/* Tailwind needs literal classes: 1.5rem is INSET, 0.5rem the scrollbar lane. */}
-      <div className="grid content-start gap-5 pt-1 pb-5 pl-[1.5rem] pr-[calc(1.5rem-0.5rem)]">{children}</div>
+      <div className="grid content-start gap-4 pt-1 pb-5 pl-[1.5rem] pr-[calc(1.5rem-0.5rem)]">{children}</div>
     </ScrollArea>
   )
 }

@@ -1,4 +1,4 @@
-import { Badge, Container, createTheme, rem, Select } from "@mantine/core";
+import { Badge, Container, createTheme, Input, rem, Select } from "@mantine/core";
 import type {
   CSSVariablesResolver,
   MantineColorsTuple,
@@ -190,6 +190,11 @@ export const mantineTheme: MantineThemeOverride = createTheme({
   // `c` props.
   autoContrast: true,
   components: {
+    // Hints read as "what you typed means" when they sit under the field;
+    // above it they push labels apart in two-column rows (UX audit).
+    InputWrapper: Input.Wrapper.extend({
+      defaultProps: { inputWrapperOrder: ["label", "input", "description", "error"] },
+    }),
     Container: Container.extend({
       vars: (_, { size, fluid }) => ({
         root: {

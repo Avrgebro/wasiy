@@ -6,7 +6,7 @@ import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useMe, usePhoneFormat } from '../auth/hooks'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { ConfirmDialog, DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { ConfirmDialog, DangerZone, DrawerField, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { FormPhoneInput } from '../../components/ui/phone-input'
 import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
@@ -239,13 +239,13 @@ export function MemberDrawer({
                   )}
                 />
               ) : (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-3.5">
+                <DrawerRow>
                   <FormTextInput control={form.control} label={t('registry.residents.firstName')} name="first_name" />
                   <FormTextInput control={form.control} label={t('registry.residents.lastName')} name="last_name" />
                   <div className="sm:col-span-2">
                     <FormPhoneInput control={form.control} defaultCountry={country} label={t('registry.residents.phone')} name="phone" placeholder="987 654 321" />
                   </div>
-                </div>
+                </DrawerRow>
               )}
             </>
           )}
@@ -283,41 +283,26 @@ export function MemberDrawer({
           {member ? (
             <>
               <DrawerSection label={t('units.detail.portal')} />
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
-                <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="surface">
-                  {t(`units.portal.${member.portal_state}`)}
-                </Badge>
-                {member.portal_state !== 'active' ? (
-                  <Button
-                    disabled={!member.email}
-                    loading={inviteMutation.isPending}
-                    size="compact-sm"
-                    variant="subtle"
-                    onClick={() => inviteMutation.mutate()}
-                  >
-                    {t(member.portal_state === 'invited' ? 'units.member.resendInvite' : 'units.member.sendInvite')}
-                  </Button>
-                ) : null}
-              </div>
-              {!member.email && member.portal_state !== 'active' ? (
-                <Text c="dimmed" mt={-12} size="xs">
-                  {t('units.member.inviteNeedsEmail')}
-                </Text>
-              ) : null}
-
-              <div className="mt-2 flex flex-col gap-3 rounded-inner border border-[var(--wa-error)]/40 p-3.5">
-                <div className="min-w-0">
-                  <Text fw={600} size="sm">
-                    {t('units.form.sensitiveZone')}
-                  </Text>
-                  <Text c="dimmed" size="xs">
-                    {t('units.member.removeHint', { unit: unit.unit_number })}
-                  </Text>
+              <DrawerField note={!member.email && member.portal_state !== 'active' ? t('units.member.inviteNeedsEmail') : undefined}>
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
+                  <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="surface">
+                    {t(`units.portal.${member.portal_state}`)}
+                  </Badge>
+                  {member.portal_state !== 'active' ? (
+                    <Button
+                      disabled={!member.email}
+                      loading={inviteMutation.isPending}
+                      size="compact-sm"
+                      variant="subtle"
+                      onClick={() => inviteMutation.mutate()}
+                    >
+                      {t(member.portal_state === 'invited' ? 'units.member.resendInvite' : 'units.member.sendInvite')}
+                    </Button>
+                  ) : null}
                 </div>
-                <Button className="w-full" color="error" variant="light" onClick={() => setConfirmingRemove(true)}>
-                  {t('units.member.remove')}
-                </Button>
-              </div>
+              </DrawerField>
+
+              <DangerZone action={<Button className="w-full" color="error" variant="light" onClick={() => setConfirmingRemove(true)}> {t('units.member.remove')} </Button>} description={t('units.member.removeHint', { unit: unit.unit_number })} title={t('units.form.sensitiveZone')} />
               <ConfirmDialog
                 body={t('units.member.confirmRemoveBody')}
                 opened={confirmingRemove}
