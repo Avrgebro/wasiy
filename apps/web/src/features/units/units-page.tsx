@@ -69,7 +69,6 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
 
   const rows = listQuery.data?.data ?? []
   const total = listQuery.data?.meta.total
-  const isFiltered = Boolean(search.search || search.type || search.status || search.attention)
 
   const columns: ColumnDef<UnitSummary>[] = [
     {
@@ -159,16 +158,6 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
       <DataTable
         columns={columns}
         data={rows}
-        emptyState={
-          <div className="grid min-h-40 place-items-center px-6 text-center">
-            <div>
-              <Text fw={600}>{t(isFiltered ? 'units.emptyFilteredTitle' : 'units.emptyTitle', { location: locationName })}</Text>
-              <Text c="dimmed" mt={4} size="sm">
-                {t(isFiltered ? 'units.emptyFilteredBody' : 'units.emptyBody')}
-              </Text>
-            </div>
-          </div>
-        }
         fetching={listQuery.isPlaceholderData}
         groupBy={(unit) => unit.building_name}
         loading={listQuery.isLoading}

@@ -94,7 +94,6 @@ function ResidentsContent({
 
   const rows = listQuery.data?.data ?? []
   const total = listQuery.data?.meta.total
-  const isFiltered = Boolean(search.search || search.portal || search.status)
 
   const portalOptions = (['active', 'invited', 'not_invited'] as const).map((value) => ({ value, label: t(`units.portal.${value}`) }))
   const statusOptions = [
@@ -174,21 +173,11 @@ function ResidentsContent({
       <DataTable
         columns={columns}
         data={rows}
-        emptyState={
-          <div className="grid min-h-40 place-items-center px-6 text-center">
-            <div className="flex flex-col items-center gap-2">
-              <Text c="dimmed" size="sm">
-                {t(isFiltered ? 'residents.emptyFiltered' : 'residents.empty', { location: locationName })}
-              </Text>
-              {/* The list is active people only; a name that finds nobody may have been deactivated. */}
-              {search.search && !search.status ? (
-                <Button size="compact-sm" variant="subtle" onClick={() => updateSearch({ status: 'inactive' })}>
-                  {t('residents.searchInactive')}
-                </Button>
-              ) : null}
-            </div>
-          </div>
-        }
+        emptyActions={search.search && !search.status ? (
+          <Button size="compact-sm" variant="subtle" onClick={() => updateSearch({ status: 'inactive' })}>
+            {t('residents.searchInactive')}
+          </Button>
+        ) : undefined}
         fetching={listQuery.isPlaceholderData}
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}

@@ -298,13 +298,6 @@ function FinancesContent({
       <DataTable
         columns={columns}
         data={listQuery.data?.data ?? []}
-        emptyState={
-          <div className="grid min-h-40 place-items-center px-6 text-center">
-            <Text c="dimmed" size="sm">
-              {t(chip || search.search || search.category || search.status ? 'finances.emptyFiltered' : 'finances.emptyMonth', { month: monthLabel(month) })}
-            </Text>
-          </div>
-        }
         fetching={listQuery.isPlaceholderData}
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}

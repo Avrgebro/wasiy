@@ -151,13 +151,6 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
       <DataTable
         columns={columns}
         data={rows}
-        emptyState={
-          <div className="grid min-h-40 place-items-center px-6 text-center">
-            <Text c="dimmed" size="sm">
-              {t(search.search ? 'packages.emptyFiltered' : `packages.empty.${search.chip}`)}
-            </Text>
-          </div>
-        }
         fetching={listQuery.isPlaceholderData}
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}

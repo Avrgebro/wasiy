@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
+import { TableEmptyState } from './table-empty-state'
 import { nextSort, parseSort } from './sort'
 
 declare module '@tanstack/react-table' {
@@ -51,7 +52,7 @@ function columnClasses(meta: { className?: string; hideBelow?: 'sm' | 'md' | 'lg
 export function DataTable<TRow extends { id: string }>({
   columns,
   data,
-  emptyState,
+  emptyActions,
   fetching = false,
   groupBy,
   loading = false,
@@ -66,8 +67,8 @@ export function DataTable<TRow extends { id: string }>({
 }: {
   columns: ColumnDef<TRow>[]
   data: TRow[]
-  /** Shown when the list is empty after loading; omit to show bare headers. */
-  emptyState?: ReactNode
+  /** Optional actions below the shared empty-state message. */
+  emptyActions?: ReactNode
   /** A page swap under keepPreviousData: rows stay visible but recede. */
   fetching?: boolean
   /** Inserts a band row whenever this key changes between consecutive rows (e.g. building). */
@@ -112,8 +113,8 @@ export function DataTable<TRow extends { id: string }>({
         <div className="grid min-h-64 place-items-center">
           <Loader aria-label={t('common.loading')} />
         </div>
-      ) : isEmpty && emptyState ? (
-        emptyState
+      ) : isEmpty ? (
+        <TableEmptyState>{emptyActions}</TableEmptyState>
       ) : (
         <div className={fetching ? 'opacity-60' : undefined}>
           {/* Narrow viewports scroll the table sideways; headers stay put. */}

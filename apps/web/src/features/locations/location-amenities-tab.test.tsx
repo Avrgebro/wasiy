@@ -153,7 +153,7 @@ describe('LocationAmenitiesTab', () => {
     installAdapter([])
     renderTab()
 
-    expect(await screen.findByText('Sin amenidades registradas')).toBeInTheDocument()
+    expect(await screen.findByText('No hay resultados')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Agregar amenidad' }).length).toBeGreaterThan(0)
   })
 
@@ -170,7 +170,7 @@ describe('LocationAmenitiesTab', () => {
   it('the availability editor blocks an overlapping window and names the range', async () => {
     installAdapter([])
     renderTab()
-    await screen.findByText('Sin amenidades registradas')
+    await screen.findByText('No hay resultados')
 
     const user = userEvent.setup()
     await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])
@@ -199,7 +199,7 @@ describe('LocationAmenitiesTab', () => {
   it('copiar a todos los días replicates one day across the week', async () => {
     installAdapter([])
     renderTab()
-    await screen.findByText('Sin amenidades registradas')
+    await screen.findByText('No hay resultados')
 
     const user = userEvent.setup()
     await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])
@@ -218,7 +218,7 @@ describe('LocationAmenitiesTab', () => {
       posted = payload as Record<string, unknown>
     })
     renderTab()
-    await screen.findByText('Sin amenidades registradas')
+    await screen.findByText('No hay resultados')
 
     const user = userEvent.setup()
     await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])

@@ -171,7 +171,7 @@ it.each([false, true])('does not carry old location results into a pending conte
   }
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   renderPage(client)
-  await screen.findByText(populated ? '402' : 'Aún no hay unidades en Edificio Central')
+  await screen.findByText(populated ? '402' : 'No hay resultados')
   const session = client.getQueryData<Session>(sessionQueryKey)
   if (session?.status !== 'authenticated') throw new Error('Expected authenticated session')
   const me = session.me
@@ -179,7 +179,7 @@ it.each([false, true])('does not carry old location results into a pending conte
   if (!location) throw new Error('Expected active location')
   await act(async () => applyAuthenticatedMe(client, { ...me, active_location: { ...location, id: 'loc_2', name: 'Nueva ubicación' } }))
   await waitFor(() => expect(release).toBeDefined())
-  expect(screen.queryByText('Aún no hay unidades en Nueva ubicación')).not.toBeInTheDocument()
+  expect(screen.queryByText('No hay resultados')).not.toBeInTheDocument()
   expect(screen.queryByText('402')).not.toBeInTheDocument()
   expect(client.getQueryState(['registry', 'units', 'loc_2', currentSearch])?.fetchStatus).toBe('fetching')
   await act(async () => release!())

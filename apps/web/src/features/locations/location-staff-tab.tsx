@@ -1,5 +1,6 @@
+import { TableEmptyState } from '../../components/table/table-empty-state'
 import { Alert, Avatar, Skeleton, Table, Text } from '@mantine/core'
-import { LockIcon, UsersGroupRoundedIcon } from '@solar-icons/react/linear'
+import { LockIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -66,13 +67,8 @@ export function LocationStaffTab({ accountId, locationId }: { accountId: string;
       </div>
 
       {staff.length === 0 ? (
-        <div className="grid min-h-56 place-items-center rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-8 text-center">
-          <div className="flex flex-col items-center gap-2">
-            <UsersGroupRoundedIcon className="text-[var(--mantine-color-dimmed)]" size={26} />
-            <Text fw={700}>{t('locations.staffTab.emptyTitle')}</Text>
-            <Text c="dimmed" size="sm">
-              {t('locations.staffTab.emptyBody')}
-            </Text>
+        <div className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+          <TableEmptyState>
             <Link
               className="mt-1 font-semibold text-[var(--wa-interactive)] no-underline"
               search={staffSearch}
@@ -80,7 +76,7 @@ export function LocationStaffTab({ accountId, locationId }: { accountId: string;
             >
               {t('locations.staffTab.goToStaff')}
             </Link>
-          </div>
+          </TableEmptyState>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">

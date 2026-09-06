@@ -155,20 +155,6 @@ function AnnouncementsContent({ canManage, locationId, locationName, timezone }:
       <DataTable
         columns={columns}
         data={rows}
-        emptyState={
-          <div className="grid min-h-40 place-items-center px-6 text-center">
-            <div className="flex flex-col items-center gap-3">
-              <Text c="dimmed" size="sm">
-                {t(search.search ? 'announcements.emptyFiltered' : `announcements.empty.${search.chip}`, { location: locationName })}
-              </Text>
-              {canManage && !search.search && search.chip !== 'scheduled' ? (
-                <Button color="accent" size="compact-md" onClick={() => setForm({ open: true, editing: null })}>
-                  {t('announcements.create')}
-                </Button>
-              ) : null}
-            </div>
-          </div>
-        }
         fetching={listQuery.isPlaceholderData}
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}

@@ -1,3 +1,4 @@
+import { TableEmptyState } from '../../components/table/table-empty-state'
 import { Alert, Badge, Button, Loader, Table, Text } from '@mantine/core'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -274,7 +275,7 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
 
       <PanelCard caption={<CardLink to="/admin/reservations">{t('dashboard.cards.viewCalendar')}</CardLink>} title={t('dashboard.cards.reservationsToday')}>
         {today.reservations_today.length === 0 ? (
-          <EmptyLine>{t('dashboard.empty.reservations')}</EmptyLine>
+          <TableEmptyState />
         ) : (
           <div className="overflow-x-auto">
             <Table verticalSpacing="sm">

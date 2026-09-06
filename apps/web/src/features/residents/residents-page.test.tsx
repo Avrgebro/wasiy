@@ -130,7 +130,7 @@ describe('ResidentsPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText('Ninguna persona coincide.')).toBeInTheDocument()
+    expect(await screen.findByText('No hay resultados')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Buscar entre desactivados' }))
     expect(navigateSpy.mock.calls.at(-1)![0].search({ page: 2, search: 'torres' })).toEqual({ search: 'torres', status: 'inactive', page: 1 })
   })

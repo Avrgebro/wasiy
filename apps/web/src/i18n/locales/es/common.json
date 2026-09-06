@@ -670,6 +670,8 @@
     "allStatuses": "Todos los estados"
   },
   "table": {
+    "emptyTitle": "No hay resultados",
+    "emptyBody": "No hay registros para mostrar en esta vista.",
     "showing": "Mostrando {{from}}–{{to}} de {{total}}",
     "previousPage": "Página anterior",
     "nextPage": "Página siguiente",

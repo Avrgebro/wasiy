@@ -670,6 +670,8 @@
     "allStatuses": "All statuses"
   },
   "table": {
+    "emptyTitle": "No results",
+    "emptyBody": "There are no records to display in this view.",
     "showing": "Showing {{from}}–{{to}} of {{total}}",
     "previousPage": "Previous page",
     "nextPage": "Next page",

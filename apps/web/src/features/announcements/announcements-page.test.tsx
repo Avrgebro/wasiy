@@ -142,7 +142,7 @@ describe('AnnouncementsPage', () => {
 
     renderPage()
     const user = userEvent.setup()
-    await screen.findByText('No hay anuncios vigentes en Edificio Central.')
+    await screen.findByText('No hay resultados')
     // The header button; the empty state offers a second one.
     await user.click(screen.getAllByRole('button', { name: 'Nuevo anuncio' })[0])
     const drawer = await screen.findByRole('dialog')

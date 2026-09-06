@@ -15,7 +15,6 @@ import { PendingInvitations } from './pending-invitations'
 import { StaffAccessDrawer } from './staff-access-drawer'
 import { StaffDeactivateModal } from './staff-deactivate-modal'
 import { useStaffColumns } from './staff-columns'
-import { StaffEmptyState } from './staff-empty-state'
 import { StaffFilters } from './staff-filters'
 import { staffRowClassName } from './staff-status'
 
@@ -142,7 +141,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
       <DataTable
         columns={columns}
         data={rows}
-        emptyState={<StaffEmptyState filtered={isFiltered} onInvite={openInvite} />}
+        emptyActions={!isFiltered ? <Button color="accent" onClick={openInvite}>{t('staff.invite')}</Button> : undefined}
         fetching={listQuery.isPlaceholderData}
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
