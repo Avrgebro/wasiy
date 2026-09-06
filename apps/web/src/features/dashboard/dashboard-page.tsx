@@ -1,19 +1,14 @@
 import { Alert, Badge, Button, Loader, Table, Text } from '@mantine/core'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
 import { StatCard } from '../../components/ui/stat-card'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { notifyError, notifySuccess } from '../../lib/notify'
 import { can, isAccountAdmin } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import type { MeResponse } from '../auth/types'
-import { generateDues } from '../finances/api'
-import { monthLabel } from '../finances/month'
-import { MovementFormDrawer } from '../finances/movement-form-drawer'
 import { RegisterPackageDrawer } from '../packages/register-package-drawer'
 import type { ReservationSummary } from '../reservations/api'
 import { formatTimeRange } from '../reservations/week'
@@ -67,12 +62,10 @@ export function DashboardPage() {
 function DashboardContent({ accountId, locationId, locationName, me, timezone }: { accountId: string; locationId: string; locationName: string; me: MeResponse; timezone: string }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
-  // The management strip, the movement drawer and dues generation are all ledger actions.
+  // Ledger reads (the management strip) are gated; ledger actions live on Finanzas.
   const canManage = can(me, 'finances.manage')
   const [registeringVisit, setRegisteringVisit] = useState(false)
   const [registeringPackage, setRegisteringPackage] = useState(false)
-  const [recordingMovement, setRecordingMovement] = useState(false)
-  const [confirmingDues, setConfirmingDues] = useState(false)
   const now = new Date()
 
   const dashboardQuery = useQuery({
@@ -85,18 +78,6 @@ function DashboardContent({ accountId, locationId, locationName, me, timezone }:
   function refresh() {
     void queryClient.invalidateQueries({ queryKey: locationDashboardQueryKey(locationId) })
   }
-
-  const month = dashboardQuery.data?.management?.month ?? new Intl.DateTimeFormat('en-CA', { timeZone: timezone, year: 'numeric', month: '2-digit' }).format(now).slice(0, 7)
-  const dues = useMutation({
-    mutationFn: () => generateDues(accountId, locationId, month),
-    onSuccess: async ({ data }) => {
-      await queryClient.invalidateQueries({ queryKey: ['finances'] })
-      refresh()
-      setConfirmingDues(false)
-      notifySuccess(t('finances.dues.done', { created: data.created, skipped: data.skipped }))
-    },
-    onError: (error) => notifyError(getErrorMessage(error)),
-  })
 
   const dateLine = new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone }).format(now)
   const data = dashboardQuery.data
@@ -118,16 +99,6 @@ function DashboardContent({ accountId, locationId, locationName, me, timezone }:
           <Button className="w-full sm:w-auto" variant="default" onClick={() => setRegisteringPackage(true)}>
             {t('packages.register')}
           </Button>
-          {canManage ? (
-            <>
-              <Button className="w-full sm:w-auto" variant="default" onClick={() => setRecordingMovement(true)}>
-                {t('dashboard.actions.newMovement')}
-              </Button>
-              <Button className="w-full sm:w-auto" variant="default" onClick={() => setConfirmingDues(true)}>
-                {t('finances.dues.action')}
-              </Button>
-            </>
-          ) : null}
         </div>
       </div>
 
@@ -169,27 +140,6 @@ function DashboardContent({ accountId, locationId, locationName, me, timezone }:
           refresh()
         }}
       />
-      {canManage ? (
-        <>
-          <MovementFormDrawer
-            accountId={accountId}
-            locationId={locationId}
-            opened={recordingMovement}
-            timezone={timezone}
-            onClose={() => {
-              setRecordingMovement(false)
-              refresh()
-            }}
-          />
-          <ConfirmDialog
-            body={t('finances.dues.confirmBody', { month: monthLabel(month) })}
-            opened={confirmingDues}
-            title={t('finances.dues.confirmTitle', { month: monthLabel(month) })}
-            onCancel={() => setConfirmingDues(false)}
-            onConfirm={() => dues.mutate()}
-          />
-        </>
-      ) : null}
     </div>
   )
 }

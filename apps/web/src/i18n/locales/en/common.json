@@ -77,9 +77,6 @@
       "today": "Today",
       "management": "Management"
     },
-    "actions": {
-      "newMovement": "New movement"
-    },
     "tiles": {
       "visitorsInside": "Visitors inside",
       "visitorsOverdue_one": "{{count}} check-out to confirm",

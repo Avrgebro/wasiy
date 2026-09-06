@@ -77,9 +77,6 @@
       "today": "Hoy",
       "management": "Administración"
     },
-    "actions": {
-      "newMovement": "Nuevo movimiento"
-    },
     "tiles": {
       "visitorsInside": "Visitantes dentro",
       "visitorsOverdue_one": "{{count}} salida por confirmar",

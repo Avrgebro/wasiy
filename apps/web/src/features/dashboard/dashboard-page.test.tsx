@@ -121,8 +121,8 @@ describe('DashboardPage', () => {
     renderPage()
 
     expect(await screen.findByRole('heading', { name: 'Panel de Edificio Central' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Nuevo movimiento' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Generar cuotas del mes' })).toBeInTheDocument()
+    // Ledger actions live on Finanzas, not on the panel.
+    expect(screen.queryByRole('button', { name: 'Generar cuotas del mes' })).not.toBeInTheDocument()
 
     expect(await screen.findByText('Movimientos pendientes')).toBeInTheDocument()
     expect(screen.queryByText('Salidas registradas hoy')).not.toBeInTheDocument()
@@ -153,8 +153,6 @@ describe('DashboardPage', () => {
     expect(await screen.findByRole('heading', { name: 'Panel de Edificio Central' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Registrar visita' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Registrar paquete' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Nuevo movimiento' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Generar cuotas del mes' })).not.toBeInTheDocument()
 
     expect(await screen.findByText('Salidas registradas hoy')).toBeInTheDocument()
     expect(screen.getByText('14')).toBeInTheDocument()
