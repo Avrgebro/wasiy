@@ -1,6 +1,7 @@
+import { ReservationStatusBadge } from './reservation-status-badge'
 import { TableEmptyState } from '../../components/table/table-empty-state'
 import type { ReactNode } from 'react'
-import { Badge, Loader, Text } from '@mantine/core'
+import { Loader, Text } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import type { ReservationSummary } from './api'
 import { formatTimeRange, localDateString, longDayLabel } from './week'
@@ -20,22 +21,6 @@ function accentFor(amenityId: string, palette: Map<string, string>): string {
   }
 
   return palette.get(amenityId)!
-}
-
-function statusBadge(reservation: ReservationSummary) {
-  if (reservation.is_completed) {
-    return { color: 'gray', key: 'completed' }
-  }
-
-  const colors: Record<ReservationSummary['status'], string> = {
-    pending: 'warning',
-    approved: 'success',
-    observed: 'info',
-    rejected: 'error',
-    cancelled: 'gray',
-  }
-
-  return { color: colors[reservation.status], key: reservation.status }
 }
 
 /**
@@ -101,7 +86,6 @@ export function ReservationWeekList({
                     {longDayLabel(day)}
                   </div>
                   {byDay.get(day)!.map((reservation) => {
-                    const badge = statusBadge(reservation)
 
                     return (
                       <div
@@ -135,9 +119,7 @@ export function ReservationWeekList({
                         <Text c="dimmed" size="sm">
                           {formatTimeRange(reservation, timezone)}
                         </Text>
-                        <Badge color={badge.color} radius="xl" size="sm" variant="light">
-                          {t(`reservations.statuses.${badge.key}`)}
-                        </Badge>
+                        <ReservationStatusBadge reservation={reservation} />
                       </div>
                     )
                   })}

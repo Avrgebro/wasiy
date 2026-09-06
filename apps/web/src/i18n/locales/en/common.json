@@ -813,6 +813,14 @@
     }
   },
   "reservations": {
+    "statusDescriptions": {
+      "pending": "Awaiting approval.",
+      "approved": "Reservation approved.",
+      "observed": "Needs clarification.",
+      "rejected": "Request rejected.",
+      "cancelled": "Reservation cancelled.",
+      "completed": "The reservation time has ended."
+    },
     "title": "Reservations",
     "subtitle": "{{location}} amenities",
     "noLocation": "Select a location to see its reservations.",

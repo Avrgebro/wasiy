@@ -1,15 +1,7 @@
-import { Badge, Text } from '@mantine/core'
-import { useTranslation } from 'react-i18next'
+import { Text } from '@mantine/core'
+import { ReservationStatusBadge } from './reservation-status-badge'
 import type { ReservationSummary } from './api'
 import { formatTimeRange, localDateString, shortDayLabel } from './week'
-
-const RESERVATION_STATUS_COLORS: Record<ReservationSummary['status'], string> = {
-  pending: 'warning',
-  approved: 'success',
-  observed: 'info',
-  rejected: 'error',
-  cancelled: 'gray',
-}
 
 /** The "mié 2 · 18:00–23:00 [status]" band the reservation modals open with. */
 export function ReservationSlotBand({
@@ -19,8 +11,6 @@ export function ReservationSlotBand({
   reservation: ReservationSummary
   timezone: string
 }) {
-  const { t } = useTranslation('common')
-  const badgeKey = reservation.is_completed ? 'completed' : reservation.status
 
   return (
     // Surface-2 band; the pill uses the `surface` variant so it stays visible.
@@ -29,14 +19,7 @@ export function ReservationSlotBand({
         {shortDayLabel(localDateString(new Date(reservation.starts_at), timezone))} ·{' '}
         {formatTimeRange(reservation, timezone)}
       </Text>
-      <Badge
-        color={reservation.is_completed ? 'gray' : RESERVATION_STATUS_COLORS[reservation.status]}
-        radius="xl"
-        size="sm"
-        variant="surface"
-      >
-        {t(`reservations.statuses.${badgeKey}`)}
-      </Badge>
+      <ReservationStatusBadge reservation={reservation} variant="surface" />
     </div>
   )
 }

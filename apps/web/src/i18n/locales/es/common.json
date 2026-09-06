@@ -813,6 +813,14 @@
     }
   },
   "reservations": {
+    "statusDescriptions": {
+      "pending": "Espera aprobación.",
+      "approved": "Reserva aprobada.",
+      "observed": "Requiere aclaraciones.",
+      "rejected": "Solicitud rechazada.",
+      "cancelled": "Reserva cancelada.",
+      "completed": "El horario de la reserva ya terminó."
+    },
     "title": "Reservas",
     "subtitle": "Amenidades de {{location}}",
     "noLocation": "Selecciona una ubicación para ver sus reservas.",
