@@ -1,4 +1,4 @@
-import { Badge, Container, createTheme, Drawer, Input, Modal, rem, Select } from "@mantine/core";
+import { Badge, Container, createTheme, Drawer, Input, Modal, rem, SegmentedControl, Select } from "@mantine/core";
 import type {
   CSSVariablesResolver,
   MantineColorsTuple,
@@ -217,6 +217,17 @@ export const mantineTheme: MantineThemeOverride = createTheme({
       }),
     }),
 
+    // The mockups' segment: track on the field color with a border, the
+    // indicator on surface 2° with a border, no separators between items.
+    // The active label color needs a selector, so it lives in index.css.
+    SegmentedControl: SegmentedControl.extend({
+      defaultProps: { size: "md", radius: "md", withItemsBorders: false },
+      styles: {
+        root: { backgroundColor: "var(--wa-field)", border: "1px solid var(--mantine-color-default-border)", padding: 3 },
+        indicator: { backgroundColor: "var(--wa-surface-2)", border: "1px solid var(--mantine-color-default-border)", boxShadow: "none" },
+        label: { fontWeight: 600, color: "var(--mantine-color-dimmed)" },
+      },
+    }),
     Select: Select.extend({
       defaultProps: {
         checkIconPosition: "right",

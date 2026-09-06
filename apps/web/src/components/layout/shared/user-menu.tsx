@@ -56,7 +56,6 @@ export function UserMenu() {
             onChange={(value) =>
               setColorScheme(value as 'light' | 'dark' | 'auto')
             }
-            size="xs"
             value={colorScheme}
             data={[
               {

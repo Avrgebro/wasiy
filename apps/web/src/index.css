@@ -217,6 +217,12 @@
   --table-hover-color: var(--wa-hover);
 }
 
+/* SegmentedControl: the active label reads at full text color (theme.ts sets
+   the rest; a selector cannot go through inline styles). */
+.mantine-SegmentedControl-label[data-active] {
+  color: var(--mantine-color-text);
+}
+
 /* Default-variant inputs sit on --wa-field. Mantine sets --input-bg to dark-6
    in dark mode, the same tone as the card the field sits on; the mockups want
    the field one step deeper. Unlayered to beat Mantine. */
