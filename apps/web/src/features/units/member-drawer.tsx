@@ -216,6 +216,7 @@ export function MemberDrawer({
                       { value: 'new', label: t('units.member.new') },
                     ]}
                     fullWidth
+                    size="md"
                   />
                 )}
               />

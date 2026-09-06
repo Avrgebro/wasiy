@@ -59,12 +59,12 @@ export function AnnouncementEditor({
           linkEditorSave: t('actions.save'),
         }}
         mt={6}
-        // Mantine paints the editor with the page background; inputs here sit
-        // on the surface color, so the editor follows them in both schemes.
+        // Mantine paints the editor with the page background; it follows the
+        // app's field token like every other input instead.
         styles={{
-          root: { backgroundColor: 'var(--mantine-color-default)' },
-          toolbar: { backgroundColor: 'var(--mantine-color-default)' },
-          content: { backgroundColor: 'var(--mantine-color-default)' },
+          root: { backgroundColor: 'var(--wa-field)' },
+          toolbar: { backgroundColor: 'var(--wa-field)' },
+          content: { backgroundColor: 'var(--wa-field)' },
         }}
       >
         <RichTextEditor.Toolbar>

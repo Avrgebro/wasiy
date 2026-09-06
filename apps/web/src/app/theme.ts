@@ -1,4 +1,4 @@
-import { Badge, Container, createTheme, Input, rem, Select } from "@mantine/core";
+import { Badge, Container, createTheme, Drawer, Input, Modal, rem, Select } from "@mantine/core";
 import type {
   CSSVariablesResolver,
   MantineColorsTuple,
@@ -190,6 +190,16 @@ export const mantineTheme: MantineThemeOverride = createTheme({
   // `c` props.
   autoContrast: true,
   components: {
+    // Panels are cards, not canvas: Mantine paints Drawer and Modal with the
+    // body color, which in dark mode is the app background (#101D1E), the same
+    // tone the mockups reserve for fields. The panel takes the surface
+    // (white / #16282A) so fields sink into it as drawn.
+    Drawer: Drawer.extend({
+      styles: { content: { backgroundColor: "var(--mantine-color-default)" }, header: { backgroundColor: "var(--mantine-color-default)" } },
+    }),
+    Modal: Modal.extend({
+      styles: { content: { backgroundColor: "var(--mantine-color-default)" }, header: { backgroundColor: "var(--mantine-color-default)" } },
+    }),
     // Hints read as "what you typed means" when they sit under the field;
     // above it they push labels apart in two-column rows (UX audit).
     InputWrapper: Input.Wrapper.extend({

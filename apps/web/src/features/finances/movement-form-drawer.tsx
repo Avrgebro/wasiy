@@ -133,6 +133,7 @@ export function MovementFormDrawer({
                   { value: 'income', label: t('finances.form.income') },
                 ]}
                 fullWidth
+                size="md"
                 onChange={(value) => {
                   field.onChange(value)
                   // Categories and the payer column differ per direction.

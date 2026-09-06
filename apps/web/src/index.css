@@ -38,6 +38,9 @@
   --wa-bg: #f7f5f0;
   --wa-surface: #ffffff;
   --wa-surface-2: #f2efe9;
+  /* Field background: white on light; in dark it sinks one step below the
+     card (mockups draw inputs at the app background, not the surface). */
+  --wa-field: #ffffff;
   --wa-text: #1c2b2c;
   --wa-text-2: #5a6b6b;
   /* Third text level (mockups): hints, chevrons, timestamps, second lines. */
@@ -100,6 +103,7 @@
   --wa-bg: #101d1e;
   --wa-surface: #16282a;
   --wa-surface-2: #1d3335;
+  --wa-field: #101d1e;
   --wa-text: #e9ece8;
   --wa-text-2: #9fb0ae;
   --wa-text-3: #5f7371;
@@ -211,6 +215,13 @@
 .mantine-Table-table {
   --table-border-color: var(--wa-divider);
   --table-hover-color: var(--wa-hover);
+}
+
+/* Default-variant inputs sit on --wa-field. Mantine sets --input-bg to dark-6
+   in dark mode, the same tone as the card the field sits on; the mockups want
+   the field one step deeper. Unlayered to beat Mantine. */
+.mantine-Input-wrapper[data-variant='default'] {
+  --input-bg: var(--wa-field);
 }
 
 /* Default-variant buttons and icon buttons: a firmer outline so the button

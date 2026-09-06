@@ -225,7 +225,7 @@ export function RegisterVisitDrawer({
                 control={form.control}
                 name="confirmation"
                 render={({ field }) => (
-                  <SegmentedControl {...field} data={VISIT_CONFIRMATIONS.map((value) => ({ value, label: t(`visits.confirmations.${value}`) }))} fullWidth />
+                  <SegmentedControl {...field} data={VISIT_CONFIRMATIONS.map((value) => ({ value, label: t(`visits.confirmations.${value}`) }))} fullWidth size="md"/>
                 )}
               />
             </DrawerField>

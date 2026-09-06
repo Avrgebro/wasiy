@@ -93,6 +93,7 @@ export function PortalVisitFormPage() {
                 { label: t('portal.visits.form.otherDay'), value: 'other' },
               ]}
               fullWidth
+              size="md"
               value={field.value}
               onChange={field.onChange}
             />
