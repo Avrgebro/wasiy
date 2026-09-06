@@ -1,4 +1,4 @@
-import { ActionIcon, Tooltip } from '@mantine/core'
+import { ActionIcon, Input, Tooltip } from '@mantine/core'
 import { BellIcon, HamburgerMenuIcon, MagnifierIcon } from '@solar-icons/react/linear'
 import { spotlight } from '@mantine/spotlight'
 import { useRouterState } from '@tanstack/react-router'
@@ -60,26 +60,33 @@ export function Topbar({
           </div>
         ) : null}
 
-        {/* Opens the ⌘K spotlight (features/search); the input look is a
-            button so the real field lives in the overlay. */}
-        <button
-          className="hidden h-9 w-full max-w-md cursor-pointer items-center gap-2 rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-3 text-sm text-[var(--mantine-color-dimmed)] hover:border-[var(--wa-border-strong)] md:flex"
-          onClick={spotlight.open}
+        {/* Opens the ⌘K spotlight (features/search). Mantine's Input rendered
+            as a button so it shares every input's colors, border, radius and
+            height; the real field lives in the overlay. */}
+        <Input
+          className="hidden w-full max-w-md md:block"
+          component="button"
+          leftSection={<MagnifierIcon aria-hidden="true" size={15} />}
+          pointer
+          rightSection={
+            <kbd className="rounded border border-[var(--mantine-color-default-border)] px-1.5 py-0.5 font-sans text-[10px] font-semibold text-[var(--mantine-color-dimmed)]">
+              ⌘K
+            </kbd>
+          }
+          rightSectionWidth={48}
           type="button"
+          onClick={spotlight.open}
         >
-          <MagnifierIcon aria-hidden="true" size={16} />
-          <span>{t('shell.searchPlaceholder')}</span>
-          <kbd className="ml-auto rounded border border-[var(--mantine-color-default-border)] px-1.5 py-0.5 font-sans text-[10px] font-semibold">
-            ⌘K
-          </kbd>
-        </button>
+          <Input.Placeholder>{t('shell.searchPlaceholder')}</Input.Placeholder>
+        </Input>
         <ActionIcon
           aria-label={t('shell.searchPlaceholder')}
           className="md:hidden"
+          color="gray"
           onClick={spotlight.open}
           radius={10}
           size={40}
-          variant="default"
+          variant="subtle"
         >
           <MagnifierIcon size={18} />
         </ActionIcon>
@@ -89,9 +96,10 @@ export function Topbar({
           <Tooltip label={t('notifications.label')}>
             <ActionIcon
               aria-label={t('notifications.label')}
+              color="gray"
               radius={10}
               size={40}
-              variant="default"
+              variant="subtle"
             >
               <BellIcon size={18} />
             </ActionIcon>
