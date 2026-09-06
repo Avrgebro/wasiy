@@ -12,6 +12,7 @@ use App\Models\UnitMembership;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
@@ -99,6 +100,8 @@ test('the desk lists today\'s expected visitors per unit and confirms an arrival
 });
 
 test('the home board scope shows today\'s expected visitors and today\'s arrivals, and packages are read per unit', function () {
+    // Midday in Lima: rows created hours ago must stay on today's date (CI runs at 05:00 UTC).
+    $this->travelTo(Carbon::parse('2026-09-05 15:00:00', 'UTC'));
     [$location, $unit, $resident, $user] = portalVisitWorld();
     Visit::factory()->expected(now($location->timezone)->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'resident_id' => $resident->id, 'visitor_name' => 'Jorge Peña', 'expected_time' => '19:00']);
     Visit::factory()->expected(now($location->timezone)->addDay()->toDateString())->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id, 'visitor_name' => 'Mañana']);

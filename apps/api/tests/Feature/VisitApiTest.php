@@ -12,6 +12,7 @@ use App\Models\UnitMembership;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
@@ -94,6 +95,8 @@ test('check-out is one way and keeps its notes', function () {
 });
 
 test('the list filters inside and today, and searches visitor, document, unit and host', function () {
+    // Midday in Lima: rows created hours ago must stay on today's date (CI runs at 05:00 UTC).
+    $this->travelTo(Carbon::parse('2026-09-05 15:00:00', 'UTC'));
     [$account, $location, $unit, $desk] = visitWorld();
     $carlos = hostOf($unit, ['first_name' => 'Carlos', 'last_name' => 'Mendoza']);
     $other = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id, 'unit_number' => '609', 'building_name' => 'Torre B']);

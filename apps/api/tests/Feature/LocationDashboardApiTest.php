@@ -23,6 +23,7 @@ use App\Models\UnitMembership;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
@@ -90,6 +91,8 @@ test('users with deleted account admin assignments cannot view account location 
 });
 
 test('the today strip counts visitors, flags overdue ones, and lists packages and reservations', function () {
+    // Midday in Lima: rows created hours ago must stay on today's date (CI runs at 05:00 UTC).
+    $this->travelTo(Carbon::parse('2026-09-05 15:00:00', 'UTC'));
     [$location, $unit, $manager] = dashboardWorld(autoCheckoutHours: 4);
     $base = ['account_id' => $location->account_id, 'location_id' => $location->id, 'unit_id' => $unit->id];
 
