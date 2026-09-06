@@ -29,7 +29,7 @@ import { plans } from '../data/plans';
                 <span>✓ {feature}</span>
               ))}
             </div>
-            <a class:list={['action', plan.ctaStyle]} href="#contacto">
+            <a class:list={['action', plan.ctaStyle]} href={plan.href}>
               {plan.cta}
             </a>
           </div>

@@ -13,6 +13,7 @@ export interface Plan {
   pitch: string;
   features: string[];
   cta: string;
+  href: string;
   ctaStyle: 'solid' | 'outline';
   featured?: boolean;
   badge?: string;
@@ -21,9 +22,9 @@ export interface Plan {
 export const plans: Plan[] = [
   {
     name: 'Esencial',
-    amount: 'S/ 2.50',
+    amount: 'S/ 4.50',
     per: ' / unidad / mes',
-    price: 2.5,
+    price: 4.5,
     pitch: 'Para un solo edificio que quiere dejar el cuaderno.',
     features: [
       'Registro de visitantes',
@@ -32,13 +33,14 @@ export const plans: Plan[] = [
       'Portal del residente',
     ],
     cta: 'Agendar demo',
+    href: '/demo',
     ctaStyle: 'outline',
   },
   {
     name: 'Operativo',
-    amount: 'S/ 4.00',
+    amount: 'S/ 6.50',
     per: ' / unidad / mes',
-    price: 4,
+    price: 6.5,
     pitch: 'La operación completa: recepción, reservas y auditoría.',
     features: [
       'Todo lo de Esencial',
@@ -48,6 +50,7 @@ export const plans: Plan[] = [
       'Exportaciones CSV',
     ],
     cta: 'Agendar demo',
+    href: '/demo',
     ctaStyle: 'solid',
     featured: true,
     badge: 'Recomendado',
@@ -65,6 +68,7 @@ export const plans: Plan[] = [
       'Onboarding asistido con CSV',
     ],
     cta: 'Pedir cotización',
+    href: '/#contacto',
     ctaStyle: 'outline',
   },
 ];
