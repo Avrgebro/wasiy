@@ -1,8 +1,10 @@
 import type { ComponentType } from 'react'
-import type { IconProps, IconWeight } from '@solar-icons/react'
+import type { DynamicIconProps } from '@solar-icons/react/lib/dynamic-icon'
 import type { FileRouteTypes } from '@surface/routeTree'
 
-export type LayoutIcon = ComponentType<IconProps>
+/** Nav icons come from `@solar-icons/react/dynamic` so the active state can switch weight. */
+export type LayoutIcon = ComponentType<DynamicIconProps>
+export type LayoutIconWeight = NonNullable<DynamicIconProps['weight']>
 
 /**
  * Only paths the router actually serves. Typing this against the generated
@@ -18,7 +20,7 @@ export type LayoutNavLeaf = {
   badge?: ComponentType
   icon: LayoutIcon
   /** Solar weight; the sidebar defaults to Linear. */
-  iconWeight?: IconWeight
+  iconWeight?: LayoutIconWeight
   labelKey: string
   to: LayoutNavTarget
 }
@@ -28,7 +30,7 @@ export type LayoutNavCollapsible = {
   children: LayoutNavLeaf[]
   defaultOpen?: boolean
   icon: LayoutIcon
-  iconWeight?: IconWeight
+  iconWeight?: LayoutIconWeight
   labelKey: string
 }
 

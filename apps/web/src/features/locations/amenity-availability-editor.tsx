@@ -1,5 +1,5 @@
 import { Button, Text, TextInput } from '@mantine/core'
-import { AddCircle, CloseCircle, Copy, DangerTriangle } from '@solar-icons/react'
+import { AddIcon, CloseIcon, CopyIcon, DangerTriangleIcon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 import type { Availability, AvailabilityWindow } from './amenities-api'
 import { findDayConflict, WEEKDAYS, type Weekday } from './amenity-schedule'
@@ -73,7 +73,7 @@ export function AmenityAvailabilityEditor({
                   </Text>
                   {readOnly ? null : (
                     <Button
-                      leftSection={<AddCircle size={13} />}
+                      leftSection={<AddIcon size={13} />}
                       size="compact-xs"
                       variant="subtle"
                       onClick={() => setDay(day, [{ start: '09:00', end: '22:00' }])}
@@ -139,7 +139,7 @@ export function AmenityAvailabilityEditor({
                               setDay(day, windows.filter((_, itemIndex) => itemIndex !== index))
                             }
                           >
-                            <CloseCircle size={16} />
+                            <CloseIcon size={16} />
                           </button>
                         )}
                       </div>
@@ -148,7 +148,7 @@ export function AmenityAvailabilityEditor({
                   {readOnly ? null : (
                     <div className="flex flex-wrap items-center gap-2 pt-0.5">
                       <Button
-                        leftSection={<AddCircle size={13} />}
+                        leftSection={<AddIcon size={13} />}
                         size="compact-xs"
                         variant="subtle"
                         onClick={() => setDay(day, [...windows, { start: '', end: '' }])}
@@ -156,7 +156,7 @@ export function AmenityAvailabilityEditor({
                         {t('amenities.availability.addWindow')}
                       </Button>
                       <Button
-                        leftSection={<Copy size={13} />}
+                        leftSection={<CopyIcon size={13} />}
                         size="compact-xs"
                         variant="subtle"
                         onClick={() => copyToAllDays(day)}
@@ -167,7 +167,7 @@ export function AmenityAvailabilityEditor({
                   )}
                   {conflict ? (
                     <div className="flex items-center gap-2 text-xs text-[var(--wa-error)]">
-                      <DangerTriangle size={14} className="shrink-0" />
+                      <DangerTriangleIcon size={14} className="shrink-0" />
                       <span>
                         {conflict.end <= conflict.start
                           ? t('amenities.availability.inverted')

@@ -1,5 +1,5 @@
 import { Button, Loader, Text } from '@mantine/core'
-import { AltArrowLeft } from '@solar-icons/react'
+import { AltArrowLeftIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -70,7 +70,7 @@ export function PortalAlertsPage() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-1">
           <Link aria-label={t('actions.back')} className="-ml-2 grid h-9 w-9 place-items-center rounded-full text-[var(--mantine-color-text)]" to="/portal">
-            <AltArrowLeft size={20} />
+            <AltArrowLeftIcon size={20} />
           </Link>
           <h1 className="m-0 text-2xl font-bold">{t('portal.alerts.title')}</h1>
         </div>

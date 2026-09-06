@@ -1,5 +1,5 @@
 import { ActionIcon, Alert, Button, Group, Select, Skeleton, Text } from '@mantine/core'
-import { AddCircle, AltArrowLeft, AltArrowRight } from '@solar-icons/react'
+import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -166,7 +166,7 @@ function ReservationsContent({
         <Button
           className="w-full sm:w-auto"
           color="accent"
-          leftSection={<AddCircle size={18} />}
+          leftSection={<AddIcon size={18} />}
           onClick={() => setDrawerOpened(true)}
         >
           {t('reservations.newReservation')}
@@ -223,7 +223,7 @@ function ReservationsContent({
                 variant="default"
                 onClick={() => updateSearch({ date: addDays(weekStart, -7) })}
               >
-                <AltArrowLeft size={16} />
+                <AltArrowLeftIcon size={16} />
               </ActionIcon>
               <Button variant="default" onClick={() => updateSearch({ date: undefined })}>
                 {t('reservations.today')}
@@ -235,7 +235,7 @@ function ReservationsContent({
                 variant="default"
                 onClick={() => updateSearch({ date: addDays(weekStart, 7) })}
               >
-                <AltArrowRight size={16} />
+                <AltArrowRightIcon size={16} />
               </ActionIcon>
             </Group>
           </div>

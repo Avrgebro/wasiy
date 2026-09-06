@@ -356,7 +356,7 @@ Rules:
 Navigation mapping in use:
 
 - Panel: `Widget`. Personas: `UsersGroupRounded`. Unidades: `KeySquare`. Reservas: `Calendar`. Finanzas: `Wallet`. Anuncios: `Speaker`. Visitantes: `UserCheckRounded`. Ubicaciones: `Buildings2`. Actividad: `ClipboardList`. Configuración: `Settings`. Búsqueda: `Magnifier`.
-- Controls: `AddCircle` on create buttons, `AltArrowLeft`/`AltArrowRight` on pagers and month or week navigators, `AltArrowUp`/`AltArrowDown` as sort indicators, `Filter` on the filters button, `CloseCircle` on chips, `InfoCircle` on informational banners, `ArrowDown` as the expense mark.
+- Controls: `Add` on create buttons, `AltArrowLeft`/`AltArrowRight` on pagers and month or week navigators, `AltArrowUp`/`AltArrowDown` as sort indicators, `Filter` on the filters button, `Close` on chips, `InfoCircle` on informational banners, `ArrowDown` as the expense mark.
 
 ## Dashboard Metrics
 

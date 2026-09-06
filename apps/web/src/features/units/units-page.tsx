@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Text } from '@mantine/core'
-import { AddCircle, Buildings } from '@solar-icons/react'
+import { AddIcon, BuildingsIcon } from '@solar-icons/react/linear'
 import { useState } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -171,12 +171,12 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         {canManage ? (
           <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
             {canManageBuildings ? (
-              <Button className="w-full sm:w-auto" leftSection={<Buildings size={18} />} variant="default" onClick={() => setManagingBuildings(true)}>
+              <Button className="w-full sm:w-auto" leftSection={<BuildingsIcon size={18} />} variant="default" onClick={() => setManagingBuildings(true)}>
                 {t('buildings.title')}
               </Button>
             ) : null}
             <ImportRegistryButton />
-            <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setCreating(true)}>
+            <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setCreating(true)}>
               {t('units.form.createTitle')}
             </Button>
           </div>

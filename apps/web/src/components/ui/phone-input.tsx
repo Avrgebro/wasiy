@@ -1,5 +1,5 @@
 import { Combobox, InputWrapperContext, TextInput, UnstyledButton, useCombobox } from '@mantine/core'
-import { AltArrowDown } from '@solar-icons/react'
+import { AltArrowDownIcon } from '@solar-icons/react/linear'
 import type { CountryCode } from 'libphonenumber-js/min'
 import type { ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -142,7 +142,7 @@ function CountryPicker({ value, onChange }: { value: CountryCode; onChange: (cou
         >
           <span aria-hidden>{countryFlag(value)}</span>
           <span className="font-mono text-xs">+{callingCode}</span>
-          {options.length > 1 ? <AltArrowDown aria-hidden size={12} /> : null}
+          {options.length > 1 ? <AltArrowDownIcon aria-hidden size={12} /> : null}
         </UnstyledButton>
       </Combobox.Target>
 

@@ -1,5 +1,5 @@
 import { Collapse } from '@mantine/core'
-import { AltArrowDown } from '@solar-icons/react'
+import { AltArrowDownIcon } from '@solar-icons/react/dynamic'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -115,7 +115,7 @@ function SidebarCollapsibleItem({
       >
         <Icon aria-hidden="true" className={iconClassName(item)} size={20} weight={item.iconWeight} />
         <span className={sidebarItemLabelClassName}>{t(item.labelKey)}</span>
-        <AltArrowDown
+        <AltArrowDownIcon
           aria-hidden="true"
           className="shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none data-[opened=true]:rotate-180"
           data-opened={opened}

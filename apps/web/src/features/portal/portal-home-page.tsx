@@ -1,5 +1,5 @@
 import { Button, Loader, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -44,7 +44,7 @@ export function PortalHomePage() {
       </div>
 
       <div className="grid grid-cols-2 gap-2.5">
-        <Button color="accent" component={Link} leftSection={<AddCircle size={18} />} size="md" to="/portal/visitas/nueva">
+        <Button color="accent" component={Link} leftSection={<AddIcon size={18} />} size="md" to="/portal/visitas/nueva">
           {t('portal.visits.preRegister')}
         </Button>
         <Button size="md" variant="default" onClick={() => void navigate({ to: '/portal/reservas', search: { chip: 'amenidades' } })}>

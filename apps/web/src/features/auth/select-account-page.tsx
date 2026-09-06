@@ -1,5 +1,5 @@
 import { Alert, Loader } from '@mantine/core'
-import { AltArrowRight } from '@solar-icons/react'
+import { AltArrowRightIcon } from '@solar-icons/react/linear'
 import { useRouter } from '@tanstack/react-router'
 import '@fontsource/instrument-sans/400.css'
 import '@fontsource/instrument-sans/500.css'
@@ -133,7 +133,7 @@ export function SelectAccountPage() {
                 {pending ? (
                   <Loader size={16} />
                 ) : (
-                  <AltArrowRight
+                  <AltArrowRightIcon
                     aria-hidden="true"
                     className="shrink-0 text-[var(--mantine-color-placeholder)] transition-colors group-hover:text-[var(--wa-teal-text)]"
                     size={16}

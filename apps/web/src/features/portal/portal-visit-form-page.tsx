@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { AltArrowLeftIcon } from '@solar-icons/react/linear'
 import { ActionIcon, Alert, Button, SegmentedControl, Text, TextInput, Textarea } from '@mantine/core'
-import { AltArrowLeft } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -62,7 +62,7 @@ export function PortalVisitFormPage() {
     <form className="flex min-h-[calc(100dvh-8rem)] flex-col gap-5" onSubmit={form.handleSubmit((values) => submitHandlingServerErrors(form, () => mutation.mutateAsync(values)))}>
       <div className="flex items-center gap-2">
         <ActionIcon aria-label={t('actions.back')} radius={10} size={40} variant="default" onClick={() => void navigate({ to: '/portal/visitas' })}>
-          <AltArrowLeft size={18} />
+          <AltArrowLeftIcon size={18} />
         </ActionIcon>
         <h1 className="m-0 text-xl font-bold">{t('portal.visits.preRegister')}</h1>
       </div>

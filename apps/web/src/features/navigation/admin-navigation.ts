@@ -1,18 +1,5 @@
-import {
-  Box,
-  Buildings,
-  Calendar,
-  ClipboardList,
-  House,
-  Settings,
-  Speaker,
-  UserCheckRounded,
-  UserPlusRounded,
-  UsersGroupRounded,
-  Wallet,
-  Widget5,
-} from '@solar-icons/react'
 import type { LayoutNavEntry } from '../../components/layout/shared/types'
+import { BoxIcon, BuildingsIcon, CalendarIcon, ClipboardListIcon, HouseIcon, SettingsIcon, SpeakerIcon, UserCheckRoundedIcon, UserPlusRoundedIcon, UsersGroupRoundedIcon, WalletIcon, Widget5Icon } from '@solar-icons/react/dynamic'
 import { hasCapability, isAccountAdmin } from '../auth/access'
 import type { MeResponse } from '../auth/types'
 import { PendingReservationsBadge } from '../reservations/pending-reservations-badge'
@@ -27,24 +14,24 @@ const locationNavigationGroup: NavGroupSpec = {
   type: 'group',
   titleKey: 'navGroups.location',
   items: [
-    { icon: Widget5, iconWeight: 'LineDuotone', labelKey: 'nav.dashboard', to: '/admin' },
-    { icon: UserCheckRounded, labelKey: 'nav.residents', to: '/admin/registry/residents' },
+    { icon: Widget5Icon, iconWeight: 'LineDuotone', labelKey: 'nav.dashboard', to: '/admin' },
+    { icon: UserCheckRoundedIcon, labelKey: 'nav.residents', to: '/admin/registry/residents' },
     // The desk finds people through Residentes; Unidades carries the ledger.
-    { icon: House, labelKey: 'nav.units', to: '/admin/registry/units', visibleTo: hasCapability('registry.manage') },
+    { icon: HouseIcon, labelKey: 'nav.units', to: '/admin/registry/units', visibleTo: hasCapability('registry.manage') },
     {
       badge: PendingReservationsBadge,
-      icon: Calendar,
+      icon: CalendarIcon,
       labelKey: 'nav.reservations',
       to: '/admin/reservations',
     },
     {
-      icon: Speaker,
+      icon: SpeakerIcon,
       labelKey: 'nav.announcements',
       to: '/admin/announcements',
       visibleTo: hasCapability('announcements.manage'),
     },
     {
-      icon: Wallet,
+      icon: WalletIcon,
       labelKey: 'nav.finances',
       to: '/admin/finances',
       visibleTo: hasCapability('finances.manage'),
@@ -60,8 +47,8 @@ const receptionNavigationGroup: NavGroupSpec = {
   type: 'group',
   titleKey: 'navGroups.reception',
   items: [
-    { icon: UserPlusRounded, labelKey: 'nav.visitors', to: '/admin/visitors' },
-    { icon: Box, labelKey: 'nav.packages', to: '/admin/packages' },
+    { icon: UserPlusRoundedIcon, labelKey: 'nav.visitors', to: '/admin/visitors' },
+    { icon: BoxIcon, labelKey: 'nav.packages', to: '/admin/packages' },
   ],
 }
 
@@ -73,10 +60,10 @@ const administrationNavigationGroup: NavGroupSpec = {
   titleKey: 'navGroups.administration',
   visibleTo: isAccountAdmin,
   items: [
-    { icon: Buildings, labelKey: 'nav.locations', to: '/admin/locations' },
-    { icon: UsersGroupRounded, labelKey: 'nav.staff', to: '/admin/staff' },
-    { icon: ClipboardList, labelKey: 'nav.activity', to: '/admin/activity' },
-    { icon: Settings, labelKey: 'nav.settings', to: '/admin/settings' },
+    { icon: BuildingsIcon, labelKey: 'nav.locations', to: '/admin/locations' },
+    { icon: UsersGroupRoundedIcon, labelKey: 'nav.staff', to: '/admin/staff' },
+    { icon: ClipboardListIcon, labelKey: 'nav.activity', to: '/admin/activity' },
+    { icon: SettingsIcon, labelKey: 'nav.settings', to: '/admin/settings' },
   ],
 }
 

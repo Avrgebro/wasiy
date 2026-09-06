@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { AltArrowDownIcon } from '@solar-icons/react/linear'
 import { Alert, Button, Collapse, NumberInput, Select, TagsInput, Text, Textarea, UnstyledButton } from '@mantine/core'
-import { AltArrowDown } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -187,7 +187,7 @@ export function UnitFormDrawer({
               <span>{t('units.form.moreDetails')}</span>
               <span className="text-xs font-normal text-[var(--mantine-color-dimmed)]">{t('units.form.moreDetailsHint')}</span>
             </span>
-            <AltArrowDown aria-hidden className={`transition-transform ${detailsOpen ? 'rotate-180' : ''}`} size={16} />
+            <AltArrowDownIcon aria-hidden className={`transition-transform ${detailsOpen ? 'rotate-180' : ''}`} size={16} />
           </UnstyledButton>
           <Collapse expanded={detailsOpen} keepMounted>
             <div className="flex flex-col gap-5 pt-1">

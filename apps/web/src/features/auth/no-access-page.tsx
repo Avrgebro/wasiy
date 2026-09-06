@@ -1,5 +1,5 @@
 import { Button } from '@mantine/core'
-import { Logout } from '@solar-icons/react'
+import { LogoutIcon } from '@solar-icons/react/linear'
 import { useRouter } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { SURFACE } from '../../app/surface'
@@ -46,7 +46,7 @@ export function NoAccessPage() {
           ) : null}
           <Button
             fullWidth
-            leftSection={<Logout size={16} />}
+            leftSection={<LogoutIcon size={16} />}
             loading={logoutMutation.isPending}
             onClick={handleLogout}
             variant="subtle"

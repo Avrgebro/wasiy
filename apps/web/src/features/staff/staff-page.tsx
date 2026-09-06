@@ -1,5 +1,5 @@
 import { Alert, Button, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -119,7 +119,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
             {t('staff.subtitle')}
           </Text>
         </div>
-        <Button color="accent" leftSection={<AddCircle size={20} />} onClick={openInvite}>
+        <Button color="accent" leftSection={<AddIcon size={20} />} onClick={openInvite}>
           {t('staff.invite')}
         </Button>
       </div>

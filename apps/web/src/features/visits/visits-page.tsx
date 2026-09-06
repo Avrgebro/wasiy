@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Select, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -165,7 +165,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
             {t('visits.subtitle', { location: locationName, date: new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone }).format(now) })}
           </Text>
         </div>
-        <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setRegistering(true)}>
+        <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setRegistering(true)}>
           {t('visits.register')}
         </Button>
       </div>

@@ -1,6 +1,6 @@
 import { Alert, Button, Skeleton, Tabs, Text } from '@mantine/core'
+import { Buildings2Icon, CameraMinimalisticIcon, DangerTriangleIcon } from '@solar-icons/react/linear'
 import { notifySuccess, notifyError } from '../../lib/notify'
-import { Buildings2, CameraMinimalistic, DangerTriangle } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMediaQuery } from '@mantine/hooks'
 import { getRouteApi, Link } from '@tanstack/react-router'
@@ -91,7 +91,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
     return (
       <div className="grid min-h-96 place-items-center text-center">
         <div className="flex flex-col items-center gap-2">
-          <Buildings2 className="text-[var(--mantine-color-dimmed)]" size={30} />
+          <Buildings2Icon className="text-[var(--mantine-color-dimmed)]" size={30} />
           <Text fw={700}>
             {notFound ? t('locations.detail.notFoundTitle') : t('errors.loadFailed')}
           </Text>
@@ -160,7 +160,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
               })
             }}
           >
-            <CameraMinimalistic size={17} />
+            <CameraMinimalisticIcon size={17} />
             <span className="hidden sm:inline">{t('locations.detail.changeCover')}</span>
           </button>
         )}
@@ -201,7 +201,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
 
       {deactivated ? (
         <div className="flex flex-wrap items-center gap-3.5 rounded-surface border border-[var(--wa-warning)]/50 bg-[var(--wa-warning)]/10 px-[18px] py-3.5">
-          <DangerTriangle className="shrink-0 text-[var(--wa-warning)]" size={22} />
+          <DangerTriangleIcon className="shrink-0 text-[var(--wa-warning)]" size={22} />
           <div className="min-w-0 flex-1">
             <Text fw={600} size="sm">
               {t('locations.detail.deactivatedTitle')}

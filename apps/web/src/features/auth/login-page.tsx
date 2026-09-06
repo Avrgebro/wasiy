@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowRightIcon, GlobalIcon, LetterIcon, LockPasswordIcon, PasswordIcon } from '@solar-icons/react/linear'
 import {
   Alert,
   Anchor,
@@ -6,13 +7,6 @@ import {
   Checkbox,
   Divider,
 } from '@mantine/core'
-import {
-  ArrowRight,
-  Global,
-  Letter,
-  LockPassword,
-  Password,
-} from '@solar-icons/react'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
 import '@fontsource/instrument-sans/400.css'
 import '@fontsource/instrument-sans/500.css'
@@ -189,7 +183,7 @@ export function LoginPage() {
                 autoComplete="email"
                 control={form.control}
                 label={t('auth.email')}
-                leftSection={<Letter aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />}
+                leftSection={<LetterIcon aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />}
                 name="email"
                 placeholder="maria.torres@wasiy.pe"
                 styles={fieldStyles}
@@ -205,7 +199,7 @@ export function LoginPage() {
                     </Anchor>
                   </span>
                 }
-                leftSection={<LockPassword aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />}
+                leftSection={<LockPasswordIcon aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />}
                 name="password"
                 styles={fieldStyles}
               />
@@ -231,7 +225,7 @@ export function LoginPage() {
                 h={48}
                 loading={loginMutation.isPending}
                 radius={10}
-                rightSection={<ArrowRight aria-hidden="true" size={15} />}
+                rightSection={<ArrowRightIcon aria-hidden="true" size={15} />}
                 styles={{ label: { fontSize: 15, fontWeight: 600 } }}
                 type="submit"
               >
@@ -252,7 +246,7 @@ export function LoginPage() {
               <div className="grid grid-cols-2 gap-2.5">
                 <Button
                   h={44}
-                  leftSection={<Global aria-hidden="true" size={15} />}
+                  leftSection={<GlobalIcon aria-hidden="true" size={15} />}
                   radius={10}
                   styles={{ label: { fontSize: 13.5, fontWeight: 600 } }}
                   type="button"
@@ -262,7 +256,7 @@ export function LoginPage() {
                 </Button>
                 <Button
                   h={44}
-                  leftSection={<Password aria-hidden="true" size={15} />}
+                  leftSection={<PasswordIcon aria-hidden="true" size={15} />}
                   radius={10}
                   styles={{ label: { fontSize: 13.5, fontWeight: 600 } }}
                   type="button"

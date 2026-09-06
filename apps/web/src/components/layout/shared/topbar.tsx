@@ -1,5 +1,5 @@
 import { ActionIcon, Tooltip } from '@mantine/core'
-import { Bell, HamburgerMenu, Magnifer } from '@solar-icons/react'
+import { BellIcon, HamburgerMenuIcon, MagnifierIcon } from '@solar-icons/react/linear'
 import { spotlight } from '@mantine/spotlight'
 import { useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -40,7 +40,7 @@ export function Topbar({
           size={40}
           variant="default"
         >
-          <HamburgerMenu size={18} />
+          <HamburgerMenuIcon size={18} />
         </ActionIcon>
 
         {/* No fallback copy: an account can have zero locations and a route
@@ -67,7 +67,7 @@ export function Topbar({
           onClick={spotlight.open}
           type="button"
         >
-          <Magnifer aria-hidden="true" size={16} />
+          <MagnifierIcon aria-hidden="true" size={16} />
           <span>{t('shell.searchPlaceholder')}</span>
           <kbd className="ml-auto rounded border border-[var(--mantine-color-default-border)] px-1.5 py-0.5 font-sans text-[10px] font-semibold">
             ⌘K
@@ -81,7 +81,7 @@ export function Topbar({
           size={40}
           variant="default"
         >
-          <Magnifer size={18} />
+          <MagnifierIcon size={18} />
         </ActionIcon>
       </div>
       <div className="flex shrink-0 items-center gap-2">
@@ -93,7 +93,7 @@ export function Topbar({
               size={40}
               variant="default"
             >
-              <Bell size={18} />
+              <BellIcon size={18} />
             </ActionIcon>
           </Tooltip>
         ) : null}

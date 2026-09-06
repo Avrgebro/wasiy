@@ -1,5 +1,5 @@
 import { Button } from '@mantine/core'
-import { CloseCircle } from '@solar-icons/react'
+import { CloseIcon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 
 export type FilterChip = {
@@ -41,7 +41,7 @@ export function FilterChips({
             type="button"
             onClick={chip.onRemove}
           >
-            <CloseCircle size={14} />
+            <CloseIcon size={14} />
           </button>
         </span>
       ))}

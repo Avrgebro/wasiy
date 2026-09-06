@@ -1,6 +1,6 @@
 import { Alert, Button, Group, SimpleGrid, Stack, Text } from '@mantine/core'
+import { CheckCircleIcon, RefreshIcon } from '@solar-icons/react/linear'
 import { notifySuccess } from '../../lib/notify'
-import { CheckCircle, Refresh } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../lib/dates'
@@ -67,7 +67,7 @@ export function ImportDetailPanel({
           <Group>
             <Button
               disabled={!canConfirm}
-              leftSection={<CheckCircle size={16} />}
+              leftSection={<CheckCircleIcon size={16} />}
               loading={confirmMutation.isPending}
               onClick={() => confirmMutation.mutate(selectedImport.id)}
             >
@@ -75,7 +75,7 @@ export function ImportDetailPanel({
             </Button>
             {canRetry ? (
               <Button
-                leftSection={<Refresh size={16} />}
+                leftSection={<RefreshIcon size={16} />}
                 loading={retryMutation.isPending}
                 variant="light"
                 onClick={() => retryMutation.mutate(selectedImport.id)}

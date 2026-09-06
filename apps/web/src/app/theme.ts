@@ -1,4 +1,4 @@
-import { Badge, Card, Container, createTheme, Paper, rem, Select } from "@mantine/core";
+import { Badge, Container, createTheme, rem, Select } from "@mantine/core";
 import type {
   CSSVariablesResolver,
   MantineColorsTuple,
@@ -201,23 +201,7 @@ export const mantineTheme: MantineThemeOverride = createTheme({
         },
       }),
     }),
-    Paper: Paper.extend({
-      defaultProps: {
-        p: "md",
-        shadow: "xl",
-        radius: "md",
-        withBorder: true,
-      },
-    }),
 
-    Card: Card.extend({
-      defaultProps: {
-        p: "xl",
-        shadow: "xl",
-        radius: "var(--mantine-radius-default)",
-        withBorder: true,
-      },
-    }),
     Select: Select.extend({
       defaultProps: {
         checkIconPosition: "right",

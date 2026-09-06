@@ -1,5 +1,5 @@
 import { TextInput } from '@mantine/core'
-import { Magnifier } from '@solar-icons/react'
+import { MagnifierIcon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 
 /**
@@ -23,7 +23,7 @@ export function SearchInput({
       aria-label={t('actions.search')}
       className="w-full sm:w-64 lg:w-80"
       defaultValue={defaultValue}
-      leftSection={<Magnifier size={15} />}
+      leftSection={<MagnifierIcon size={15} />}
       placeholder={placeholder}
       onBlur={(event) => onApply(event.currentTarget.value)}
       onKeyDown={(event) => {

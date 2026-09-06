@@ -1,5 +1,5 @@
 import { MantineThemeProvider, UnstyledButton } from '@mantine/core'
-import { AltArrowDown, Bell, CheckCircle } from '@solar-icons/react'
+import { AltArrowDownIcon, BellIcon, CheckCircleIcon } from '@solar-icons/react/dynamic'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
@@ -38,7 +38,7 @@ function AlertsBell({ unitId }: { unitId?: string }) {
 
   return (
     <Link aria-label={unread > 0 ? t('portal.alerts.bellUnread', { count: unread }) : t('portal.alerts.title')} className="relative grid h-9 w-9 place-items-center rounded-full text-[var(--mantine-color-text)]" to="/portal/alertas">
-      <Bell aria-hidden size={22} />
+      <BellIcon aria-hidden size={22} />
       {unread > 0 ? (
         <span aria-hidden className="absolute -top-0.5 -right-0.5 grid min-h-[18px] min-w-[18px] place-items-center rounded-full bg-[var(--wa-accent)] px-1 text-[10px] font-bold text-[#1c2b2c]">
           {unread > 99 ? '99+' : unread}
@@ -86,7 +86,7 @@ function PortalShell({ children, navItems }: PortalLayoutProps) {
               onClick={() => setSwitching(true)}
             >
               <span>{active.unit_label}</span>
-              {units.length > 1 ? <AltArrowDown aria-hidden size={14} /> : null}
+              {units.length > 1 ? <AltArrowDownIcon aria-hidden size={14} /> : null}
             </UnstyledButton>
           ) : null}
           <div className="flex items-center gap-1">
@@ -140,7 +140,7 @@ function PortalShell({ children, navItems }: PortalLayoutProps) {
                     <span className="text-sm font-semibold">{unit.unit_label}</span>
                     {unit.is_primary_contact ? <span className="text-xs text-[var(--mantine-color-dimmed)]">{t('portal.primaryContact')}</span> : null}
                   </span>
-                  {selected ? <CheckCircle aria-hidden className="text-[var(--wa-interactive)]" size={20} weight="Bold" /> : null}
+                  {selected ? <CheckCircleIcon aria-hidden className="text-[var(--wa-interactive)]" size={20} weight="Bold" /> : null}
                 </UnstyledButton>
               </li>
             )

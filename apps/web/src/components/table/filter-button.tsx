@@ -1,5 +1,5 @@
 import { Badge, Button, Popover, Stack } from '@mantine/core'
-import { Filter } from '@solar-icons/react'
+import { FilterIcon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 
@@ -22,7 +22,7 @@ export function FilterButton({
     <Popover position="bottom-start" shadow="md" width={280}>
       <Popover.Target>
         <Button
-          leftSection={<Filter size={16} />}
+          leftSection={<FilterIcon size={16} />}
           rightSection={
             activeCount > 0 ? (
               <Badge circle size="sm" variant="filled">

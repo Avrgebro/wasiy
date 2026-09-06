@@ -1,5 +1,5 @@
 import { Button, Text } from '@mantine/core'
-import { Pen } from '@solar-icons/react'
+import { PenIcon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 import { formatPhone } from '../../lib/phone'
 import type { LocationSummary } from './api'
@@ -77,7 +77,7 @@ export function LocationInfoTab({
               {t('locations.info.editBlocked')}
             </Text>
           ) : (
-            <Button leftSection={<Pen size={13} />} size="xs" variant="default" onClick={onEdit}>
+            <Button leftSection={<PenIcon size={13} />} size="xs" variant="default" onClick={onEdit}>
               {t('actions.edit')}
             </Button>
           )}

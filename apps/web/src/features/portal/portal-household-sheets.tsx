@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { PhoneCallingIcon } from '@solar-icons/react/linear'
 import { Alert, Button, SegmentedControl, Text, TextInput } from '@mantine/core'
-import { PhoneCalling } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -100,7 +100,7 @@ export function MemberSheet({
                 member.phone ? (
                   <a className="inline-flex items-center gap-1.5 text-[var(--wa-interactive)] no-underline" href={telHref(member.phone)}>
                     {formatPhone(member.phone, country)}
-                    <PhoneCalling aria-hidden size={14} />
+                    <PhoneCallingIcon aria-hidden size={14} />
                   </a>
                 ) : (
                   '—'

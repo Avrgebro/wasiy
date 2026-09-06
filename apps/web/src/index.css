@@ -319,13 +319,11 @@ body {
 }
 
 /* Solar duotone icons draw their second tone as a half-opacity currentColor
-   path. In the sidebar that tone is the Wasiy amber instead, full strength,
-   so the Panel's Widget5 reads as the brand mark next to the linear icons. */
-.wa-duotone-accent [opacity][stroke] {
-  opacity: 1;
-  stroke: var(--wa-accent);
-}
-.wa-duotone-accent [opacity][fill]:not([fill='none']) {
-  opacity: 1;
-  fill: var(--wa-accent);
+   path, exposed since @solar-icons/react 2 as the two --solar-secondary-*
+   variables. In the sidebar that tone is the Wasiy amber instead, full
+   strength, so the Panel's Widget5 reads as the brand mark next to the
+   linear icons. */
+.wa-duotone-accent {
+  --solar-secondary-color: var(--wa-accent);
+  --solar-secondary-opacity: 1;
 }

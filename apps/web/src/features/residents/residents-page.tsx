@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Select, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -171,7 +171,7 @@ function ResidentsContent({
           </Text>
         </div>
         {canManage ? (
-          <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setForm({ open: true, editing: null })}>
+          <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setForm({ open: true, editing: null })}>
             {t('residents.form.createTitle')}
           </Button>
         ) : null}

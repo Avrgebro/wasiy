@@ -1,5 +1,5 @@
 import { ActionIcon, Loader, Text } from '@mantine/core'
-import { AltArrowLeft } from '@solar-icons/react'
+import { AltArrowLeftIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -47,7 +47,7 @@ export function PortalLedgerPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <ActionIcon aria-label={t('actions.back')} radius={10} size={40} variant="default" onClick={() => void navigate({ to: '/portal/mi-unidad' })}>
-          <AltArrowLeft size={18} />
+          <AltArrowLeftIcon size={18} />
         </ActionIcon>
         <h1 className="m-0 text-xl font-bold">{t('portal.ledger.title')}</h1>
       </div>

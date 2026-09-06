@@ -1,9 +1,5 @@
 import { CheckIcon, Drawer, Loader, Popover, TextInput } from '@mantine/core'
-import {
-  AltArrowDown,
-  Buildings2,
-  MinimalisticMagnifier,
-} from '@solar-icons/react'
+import { AltArrowDownIcon, Buildings2Icon, MinimalisticMagnifierIcon } from '@solar-icons/react/linear'
 import { Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import type { ComponentPropsWithoutRef, Ref } from 'react'
@@ -103,7 +99,7 @@ function CurrentLocation({
         pending ? (
           <Loader aria-label={t('common.loading')} size={14} />
         ) : (
-          <AltArrowDown
+          <AltArrowDownIcon
             aria-hidden="true"
             className="shrink-0 text-[var(--mantine-color-dimmed)] transition-transform duration-150 data-[opened=true]:rotate-180"
             data-opened={opened}
@@ -295,7 +291,7 @@ function LocationSearch({
       aria-label={t('shell.locationSearchPlaceholder')}
       classNames={{ input: 'scroll-m-6' }}
       enterKeyHint="search"
-      leftSection={<MinimalisticMagnifier aria-hidden="true" size={15} />}
+      leftSection={<MinimalisticMagnifierIcon aria-hidden="true" size={15} />}
       onChange={(event) => picker.setSearch(event.currentTarget.value)}
       placeholder={t('shell.locationSearchPlaceholder')}
       radius={9}
@@ -366,7 +362,7 @@ function LocationPickerFooter({ picker }: { picker: LocationPicker }) {
         to="/admin/locations"
       >
         <span className="flex size-[30px] shrink-0 items-center justify-center rounded-lg bg-[var(--wa-tint)] text-[var(--wa-teal-text)]">
-          <Buildings2 aria-hidden="true" size={15} />
+          <Buildings2Icon aria-hidden="true" size={15} />
         </span>
         {t('shell.viewAllLocations')}
       </Link>

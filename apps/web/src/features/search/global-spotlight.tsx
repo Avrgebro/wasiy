@@ -1,7 +1,7 @@
 import { Loader } from '@mantine/core'
+import { MagnifierIcon } from '@solar-icons/react/linear'
 import { useDebouncedValue } from '@mantine/hooks'
 import { Spotlight, spotlight } from '@mantine/spotlight'
-import { Magnifer } from '@solar-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -77,7 +77,7 @@ export function GlobalSpotlight({ navItems }: { navItems: LayoutNavEntry[] }) {
       shortcut={['mod + K']}
     >
       <Spotlight.Search
-        leftSection={<Magnifer size={18} />}
+        leftSection={<MagnifierIcon size={18} />}
         placeholder={t('search.placeholder')}
         rightSection={results.isFetching ? <Loader size={16} /> : null}
       />

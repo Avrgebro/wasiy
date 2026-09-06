@@ -1,3 +1,4 @@
+import { LogoutIcon, MonitorIcon, MoonStarsIcon, Sun2Icon } from '@solar-icons/react/linear'
 import {
   Avatar,
   Center,
@@ -8,7 +9,6 @@ import {
   VisuallyHidden,
   useMantineColorScheme,
 } from '@mantine/core'
-import { Logout, Monitor, MoonStars, Sun2 } from '@solar-icons/react'
 import { useRouter } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useLogout, useMe } from '../../../features/auth/hooks'
@@ -63,7 +63,7 @@ export function UserMenu() {
                 value: 'light',
                 label: (
                   <Center>
-                    <Sun2 {...themeIconProps} />
+                    <Sun2Icon {...themeIconProps} />
                     <VisuallyHidden>{t('theme.light')}</VisuallyHidden>
                   </Center>
                 ),
@@ -72,7 +72,7 @@ export function UserMenu() {
                 value: 'dark',
                 label: (
                   <Center>
-                    <MoonStars {...themeIconProps} />
+                    <MoonStarsIcon {...themeIconProps} />
                     <VisuallyHidden>{t('theme.dark')}</VisuallyHidden>
                   </Center>
                 ),
@@ -81,7 +81,7 @@ export function UserMenu() {
                 value: 'auto',
                 label: (
                   <Center>
-                    <Monitor {...themeIconProps} />
+                    <MonitorIcon {...themeIconProps} />
                     <VisuallyHidden>{t('theme.auto')}</VisuallyHidden>
                   </Center>
                 ),
@@ -93,7 +93,7 @@ export function UserMenu() {
         <Menu.Item
           color="error"
           disabled={logoutMutation.isPending}
-          leftSection={<Logout size={16} />}
+          leftSection={<LogoutIcon size={16} />}
           onClick={handleLogout}
         >
           {t('auth.logout')}

@@ -1,5 +1,5 @@
 import { Alert } from '@mantine/core'
-import { CodeSquare } from '@solar-icons/react'
+import { CodeSquareIcon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 
 /**
@@ -23,7 +23,7 @@ export function PagePlaceholder({
       </h1>
       <Alert
         color="warning"
-        icon={<CodeSquare size={20} />}
+        icon={<CodeSquareIcon size={20} />}
         title={t('placeholder.title')}
       >
         {descriptionKey ? t(descriptionKey) : t('placeholder.body')}

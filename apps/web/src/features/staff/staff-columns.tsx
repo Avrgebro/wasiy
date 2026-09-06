@@ -1,5 +1,5 @@
 import { ActionIcon, Menu, Text } from '@mantine/core'
-import { MenuDots } from '@solar-icons/react'
+import { MenuDotsIcon } from '@solar-icons/react/linear'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
 import { accountRoles } from '../auth/access'
@@ -65,7 +65,7 @@ export function useStaffColumns({
           <Menu position="bottom-end" withinPortal>
             <Menu.Target>
               <ActionIcon aria-label={t('staff.actions')} color="gray" variant="subtle">
-                <MenuDots size={16} style={{ transform: 'rotate(90deg)' }} />
+                <MenuDotsIcon size={16} style={{ transform: 'rotate(90deg)' }} />
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>

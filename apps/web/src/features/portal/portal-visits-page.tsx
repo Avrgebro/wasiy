@@ -1,5 +1,5 @@
 import { ActionIcon, Button, Loader, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -132,7 +132,7 @@ export function PortalVisitsPage() {
       )}
 
       <ActionIcon aria-label={t('portal.visits.preRegister')} className="fixed right-5 bottom-20 shadow-lg" color="accent" component={Link} radius="xl" size={56} to="/portal/visitas/nueva" variant="filled">
-        <AddCircle size={26} />
+        <AddIcon size={26} />
       </ActionIcon>
 
       <BottomSheet

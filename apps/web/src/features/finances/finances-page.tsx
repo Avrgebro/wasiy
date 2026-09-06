@@ -1,5 +1,5 @@
 import { ActionIcon, Alert, Badge, Button, Group, Skeleton, Text } from '@mantine/core'
-import { AddCircle, AltArrowLeft, AltArrowRight, ArrowDown, InfoCircle } from '@solar-icons/react'
+import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon, ArrowDownIcon, InfoCircleIcon } from '@solar-icons/react/linear'
 import type { TFunction } from 'i18next'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -144,7 +144,7 @@ function FinancesContent({
           <span className="flex items-center gap-2 font-semibold">
             {row.original.direction === 'expense' ? (
               <span className="grid size-4 shrink-0 place-items-center rounded-[5px] bg-[var(--mantine-color-error-light)] text-[var(--wa-error)]">
-                <ArrowDown size={10} />
+                <ArrowDownIcon size={10} />
               </span>
             ) : null}
             {row.original.concept}
@@ -219,7 +219,7 @@ function FinancesContent({
           <Button
             className="w-full sm:w-auto"
             color="accent"
-            leftSection={<AddCircle size={18} />}
+            leftSection={<AddIcon size={18} />}
             onClick={() => setDrawerOpened(true)}
           >
             {t('finances.record')}
@@ -235,7 +235,7 @@ function FinancesContent({
       />
 
       <div className="flex items-center gap-2.5 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-4 py-3">
-        <InfoCircle className="shrink-0 text-[var(--wa-interactive)]" size={16} />
+        <InfoCircleIcon className="shrink-0 text-[var(--wa-interactive)]" size={16} />
         <Text c="dimmed" size="sm">
           {t('finances.disclaimer')}
         </Text>
@@ -279,7 +279,7 @@ function FinancesContent({
             variant="default"
             onClick={() => updateSearch({ month: shiftMonth(month, -1) })}
           >
-            <AltArrowLeft size={16} />
+            <AltArrowLeftIcon size={16} />
           </ActionIcon>
           <Button
             className="min-w-36 capitalize"
@@ -296,7 +296,7 @@ function FinancesContent({
             variant="default"
             onClick={() => updateSearch({ month: shiftMonth(month, 1) })}
           >
-            <AltArrowRight size={16} />
+            <AltArrowRightIcon size={16} />
           </ActionIcon>
         </Group>
       </div>

@@ -1,6 +1,6 @@
 import { ActionIcon, Avatar, Drawer } from '@mantine/core'
+import { AltArrowLeftIcon, CloseIcon, LogoutIcon } from '@solar-icons/react/linear'
 import { useMediaQuery } from '@mantine/hooks'
-import { AltArrowLeft, CloseCircle, Logout } from '@solar-icons/react'
 import { useRouter, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { getRoleLabelKey } from '../../../features/auth/access'
@@ -128,7 +128,7 @@ function SidebarContent({
           size={40}
           variant="default"
         >
-          <AltArrowLeft aria-hidden="true" size={18} />
+          <AltArrowLeftIcon aria-hidden="true" size={18} />
         </ActionIcon>
       </div>
       <div className="pb-4">
@@ -177,7 +177,7 @@ function MobileAccountFooter() {
         onClick={handleLogout}
         type="button"
       >
-        <Logout aria-hidden="true" size={15} />
+        <LogoutIcon aria-hidden="true" size={15} />
         {t('auth.logout')}
       </button>
     </div>
@@ -209,7 +209,7 @@ function MobileSidebarContent({
           size={40}
           variant="default"
         >
-          <CloseCircle aria-hidden="true" size={18} />
+          <CloseIcon aria-hidden="true" size={18} />
         </ActionIcon>
       </div>
 

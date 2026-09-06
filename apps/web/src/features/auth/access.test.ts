@@ -1,5 +1,5 @@
-import { Widget } from '@solar-icons/react'
 import { describe, expect, it } from 'vitest'
+import { WidgetIcon } from '@solar-icons/react/dynamic'
 import {
   ADMIN_CAPABILITIES,
   can,
@@ -314,7 +314,7 @@ describe('access helpers', () => {
 describe('navigation filtering', () => {
   const me = makeMe()
   const leaf = (labelKey: string, visibleTo?: (me: MeResponse) => boolean) => ({
-    icon: Widget,
+    icon: WidgetIcon,
     labelKey,
     to: '/admin' as const,
     ...(visibleTo ? { visibleTo } : {}),
@@ -367,7 +367,7 @@ describe('navigation filtering', () => {
       [
         {
           type: 'collapsible',
-          icon: Widget,
+          icon: WidgetIcon,
           labelKey: 'nav.people',
           children: [leaf('nav.hidden', () => false)],
         },
@@ -383,7 +383,7 @@ describe('navigation filtering', () => {
       [
         {
           type: 'collapsible',
-          icon: Widget,
+          icon: WidgetIcon,
           labelKey: 'nav.people',
           children: [leaf('nav.hidden', () => false), leaf('nav.shown')],
         },

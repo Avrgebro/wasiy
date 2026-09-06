@@ -1,5 +1,5 @@
 import { Alert, Button, Group, SimpleGrid } from '@mantine/core'
-import { Upload } from '@solar-icons/react'
+import { UploadIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -72,7 +72,7 @@ function ImportsRegistryContent({
         <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
           {t('registry.imports.title')}
         </h1>
-        <Button leftSection={<Upload size={16} />} onClick={() => setUploadOpened(true)}>
+        <Button leftSection={<UploadIcon size={16} />} onClick={() => setUploadOpened(true)}>
           {t('registry.imports.uploadAction')}
         </Button>
       </Group>

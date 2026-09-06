@@ -1,5 +1,5 @@
 import { ActionIcon, Button, Loader, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -148,7 +148,7 @@ export function PortalReservationsPage() {
 
       {chip === 'mine' ? (
         <ActionIcon aria-label={t('portal.reservations.book')} className="fixed right-5 bottom-20 shadow-lg" color="accent" radius="xl" size={56} variant="filled" onClick={() => void navigate({ search: { chip: 'amenidades' } })}>
-          <AddCircle size={26} />
+          <AddIcon size={26} />
         </ActionIcon>
       ) : null}
 

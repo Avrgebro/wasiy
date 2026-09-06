@@ -1,5 +1,5 @@
 import { Button, Text } from '@mantine/core'
-import { Buildings2 } from '@solar-icons/react'
+import { Buildings2Icon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 
 /**
@@ -20,7 +20,7 @@ export function LocationEmptyState({
   return (
     <div className="grid min-h-72 place-items-center rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-6 text-center sm:p-10">
       <div className="flex flex-col items-center gap-2">
-        <Buildings2 className="text-[var(--mantine-color-dimmed)]" size={28} />
+        <Buildings2Icon className="text-[var(--mantine-color-dimmed)]" size={28} />
         <Text fw={700}>
           {filtered ? t('locations.empty.filteredTitle') : t('locations.empty.title')}
         </Text>

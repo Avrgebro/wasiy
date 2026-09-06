@@ -1,5 +1,5 @@
 import { Button } from '@mantine/core'
-import { Import } from '@solar-icons/react'
+import { ImportIcon } from '@solar-icons/react/linear'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { can } from '../auth/access'
@@ -21,7 +21,7 @@ export function ImportRegistryButton() {
   return (
     <Button
       component={Link}
-      leftSection={<Import size={16} />}
+      leftSection={<ImportIcon size={16} />}
       to="/admin/registry/imports"
       variant="light"
     >

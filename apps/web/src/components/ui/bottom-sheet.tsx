@@ -1,5 +1,5 @@
 import { Button, Drawer, Text, UnstyledButton } from '@mantine/core'
-import { CloseCircle } from '@solar-icons/react'
+import { CloseIcon } from '@solar-icons/react/linear'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -88,7 +88,7 @@ export function BottomSheet({
             {pill ? <span className="mt-0.5 shrink-0">{pill}</span> : null}
             {withClose && !pill ? (
               <UnstyledButton aria-label={t('actions.close')} className="grid size-7 shrink-0 place-items-center rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] text-[var(--mantine-color-dimmed)]" onClick={onClose}>
-                <CloseCircle size={16} />
+                <CloseIcon size={16} />
               </UnstyledButton>
             ) : null}
           </span>

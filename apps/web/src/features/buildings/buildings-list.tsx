@@ -1,5 +1,5 @@
 import { ActionIcon, Button, Loader, Text, TextInput, Tooltip } from '@mantine/core'
-import { AddCircle, TrashBinTrash } from '@solar-icons/react'
+import { AddIcon, TrashBinTrashIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -107,7 +107,7 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
             </Button>
           </form>
         ) : (
-          <Button className="self-start" leftSection={<AddCircle size={18} />} variant="default" onClick={() => setAdding(true)}>
+          <Button className="self-start" leftSection={<AddIcon size={18} />} variant="default" onClick={() => setAdding(true)}>
             {t('buildings.add')}
           </Button>
         )
@@ -189,7 +189,7 @@ function BuildingRow({
           <Tooltip disabled={canDelete} label={deleteHint ?? ''}>
             <span>
               <ActionIcon aria-label={t('buildings.delete', { name: building.name ?? t('buildings.unnamed') })} color="error" disabled={!canDelete} size={36} variant="subtle" onClick={onDelete}>
-                <TrashBinTrash size={18} />
+                <TrashBinTrashIcon size={18} />
               </ActionIcon>
             </span>
           </Tooltip>

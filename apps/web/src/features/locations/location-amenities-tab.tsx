@@ -1,6 +1,6 @@
 import { Alert, Button, Group, Modal, Skeleton, Stack, Table, Text } from '@mantine/core'
+import { AddIcon, ConfettiIcon } from '@solar-icons/react/linear'
 import { notifySuccess, notifyError } from '../../lib/notify'
-import { AddCircle, Confetti } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -110,7 +110,7 @@ export function LocationAmenitiesTab({
           })}
         </Text>
         {readOnly ? null : (
-          <Button color="accent" leftSection={<AddCircle size={18} />} onClick={openCreate}>
+          <Button color="accent" leftSection={<AddIcon size={18} />} onClick={openCreate}>
             {t('amenities.add')}
           </Button>
         )}
@@ -119,13 +119,13 @@ export function LocationAmenitiesTab({
       {amenities.length === 0 ? (
         <div className="grid min-h-64 place-items-center rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-8 text-center">
           <div className="flex flex-col items-center gap-2">
-            <Confetti className="text-[var(--mantine-color-dimmed)]" size={26} />
+            <ConfettiIcon className="text-[var(--mantine-color-dimmed)]" size={26} />
             <Text fw={700}>{t('amenities.empty.title')}</Text>
             <Text c="dimmed" size="sm">
               {t('amenities.empty.body')}
             </Text>
             {readOnly ? null : (
-              <Button color="accent" leftSection={<AddCircle size={18} />} mt="sm" onClick={openCreate}>
+              <Button color="accent" leftSection={<AddIcon size={18} />} mt="sm" onClick={openCreate}>
                 {t('amenities.add')}
               </Button>
             )}

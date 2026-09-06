@@ -1,5 +1,5 @@
 import { ActionIcon, Group, Loader, Table, Text } from '@mantine/core'
-import { AltArrowDown, AltArrowLeft, AltArrowRight, AltArrowUp } from '@solar-icons/react'
+import { AltArrowDownIcon, AltArrowLeftIcon, AltArrowRightIcon, AltArrowUpIcon } from '@solar-icons/react/linear'
 import {
   flexRender,
   getCoreRowModel,
@@ -228,7 +228,7 @@ function DataTableFooter({
           variant="default"
           onClick={() => onPage(meta.current_page - 1)}
         >
-          <AltArrowLeft size={16} />
+          <AltArrowLeftIcon size={16} />
         </ActionIcon>
         <ActionIcon
           aria-label={t('table.nextPage')}
@@ -238,7 +238,7 @@ function DataTableFooter({
           variant="default"
           onClick={() => onPage(meta.current_page + 1)}
         >
-          <AltArrowRight size={16} />
+          <AltArrowRightIcon size={16} />
         </ActionIcon>
       </Group>
     </Group>
@@ -269,7 +269,7 @@ function SortHeader({
       onClick={onClick}
     >
       {children}
-      {active ? active.desc ? <AltArrowDown size={12} /> : <AltArrowUp size={12} /> : null}
+      {active ? active.desc ? <AltArrowDownIcon size={12} /> : <AltArrowUpIcon size={12} /> : null}
     </button>
   )
 }

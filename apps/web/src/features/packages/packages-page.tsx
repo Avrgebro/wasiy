@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Text } from '@mantine/core'
-import { AddCircle } from '@solar-icons/react'
+import { AddIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -135,7 +135,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
             {t('packages.subtitle', { location: locationName })}
           </Text>
         </div>
-        <Button className="w-full sm:w-auto" color="accent" leftSection={<AddCircle size={18} />} onClick={() => setRegistering(true)}>
+        <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setRegistering(true)}>
           {t('packages.register')}
         </Button>
       </div>

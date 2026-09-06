@@ -1,7 +1,7 @@
 import { Alert, Badge, Button, Drawer, Stack, Text } from '@mantine/core'
+import { UploadIcon } from '@solar-icons/react/linear'
 import { Dropzone } from '@mantine/dropzone'
 import { notifySuccess } from '../../lib/notify'
-import { Upload } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -53,7 +53,7 @@ export function UploadDrawer({
           onDrop={(files) => setSelectedFile(files[0] ?? null)}
         >
           <Stack align="center" gap="xs">
-            <Upload size={28} />
+            <UploadIcon size={28} />
             <Text fw={600}>{t('registry.imports.dropzoneTitle')}</Text>
             <Text c="dimmed" size="sm">
               {t('registry.imports.dropzoneHint')}
@@ -70,7 +70,7 @@ export function UploadDrawer({
         ) : null}
         <Button
           disabled={!selectedFile}
-          leftSection={<Upload size={16} />}
+          leftSection={<UploadIcon size={16} />}
           loading={uploadMutation.isPending}
           onClick={() => selectedFile && uploadMutation.mutate(selectedFile)}
         >

@@ -1,6 +1,6 @@
 import { Alert, Badge, Button, Skeleton, Text, Textarea } from '@mantine/core'
+import { KeySquareIcon } from '@solar-icons/react/linear'
 import { useMediaQuery } from '@mantine/hooks'
-import { KeySquare } from '@solar-icons/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
@@ -122,7 +122,7 @@ function UnitDetailContent({
     return (
       <div className="grid min-h-96 place-items-center text-center">
         <div className="flex flex-col items-center gap-2">
-          <KeySquare className="text-[var(--mantine-color-dimmed)]" size={30} />
+          <KeySquareIcon className="text-[var(--mantine-color-dimmed)]" size={30} />
           <Text fw={700}>{notFound ? t('units.detail.notFoundTitle') : t('errors.loadFailed')}</Text>
           <Text c="dimmed" size="sm">
             {notFound ? t('units.detail.notFoundBody') : getErrorMessage(detailQuery.error)}

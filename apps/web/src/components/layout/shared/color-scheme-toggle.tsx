@@ -1,5 +1,5 @@
 import { ActionIcon, Tooltip, useComputedColorScheme, useMantineColorScheme } from '@mantine/core'
-import { MoonStars, Sun2 } from '@solar-icons/react'
+import { MoonStarsIcon, Sun2Icon } from '@solar-icons/react/linear'
 import { useTranslation } from 'react-i18next'
 
 export function ColorSchemeToggle() {
@@ -9,7 +9,7 @@ export function ColorSchemeToggle() {
     getInitialValueInEffect: false,
   })
   const nextColorScheme = computedColorScheme === 'dark' ? 'light' : 'dark'
-  const Icon = computedColorScheme === 'dark' ? Sun2 : MoonStars
+  const Icon = computedColorScheme === 'dark' ? Sun2Icon : MoonStarsIcon
 
   return (
     <Tooltip label={t(`theme.${nextColorScheme}`)}>

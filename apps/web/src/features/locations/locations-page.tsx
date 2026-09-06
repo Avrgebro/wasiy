@@ -1,5 +1,5 @@
 import { ActionIcon, Alert, Button, Group, Skeleton, Text } from '@mantine/core'
-import { AddCircle, AltArrowLeft, AltArrowRight } from '@solar-icons/react'
+import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/react/linear'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -93,7 +93,7 @@ function LocationsPageContent({
               : t('common.loading')}
           </Text>
         </div>
-        <Button color="accent" leftSection={<AddCircle size={20} />} onClick={openCreate}>
+        <Button color="accent" leftSection={<AddIcon size={20} />} onClick={openCreate}>
           {t('locations.new')}
         </Button>
       </div>
@@ -157,7 +157,7 @@ function LocationsPageContent({
             variant="default"
             onClick={() => updateSearch({ page: meta.current_page - 1 })}
           >
-            <AltArrowLeft size={16} />
+            <AltArrowLeftIcon size={16} />
           </ActionIcon>
           <ActionIcon
             aria-label={t('table.nextPage')}
@@ -167,7 +167,7 @@ function LocationsPageContent({
             variant="default"
             onClick={() => updateSearch({ page: meta.current_page + 1 })}
           >
-            <AltArrowRight size={16} />
+            <AltArrowRightIcon size={16} />
           </ActionIcon>
         </Group>
       ) : null}

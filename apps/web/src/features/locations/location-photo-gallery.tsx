@@ -1,7 +1,7 @@
 import { Text } from '@mantine/core'
+import { AddIcon, CameraIcon } from '@solar-icons/react/linear'
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone'
 import { notifyError } from '../../lib/notify'
-import { AddCircle, Camera } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -166,7 +166,7 @@ export function LocationPhotoGallery({
             onReject={() => notifyError(t('locations.photos.rejected'))}
           >
             <div className="pointer-events-none flex flex-col items-center gap-1.5 text-center">
-              <AddCircle className="text-[var(--mantine-color-dimmed)]" size={22} />
+              <AddIcon className="text-[var(--mantine-color-dimmed)]" size={22} />
               <Text fw={600} size="sm">
                 {t('locations.photos.add')}
               </Text>
@@ -179,7 +179,7 @@ export function LocationPhotoGallery({
         {readOnly && photos.length === 0 ? (
           <div className="col-span-full grid min-h-32 place-items-center text-center">
             <div className="flex flex-col items-center gap-1.5">
-              <Camera className="text-[var(--mantine-color-dimmed)]" size={22} />
+              <CameraIcon className="text-[var(--mantine-color-dimmed)]" size={22} />
               <Text c="dimmed" size="sm">
                 {t('locations.photos.none')}
               </Text>

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { AddIcon, CloseIcon } from '@solar-icons/react/linear'
 import {
   ActionIcon,
   Alert,
@@ -9,7 +10,6 @@ import {
   TextInput,
 } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
-import { AddCircle, CloseCircle } from '@solar-icons/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, type ReactNode } from 'react'
 import { Controller, useFieldArray, useForm, useWatch, type FieldError } from 'react-hook-form'
@@ -336,14 +336,14 @@ export function StaffAccessDrawer({
                       variant="subtle"
                       onClick={() => assignments.remove(index)}
                     >
-                      <CloseCircle size={16} />
+                      <CloseIcon size={16} />
                     </ActionIcon>
                   </Group>
                 ))}
                 {canAddAssignment ? (
                   <Button
                     className="justify-self-start"
-                    leftSection={<AddCircle size={14} />}
+                    leftSection={<AddIcon size={14} />}
                     size="xs"
                     variant="subtle"
                     onClick={appendAssignment}
