@@ -1,3 +1,4 @@
+import { TableEmptyState } from '../../components/table/table-empty-state'
 import { Badge, Text } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import type { ReservationSummary } from './api'
@@ -65,7 +66,7 @@ export function ReservationWeekList({
 
   return (
     <div className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
-      <div className="overflow-x-auto">
+      {days.length === 0 ? <TableEmptyState /> : <div className="overflow-x-auto">
         <div className="min-w-[640px]">
           <div
             className={`${ROW_GRID} border-b border-[var(--mantine-color-default-border)] py-2.5 text-[11.5px] font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]`}
@@ -78,12 +79,7 @@ export function ReservationWeekList({
             <span>{t('reservations.columns.status')}</span>
           </div>
 
-          {days.length === 0 ? (
-            <Text c="dimmed" className="px-5 py-8 text-center" size="sm">
-              {t('reservations.emptyWeek')}
-            </Text>
-          ) : (
-            days.map((day) => {
+          {days.map((day) => {
               const prefix =
                 day === today
                   ? `${t('reservations.today')} · `
@@ -143,10 +139,9 @@ export function ReservationWeekList({
                   })}
                 </div>
               )
-            })
-          )}
+            })}
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

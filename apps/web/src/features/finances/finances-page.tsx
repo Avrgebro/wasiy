@@ -1,6 +1,7 @@
+import { MonthNavigation } from './month-navigation'
 import { keepContextData } from '../../lib/keep-context-data'
-import { ActionIcon, Alert, Button, Group, Skeleton, Text } from '@mantine/core'
-import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon, ArrowDownIcon, InfoCircleIcon } from '@solar-icons/react/linear'
+import { Alert, Button, Skeleton, Text } from '@mantine/core'
+import { AddIcon, ArrowDownIcon, InfoCircleIcon } from '@solar-icons/react/linear'
 import type { TFunction } from 'i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -16,7 +17,7 @@ import { useMe } from '../auth/hooks'
 import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { generateDues, getFinanceSummary, getMovements, type CategoryTotal, type FinanceSummary, type MovementSummary } from './api'
-import { currentMonth, monthLabel, shiftMonth, shortDate } from './month'
+import { currentMonth, monthLabel, shortDate } from './month'
 import { FinancesFilters } from './finances-filters'
 import { MovementDrawer } from './movement-drawer'
 import { MovementFormDrawer } from './movement-form-drawer'
@@ -258,36 +259,7 @@ function FinancesContent({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-end gap-2 pointer-coarse:gap-3">
-        <Group className="w-full sm:w-auto" gap={6} wrap="nowrap">
-          <ActionIcon
-            aria-label={t('finances.previousMonth')}
-            radius="md"
-            size="input-md"
-            variant="default"
-            onClick={() => updateSearch({ month: shiftMonth(month, -1) })}
-          >
-            <AltArrowLeftIcon size={16} />
-          </ActionIcon>
-          <Button
-            className="min-w-36 capitalize"
-            variant="default"
-            onClick={() => updateSearch({ month: undefined })}
-          >
-            {monthLabel(month)}
-          </Button>
-          <ActionIcon
-            aria-label={t('finances.nextMonth')}
-            disabled={month >= thisMonth}
-            radius="md"
-            size="input-md"
-            variant="default"
-            onClick={() => updateSearch({ month: shiftMonth(month, 1) })}
-          >
-            <AltArrowRightIcon size={16} />
-          </ActionIcon>
-        </Group>
-      </div>
+      <MonthNavigation month={month} thisMonth={thisMonth} onChange={(value) => updateSearch({ month: value })} />
 
       {listQuery.isError ? (
         <Alert color="error" title={t('errors.loadFailed')}>

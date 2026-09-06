@@ -192,7 +192,7 @@ function ReservationsContent({
         <div className="flex min-w-0 flex-col gap-2.5">
           {/* The pager belongs to the agenda, not the page header: the queue
               on the right is week-agnostic. */}
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Text className="min-w-0" fw={600} size="sm">
               {t('reservations.weekOf', { range: weekRangeLabel(weekStart) })}
             </Text>
@@ -200,19 +200,19 @@ function ReservationsContent({
               <ActionIcon
                 aria-label={t('reservations.previousWeek')}
                 radius="md"
-                size="input-md"
+                size={44}
                 variant="default"
                 onClick={() => updateSearch({ date: addDays(weekStart, -7) })}
               >
                 <AltArrowLeftIcon size={16} />
               </ActionIcon>
-              <Button variant="default" onClick={() => updateSearch({ date: undefined })}>
-                {t('reservations.today')}
+              <Button h={44} disabled={weekStart === startOfWeek(today)} variant="default" onClick={() => updateSearch({ date: undefined })}>
+                {t('reservations.currentWeek')}
               </Button>
               <ActionIcon
                 aria-label={t('reservations.nextWeek')}
                 radius="md"
-                size="input-md"
+                size={44}
                 variant="default"
                 onClick={() => updateSearch({ date: addDays(weekStart, 7) })}
               >
