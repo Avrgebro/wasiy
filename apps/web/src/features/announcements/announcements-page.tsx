@@ -1,5 +1,6 @@
+import { PageAction } from '../../components/ui/page-action'
 import { keepContextData } from '../../lib/keep-context-data'
-import { Alert, Badge, Button, Text } from '@mantine/core'
+import { Alert, Badge, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -140,9 +141,9 @@ function AnnouncementsContent({ canManage, locationId, locationName, timezone }:
           </Text>
         </div>
         {canManage ? (
-          <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setForm({ open: true, editing: null })}>
+          <PageAction className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setForm({ open: true, editing: null })}>
             {t('announcements.create')}
-          </Button>
+          </PageAction>
         ) : null}
       </div>
 

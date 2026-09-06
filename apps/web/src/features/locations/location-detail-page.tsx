@@ -1,3 +1,4 @@
+import { PageAction } from '../../components/ui/page-action'
 import { Alert, Button, Skeleton, Tabs, Text } from '@mantine/core'
 import { Buildings2Icon, CameraMinimalisticIcon, DangerTriangleIcon } from '@solar-icons/react/linear'
 import { notifySuccess, notifyError } from '../../lib/notify'
@@ -111,18 +112,18 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
   const location = detailQuery.data!.data
   const deactivated = location.status === 'deactivated'
   const primaryAction = deactivated ? (
-    <Button
+    <PageAction
       color="accent"
       fullWidth={!wide}
       loading={reactivateMutation.isPending}
       onClick={() => reactivateMutation.mutate()}
     >
       {t('locations.detail.reactivateLocation')}
-    </Button>
+    </PageAction>
   ) : (
-    <Button color="accent" fullWidth={!wide} onClick={() => setDrawerOpened(true)}>
+    <PageAction color="accent" fullWidth={!wide} onClick={() => setDrawerOpened(true)}>
       {t('locations.editTitle')}
-    </Button>
+    </PageAction>
   )
 
   return (

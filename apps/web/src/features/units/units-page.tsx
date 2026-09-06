@@ -1,5 +1,6 @@
+import { PageAction } from '../../components/ui/page-action'
 import { keepContextData } from '../../lib/keep-context-data'
-import { Alert, Avatar, Badge, Button, Text } from '@mantine/core'
+import { Alert, Avatar, Badge, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -142,9 +143,9 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
         </div>
         {canManage ? (
           <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
-            <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setCreating(true)}>
+            <PageAction className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setCreating(true)}>
               {t('units.form.createTitle')}
-            </Button>
+            </PageAction>
           </div>
         ) : null}
       </div>

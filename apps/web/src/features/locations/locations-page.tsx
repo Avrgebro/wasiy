@@ -1,5 +1,6 @@
+import { PageAction } from '../../components/ui/page-action'
 import { keepContextData } from '../../lib/keep-context-data'
-import { ActionIcon, Alert, Button, Group, Skeleton, Text } from '@mantine/core'
+import { ActionIcon, Alert, Group, Skeleton, Text } from '@mantine/core'
 import { AddIcon, AltArrowLeftIcon, AltArrowRightIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -94,9 +95,9 @@ function LocationsPageContent({
               : t('common.loading')}
           </Text>
         </div>
-        <Button color="accent" leftSection={<AddIcon size={20} />} onClick={openCreate}>
+        <PageAction color="accent" leftSection={<AddIcon size={20} />} onClick={openCreate}>
           {t('locations.new')}
-        </Button>
+        </PageAction>
       </div>
 
       <LocationFilters search={search} onChange={updateSearch} />

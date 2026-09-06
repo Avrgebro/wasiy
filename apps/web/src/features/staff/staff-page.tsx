@@ -1,3 +1,4 @@
+import { PageAction } from '../../components/ui/page-action'
 import { keepContextData } from '../../lib/keep-context-data'
 import { Alert, Button, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
@@ -119,9 +120,9 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
             {t('staff.subtitle')}
           </Text>
         </div>
-        <Button color="accent" leftSection={<AddIcon size={20} />} onClick={openInvite}>
+        <PageAction color="accent" leftSection={<AddIcon size={20} />} onClick={openInvite}>
           {t('staff.invite')}
-        </Button>
+        </PageAction>
       </div>
 
       {invitationsQuery.data ? (

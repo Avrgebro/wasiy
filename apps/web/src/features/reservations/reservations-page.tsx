@@ -1,3 +1,4 @@
+import { PageAction } from '../../components/ui/page-action'
 import { SearchInput } from '../../components/table/search-input'
 import { TableToolbar } from '../../components/table/table-toolbar'
 import { FilterButton } from '../../components/table/filter-button'
@@ -163,14 +164,14 @@ function ReservationsContent({
             {t('reservations.subtitle', { location: locationName })}
           </Text>
         </div>
-        <Button
+        <PageAction
           className="w-full sm:w-auto"
           color="accent"
           leftSection={<AddIcon size={18} />}
           onClick={() => setDrawerOpened(true)}
         >
           {t('reservations.newReservation')}
-        </Button>
+        </PageAction>
       </div>
 
 

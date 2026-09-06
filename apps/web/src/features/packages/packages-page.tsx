@@ -1,5 +1,6 @@
+import { PageAction } from '../../components/ui/page-action'
 import { keepContextData } from '../../lib/keep-context-data'
-import { Alert, Button, Text } from '@mantine/core'
+import { Alert, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
@@ -137,9 +138,9 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
             {t('packages.subtitle', { location: locationName })}
           </Text>
         </div>
-        <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setRegistering(true)}>
+        <PageAction className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setRegistering(true)}>
           {t('packages.register')}
-        </Button>
+        </PageAction>
       </div>
 
       {listQuery.isError ? (

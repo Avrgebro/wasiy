@@ -1,6 +1,7 @@
+import { PageAction } from '../../components/ui/page-action'
 import { MonthNavigation } from './month-navigation'
 import { keepContextData } from '../../lib/keep-context-data'
-import { Alert, Button, Skeleton, Text } from '@mantine/core'
+import { Alert, Skeleton, Text } from '@mantine/core'
 import { AddIcon, ArrowDownIcon, InfoCircleIcon } from '@solar-icons/react/linear'
 import type { TFunction } from 'i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -215,17 +216,17 @@ function FinancesContent({
           </Text>
         </div>
         <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
-          <Button className="w-full sm:w-auto" variant="default" onClick={() => setConfirmingDues(true)}>
+          <PageAction className="w-full sm:w-auto" variant="default" onClick={() => setConfirmingDues(true)}>
             {t('finances.dues.action')}
-          </Button>
-          <Button
+          </PageAction>
+          <PageAction
             className="w-full sm:w-auto"
             color="accent"
             leftSection={<AddIcon size={18} />}
             onClick={() => setDrawerOpened(true)}
           >
             {t('finances.record')}
-          </Button>
+          </PageAction>
         </div>
       </div>
       <ConfirmDialog

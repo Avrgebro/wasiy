@@ -1,3 +1,4 @@
+import { PageAction } from '../../components/ui/page-action'
 import { keepContextData } from '../../lib/keep-context-data'
 import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
 import { Alert, Button, Select, Text } from '@mantine/core'
@@ -158,9 +159,9 @@ function ResidentsContent({
           </Text>
         </div>
         {canManage ? (
-          <Button className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setForm({ open: true, editing: null })}>
+          <PageAction className="w-full sm:w-auto" color="accent" leftSection={<AddIcon size={18} />} onClick={() => setForm({ open: true, editing: null })}>
             {t('residents.form.createTitle')}
-          </Button>
+          </PageAction>
         ) : null}
       </div>
 

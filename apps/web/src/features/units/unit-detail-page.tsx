@@ -1,3 +1,4 @@
+import { PageAction } from '../../components/ui/page-action'
 import { Alert, Badge, Button, Skeleton, Text, Textarea } from '@mantine/core'
 import { KeySquareIcon } from '@solar-icons/react/linear'
 import { useMediaQuery } from '@mantine/hooks'
@@ -139,13 +140,13 @@ function UnitDetailContent({
   const { data: unit, packages, visits, reservations, movements, movements_month: month, pending_balance: balance, notes } = detailQuery.data
   const primaryAction =
     unit.status === 'inactive' ? (
-      <Button color="accent" fullWidth={!wide} loading={reactivate.isPending} onClick={() => reactivate.mutate()}>
+      <PageAction color="accent" fullWidth={!wide} loading={reactivate.isPending} onClick={() => reactivate.mutate()}>
         {t('units.detail.reactivate')}
-      </Button>
+      </PageAction>
     ) : (
-      <Button color="accent" fullWidth={!wide} onClick={() => setEditing(true)}>
+      <PageAction color="accent" fullWidth={!wide} onClick={() => setEditing(true)}>
         {t('units.detail.edit')}
-      </Button>
+      </PageAction>
     )
   const title = t('units.detail.title', { type: typeLabel(unit.type, t, true), number: unit.unit_number })
   const descriptor = [

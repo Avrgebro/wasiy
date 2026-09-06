@@ -1,3 +1,4 @@
+import { PageAction } from '../../components/ui/page-action'
 import { TableEmptyState } from '../../components/table/table-empty-state'
 import { Alert, Badge, Button, Loader, Table, Text } from '@mantine/core'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -94,12 +95,12 @@ function DashboardContent({ accountId, locationId, locationName, me, timezone }:
         </div>
         <div className="flex w-full flex-wrap gap-2.5 sm:w-auto">
           {/* The screen's single amber CTA. */}
-          <Button className="w-full sm:w-auto" color="accent" onClick={() => setRegisteringVisit(true)}>
+          <PageAction className="w-full sm:w-auto" color="accent" onClick={() => setRegisteringVisit(true)}>
             {t('visits.register')}
-          </Button>
-          <Button className="w-full sm:w-auto" variant="default" onClick={() => setRegisteringPackage(true)}>
+          </PageAction>
+          <PageAction className="w-full sm:w-auto" variant="default" onClick={() => setRegisteringPackage(true)}>
             {t('packages.register')}
-          </Button>
+          </PageAction>
         </div>
       </div>
 
