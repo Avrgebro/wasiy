@@ -137,8 +137,8 @@ describe('UnitsPage', () => {
     expect(navigateSpy).toHaveBeenLastCalledWith({ to: '/admin/registry/units/$unitId', params: { unitId: 'un_305' } })
   })
 
-  it('chips and search land on the URL and the request', async () => {
-    currentSearch.chip = 'no_fee'
+  it('the Atención filter and search land on the request; clearing the filter chip drops it', async () => {
+    currentSearch.attention = 'no_fee'
     currentSearch.search = 'axb'
     const requests = installAdapter([unit()])
 
@@ -146,7 +146,7 @@ describe('UnitsPage', () => {
     await screen.findByText('402')
 
     expect(requests.some((url) => url.includes('fee=missing') && url.includes('search=axb'))).toBe(true)
-    await userEvent.click(screen.getByRole('button', { name: 'Vacías' }))
-    expect(navigateSpy.mock.calls.at(-1)![0].search({ page: 4 })).toEqual({ chip: 'vacant', page: 1 })
+    await userEvent.click(screen.getByRole('button', { name: 'Quitar filtro Atención: Sin cuota definida' }))
+    expect(navigateSpy.mock.calls.at(-1)![0].search({ page: 4 })).toEqual({ attention: undefined, page: 1 })
   })
 })

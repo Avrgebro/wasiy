@@ -12,7 +12,7 @@ import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import { ImportRegistryButton } from '../imports/import-registry-button'
 import { getUnits, type UnitSummary } from './api'
-import { chipParams, type UnitsSearchValues } from './schemas'
+import { attentionParams, type UnitsSearchValues } from './schemas'
 import { occupancyColor, portalColor, unitDescriptor, unitLabelsLine } from './unit-presentation'
 import { BuildingsDrawer } from '../buildings/buildings-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
@@ -61,7 +61,7 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         sort: search.sort,
         type: search.type,
         status: search.status,
-        ...chipParams(search.chip, search.attention),
+        ...attentionParams(search.attention),
       }),
     placeholderData: keepPreviousData,
   })
@@ -72,12 +72,7 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
 
   const rows = listQuery.data?.data ?? []
   const total = listQuery.data?.meta.total
-  const isFiltered = Boolean(search.chip || search.search || search.type || search.status || search.attention)
-  // The Sin cuota count is the admin's to-do before generating dues.
-  const noFeeCount = useQuery({
-    queryKey: ['registry', 'units', locationId, 'no-fee-count'],
-    queryFn: () => getUnits(locationId, { fee: 'missing', per_page: 1 }),
-  }).data?.meta.total
+  const isFiltered = Boolean(search.search || search.type || search.status || search.attention)
 
   const columns: ColumnDef<UnitSummary>[] = [
     {
@@ -212,7 +207,7 @@ function UnitsContent({ canManage, canManageBuildings, locationId, locationName 
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
         sort={search.sort}
-        toolbar={<UnitsFilters noFeeCount={noFeeCount} search={search} onChange={updateSearch} />}
+        toolbar={<UnitsFilters search={search} onChange={updateSearch} />}
         onPageChange={(page) => updateSearch({ page })}
         onRowClick={(unit) =>
           void navigate({ to: '/admin/registry/units/$unitId', params: { unitId: unit.id } })

@@ -6,7 +6,7 @@ export const Route = createFileRoute('/_authenticated/admin/registry/vehicles')(
   beforeLoad: () => {
     throw redirect({
       to: '/admin/registry/units',
-      search: { page: 1, search: '', sort: '', type: '', status: '', chip: undefined },
+      search: { page: 1, search: '', sort: '', type: '', status: '', attention: undefined },
     })
   },
 })

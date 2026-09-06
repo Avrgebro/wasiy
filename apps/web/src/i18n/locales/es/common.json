@@ -1287,12 +1287,6 @@
     "subtitle_other": "{{count}} unidades · {{location}}",
     "searchPlaceholder": "Buscar unidad, residente o placa…",
     "allTypes": "Todos los tipos",
-    "chips": {
-      "all": "Todas",
-      "occupied": "Ocupadas",
-      "vacant": "Vacías",
-      "no_fee": "Sin cuota"
-    },
     "columns": {
       "unit": "Unidad",
       "floorType": "Piso · tipo",
@@ -1447,8 +1441,10 @@
     "attention": {
       "label": "Atención",
       "any": "Cualquiera",
+      "no_residents": "Sin residentes",
       "no_contact": "Sin contacto principal",
-      "no_portal": "Sin portal"
+      "no_portal": "Sin portal",
+      "no_fee": "Sin cuota definida"
     }
   },
   "packages": {

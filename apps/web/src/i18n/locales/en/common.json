@@ -1287,12 +1287,6 @@
     "subtitle_other": "{{count}} units · {{location}}",
     "searchPlaceholder": "Search unit, resident or plate…",
     "allTypes": "All types",
-    "chips": {
-      "all": "All",
-      "occupied": "Occupied",
-      "vacant": "Vacant",
-      "no_fee": "No fee"
-    },
     "columns": {
       "unit": "Unit",
       "floorType": "Floor · type",
@@ -1447,8 +1441,10 @@
     "attention": {
       "label": "Attention",
       "any": "Any",
+      "no_residents": "No residents",
       "no_contact": "No primary contact",
-      "no_portal": "No portal"
+      "no_portal": "No portal",
+      "no_fee": "No fee defined"
     }
   },
   "packages": {

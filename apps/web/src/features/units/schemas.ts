@@ -91,22 +91,25 @@ export const vehicleFormSchema = z.object({
 
 export type VehicleFormValues = z.infer<typeof vehicleFormSchema>
 
-export const UNIT_CHIPS = ['occupied', 'vacant', 'no_fee'] as const
-/** Data-quality views behind Filtros: units missing a primary contact, or with residents but no one on the portal. */
-export const UNIT_ATTENTION = ['no_contact', 'no_portal'] as const
+/**
+ * The directory has no quick-view row (decided 2026-09-05): nothing on it
+ * changes hour to hour. The data gaps an admin fixes live behind Filtros as
+ * "Atención": no residents registered, no primary contact, residents but no
+ * one on the portal, and no monthly fee defined (those units are skipped
+ * when the month's dues are generated).
+ */
+export const UNIT_ATTENTION = ['no_residents', 'no_contact', 'no_portal', 'no_fee'] as const
 export type UnitAttention = (typeof UNIT_ATTENTION)[number]
-export type UnitChip = (typeof UNIT_CHIPS)[number]
 
 /**
- * URL contract for /admin/registry/units (mockup 11). `chip` is the quick
- * filter row; `type`, `status` and `attention` live behind Filtros; `search` reaches
- * unit, building, resident names and plates on the server.
+ * URL contract for /admin/registry/units (mockup 11). `type`, `status` and
+ * `attention` live behind Filtros; `search` reaches unit, building,
+ * resident names and plates on the server.
  */
 export const unitsSearchSchema = z.object({
   page: z.coerce.number().int().positive().catch(1),
   search: z.string().catch(''),
   sort: z.string().catch(''),
-  chip: z.enum(UNIT_CHIPS).optional().catch(undefined),
   type: z.string().catch(''),
   status: z.string().catch(''),
   attention: z.enum(UNIT_ATTENTION).optional().catch(undefined),
@@ -114,17 +117,17 @@ export const unitsSearchSchema = z.object({
 
 export type UnitsSearchValues = z.infer<typeof unitsSearchSchema>
 
-export function chipParams(chip: UnitChip | undefined, attention?: UnitAttention): Pick<UnitsSearch, 'occupancy' | 'portal' | 'fee'> {
-  const extra: Pick<UnitsSearch, 'occupancy' | 'portal'> = attention === 'no_contact' ? { occupancy: 'attention' } : attention === 'no_portal' ? { portal: 'none' } : {}
-
-  switch (chip) {
-    case 'occupied':
-      return { ...extra, occupancy: 'occupied' }
-    case 'vacant':
-      return { ...extra, occupancy: 'vacant' }
+export function attentionParams(attention: UnitAttention | undefined): Pick<UnitsSearch, 'occupancy' | 'portal' | 'fee'> {
+  switch (attention) {
+    case 'no_residents':
+      return { occupancy: 'vacant' }
+    case 'no_contact':
+      return { occupancy: 'attention' }
+    case 'no_portal':
+      return { portal: 'none' }
     case 'no_fee':
-      return { ...extra, fee: 'missing' }
+      return { fee: 'missing' }
     default:
-      return extra
+      return {}
   }
 }

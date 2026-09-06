@@ -4,22 +4,19 @@ import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { FilterButton } from '../../components/table/filter-button'
 import { TableToolbar } from '../../components/table/table-toolbar'
 import { SearchInput } from '../../components/table/search-input'
-import { QuickFilters } from '../../components/table/quick-filters'
-import { UNIT_ATTENTION, UNIT_CHIPS, type UnitsSearchValues } from './schemas'
+import { UNIT_ATTENTION, type UnitsSearchValues } from './schemas'
 
 const TYPES = ['apartment', 'house', 'commercial', 'office'] as const
 
 /**
- * Toolbar: the quick views (Todas, Ocupadas, Vacías, Sin cuota), one search
- * box that reaches unit, building, residents and plates, and Tipo / Estado /
- * Atención behind Filtros.
+ * Toolbar: one search box that reaches unit, building, residents and plates,
+ * and Tipo / Estado / Atención behind Filtros. No quick-view row: the table
+ * is a directory, not a queue.
  */
 export function UnitsFilters({
-  noFeeCount,
   onChange,
   search,
 }: {
-  noFeeCount?: number
   onChange: (next: Partial<UnitsSearchValues>) => void
   search: UnitsSearchValues
 }) {
@@ -31,10 +28,6 @@ export function UnitsFilters({
   ]
 
   const attentionOptions = UNIT_ATTENTION.map((value) => ({ value, label: t(`units.attention.${value}`) }))
-  const quickOptions = [
-    { key: 'all' as const, label: t('units.chips.all') },
-    ...UNIT_CHIPS.map((key) => ({ key, label: t(`units.chips.${key}`), count: key === 'no_fee' ? noFeeCount : undefined })),
-  ]
 
   const chips = buildFilterChips([
     { key: 'type', label: t('units.columns.type'), value: search.type, options: typeOptions, onRemove: () => onChange({ type: '' }) },
@@ -76,7 +69,6 @@ export function UnitsFilters({
             />
         </FilterButton>
       }
-      quickFilters={<QuickFilters label={t('table.quickFilters')} options={quickOptions} value={search.chip ?? 'all'} onChange={(key) => onChange({ chip: key === 'all' ? undefined : key })} />}
       search={<SearchInput defaultValue={search.search} placeholder={t('units.searchPlaceholder')} onApply={(value) => onChange({ search: value })} />}
       onClearAll={() => onChange({ type: '', status: '', attention: undefined })}
     />
