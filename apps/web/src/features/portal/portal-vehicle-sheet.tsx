@@ -74,7 +74,6 @@ export function VehicleSheet({ onClose, opened, unitId, vehicle }: { onClose: ()
         }
         opened={opened}
         title={t(vehicle ? 'portal.vehicles.edit' : 'portal.vehicles.add')}
-        withClose
         onClose={onClose}
       >
         <form className="flex flex-col gap-[11px]" id="vehicle-form" onSubmit={form.handleSubmit((values) => submitHandlingServerErrors(form, () => save.mutateAsync(values)))}>

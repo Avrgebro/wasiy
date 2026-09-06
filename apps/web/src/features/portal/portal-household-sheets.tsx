@@ -89,7 +89,6 @@ export function MemberSheet({
         opened={member !== null}
         pill={member?.is_primary_contact ? <StatusPill color="teal">{t('portal.primaryContact')}</StatusPill> : member?.is_me ? <StatusPill color="teal">{t('portal.household.you')}</StatusPill> : undefined}
         title={member?.name ?? ''}
-        withClose
         onClose={onClose}
       >
         {member ? (
@@ -168,7 +167,6 @@ export function AddMemberSheet({ country, onClose, opened, unitId }: { country: 
       }
       opened={opened}
       title={t('portal.household.add')}
-      withClose
       onClose={onClose}
     >
       <form className="flex flex-col gap-[11px]" id="add-member-form" onSubmit={form.handleSubmit((values) => submitHandlingServerErrors(form, () => mutation.mutateAsync(values)))}>

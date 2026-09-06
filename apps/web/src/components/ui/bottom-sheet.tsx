@@ -1,5 +1,4 @@
-import { Button, Drawer, Text, UnstyledButton } from '@mantine/core'
-import { CloseIcon } from '@solar-icons/react/linear'
+import { Button, Drawer, Text } from '@mantine/core'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -9,10 +8,10 @@ import { useTranslation } from 'react-i18next'
  * shoulders, one 16px inset, 11px between blocks. Content-sized, capped at
  * 60% of the viewport; header and footer stay while the body scrolls.
  *
- * Header: title, up to two dimmed lines, and either a `pill` (detail
- * sheets) or a small close square (`withClose`, form sheets). Footer: the
- * sheet's actions; `footerDivider` draws the line the detail sheet has and
- * the form sheets do not.
+ * Header: title, up to two dimmed lines and an optional `pill` (detail
+ * sheets). There is no close control: the scrim, Escape and the footer's
+ * own actions dismiss it. Footer: the sheet's actions; `footerDivider`
+ * draws the line the detail sheet has and the form sheets do not.
  */
 export function BottomSheet({
   children,
@@ -24,7 +23,6 @@ export function BottomSheet({
   opened,
   pill,
   title,
-  withClose = false,
 }: {
   children: ReactNode
   footer?: ReactNode
@@ -37,9 +35,7 @@ export function BottomSheet({
   opened: boolean
   pill?: ReactNode
   title: ReactNode
-  withClose?: boolean
 }) {
-  const { t } = useTranslation('common')
   const shown = lines.filter((line): line is string => Boolean(line))
 
   return (
@@ -86,11 +82,6 @@ export function BottomSheet({
               ))}
             </span>
             {pill ? <span className="mt-0.5 shrink-0">{pill}</span> : null}
-            {withClose && !pill ? (
-              <UnstyledButton aria-label={t('actions.close')} className="grid size-7 shrink-0 place-items-center rounded-lg border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] text-[var(--mantine-color-dimmed)]" onClick={onClose}>
-                <CloseIcon size={16} />
-              </UnstyledButton>
-            ) : null}
           </span>
         </>
       }
