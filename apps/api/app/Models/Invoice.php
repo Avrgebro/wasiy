@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable(['account_id', 'subscription_id', 'number', 'period_starts_on', 'period_ends_on', 'billable_units', 'unit_price_minor', 'amount_minor', 'currency', 'status', 'due_on', 'issued_at', 'paid_at', 'payment_method', 'rejection_reason'])]
 class Invoice extends Model
@@ -37,6 +39,22 @@ class Invoice extends Model
     public function subscription(): BelongsTo
     {
         return $this->belongsTo(Subscription::class);
+    }
+
+    /**
+     * @return HasMany<InvoicePaymentProof, $this>
+     */
+    public function proofs(): HasMany
+    {
+        return $this->hasMany(InvoicePaymentProof::class);
+    }
+
+    /**
+     * @return HasOne<InvoicePaymentProof, $this>
+     */
+    public function latestProof(): HasOne
+    {
+        return $this->hasOne(InvoicePaymentProof::class)->latestOfMany();
     }
 
     /**

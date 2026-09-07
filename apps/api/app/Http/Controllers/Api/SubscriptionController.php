@@ -63,7 +63,7 @@ class SubscriptionController extends Controller
                 'extra_units' => $extraUnits, 'extra_minor' => $extraUnits * $subscription->unit_price_minor,
                 'total_minor' => $base + $extraUnits * $subscription->unit_price_minor,
             ],
-            'invoices' => $subscription->invoices()->latest('issued_at')->get()->map(fn (Invoice $invoice) => $this->invoice($invoice))->values(),
+            'invoices' => $subscription->invoices()->with('latestProof')->latest('issued_at')->get()->map(fn (Invoice $invoice) => $this->invoice($invoice))->values(),
             'payment_instructions' => $this->paymentInstructions(),
             // Totals per plan for this account's contracted units (ADR 0040).
             'plans' => Plan::query()->where('is_available', true)->orderBy('unit_price_minor')->get()->map(fn (Plan $candidate) => [
@@ -91,6 +91,7 @@ class SubscriptionController extends Controller
             'paid_at' => $invoice->paid_at?->toIso8601String(),
             'payment_method' => $invoice->payment_method?->value,
             'rejection_reason' => $invoice->rejection_reason,
+            'latest_proof' => $invoice->latestProof ? InvoiceProofController::proof($invoice->latestProof) : null,
         ];
     }
 

@@ -1,11 +1,12 @@
 import { Alert, Badge, Button, CopyButton, Skeleton, Text } from '@mantine/core'
 import { ArrowDownIcon, CheckCircleIcon, CopyIcon, InfoCircleIcon, WalletIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
-import { useRef, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../lib/dates'
 import { useMe } from '../auth/hooks'
-import { getSubscriptionPage, subscriptionPageQueryKey, type Invoice, type SubscriptionPageData } from './api'
+import { getSubscriptionPage, paymentProofUrl, subscriptionPageQueryKey, type Invoice, type SubscriptionPageData } from './api'
+import { ConfirmPaymentDrawer } from './confirm-payment-drawer'
 import { formatLongDay, formatPeriod, formatPlanMoney } from './format'
 
 /**
@@ -20,6 +21,8 @@ export function SubscriptionPage({ onConfirmPayment }: { onConfirmPayment?: (inv
   const me = useMe().data
   const page = useQuery({ queryKey: subscriptionPageQueryKey, queryFn: getSubscriptionPage, select: (r) => r.data })
   const invoicesRef = useRef<HTMLElement>(null)
+  const [confirming, setConfirming] = useState<Invoice | null>(null)
+  const confirm = onConfirmPayment ?? setConfirming
 
   if (!me?.active_account) {
     return <Alert color="warning" title={t('auth.noAccessTitle')}>{t('accountSelection.title')}</Alert>
@@ -46,10 +49,11 @@ export function SubscriptionPage({ onConfirmPayment }: { onConfirmPayment?: (inv
             <BillingCard data={data} />
           </div>
           <HowToPayCard data={data} />
-          <InvoicesCard data={data} onConfirmPayment={onConfirmPayment} ref={invoicesRef} />
+          <InvoicesCard data={data} onConfirmPayment={confirm} ref={invoicesRef} />
           <ChangePlanCard data={data} />
         </>
       ) : null}
+      <ConfirmPaymentDrawer invoice={confirming} onClose={() => setConfirming(null)} />
     </div>
   )
 }
@@ -313,6 +317,9 @@ function InvoiceRow({ invoice, onConfirmPayment }: { invoice: Invoice; onConfirm
       </div>
       {canConfirm ? (
         <Button className="w-full sm:w-auto" color="accent" onClick={() => onConfirmPayment?.(invoice)} size="sm">{t('subscription.invoices.confirmPayment')}</Button>
+      ) : null}
+      {invoice.status === 'under_review' && invoice.latest_proof ? (
+        <Button className="w-full sm:w-auto" component="a" href={paymentProofUrl(invoice.id, invoice.latest_proof.id)} rel="noreferrer" size="sm" target="_blank" variant="default">{t('subscription.invoices.viewProof')}</Button>
       ) : null}
     </li>
   )

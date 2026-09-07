@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\SubscriptionStatus;
 use App\Models\Invoice;
+use App\Services\BillingNotifier;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -17,6 +18,8 @@ use InvalidArgumentException;
  */
 class ConfirmInvoicePayment
 {
+    public function __construct(private readonly BillingNotifier $notifier) {}
+
     public function handle(Invoice $invoice, ?CarbonImmutable $paidAt = null, PaymentMethod $method = PaymentMethod::Transfer): Invoice
     {
         return DB::transaction(function () use ($invoice, $paidAt, $method): Invoice {
@@ -42,6 +45,7 @@ class ConfirmInvoicePayment
                 'pending_billable_units' => $decreaseApplied ? null : $subscription->pending_billable_units,
                 'pending_units_from' => $decreaseApplied ? null : $subscription->pending_units_from,
             ])->save();
+            $this->notifier->paymentConfirmed($invoice->refresh());
 
             return $invoice;
         });

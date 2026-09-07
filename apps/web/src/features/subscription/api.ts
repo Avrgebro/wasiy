@@ -1,4 +1,4 @@
-import { apiRequest } from '../../app/api-client'
+import { apiClient, apiRequest } from '../../app/api-client'
 import type { SubscriptionStatus } from '../auth/types'
 
 export type InvoiceStatus = 'pending' | 'under_review' | 'paid' | 'rejected'
@@ -16,6 +16,18 @@ export type Invoice = {
   paid_at: string | null
   payment_method: PaymentMethod | null
   rejection_reason: string | null
+  latest_proof: PaymentProof | null
+}
+
+export type PaymentProof = {
+  id: string
+  original_filename: string
+  mime_type: string
+  size_bytes: number
+  paid_on: string | null
+  amount_minor: number | null
+  operation_number: string | null
+  uploaded_at: string
 }
 
 export type PlanOption = {
@@ -60,3 +72,21 @@ export type SubscriptionPageData = {
 export const subscriptionPageQueryKey = ['subscription', 'page'] as const
 
 export const getSubscriptionPage = () => apiRequest<{ data: SubscriptionPageData | null }>('/api/account/subscription')
+
+export type ProofDetails = { paid_on?: string; amount_minor?: number; operation_number?: string }
+
+/** Multipart: the file plus whatever details the admin filled in (mockup 22c). */
+export function uploadPaymentProof(invoiceId: string, file: File, details: ProofDetails) {
+  const data = new FormData()
+  data.append('file', file)
+  if (details.paid_on) data.append('paid_on', details.paid_on)
+  if (details.amount_minor) data.append('amount_minor', String(details.amount_minor))
+  if (details.operation_number) data.append('operation_number', details.operation_number)
+
+  return apiRequest<{ data: PaymentProof }>(`/api/account/invoices/${invoiceId}/proofs`, { data, method: 'POST' })
+}
+
+/** Streams through the API with the session cookie, so a plain link works. */
+export function paymentProofUrl(invoiceId: string, proofId: string) {
+  return `${apiClient.defaults.baseURL ?? ''}/api/account/invoices/${invoiceId}/proofs/${proofId}`
+}

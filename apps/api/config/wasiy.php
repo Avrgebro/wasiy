@@ -34,6 +34,11 @@ return [
         'notify_email' => env('WASIY_LEADS_NOTIFY_EMAIL', 'hola@wasiy.co'),
     ],
     'billing' => [
+        // Payment proofs: bank documents, so a private disk streamed through the API.
+        'proofs_disk' => env('WASIY_PROOFS_DISK', 'local'),
+        'proof_max_file_kb' => (int) env('WASIY_PROOF_MAX_FILE_KB', 10240),
+        // Where the team hears about proofs to review.
+        'review_email' => env('WASIY_BILLING_REVIEW_EMAIL', env('WASIY_LEADS_NOTIFY_EMAIL', 'hola@wasiy.co')),
         // Manual payment instructions shown on the subscription page (ADR 0040).
         // Yape and Plin are channels into the same account, not payment
         // methods; unset numbers hide their card. Replaced by the payment

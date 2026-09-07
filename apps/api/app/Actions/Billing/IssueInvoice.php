@@ -5,6 +5,7 @@ namespace App\Actions\Billing;
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Subscription;
+use App\Services\BillingNotifier;
 use App\Support\InvoiceNumber;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,8 @@ class IssueInvoice
     /** How many days before access_until the invoice appears; also the due date. */
     public const LEAD_DAYS = 7;
 
+    public function __construct(private readonly BillingNotifier $notifier) {}
+
     public function handle(Subscription $subscription, ?CarbonImmutable $now = null): ?Invoice
     {
         $now = $now ?? CarbonImmutable::now();
@@ -34,7 +37,7 @@ class IssueInvoice
             $end = $start->addMonth()->subDay();
             $units = $subscription->pendingUnitsApplyOn($start) ?? $subscription->billable_units;
 
-            return Invoice::create([
+            $invoice = Invoice::create([
                 'account_id' => $subscription->account_id,
                 'subscription_id' => $subscription->id,
                 'number' => InvoiceNumber::next($now->year),
@@ -48,6 +51,9 @@ class IssueInvoice
                 'due_on' => $start,
                 'issued_at' => $now,
             ]);
+            $this->notifier->invoiceIssued($invoice);
+
+            return $invoice;
         });
     }
 }

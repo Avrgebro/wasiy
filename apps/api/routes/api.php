@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AmenityPhotoController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\BuildingController;
 use App\Http\Controllers\Api\FinancialMovementController;
+use App\Http\Controllers\Api\InvoiceProofController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\LocationDashboardController;
 use App\Http\Controllers\Api\LocationPhotoController;
@@ -93,6 +94,8 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     // The subscription page (ADR 0040) stays readable once an account has
     // lapsed: that is when its admin needs the invoice.
     Route::get('/account/subscription', [SubscriptionController::class, 'show']);
+    Route::post('/account/invoices/{invoice}/proofs', [InvoiceProofController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('/account/invoices/{invoice}/proofs/{proof}', [InvoiceProofController::class, 'show']);
 
     Route::controller(AccessContextController::class)->group(function () {
         Route::post('/context/account', 'selectAccount');

@@ -1835,6 +1835,25 @@
       "portfolio": "Portafolio, para administradoras con varios edificios, se coordina con el equipo comercial.",
       "mailSubject": "Cambio de plan · {{account}}",
       "mailBody": "Hola, quiero cambiar la cuenta {{account}} al plan {{plan}} en la siguiente renovación."
+    },
+    "proof": {
+      "title": "Confirmar pago",
+      "subtitle": "{{number}} · {{amount}} · {{period}}",
+      "drop": "Arrastra el comprobante o toca para elegir",
+      "dropHint": "Imagen o PDF, hasta 10 MB",
+      "rejected": "Solo imágenes o PDF de hasta 10 MB.",
+      "remove": "Quitar archivo",
+      "detailsTitle": "Datos del pago (opcional)",
+      "paidOn": "Fecha de pago",
+      "amount": "Monto",
+      "operation": "Número de operación",
+      "operationPlaceholder": "Ej. 00483921",
+      "submit": "Enviar comprobante",
+      "reviewNote": "Lo revisamos en un día hábil y te avisamos por correo.",
+      "fileRequired": "Adjunta el comprobante para continuar.",
+      "sentTitle": "Comprobante enviado",
+      "sentBody": "La factura queda en revisión. Te escribimos a {{email}} cuando confirmemos el pago.",
+      "done": "Listo"
     }
   },
   "account": {

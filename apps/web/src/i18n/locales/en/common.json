@@ -1835,6 +1835,25 @@
       "portfolio": "Portafolio, for administrators with several buildings, is arranged with the sales team.",
       "mailSubject": "Plan change · {{account}}",
       "mailBody": "Hi, I want to move the account {{account}} to the {{plan}} plan at the next renewal."
+    },
+    "proof": {
+      "title": "Confirm payment",
+      "subtitle": "{{number}} · {{amount}} · {{period}}",
+      "drop": "Drag the proof here or tap to choose",
+      "dropHint": "Image or PDF, up to 10 MB",
+      "rejected": "Images or PDFs up to 10 MB only.",
+      "remove": "Remove file",
+      "detailsTitle": "Payment details (optional)",
+      "paidOn": "Payment date",
+      "amount": "Amount",
+      "operation": "Operation number",
+      "operationPlaceholder": "E.g. 00483921",
+      "submit": "Send proof",
+      "reviewNote": "We review it within a business day and email you.",
+      "fileRequired": "Attach the proof to continue.",
+      "sentTitle": "Proof sent",
+      "sentBody": "The invoice is under review. We will email {{email}} once we confirm the payment.",
+      "done": "Done"
     }
   },
   "account": {

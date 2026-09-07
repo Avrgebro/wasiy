@@ -26,9 +26,9 @@ function pageData(overrides: Partial<SubscriptionPageData> = {}): SubscriptionPa
     subscription: { status: 'trialing', trial_ends_at: '2026-09-21T12:00:00Z', access_until: '2026-09-21T12:00:00Z', days_left: 5, is_lapsed: false, billable_units: 40, units_in_use: 37, pending_billable_units: null, pending_units_from: null, last_paid_at: null },
     breakdown: { base_units: 10, base_minor: 6500, extra_units: 30, extra_minor: 19500, total_minor: 26000 },
     invoices: [
-      { id: 'i1', number: 'F-2026-0042', period_starts_on: '2026-09-21', period_ends_on: '2026-10-20', amount_minor: 26000, currency: 'PEN', status: 'pending', due_on: '2026-09-21', paid_at: null, payment_method: null, rejection_reason: null },
-      { id: 'i2', number: 'F-2026-0039', period_starts_on: '2026-06-04', period_ends_on: '2026-07-03', amount_minor: 25350, currency: 'PEN', status: 'rejected', due_on: '2026-06-04', paid_at: null, payment_method: null, rejection_reason: 'El monto no coincide con la factura.' },
-      { id: 'i3', number: 'F-2026-0040', period_starts_on: '2026-07-04', period_ends_on: '2026-08-03', amount_minor: 25350, currency: 'PEN', status: 'paid', due_on: '2026-07-04', paid_at: '2026-07-06T15:00:00Z', payment_method: 'transfer', rejection_reason: null },
+      { id: 'i1', number: 'F-2026-0042', period_starts_on: '2026-09-21', period_ends_on: '2026-10-20', amount_minor: 26000, currency: 'PEN', status: 'pending', due_on: '2026-09-21', paid_at: null, payment_method: null, rejection_reason: null, latest_proof: null },
+      { id: 'i2', number: 'F-2026-0039', period_starts_on: '2026-06-04', period_ends_on: '2026-07-03', amount_minor: 25350, currency: 'PEN', status: 'rejected', due_on: '2026-06-04', paid_at: null, payment_method: null, rejection_reason: 'El monto no coincide con la factura.', latest_proof: null },
+      { id: 'i3', number: 'F-2026-0040', period_starts_on: '2026-07-04', period_ends_on: '2026-08-03', amount_minor: 25350, currency: 'PEN', status: 'paid', due_on: '2026-07-04', paid_at: '2026-07-06T15:00:00Z', payment_method: 'transfer', rejection_reason: null, latest_proof: null },
     ],
     payment_instructions: { transfer: { bank: 'BCP', account_type: 'Cuenta corriente soles', account_number: '193-2547891-0-45', cci: '002-193-002547891045-19', holder: 'Wasiy SAC', tax_id: '20612345678' }, yape: { number: '987 654 321', holder: 'Wasiy SAC' }, plin: null },
     plans: [
