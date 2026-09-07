@@ -100,7 +100,7 @@ function renderTab(readOnly = false) {
 
   return render(
     <MantineProvider env="test">
-      <Notifications />
+      <Notifications autoClose={false} />
       <QueryClientProvider client={queryClient}>
         <LocationAmenitiesTab
           accountId="acc_1"

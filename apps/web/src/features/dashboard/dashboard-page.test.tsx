@@ -102,7 +102,7 @@ function renderPage() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
   return render(
     <MantineProvider env="test">
-      <Notifications />
+      <Notifications autoClose={false} />
       <QueryClientProvider client={queryClient}>
         <DashboardPage />
       </QueryClientProvider>

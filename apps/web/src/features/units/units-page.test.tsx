@@ -89,7 +89,7 @@ function installAdapter(rows: UnitSummary[]) {
 function renderPage(queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
   return render(
     <MantineProvider env="test">
-      <Notifications />
+      <Notifications autoClose={false} />
       <QueryClientProvider client={queryClient}>
         <UnitsPage />
       </QueryClientProvider>

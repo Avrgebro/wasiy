@@ -29,7 +29,7 @@ export function renderPortal(ui: ReactNode) {
 
   return render(
     <MantineProvider env="test">
-      <Notifications />
+      <Notifications autoClose={false} />
       <QueryClientProvider client={queryClient}>
         <ActiveUnitProvider>{ui}</ActiveUnitProvider>
       </QueryClientProvider>

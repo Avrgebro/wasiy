@@ -54,7 +54,7 @@ function renderPanel({
 
   render(
     <MantineProvider env="test">
-      <Notifications />
+      <Notifications autoClose={false} />
       <QueryClientProvider client={queryClient}>
         <OperationalSettingsPanel
           fetchSettings={() => Promise.resolve(response)}

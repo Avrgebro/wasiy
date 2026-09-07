@@ -131,7 +131,7 @@ function renderPage() {
 
   return render(
     <MantineProvider env="test">
-      <Notifications />
+      <Notifications autoClose={false} />
       <QueryClientProvider client={queryClient}>
         <LocationsPage />
       </QueryClientProvider>
