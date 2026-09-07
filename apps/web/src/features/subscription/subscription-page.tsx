@@ -9,8 +9,8 @@ import { formatPlanMoney, monthlyTotalMinor } from './format'
 /**
  * /admin/subscription: the plan, what it costs and where the trial stands.
  * Payment is manual (transfer, Yape, Plin), so the action is a mailto to the
- * sales inbox the API hands us. Open to every staff role because a lapsed
- * account lands everyone here (ADR 0039).
+ * sales inbox the API hands us. Account admins only; a lapsed account sends
+ * them here and other staff to the lock screen (ADR 0039).
  */
 export function SubscriptionPage() {
   const { t } = useTranslation('common')

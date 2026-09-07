@@ -1773,6 +1773,9 @@
     "bannerLapsedBodyStaff": "Ask the account administrator to activate the plan.",
     "bannerAction": "View subscription",
     "lockedTitle": "Access to this account is paused",
-    "lockedBody": "Your data is safe. Everything comes back as soon as the plan is activated."
+    "lockedBody": "Your data is safe. Everything comes back as soon as the plan is activated.",
+    "pausedTitle": "Access to this account is paused",
+    "pausedSince": "The subscription for {{account}} expired on {{date}}.",
+    "pausedSinceUnknown": "The subscription for {{account}} has expired."
   }
 }

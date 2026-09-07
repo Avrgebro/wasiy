@@ -1773,6 +1773,9 @@
     "bannerLapsedBodyStaff": "Avisa al administrador de la cuenta para activar el plan.",
     "bannerAction": "Ver suscripción",
     "lockedTitle": "El acceso a esta cuenta está pausado",
-    "lockedBody": "Los datos siguen guardados. En cuanto se active el plan, todo vuelve a estar disponible."
+    "lockedBody": "Los datos siguen guardados. En cuanto se active el plan, todo vuelve a estar disponible.",
+    "pausedTitle": "El acceso a esta cuenta está pausado",
+    "pausedSince": "La suscripción de {{account}} venció el {{date}}.",
+    "pausedSinceUnknown": "La suscripción de {{account}} venció."
   }
 }

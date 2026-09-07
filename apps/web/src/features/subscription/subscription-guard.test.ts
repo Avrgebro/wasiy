@@ -23,11 +23,19 @@ describe('checkSubscriptionAccess', () => {
     expect(() => checkSubscriptionAccess(meWith(null), '/admin/units')).not.toThrow()
   })
 
-  it('sends a lapsed account to the subscription page and nowhere else', () => {
-    const me = meWith({ is_lapsed: true, days_left: 0 })
+  it('sends a lapsed account admin to the subscription page and nowhere else', () => {
+    const me = { ...meWith({ is_lapsed: true, days_left: 0 }), roles: { account: [{ account_id: 'acc_1', role: 'account_admin' as const }], location: [] } }
     expect(() => checkSubscriptionAccess(me, '/admin/units')).toThrow()
+    expect(() => checkSubscriptionAccess(me, '/access-paused')).toThrow()
     expect(() => checkSubscriptionAccess(me, '/admin/subscription')).not.toThrow()
     expect(() => checkSubscriptionAccess(me, '/admin/subscription/')).not.toThrow()
+  })
+
+  it('sends other lapsed staff to the lock screen, never to billing', () => {
+    const me = meWith({ is_lapsed: true, days_left: 0 })
+    expect(() => checkSubscriptionAccess(me, '/admin/units')).toThrow()
+    expect(() => checkSubscriptionAccess(me, '/admin/subscription')).toThrow()
+    expect(() => checkSubscriptionAccess(me, '/access-paused')).not.toThrow()
   })
 })
 

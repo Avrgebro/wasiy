@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes-admin/login'
 import { Route as AuthenticatedRouteImport } from './routes-admin/_authenticated'
 import { Route as IndexRouteImport } from './routes-admin/index'
 import { Route as AuthenticatedSelectAccountRouteImport } from './routes-admin/_authenticated/select-account'
+import { Route as AuthenticatedAccessPausedRouteImport } from './routes-admin/_authenticated/access-paused'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes-admin/_authenticated/admin/route'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes-admin/_authenticated/admin/index'
 import { Route as InvitationsStaffTokenRouteImport } from './routes-admin/invitations/staff.$token'
@@ -65,6 +66,12 @@ const AuthenticatedSelectAccountRoute =
   AuthenticatedSelectAccountRouteImport.update({
     id: '/select-account',
     path: '/select-account',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAccessPausedRoute =
+  AuthenticatedAccessPausedRouteImport.update({
+    id: '/access-paused',
+    path: '/access-paused',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
@@ -195,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/no-access': typeof NoAccessRoute
   '/registro': typeof RegistroRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/access-paused': typeof AuthenticatedAccessPausedRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
@@ -222,6 +230,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
   '/registro': typeof RegistroRoute
+  '/access-paused': typeof AuthenticatedAccessPausedRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
@@ -252,6 +261,7 @@ export interface FileRoutesById {
   '/no-access': typeof NoAccessRoute
   '/registro': typeof RegistroRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
+  '/_authenticated/access-paused': typeof AuthenticatedAccessPausedRoute
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/_authenticated/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/registro'
     | '/admin'
+    | '/access-paused'
     | '/select-account'
     | '/admin/activity'
     | '/admin/announcements'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/no-access'
     | '/registro'
+    | '/access-paused'
     | '/select-account'
     | '/admin/activity'
     | '/admin/announcements'
@@ -338,6 +350,7 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/registro'
     | '/_authenticated/admin'
+    | '/_authenticated/access-paused'
     | '/_authenticated/select-account'
     | '/_authenticated/admin/activity'
     | '/_authenticated/admin/announcements'
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/select-account'
       fullPath: '/select-account'
       preLoaderRoute: typeof AuthenticatedSelectAccountRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/access-paused': {
+      id: '/_authenticated/access-paused'
+      path: '/access-paused'
+      fullPath: '/access-paused'
+      preLoaderRoute: typeof AuthenticatedAccessPausedRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin': {
@@ -620,11 +640,13 @@ const AuthenticatedAdminRouteRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
+  AuthenticatedAccessPausedRoute: typeof AuthenticatedAccessPausedRoute
   AuthenticatedSelectAccountRoute: typeof AuthenticatedSelectAccountRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
+  AuthenticatedAccessPausedRoute: AuthenticatedAccessPausedRoute,
   AuthenticatedSelectAccountRoute: AuthenticatedSelectAccountRoute,
 }
 
