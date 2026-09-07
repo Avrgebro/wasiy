@@ -1,0 +1,13 @@
+{
+  "name": "@wasiy/mailing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "maizzle serve",
+    "build": "maizzle build -c maizzle.config.production.ts",
+    "postinstall": "maizzle prepare"
+  },
+  "dependencies": {
+    "@maizzle/framework": "^6.1.2"
+  }
+}

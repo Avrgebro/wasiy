@@ -1,0 +1,23 @@
+/* Wasiy brand tokens, mirrored from apps/marketing/src/layouts/Layout.astro
+   so emails and the site cannot drift. Names match the CSS variables there.
+   Appended into the Layout's Tailwind import by afterRender in
+   maizzle.config.ts; do not import @maizzle/tailwindcss here. */
+@theme {
+  --color-bg: #f7f5f0;
+  --color-ink: #1c2b2c;
+  --color-teal: #124e52;
+  --color-teal-dark: #0a3538;
+  --color-teal-mid: #3e7c80;
+  --color-teal-pale: #a9c4c0;
+  --color-teal-faded: #8fb3af;
+  --color-gold: #e0a438;
+  --color-muted: #5a6b6b;
+  --color-faint: #9aa6a4;
+  --color-border: #e4e0d6;
+  --color-card-border: #dde4e1;
+  --color-cream: #efebe2;
+  --color-white: #ffffff;
+
+  --font-sora: Sora, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-instrument: 'Instrument Sans', 'Segoe UI', Helvetica, Arial, sans-serif;
+}

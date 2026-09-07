@@ -3,9 +3,11 @@
   "private": true,
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "build:mail": "pnpm --filter @wasiy/mailing build",
     "build:marketing": "pnpm --filter @wasiy/marketing build",
     "build:web": "pnpm --filter @wasiy/web build",
     "dev": "pnpm sail:up && pnpm --filter @wasiy/web dev",
+    "dev:mail": "pnpm --filter @wasiy/mailing dev",
     "dev:marketing": "pnpm --filter @wasiy/marketing exec astro dev --background",
     "dev:marketing:logs": "pnpm --filter @wasiy/marketing exec astro dev logs",
     "dev:marketing:status": "pnpm --filter @wasiy/marketing exec astro dev status",
