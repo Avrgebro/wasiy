@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { canAccessPortal, getDefaultAuthenticatedRoute } from '../features/auth/access'
-import { resolveSession } from '../features/auth/guards'
+import { redirectWithinSurface, resolveSession } from '../features/auth/guards'
 import { NoAccessPage } from '../features/auth/no-access-page'
 
 // Deliberately outside the _authenticated layout: deactivated users (whose
@@ -15,7 +15,7 @@ export const Route = createFileRoute('/no-access')({
     }
 
     if (session.status === 'authenticated' && canAccessPortal(session.me)) {
-      throw redirect({ href: getDefaultAuthenticatedRoute(session.me) })
+      throw redirectWithinSurface(getDefaultAuthenticatedRoute(session.me))
     }
   },
   component: NoAccessPage,

@@ -70,7 +70,7 @@ export function checkSurfaceAccess(
 ) {
   if (SURFACE === 'admin' && requiresAccountSelection(me)) {
     // href, not to: the route exists only in the staff tree.
-    throw redirect({ href: '/select-account' })
+    throw redirectWithinSurface('/select-account')
   }
 
   if (!canAccess(me)) {
@@ -79,9 +79,28 @@ export function checkSurfaceAccess(
 }
 
 /**
- * The landing page is computed per surface and expressed as an href: a typed
- * `to` would drag the other surface's route literals into this build.
+ * The landing page is computed per surface (ADR 0038): each build only ever
+ * receives its own routes, so the redirect stays within this surface.
  */
 export function redirectToLanding(me: MeResponse) {
-  return redirect({ href: getDefaultAuthenticatedRoute(me) })
+  return redirectWithinSurface(getDefaultAuthenticatedRoute(me))
+}
+
+export type SurfaceRoute = ReturnType<typeof getDefaultAuthenticatedRoute> | '/select-account'
+
+/**
+ * A redirect to a route of this build, expressed as `to`, never `href`.
+ *
+ * `href` is only for the other host. Within a surface it is also unsafe: the
+ * router's hover preload rebuilds a thrown redirect from its `to` and ignores
+ * `href`, so an href redirect thrown from beforeLoad while preloading
+ * re-resolves to the route being preloaded and recurses forever, freezing the
+ * tab (front desk hovering a unit link it may not open).
+ *
+ * The path's type is the union across both surfaces, so it is cast here once
+ * rather than typed per build; `getDefaultAuthenticatedRoute` guarantees the
+ * value exists on this surface.
+ */
+export function redirectWithinSurface(path: SurfaceRoute) {
+  return redirect({ to: path as never })
 }

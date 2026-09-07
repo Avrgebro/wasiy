@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { RegistrationPage } from '../features/registration/registration-page'
 import { getPendingRegistration, getRegistrationPlans } from '../features/registration/api'
-import { resolveSession } from '../features/auth/guards'
+import { redirectWithinSurface, resolveSession } from '../features/auth/guards'
 import { getDefaultAuthenticatedRoute } from '../features/auth/access'
 import { sessionQueryKey } from '../features/auth/query-options'
 
@@ -11,7 +11,7 @@ export const Route = createFileRoute('/registro')({
   validateSearch: z.object({ plan: z.enum(['esencial', 'operativo']).catch('operativo') }),
   beforeLoad: async ({ context }) => {
     const session = await resolveSession(context)
-    if (session.status === 'authenticated') throw redirect({ href: getDefaultAuthenticatedRoute(session.me) })
+    if (session.status === 'authenticated') throw redirectWithinSurface(getDefaultAuthenticatedRoute(session.me))
     if (session.status === 'deactivated') throw redirect({ to: '/no-access' })
   },
   loader: async () => {
