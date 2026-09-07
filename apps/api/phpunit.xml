@@ -26,6 +26,7 @@
         <env name="DB_DATABASE" value="testing"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
+        <env name="TURNSTILE_SECRET" value=""/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="FILESYSTEM_DISK" value="local"/>
         <env name="WASIY_EXPORT_DISK" value="local"/>

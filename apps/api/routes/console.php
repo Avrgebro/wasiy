@@ -12,3 +12,4 @@ Schedule::command('invitations:expire-stale')->daily();
 Schedule::command('visits:auto-check-out')->everyTenMinutes();
 Schedule::command('alerts:prune')->daily();
 Schedule::command('announcements:publish-due')->everyMinute();
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
