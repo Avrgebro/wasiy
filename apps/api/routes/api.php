@@ -96,7 +96,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
                 Route::get('/staff/invitations', 'index');
                 Route::post('/staff/invitations', 'store');
                 Route::delete('/staff/invitations/{invitation}', 'destroy');
-                Route::post('/staff/invitations/{invitation}/resend', 'resend');
+                Route::post('/staff/invitations/{invitation}/resend', [StaffInvitationController::class, 'resend']);
             });
         });
 
@@ -251,7 +251,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     Route::controller(ResidentInvitationController::class)->group(function () {
         Route::post('/residents/{resident}/invitations', 'store');
         Route::delete('/residents/{resident}/invitations/{invitation}', 'destroy');
-        Route::post('/residents/{resident}/invitations/{invitation}/resend', 'resend');
+        Route::post('/residents/{resident}/invitations/{invitation}/resend', [ResidentInvitationController::class, 'resend']);
     });
 
     Route::controller(UnitMembershipController::class)->group(function () {
