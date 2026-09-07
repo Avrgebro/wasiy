@@ -56,6 +56,29 @@ test('it returns the authenticated user location scoped access context', functio
         ->assertJsonPath('roles.location.0.role', LocationRole::LocationManager->value);
 });
 
+test('each account carries the roles the user holds in it', function () {
+    $user = User::factory()->create();
+    $first = Account::factory()->create(['name' => 'Administradora Sur']);
+    $second = Account::factory()->create(['name' => 'Las Palmas']);
+    $central = Location::factory()->for($first)->create(['name' => 'Edificio Central']);
+    $norte = Location::factory()->for($first)->create(['name' => 'Torre Norte']);
+    grantLocationRole($first, $norte, $user, LocationRole::FrontDesk);
+    grantLocationRole($first, $central, $user, LocationRole::LocationManager);
+    createStaffMembership($second, $user, AccountRole::AccountAdmin);
+
+    $this->actingAs($user)
+        ->withSession(['wasiy.active_account_id' => $first->id])
+        ->getJson('/api/me')
+        ->assertOk()
+        ->assertJsonPath('accounts.0.access.account_role', null)
+        ->assertJsonPath('accounts.0.access.locations.0.location_name', 'Edificio Central')
+        ->assertJsonPath('accounts.0.access.locations.0.role', 'location_manager')
+        ->assertJsonPath('accounts.0.access.locations.1.location_name', 'Torre Norte')
+        ->assertJsonPath('accounts.0.access.locations.1.role', 'front_desk')
+        ->assertJsonPath('accounts.1.access.account_role', 'account_admin')
+        ->assertJsonPath('accounts.1.access.locations', []);
+});
+
 test('it includes account access from account scoped roles', function () {
     $user = User::factory()->create();
     $account = Account::factory()->create();

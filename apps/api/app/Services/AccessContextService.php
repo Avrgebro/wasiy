@@ -85,9 +85,9 @@ class AccessContextService
                 'name' => $user->name,
                 'email' => $user->email,
             ],
-            accounts: $accounts->map(fn (Account $account) => $this->accountSummary($account))->all(),
+            accounts: $accounts->map(fn (Account $account) => $this->accountSummary($account, $user))->all(),
             activeAccount: $activeAccount instanceof Account
-                ? $this->accountSummary($activeAccount)
+                ? $this->accountSummary($activeAccount, $user)
                 : null,
             activeLocation: $activeLocation instanceof Location
                 ? $this->locationSummary($activeLocation, $membership, $isAccountAdmin)
@@ -248,7 +248,7 @@ class AccessContextService
     /**
      * @return array<string, mixed>
      */
-    private function accountSummary(Account $account): array
+    private function accountSummary(Account $account, User $user): array
     {
         return [
             'id' => $account->id,
@@ -258,9 +258,31 @@ class AccessContextService
             // Loaded via withCount() in buildContext; the fallback covers
             // Account instances that arrive without it.
             'locations_count' => (int) ($account->locations_count ?? $account->locations()->count()),
+            // What this user holds in the account, for "Cuentas y accesos"
+            // (mockup 21): the account role, and one row per Location role.
+            'access' => $this->accessSummary($account, $user),
             // Null for accounts created by hand; the SPA shows no banner and
             // the API applies no gate (ADR 0039).
             'subscription' => $this->subscriptionSummary($account->subscription),
+        ];
+    }
+
+    /**
+     * @return array{account_role: string|null, locations: list<array{location_id: string, location_name: string, role: string}>}
+     */
+    private function accessSummary(Account $account, User $user): array
+    {
+        $membership = $user->staffMemberships->firstWhere('account_id', $account->id);
+
+        return [
+            'account_role' => $membership?->account_role?->value,
+            'locations' => $membership?->locationRoles
+                ->sortBy(fn ($assignment) => $assignment->location->name)
+                ->map(fn ($assignment) => [
+                    'location_id' => $assignment->location_id,
+                    'location_name' => $assignment->location->name,
+                    'role' => $assignment->role->value,
+                ])->values()->all() ?? [],
         ];
     }
 

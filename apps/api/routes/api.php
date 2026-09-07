@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AccessContextController;
+use App\Http\Controllers\Api\AccountProfileController;
+use App\Http\Controllers\Api\AccountSessionsController;
 use App\Http\Controllers\Api\AccountSettingsController;
 use App\Http\Controllers\Api\AccountStaffController;
 use App\Http\Controllers\Api\AmenityController;
@@ -70,6 +72,22 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
 
     Route::get('/me', MeController::class);
     Route::patch('/me/password', [PasswordController::class, 'update']);
+
+    // Mi cuenta (mockup 21): own name and login email. Outside the
+    // subscription gate like /me, since a lapsed account may still fix its
+    // login details.
+    Route::controller(AccountProfileController::class)->group(function () {
+        Route::patch('/me/profile', 'updateProfile');
+        Route::get('/me/email', 'showEmailChange');
+        Route::post('/me/email/request', 'requestEmailChange')->middleware('throttle:10,1');
+        Route::post('/me/email/resend', 'resendEmailChange')->middleware('throttle:10,1');
+        Route::post('/me/email/verify', 'verifyEmailChange')->middleware('throttle:10,1');
+        Route::delete('/me/email', 'cancelEmailChange');
+    });
+    Route::controller(AccountSessionsController::class)->group(function () {
+        Route::get('/me/sessions', 'index');
+        Route::delete('/me/sessions/others', 'destroyOthers');
+    });
 
     Route::controller(AccessContextController::class)->group(function () {
         Route::post('/context/account', 'selectAccount');
