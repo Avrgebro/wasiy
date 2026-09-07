@@ -134,6 +134,19 @@ describe('Registration', () => {
     expect(screen.queryByText('Datos inválidos')).not.toBeInTheDocument()
     expect(completed).not.toHaveBeenCalled()
   })
+  it('keeps the live total in reach while the plan card sits below the building form', async () => {
+    const scrollIntoView = vi.fn()
+    Element.prototype.scrollIntoView = scrollIntoView
+    await renderPage({ ...draft, verified: true })
+    const user = userEvent.setup()
+    expect(screen.getByText('Total al indicar las unidades')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Número total de unidades'), '40')
+    const total = screen.getByText('S/ 260.00 al mes')
+    expect(screen.getByRole('complementary')).not.toContainElement(total)
+    await user.click(screen.getByRole('button', { name: 'Ver detalle' }))
+    expect(scrollIntoView).toHaveBeenCalled()
+    expect(scrollIntoView.mock.instances[0]).toBe(screen.getByRole('complementary'))
+  })
   it('shows the included units and adds nothing for a building under them', async () => {
     await renderPage({ ...draft, verified: true })
     const user = userEvent.setup()

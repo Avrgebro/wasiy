@@ -47,6 +47,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
   const [error, setError] = useState('')
   const submitting = useRef(false)
   const heading = useRef<HTMLHeadingElement>(null)
+  const planCard = useRef<HTMLElement>(null)
   const selected = plans[plan]
   const units = Number(building.units) || 0
   const countryLabel = registrationCountries.find(c => c.value === building.country)?.label
@@ -127,7 +128,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
       </header>
 
       {/* Tablets stack the form and plan card in one centered column; two columns need lg. */}
-      <main className="mx-auto max-w-[640px] px-5 pb-14 pt-8 md:px-8 md:pt-11 lg:max-w-6xl lg:px-12">
+      <main className={`mx-auto max-w-[640px] px-5 pt-8 md:px-8 md:pt-11 lg:max-w-6xl lg:px-12 lg:pb-14 ${step === 1 ? 'pb-28' : 'pb-14'}`}>
         <nav aria-label="Progreso del registro" className="mb-8 hidden md:block">
           <ol className="flex items-center gap-4">
             {steps.map((label, index) => (
@@ -258,7 +259,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
             </section>
 
             {!verification && (
-              <aside className="flex min-w-0 flex-col gap-4">
+              <aside ref={planCard} className="flex min-w-0 scroll-mt-6 flex-col gap-4">
                 <RegistrationPlanCard step={step} plan={selected} favorite={plan === 'operativo'} units={units} trialEnd={trialEnd} />
                 {step === 2 && <>
                   <Button color="accent" h={48} radius={10} fullWidth loading={busy} onClick={finish}>Comenzar prueba gratis</Button>
@@ -270,6 +271,20 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
         )}
       </main>
       <footer className="px-5 py-6 text-center text-xs text-[var(--mantine-color-placeholder)]">Wasiy · Hecho para la vida en comunidad.</footer>
+      {/* Stacked layouts put the plan card below the building form, so the live total rides along in a bar. */}
+      {step === 1 && selected && (
+        <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-1/2 z-10 w-[calc(100%-2rem)] max-w-[640px] -translate-x-1/2 rounded-xl md:max-w-[576px] border border-[var(--mantine-color-default-border)] bg-white px-5 py-3 shadow-[0_12px_40px_rgba(28,43,44,0.06)] lg:hidden">
+          <div className="flex items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]">Plan {selected.name}</p>
+              <p aria-live="polite" className="font-display text-lg font-semibold leading-tight">
+                {units > 0 ? `${money(monthlyTotal(selected, units).total)} al mes` : <span className="text-sm font-normal text-[var(--mantine-color-placeholder)]">Total al indicar las unidades</span>}
+              </p>
+            </div>
+            <Button variant="default" radius={10} h={40} className="shrink-0" onClick={() => planCard.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>Ver detalle</Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
