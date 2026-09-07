@@ -1,4 +1,5 @@
 import { MantineProvider } from '@mantine/core'
+import { RouterProvider, createMemoryHistory, createRootRoute, createRouter } from '@tanstack/react-router'
 import { mantineTheme } from '../../app/theme'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -15,8 +16,13 @@ const catalog: RegistrationPlan[] = [
 ]
 const draft = { first_name: 'Ana', last_name: 'Torres', email: 'ana@example.com', verified: false, resend_after: 30 }
 const completed = vi.fn(async () => {})
-function renderPage(initialPending = null as typeof draft | null) {
-  return render(<MantineProvider theme={mantineTheme} env="test"><RegistrationPage initialPending={initialPending} catalog={catalog} onComplete={completed} /></MantineProvider>)
+// The page renders a router Link, so it needs a (minimal) router around it.
+async function renderPage(initialPending = null as typeof draft | null) {
+  const rootRoute = createRootRoute({ component: () => <RegistrationPage initialPending={initialPending} catalog={catalog} onComplete={completed} /> })
+  const router = createRouter({ routeTree: rootRoute, history: createMemoryHistory({ initialEntries: ['/registro'] }) })
+  const view = render(<MantineProvider theme={mantineTheme} env="test"><RouterProvider router={router} /></MantineProvider>)
+  await screen.findByRole('heading', { level: 1 })
+  return view
 }
 afterEach(cleanup)
 beforeEach(() => {
@@ -42,7 +48,7 @@ function enterCode(code: string) {
 
 describe('Registration', () => {
   it('rejects mismatched passwords before sending credentials', async () => {
-    renderPage()
+    await renderPage()
     expect(screen.getByText('Plan elegido')).toBeInTheDocument()
     expect(screen.getByText('S/ 65')).toBeInTheDocument()
     expect(screen.getByText('Incluye hasta 10 unidades · S/ 6.50 por unidad adicional')).toBeInTheDocument()
@@ -55,14 +61,14 @@ describe('Registration', () => {
   })
   it('shows server field errors under their input instead of the banner', async () => {
     vi.mocked(startRegistration).mockRejectedValue(new ApiError('Datos inválidos', 422, { email: ['Este correo ya tiene una cuenta. Inicia sesión.'] }))
-    renderPage()
+    await renderPage()
     await accountStep()
     expect(screen.getByLabelText('Correo electrónico')).toHaveAccessibleDescription(/ya tiene una cuenta/)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
   it('uses backend OTP verification and preserves the email when correcting it', async () => {
     vi.mocked(verifyRegistrationCode).mockRejectedValue(new ApiError('Código incorrecto', 422, { code: ['El código no es correcto.'] }))
-    renderPage()
+    await renderPage()
     const user = await accountStep()
     expect(startRegistration).toHaveBeenCalledWith(expect.objectContaining({ password_confirmation: 'test-password', terms_accepted: true }))
     enterCode('111111')
@@ -74,7 +80,7 @@ describe('Registration', () => {
     expect(screen.getByLabelText('Correo electrónico')).toHaveValue('ana@example.com')
   })
   it('resumes verified onboarding and submits the chosen price and location', async () => {
-    renderPage({ ...draft, verified: true })
+    await renderPage({ ...draft, verified: true })
     const user = userEvent.setup()
     await user.type(screen.getByLabelText('Nombre del edificio'), 'Edificio Central')
     await user.type(screen.getByLabelText('Dirección'), 'Av. Central 123')
@@ -101,7 +107,7 @@ describe('Registration', () => {
   })
   it('keeps failed completion recoverable without reporting success', async () => {
     vi.mocked(completeRegistration).mockRejectedValue(new ApiError('No disponible', 503))
-    renderPage({ ...draft, verified: true })
+    await renderPage({ ...draft, verified: true })
     const user = userEvent.setup()
     await user.type(screen.getByLabelText('Nombre del edificio'), 'Central')
     await user.type(screen.getByLabelText('Dirección'), 'Av. Central 123')
@@ -114,7 +120,7 @@ describe('Registration', () => {
     expect(screen.getByRole('button', { name: 'Comenzar prueba gratis' })).toBeEnabled()
   })
   it('shows the included units and adds nothing for a building under them', async () => {
-    renderPage({ ...draft, verified: true })
+    await renderPage({ ...draft, verified: true })
     const user = userEvent.setup()
     await user.type(screen.getByLabelText('Nombre del edificio'), 'Chico')
     await user.type(screen.getByLabelText('Dirección'), 'Av. Central 123')

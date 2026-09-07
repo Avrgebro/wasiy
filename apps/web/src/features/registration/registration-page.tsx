@@ -1,6 +1,7 @@
 import { ArrowRightIcon, BuildingsIcon, CheckReadIcon, GlobalIcon, LetterIcon, LockPasswordIcon, MapPointIcon } from '@solar-icons/react/linear'
 import { money, monthlyTotal, type PlanPricing } from './format'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link } from '@tanstack/react-router'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm, useWatch, type FieldValues, type UseFormReturn } from 'react-hook-form'
 import { Button, Checkbox, PinInput, Radio, UnstyledButton } from '@mantine/core'
@@ -114,13 +115,13 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
   return (
     <div id="registration" className="min-h-screen bg-[var(--mantine-color-body)] font-brand text-[var(--mantine-color-text)] [--mantine-font-family:var(--font-brand)]">
       <header className="flex items-center justify-between gap-4 border-b border-[var(--mantine-color-default-border)] px-5 py-4 md:px-12">
-        <a href="https://wasiy.co" aria-label="Wasiy, inicio" className="flex items-center gap-2.5 text-[var(--wa-brand-mark)]">
+        <a href={import.meta.env.VITE_MARKETING_URL as string} aria-label="Wasiy, inicio" className="flex items-center gap-2.5 text-[var(--wa-brand-mark)]">
           <WasiyLogo size={28} />
           <span className="font-display text-xl font-semibold tracking-tight">Wasiy</span>
         </a>
         <div className="flex items-center gap-4">
           <span className="hidden text-sm text-[var(--mantine-color-dimmed)] sm:inline">¿Ya tienes una cuenta?</span>
-          <Button component="a" href="/login" variant="default" h={44} radius={10}>Inicia sesión</Button>
+          <Button component={Link} to="/login" variant="default" h={44} radius={10}>Inicia sesión</Button>
         </div>
       </header>
 

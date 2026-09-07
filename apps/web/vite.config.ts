@@ -21,6 +21,9 @@ export default defineConfig(({ mode }) => {
   // sets these in Vercel (app.wasiy.co / portal.wasiy.co).
   process.env.VITE_APP_URL ??= 'http://localhost:5174'
   process.env.VITE_PORTAL_URL ??= 'http://localhost:5175'
+  // Marketing site, for the logo link on /registro. Production sets it in
+  // Vercel (wasiy.co); the API mirrors it as WASIY_MARKETING_URL.
+  process.env.VITE_MARKETING_URL ??= 'http://localhost:4321'
 
   return {
     plugins: [
