@@ -31,7 +31,7 @@ class LeadController extends Controller
 
         DB::transaction(function () use ($request, $data): void {
             $lead = Lead::create([
-                ...collect($data)->except(StoreLeadRequest::HONEYPOT)->all(),
+                ...collect($data)->except([StoreLeadRequest::HONEYPOT, 'turnstile_token'])->all(),
                 'ip' => $request->ip(),
                 'user_agent' => mb_substr((string) $request->userAgent(), 0, 255),
             ]);

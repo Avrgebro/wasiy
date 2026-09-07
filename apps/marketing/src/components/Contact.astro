@@ -1,6 +1,9 @@
 ---
 import LogoMark from './LogoMark.astro';
 import { API_URL, SITE } from '../site';
+
+// Public by design; unset disables the widget (and the API check is off too).
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
 ---
 
 <section id="contacto">
@@ -90,6 +93,18 @@ import { API_URL, SITE } from '../site';
         <input type="text" name="website" tabindex="-1" autocomplete="off" />
       </label>
       <p class="form-error" role="alert" hidden></p>
+      {turnstileSiteKey && (
+        <div
+          class="cf-turnstile"
+          data-sitekey={turnstileSiteKey}
+          data-action="contacto"
+          data-callback="wasiyContactVerified"
+          data-expired-callback="wasiyContactVerifiedExpired"
+          data-theme="light"
+          data-size="flexible"
+          data-language="es"
+        ></div>
+      )}
       <div class="footer-row">
         <span class="disclaimer">
           Al enviar aceptas que te contactemos sobre Wasiy. Nada de spam, lo prometemos.
@@ -120,12 +135,15 @@ import { API_URL, SITE } from '../site';
   </div>
 </section>
 
+{turnstileSiteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+
 <script>
-  import { honeypotValue, submitLead } from '../scripts/leads';
+  import { gateSubmitOnTurnstile, honeypotValue, resetTurnstile, submitLead, turnstileToken } from '../scripts/leads';
 
   const form = document.querySelector<HTMLFormElement>('form.card[data-api]');
   const errorEl = form?.querySelector<HTMLElement>('.form-error');
   const submit = form?.querySelector<HTMLButtonElement>('.submit');
+  if (form) gateSubmitOnTurnstile(form, submit, 'wasiyContactVerified');
 
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -144,6 +162,7 @@ import { API_URL, SITE } from '../site';
         units: units > 0 ? units : undefined,
         message: value('mensaje') || undefined,
         website: honeypotValue(form),
+        turnstile_token: turnstileToken(form) || undefined,
       });
       form.querySelector<HTMLElement>('.form-body')?.setAttribute('hidden', '');
       form.querySelector<HTMLElement>('.success')?.removeAttribute('hidden');
@@ -152,6 +171,7 @@ import { API_URL, SITE } from '../site';
         errorEl.textContent = error instanceof Error ? error.message : 'No pudimos enviar tu mensaje.';
         errorEl.hidden = false;
       }
+      resetTurnstile(form);
     } finally {
       if (submit) submit.disabled = false;
     }

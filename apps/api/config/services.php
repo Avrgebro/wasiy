@@ -2,6 +2,13 @@
 
 return [
 
+    'turnstile' => [
+        // Cloudflare Turnstile secret; leave unset to disable the check.
+        'secret' => env('TURNSTILE_SECRET'),
+        // Comma-separated frontend hostnames allowed to submit tokens; unset skips the check.
+        'hostnames' => env('TURNSTILE_HOSTNAMES'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

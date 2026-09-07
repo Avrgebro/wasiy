@@ -2,8 +2,11 @@
 
 use App\Models\Lead;
 use App\Notifications\LeadReceivedNotification;
+use App\Rules\VerifyTurnstile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
@@ -39,6 +42,40 @@ it('rejects invalid input', function () {
     $this->postJson('/api/public/leads', contactInput(['email' => 'maria@example']))->assertUnprocessable()->assertJsonValidationErrors('email');
     $this->postJson('/api/public/leads', contactInput(['name' => 'Buy now https://spam.example']))->assertUnprocessable()->assertJsonValidationErrors('name');
     $this->postJson('/api/public/leads', contactInput(['source' => 'newsletter']))->assertUnprocessable()->assertJsonValidationErrors('source');
+    expect(Lead::count())->toBe(0);
+});
+it('skips turnstile when no secret is configured', function () {
+    Http::fake();
+    $this->postJson('/api/public/leads', contactInput())->assertStatus(202);
+    Http::assertNothingSent();
+    expect(Lead::count())->toBe(1);
+});
+it('requires a token cloudflare accepts once turnstile is configured', function () {
+    config(['services.turnstile.secret' => 'secret-under-test']);
+    Http::fake([VerifyTurnstile::VERIFY_URL => Http::sequence()
+        ->push(['success' => false, 'error-codes' => ['invalid-input-response']])
+        ->push(['success' => true, 'action' => 'contacto', 'hostname' => 'wasiy.co'])]);
+    $this->postJson('/api/public/leads', contactInput())->assertUnprocessable()->assertJsonValidationErrors('turnstile_token');
+    $this->postJson('/api/public/leads', contactInput(['turnstile_token' => 'bad']))->assertUnprocessable()->assertJsonValidationErrors('turnstile_token');
+    $this->postJson('/api/public/leads', contactInput(['turnstile_token' => 'good']))->assertStatus(202);
+    Http::assertSent(fn ($request) => $request['secret'] === 'secret-under-test' && $request['response'] === 'good' && filled($request['remoteip']));
+    expect(Lead::count())->toBe(1);
+});
+it('rejects tokens minted for another form or hostname', function () {
+    config(['services.turnstile.secret' => 'secret-under-test', 'services.turnstile.hostnames' => 'wasiy.co, stage.wasiy.co']);
+    Http::fake([VerifyTurnstile::VERIFY_URL => Http::sequence()
+        ->push(['success' => true, 'action' => 'demo', 'hostname' => 'wasiy.co'])
+        ->push(['success' => true, 'action' => 'contacto', 'hostname' => 'evil.example'])
+        ->push(['success' => true, 'action' => 'contacto', 'hostname' => 'Stage.Wasiy.co'])]);
+    $this->postJson('/api/public/leads', contactInput(['turnstile_token' => 't']))->assertUnprocessable()->assertJsonValidationErrors('turnstile_token');
+    $this->postJson('/api/public/leads', contactInput(['turnstile_token' => 't']))->assertUnprocessable()->assertJsonValidationErrors('turnstile_token');
+    $this->postJson('/api/public/leads', contactInput(['turnstile_token' => 't']))->assertStatus(202);
+    expect(Lead::count())->toBe(1);
+});
+it('fails closed when cloudflare is unreachable', function () {
+    config(['services.turnstile.secret' => 'secret-under-test']);
+    Http::fake([VerifyTurnstile::VERIFY_URL => fn () => throw new ConnectionException('timeout')]);
+    $this->postJson('/api/public/leads', contactInput(['turnstile_token' => 'token']))->assertUnprocessable()->assertJsonValidationErrors('turnstile_token');
     expect(Lead::count())->toBe(0);
 });
 it('caps submissions per email and per ip', function () {

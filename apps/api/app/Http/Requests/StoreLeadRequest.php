@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Lead;
+use App\Rules\VerifyTurnstile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -44,6 +45,9 @@ class StoreLeadRequest extends FormRequest
             'preferred_slot' => ['nullable', 'string', 'max:20'],
             'message' => ['nullable', 'string', 'max:2000'],
             self::HONEYPOT => ['nullable', 'string'],
+            // Required only once a Turnstile secret is configured; 'nullable' would skip the rule on a missing token.
+            // The widget's data-action is the lead source, so a token minted on one form cannot be replayed on the other.
+            'turnstile_token' => [VerifyTurnstile::enabled() ? 'required' : 'nullable', 'string', 'max:2048', new VerifyTurnstile(expectedAction: is_string($this->source) ? $this->source : null, remoteIp: $this->ip())],
         ];
     }
 
@@ -52,6 +56,7 @@ class StoreLeadRequest extends FormRequest
         return [
             'name.not_regex' => 'El nombre no puede contener enlaces.',
             'email.email' => 'Ingresa un correo válido.',
+            'turnstile_token.required' => 'No pudimos verificar que eres una persona. Recarga la página e inténtalo otra vez.',
         ];
     }
 }

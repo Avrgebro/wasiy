@@ -3,6 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { API_URL, SITE } from '../site';
+
+// Public by design; unset disables the widget (and the API check is off too).
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY as string | undefined;
 ---
 
 <Layout
@@ -171,6 +174,18 @@ import { API_URL, SITE } from '../site';
             <input type="text" name="website" tabindex="-1" autocomplete="off" />
           </label>
           <p class="form-error" role="alert" hidden></p>
+          {turnstileSiteKey && (
+            <div
+              class="cf-turnstile"
+              data-sitekey={turnstileSiteKey}
+              data-action="demo"
+              data-callback="wasiyDemoVerified"
+              data-expired-callback="wasiyDemoVerifiedExpired"
+              data-theme="light"
+              data-size="flexible"
+              data-language="es"
+            ></div>
+          )}
           <button type="submit" class="submit">
             Agendar mi demo
             <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
@@ -224,12 +239,15 @@ import { API_URL, SITE } from '../site';
   <Footer />
 </Layout>
 
+{turnstileSiteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+
 <script>
-  import { honeypotValue, submitLead } from '../scripts/leads';
+  import { gateSubmitOnTurnstile, honeypotValue, resetTurnstile, submitLead, turnstileToken } from '../scripts/leads';
 
   const form = document.querySelector<HTMLFormElement>('form.panel');
   const errorEl = form?.querySelector<HTMLElement>('.form-error');
   const submitButton = form?.querySelector<HTMLButtonElement>('.submit');
+  if (form) gateSubmitOnTurnstile(form, submitButton, 'wasiyDemoVerified');
 
   /** Selected chip values for a fieldset, from data-value or the label text. */
   const chipValues = (field: string) =>
@@ -279,12 +297,14 @@ import { API_URL, SITE } from '../site';
         interests: chipValues('interests'),
         preferred_slot: chipValues('preferred_slot')[0],
         website: honeypotValue(form),
+        turnstile_token: turnstileToken(form) || undefined,
       });
     } catch (error) {
       if (errorEl) {
         errorEl.textContent = error instanceof Error ? error.message : 'No pudimos enviar tu solicitud.';
         errorEl.hidden = false;
       }
+      resetTurnstile(form);
       if (submitButton) submitButton.disabled = false;
       return;
     }
