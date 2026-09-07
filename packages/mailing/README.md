@@ -39,7 +39,8 @@ Never add a Tailwind `<style>` to a template.
 `emails/example.vue` is the reference template and follows the Maizzle starter
 skeleton: one centered Container with a teal header Section (mark, wordmark,
 kicker, title), a white body Section (greeting, intro, label/value Rows, gold
-action, footnote) and a plain footer Section. Its Blade variables match
+action, footnote) and the shared `<WasiyFooter />` (mark, tagline, contact
+line). Its Blade variables match
 `ResidentAlertNotification`.
 
 ## Blade inside Vue templates
