@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-query'
 import { formatPhone } from '../../lib/phone'
 import { getDefaultLocation } from './access'
-import { login, logout, selectAccount, selectLocation } from './api'
+import { login, logout, requestLoginCode, selectAccount, selectLocation, verifyLoginCode } from './api'
 import { sessionQueryKey, sessionQueryOptions } from './query-options'
 import type {
   LocationSummary,
@@ -69,6 +69,29 @@ export function useLogin() {
       })
     },
     // The login form maps failures onto field/root errors itself.
+    meta: { suppressErrorNotification: true },
+  })
+}
+
+export function useRequestLoginCode() {
+  return useMutation({
+    mutationFn: (email: string) => requestLoginCode(email),
+    // The code form surfaces failures inline.
+    meta: { suppressErrorNotification: true },
+  })
+}
+
+export function useVerifyLoginCode() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: { code: string; remember: boolean }) => verifyLoginCode(input),
+    // The verify response carries the fresh /me payload, so seed the session
+    // from it instead of a second round-trip.
+    onSuccess: ({ session }) => {
+      const next: Session = { status: 'authenticated', me: session }
+      queryClient.setQueryData<Session>(sessionQueryKey, next)
+    },
     meta: { suppressErrorNotification: true },
   })
 }

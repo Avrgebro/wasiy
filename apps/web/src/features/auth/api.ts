@@ -51,3 +51,30 @@ export function logout() {
     method: 'POST',
   })
 }
+
+export type PendingLoginCode = { email: string; resend_after: number }
+
+// The outstanding code request in this session, if any, so a returning tab
+// resumes on the code step instead of burning another code.
+export function getPendingLoginCode() {
+  return apiRequest<{ data: PendingLoginCode | null }>('/login/code')
+}
+
+// Passwordless login: the API always answers as if a code was sent.
+export async function requestLoginCode(email: string) {
+  await csrfCookie()
+
+  return apiRequest<{ data: PendingLoginCode }>('/login/code/request', {
+    data: { email },
+    method: 'POST',
+  })
+}
+
+export async function verifyLoginCode(input: { code: string; remember: boolean }) {
+  await csrfCookie()
+
+  return apiRequest<{ session: MeResponse }>('/login/code/verify', {
+    data: input,
+    method: 'POST',
+  })
+}

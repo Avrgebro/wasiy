@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowRightIcon, GlobalIcon, LetterIcon, LockPasswordIcon, PasswordIcon } from '@solar-icons/react/linear'
+import { ArrowRightIcon, LetterIcon, LockPasswordIcon, PasswordMinimalisticIcon } from '@solar-icons/react/linear'
 import {
   Alert,
   Anchor,
@@ -11,13 +11,16 @@ import { getRouteApi, useRouter } from '@tanstack/react-router'
 import '@fontsource/instrument-sans/400.css'
 import '@fontsource/instrument-sans/500.css'
 import '@fontsource/instrument-sans/600.css'
-import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { getDefaultAuthenticatedRoute } from './access'
 import { getSafeRedirectPath } from './guards'
 import { useLogin } from './hooks'
+import { LoginCodeForm } from './login-code-form'
 import { authFieldStyles } from './auth-field-styles'
 import { loginSchema, type LoginFormValues } from './schemas'
+import type { MeResponse } from './types'
 import { WasiyLogo } from '../../components/layout/shared/wasiy-logo'
 import { FormPasswordInput, FormTextInput } from '../../components/ui/form-fields'
 import { submitHandlingServerErrors } from '../../lib/errors'
@@ -116,20 +119,21 @@ export function LoginPage() {
   })
 
   const rootError = form.formState.errors.root?.message
+  const [mode, setMode] = useState<'password' | 'code'>('password')
+  const remember = useWatch({ control: form.control, name: 'remember' })
+
+  // A non-authenticated session right after login (e.g. a deactivated
+  // user) is routed by the index guard.
+  async function goAfterLogin(me: MeResponse | null) {
+    await router.navigate({
+      to: getSafeRedirectPath(search.redirect) ?? (me ? getDefaultAuthenticatedRoute(me) : '/'),
+    })
+  }
 
   async function handleSubmit(values: LoginFormValues) {
     await submitHandlingServerErrors(form, async () => {
       const session = await loginMutation.mutateAsync(values)
-
-      // A non-authenticated session right after login (e.g. a deactivated
-      // user) is routed by the index guard.
-      await router.navigate({
-        to:
-          getSafeRedirectPath(search.redirect) ??
-          (session.status === 'authenticated'
-            ? getDefaultAuthenticatedRoute(session.me)
-            : '/'),
-      })
+      await goAfterLogin(session.status === 'authenticated' ? session.me : null)
     })
   }
 
@@ -151,13 +155,21 @@ export function LoginPage() {
 
           <div>
             <h1 className="font-display text-[2rem] font-semibold tracking-tight text-[var(--mantine-color-text)]">
-              {t('auth.welcomeBack')}
+              {t(mode === 'code' ? 'auth.codeTitle' : 'auth.welcomeBack')}
             </h1>
             <p className="mt-2 text-[15px] text-[var(--mantine-color-dimmed)]">
-              {t('auth.welcomeBackSubtitle')}
+              {t(mode === 'code' ? 'auth.codeSubtitle' : 'auth.welcomeBackSubtitle')}
             </p>
           </div>
 
+          {mode === 'code' ? (
+            <LoginCodeForm
+              onBack={() => setMode('password')}
+              onRememberChange={value => form.setValue('remember', value)}
+              onSuccess={goAfterLogin}
+              remember={remember}
+            />
+          ) : (
           <form
             className="flex flex-col gap-[26px]"
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -232,30 +244,21 @@ export function LoginPage() {
                 }}
               />
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <Button
-                  h={44}
-                  leftSection={<GlobalIcon aria-hidden="true" size={15} />}
-                  radius={10}
-                  styles={{ label: { fontSize: 13.5, fontWeight: 600 } }}
-                  type="button"
-                  variant="default"
-                >
-                  Google
-                </Button>
-                <Button
-                  h={44}
-                  leftSection={<PasswordIcon aria-hidden="true" size={15} />}
-                  radius={10}
-                  styles={{ label: { fontSize: 13.5, fontWeight: 600 } }}
-                  type="button"
-                  variant="default"
-                >
-                  {t('auth.loginWithCode')}
-                </Button>
-              </div>
+              <Button
+                fullWidth
+                h={44}
+                leftSection={<PasswordMinimalisticIcon aria-hidden="true" size={18} />}
+                onClick={() => setMode('code')}
+                radius={10}
+                styles={{ label: { fontSize: 13.5, fontWeight: 600 } }}
+                type="button"
+                variant="default"
+              >
+                {t('auth.loginWithCode')}
+              </Button>
             </div>
           </form>
+          )}
 
           <p className="flex items-center justify-center gap-1.5 text-[13.5px] text-[var(--mantine-color-dimmed)]">
             {t('auth.residentNoAccount')}
