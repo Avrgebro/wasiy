@@ -157,24 +157,39 @@ export function PersonDrawer({
                 </Text>
               ) : (
                 <div className="flex flex-col divide-y divide-[var(--mantine-color-default-border)] overflow-hidden rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)]">
-                  {inLocation.map((membership) => (
-                    <Link
-                      key={membership.id}
-                      className={`flex items-center gap-3 px-3.5 py-2.5 text-sm no-underline text-[var(--mantine-color-text)] hover:bg-[var(--mantine-color-default-hover)] ${membership.status === 'inactive' ? 'opacity-60' : ''}`}
-                      params={{ unitId: membership.unit_id }}
-                      to="/admin/units/$unitId"
-                    >
-                      <span className="font-display font-semibold">
-                        {[membership.unit?.unit_number, membership.unit?.building_name].filter(Boolean).join(' · ')}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-[var(--mantine-color-dimmed)]">
-                        {[membership.is_primary_contact ? t('units.detail.primaryContact') : null, membership.status === 'inactive' ? t('registry.statuses.inactive') : null]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </span>
-                      <span className="text-[15px] text-[var(--wa-text-3)]">›</span>
-                    </Link>
-                  ))}
+                  {inLocation.map((membership) => {
+                    const rowClass = `flex items-center gap-3 px-3.5 py-2.5 text-sm text-[var(--mantine-color-text)] ${membership.status === 'inactive' ? 'opacity-60' : ''}`
+                    const content = (
+                      <>
+                        <span className="font-display font-semibold">
+                          {[membership.unit?.unit_number, membership.unit?.building_name].filter(Boolean).join(' · ')}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-[var(--mantine-color-dimmed)]">
+                          {[membership.is_primary_contact ? t('units.detail.primaryContact') : null, membership.status === 'inactive' ? t('registry.statuses.inactive') : null]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </span>
+                      </>
+                    )
+
+                    // The unit page needs registry.manage; the desk sees the
+                    // unit as a fact, not a link it would be turned away from.
+                    return canManage ? (
+                      <Link
+                        key={membership.id}
+                        className={`${rowClass} no-underline hover:bg-[var(--mantine-color-default-hover)]`}
+                        params={{ unitId: membership.unit_id }}
+                        to="/admin/units/$unitId"
+                      >
+                        {content}
+                        <span className="text-[15px] text-[var(--wa-text-3)]">›</span>
+                      </Link>
+                    ) : (
+                      <div key={membership.id} className={rowClass}>
+                        {content}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </DrawerField>

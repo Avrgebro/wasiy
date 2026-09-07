@@ -186,5 +186,8 @@ describe('ResidentsPage', () => {
     expect(within(drawer).queryByText('Correo')).not.toBeInTheDocument()
     expect(within(drawer).queryByRole('button', { name: 'Editar datos' })).not.toBeInTheDocument()
     expect(within(drawer).queryByRole('button', { name: 'Invitar al portal' })).not.toBeInTheDocument()
+    // The unit page needs registry.manage, so the desk sees units as text, not links.
+    expect(within(drawer).getByText('402 · Torre A')).toBeInTheDocument()
+    expect(within(drawer).queryByRole('link', { name: /402/ })).not.toBeInTheDocument()
   })
 })
