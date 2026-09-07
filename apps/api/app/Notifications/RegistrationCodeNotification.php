@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Support\PendingRegistration;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,14 +22,14 @@ class RegistrationCodeNotification extends Notification implements ShouldQueue
         return ['mail'];
     }
 
+    /** Branded template compiled from packages/mailing/emails/registration-code.vue. */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject('Tu código de verificación de Wasiy')
-            ->greeting('Confirma tu correo')
-            ->line('Ingresa este código en la página de registro:')
-            ->line($this->code)
-            ->line('Vence en 10 minutos. No compartas este código.')
-            ->line('Si no solicitaste este registro, puedes ignorar este correo.');
+            ->view('mail.maizzle.registration-code', [
+                'code' => $this->code,
+                'minutes' => PendingRegistration::CODE_LIFETIME_MINUTES,
+            ]);
     }
 }

@@ -16,6 +16,11 @@ return [
             env('WASIY_SPA_URL', 'http://localhost:5174').'/invitations/staff/{token}',
         ),
     ],
+    'marketing' => [
+        // Public site the email logo and footer link to. Defaults to the local
+        // Astro dev server; staging and production set their own host.
+        'url' => env('WASIY_MARKETING_URL', 'http://localhost:4321'),
+    ],
     'portal' => [
         // Where alert emails send residents (mockup 03d "Ver reserva").
         'url' => env('WASIY_PORTAL_URL', 'http://localhost:5175'),
