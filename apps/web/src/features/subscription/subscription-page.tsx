@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../lib/dates'
 import { useMe } from '../auth/hooks'
 import { getSubscriptionPage, paymentProofUrl, subscriptionPageQueryKey, type Invoice, type SubscriptionPageData } from './api'
+import { ChangeUnitsDrawer } from './change-units-drawer'
 import { ConfirmPaymentDrawer } from './confirm-payment-drawer'
 import { formatLongDay, formatPeriod, formatPlanMoney } from './format'
 
@@ -22,6 +23,7 @@ export function SubscriptionPage({ onConfirmPayment }: { onConfirmPayment?: (inv
   const page = useQuery({ queryKey: subscriptionPageQueryKey, queryFn: getSubscriptionPage, select: (r) => r.data })
   const invoicesRef = useRef<HTMLElement>(null)
   const [confirming, setConfirming] = useState<Invoice | null>(null)
+  const [changingUnits, setChangingUnits] = useState(false)
   const confirm = onConfirmPayment ?? setConfirming
 
   if (!me?.active_account) {
@@ -46,7 +48,7 @@ export function SubscriptionPage({ onConfirmPayment }: { onConfirmPayment?: (inv
           <StateCard data={data} onSeeInvoice={scrollToInvoices} />
           <div className="grid gap-4 md:grid-cols-2">
             <PlanCard data={data} />
-            <BillingCard data={data} />
+            <BillingCard data={data} onExpand={() => setChangingUnits(true)} />
           </div>
           <HowToPayCard data={data} />
           <InvoicesCard data={data} onConfirmPayment={confirm} ref={invoicesRef} />
@@ -54,6 +56,7 @@ export function SubscriptionPage({ onConfirmPayment }: { onConfirmPayment?: (inv
         </>
       ) : null}
       <ConfirmPaymentDrawer invoice={confirming} onClose={() => setConfirming(null)} />
+      {data ? <ChangeUnitsDrawer key={`${data.subscription.billable_units}-${changingUnits}`} data={data} onClose={() => setChangingUnits(false)} opened={changingUnits} /> : null}
     </div>
   )
 }
@@ -144,7 +147,7 @@ function PlanCard({ data }: { data: SubscriptionPageData }) {
 }
 
 /** Block 3. Breakdown, then contracted versus in use: "en uso" only tells how much headroom is left (ADR 0040). */
-function BillingCard({ data }: { data: SubscriptionPageData }) {
+function BillingCard({ data, onExpand }: { data: SubscriptionPageData; onExpand: () => void }) {
   const { t } = useTranslation('common')
   const { breakdown, subscription, plan } = data
   const headroom = subscription.billable_units - subscription.units_in_use
@@ -167,7 +170,7 @@ function BillingCard({ data }: { data: SubscriptionPageData }) {
         {headroom <= 0 ? <InfoCircleIcon aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> : null}
         {headroom <= 0 ? t('subscription.billing.atLimit') : t('subscription.billing.headroom', { count: headroom })}
       </p>
-      <Button className="mt-3 w-full sm:w-auto" disabled variant="default">{t('subscription.billing.expand')}</Button>
+      <Button className="mt-3 w-full sm:w-auto" onClick={onExpand} variant="default">{t('subscription.billing.expand')}</Button>
       {subscription.pending_billable_units !== null && subscription.pending_units_from ? (
         <p className="m-0 mt-3 text-xs text-[var(--mantine-color-dimmed)]">
           {t('subscription.billing.scheduled', { date: formatLongDay(`${subscription.pending_units_from}T12:00:00`), count: subscription.pending_billable_units })}

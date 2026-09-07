@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Models\Visit;
 use App\Services\AccessAuthorizationService;
 use App\Services\ActivityLogger;
+use App\Services\UnitCapacity;
 use App\Support\SortParser;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -113,6 +114,9 @@ class UnitController extends Controller
         $actor = $request->user();
 
         $unit = DB::transaction(function () use ($request, $location, $actor): Unit {
+            // Contracted units are a hard cap on active ones (ADR 0040).
+            app(UnitCapacity::class)->assertCanActivate($location->account()->lockForUpdate()->firstOrFail());
+
             $unit = Unit::query()->create([
                 ...$request->safe()->only(['unit_number', 'type', 'building_id', 'floor', 'participation_share', 'maintenance_fee', 'parking_spots', 'storage_rooms', 'notes']),
                 'account_id' => $location->account_id,
@@ -264,6 +268,8 @@ class UnitController extends Controller
 
         /** @var User $actor */
         $actor = $request->user();
+
+        app(UnitCapacity::class)->assertCanActivate($unit->account);
 
         return new UnitResource($deactivate->reactivate($unit, $actor)->loadSummary());
     }

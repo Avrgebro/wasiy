@@ -1379,7 +1379,8 @@
       "buildingHint": "Pick the tower; units group by it.",
       "moreDetails": "More details",
       "feeSectionHint": "The monthly fee feeds the month's dues. The share is the bylaws' quota and splits common expenses.",
-      "moreDetailsHint": "Parking and storage as labels (Enter adds another) and internal notes."
+      "moreDetailsHint": "Parking and storage as labels (Enter adds another) and internal notes.",
+      "capAction": "Expand units"
     },
     "member": {
       "addTitle": "Add resident",
@@ -1854,6 +1855,20 @@
       "sentTitle": "Proof sent",
       "sentBody": "The invoice is under review. We will email {{email}} once we confirm the payment.",
       "done": "Done"
+    },
+    "units": {
+      "title": "Expand units",
+      "subtitle": "You are billed for the contracted units, not the registered ones.",
+      "label": "Contracted units",
+      "floor": "The plan includes {{count}} units; that is the minimum.",
+      "inUse": "You have {{count}} in use now.",
+      "total": "Monthly total with {{count}} units",
+      "up": "Applies now. The difference is billed on the next invoice.",
+      "down": "Applies from the next renewal, on {{date}}.",
+      "same": "No change.",
+      "cancelPending": "Cancels the scheduled change to {{count}} units.",
+      "submit": "Save",
+      "saved": "Units updated"
     }
   },
   "account": {

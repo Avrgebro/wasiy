@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\Billing\ChangeContractedUnits;
 use App\Enums\RegistryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
@@ -74,6 +75,21 @@ class SubscriptionController extends Controller
             ])->values(),
             'contact_email' => (string) config('wasiy.leads.notify_email'),
         ]]);
+    }
+
+    /** "Ampliar unidades": up applies now, down waits for the renewal (ADR 0040). */
+    public function updateUnits(Request $request, ChangeContractedUnits $change): JsonResponse
+    {
+        $account = $this->context->activeAccountOrSingle($request, $request->user());
+        abort_unless($account instanceof Account, 409, 'Selecciona una cuenta para ver su suscripción.');
+        Gate::authorize('manageBilling', $account);
+        $subscription = $account->subscription;
+        abort_unless($subscription instanceof Subscription, 404);
+
+        $validated = $request->validate(['units' => ['required', 'integer', 'min:1', 'max:10000']]);
+        $change->handle($subscription, (int) $validated['units']);
+
+        return $this->show($request);
     }
 
     /** @return array<string, mixed> */

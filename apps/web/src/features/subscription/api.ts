@@ -90,3 +90,7 @@ export function uploadPaymentProof(invoiceId: string, file: File, details: Proof
 export function paymentProofUrl(invoiceId: string, proofId: string) {
   return `${apiClient.defaults.baseURL ?? ''}/api/account/invoices/${invoiceId}/proofs/${proofId}`
 }
+
+/** Up applies now and bills on the next invoice; down is scheduled for the renewal (ADR 0040). */
+export const updateContractedUnits = (units: number) =>
+  apiRequest<{ data: SubscriptionPageData }>('/api/account/subscription/units', { method: 'PATCH', data: { units } })

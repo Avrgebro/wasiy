@@ -1379,7 +1379,8 @@
       "buildingHint": "Selecciona la torre; las unidades se agrupan por ella.",
       "moreDetails": "Más detalles",
       "feeSectionHint": "La cuota mensual se usa al generar las cuotas del mes. La participación es la alícuota del reglamento interno y reparte los gastos comunes.",
-      "moreDetailsHint": "Estacionamientos y depósitos como etiquetas (Enter agrega otra) y notas internas."
+      "moreDetailsHint": "Estacionamientos y depósitos como etiquetas (Enter agrega otra) y notas internas.",
+      "capAction": "Ampliar unidades"
     },
     "member": {
       "addTitle": "Agregar residente",
@@ -1854,6 +1855,20 @@
       "sentTitle": "Comprobante enviado",
       "sentBody": "La factura queda en revisión. Te escribimos a {{email}} cuando confirmemos el pago.",
       "done": "Listo"
+    },
+    "units": {
+      "title": "Ampliar unidades",
+      "subtitle": "Se cobra por las unidades contratadas, no por las registradas.",
+      "label": "Unidades contratadas",
+      "floor": "El plan incluye {{count}} unidades; ese es el mínimo.",
+      "inUse": "Ahora tienes {{count}} en uso.",
+      "total": "Total mensual con {{count}} unidades",
+      "up": "Se aplica ahora. La diferencia se cobra en la próxima factura.",
+      "down": "Se aplica desde la próxima renovación, el {{date}}.",
+      "same": "Sin cambios.",
+      "cancelPending": "Se cancela el cambio programado a {{count}} unidades.",
+      "submit": "Guardar",
+      "saved": "Unidades actualizadas"
     }
   },
   "account": {

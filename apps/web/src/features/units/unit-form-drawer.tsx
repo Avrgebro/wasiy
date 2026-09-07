@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AltArrowDownIcon } from '@solar-icons/react/linear'
-import { Alert, Button, Collapse, NumberInput, Select, TagsInput, Textarea, UnstyledButton } from '@mantine/core'
+import { Alert, Anchor, Button, Collapse, NumberInput, Select, TagsInput, Textarea, UnstyledButton } from '@mantine/core'
+import { Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -8,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DangerZone, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
+import { ApiError } from '../../app/api-client'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
 import { buildingsQueryKey, getBuildings } from '../buildings/api'
@@ -103,6 +105,10 @@ export function UnitFormDrawer({
           {form.formState.errors.root?.message ? (
             <Alert color="error" title={t('errors.actionFailed')}>
               {form.formState.errors.root.message}
+              {/* The contracted-units cap (ADR 0040): the fix lives on the subscription page. */}
+              {mutation.error instanceof ApiError && mutation.error.errors?.contracted_units ? (
+                <Anchor className="mt-2 block text-sm font-semibold" component={Link} to="/admin/subscription">{t('units.form.capAction')}</Anchor>
+              ) : null}
             </Alert>
           ) : null}
 
