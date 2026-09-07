@@ -110,6 +110,7 @@ export function LoginPage() {
     defaultValues: {
       email: '',
       password: '',
+      remember: true,
     },
     resolver: zodResolver(loginSchema),
   })
@@ -193,8 +194,8 @@ export function LoginPage() {
               />
               <Checkbox
                 color="accent"
-                defaultChecked
                 label={t('auth.rememberMe')}
+                {...form.register('remember')}
                 radius={5}
                 size="sm"
                 styles={{

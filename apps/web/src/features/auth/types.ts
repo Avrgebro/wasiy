@@ -87,6 +87,7 @@ export type MeResponse = {
 export type LoginCredentials = {
   email: string
   password: string
+  remember: boolean
 }
 
 // The three expected auth states, modeled as data so the session query only
