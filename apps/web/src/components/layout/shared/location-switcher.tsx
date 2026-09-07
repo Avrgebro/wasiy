@@ -271,7 +271,6 @@ function useLocationPicker(onClose: () => void) {
 type LocationPicker = ReturnType<typeof useLocationPicker>
 
 function LocationSearch({
-  mobile = false,
   picker,
 }: {
   mobile?: boolean
@@ -295,7 +294,6 @@ function LocationSearch({
       onChange={(event) => picker.setSearch(event.currentTarget.value)}
       placeholder={t('shell.locationSearchPlaceholder')}
       radius={9}
-      size={mobile ? 'sm' : 'xs'}
       value={picker.search}
     />
   )
