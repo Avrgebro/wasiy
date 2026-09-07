@@ -47,6 +47,7 @@ class ResidentAlerts
         ?string $actionLabel = null,
         ?string $actionPath = null,
         ?Resident $only = null,
+        string $template = 'resident-alert',
     ): void {
         $unit->loadMissing(['location', 'account']);
 
@@ -61,7 +62,7 @@ class ResidentAlerts
                 ->unique('id')
                 ->values();
 
-        $this->deliver($unit->location, $recipients->map(fn (Resident $resident) => [$resident, $unit->id]), $kind, $title, $body, $subject, $facts, $intro, $actionLabel, $actionPath, email: true);
+        $this->deliver($unit->location, $recipients->map(fn (Resident $resident) => [$resident, $unit->id]), $kind, $title, $body, $subject, $facts, $intro, $actionLabel, $actionPath, email: true, template: $template);
     }
 
     /**
@@ -107,7 +108,7 @@ class ResidentAlerts
      * @param  array<int, array{label: string, value: string}>  $facts
      * @return array{recipients: int, alerts: int, emails: int}
      */
-    private function deliver($location, $pairs, ResidentAlertKind $kind, string $title, ?string $body, Model $subject, array $facts, ?string $intro, ?string $actionLabel, ?string $actionPath, bool $email): array
+    private function deliver($location, $pairs, ResidentAlertKind $kind, string $title, ?string $body, Model $subject, array $facts, ?string $intro, ?string $actionLabel, ?string $actionPath, bool $email, string $template = 'resident-alert'): array
     {
         $alerts = 0;
         $emails = 0;
@@ -150,6 +151,7 @@ class ResidentAlerts
                     actionLabel: $actionLabel,
                     actionUrl: $actionPath !== null ? rtrim((string) config('wasiy.portal.url'), '/').$actionPath : null,
                     alertId: $alert?->id,
+                    template: $template,
                 );
                 DB::afterCommit(fn () => Notification::route('mail', $address)->notify($notification));
                 $emails++;

@@ -36,12 +36,14 @@ showed up as the Container losing `mx-auto`. So `maizzle.config.ts` appends
 `tailwind.css` into that single import from the `afterRender` hook instead.
 Never add a Tailwind `<style>` to a template.
 
-`emails/example.vue` is the reference template and follows the Maizzle starter
-skeleton: one centered Container with a teal header Section (mark, wordmark,
-kicker, title), a white body Section (greeting, intro, label/value Rows, gold
-action, footnote) and the shared `<WasiyFooter />` (mark, tagline, contact
-line). Its Blade variables match
-`ResidentAlertNotification`.
+`emails/resident-alert.vue` is the reference template and follows the Maizzle
+starter skeleton: one centered Container with a teal header Section (mark,
+wordmark, location kicker, title), a white body Section (greeting, intro,
+label/value Rows, gold action, footnote) and the shared `<WasiyFooter />`
+(mark, tagline, contact line). It is also the email `ResidentAlertNotification`
+sends for every portal alert kind; a kind that earns its own design gets its
+own file with the same Blade variables and names it as the notification's
+`template` (`package-received.vue` is the first).
 
 ## Blade inside Vue templates
 

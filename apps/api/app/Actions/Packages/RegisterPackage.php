@@ -61,6 +61,8 @@ class RegisterPackage
                 actionLabel: 'Ver paquetes',
                 actionPath: '/portal',
                 only: $resident,
+                // packages/mailing/emails/package-received.vue
+                template: 'package-received',
             );
 
             $this->activityLogger->log(

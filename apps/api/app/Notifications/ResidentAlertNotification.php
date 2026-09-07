@@ -8,9 +8,10 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * The one alert email (mockup 03d): eyebrow with the location, a headline,
- * a short fact table and a single button into the portal. Every alert kind
- * renders through this template so residents learn one shape.
+ * The alert email (mockup 03d): eyebrow with the location, a headline, a
+ * short fact table and a single button into the portal. Every kind shares
+ * the data shape so residents learn one layout; a kind may name its own
+ * template when it earns a dedicated design.
  */
 class ResidentAlertNotification extends Notification implements ShouldQueue
 {
@@ -30,6 +31,8 @@ class ResidentAlertNotification extends Notification implements ShouldQueue
         public readonly ?string $actionLabel = null,
         public readonly ?string $actionUrl = null,
         public readonly ?string $alertId = null,
+        /** File under packages/mailing/emails; the shared alert unless the kind has its own design. */
+        public readonly string $template = 'resident-alert',
     ) {}
 
     /** @return list<string> */
@@ -38,12 +41,12 @@ class ResidentAlertNotification extends Notification implements ShouldQueue
         return ['mail'];
     }
 
+    /** Branded template compiled from packages/mailing/emails/{$template}.vue. */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject("{$this->title} · {$this->locationName}")
-            ->theme('wasiy')
-            ->markdown('mail.resident-alert', [
+            ->view("mail.maizzle.{$this->template}", [
                 'locationName' => $this->locationName,
                 'recipientName' => $this->recipientName,
                 'title' => $this->title,
@@ -52,7 +55,6 @@ class ResidentAlertNotification extends Notification implements ShouldQueue
                 'facts' => $this->facts,
                 'actionLabel' => $this->actionLabel,
                 'actionUrl' => $this->actionUrl,
-                'portalUrl' => config('wasiy.portal.url'),
             ]);
     }
 }

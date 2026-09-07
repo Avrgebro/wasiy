@@ -1,14 +1,15 @@
 <template>
   <!--
-    Wasiy base email. Skeleton follows the Maizzle starter (header Section,
-    body Section, footer Section inside one centered Container); colours and
-    type come from apps/marketing via tailwind.css. Copy this file to start a
-    new email. The Blade data matches ResidentAlertNotification:
-    $title, $recipientName, $kicker?, $intro?, $facts (label/value rows),
-    $actionUrl?, $actionLabel?, $footnote?
+    The shared portal alert (mockup 03d) and the base every Wasiy email is
+    copied from. Skeleton follows the Maizzle starter (header Section, body
+    Section, footer Section inside one centered Container); colours and type
+    come from apps/marketing via tailwind.css. Rendered by
+    ResidentAlertNotification for every alert kind without a template of its
+    own: $locationName, $title, $recipientName, $intro?, $facts (label/value
+    rows), $actionUrl?, $actionLabel?, $footnote?
   -->
   <WasiyLayout>
-    <Preheader>{{ blade('$title') }}</Preheader>
+    <Preheader>{{ blade('$title') }} · {{ blade('$locationName') }}</Preheader>
 
     <Container class="max-w-xl p-0 py-10 sm:py-0">
       <Section class="rounded-t-lg bg-teal px-6 pt-6 pb-11 sm:rounded-none">
@@ -21,11 +22,9 @@
 
         <Spacer class="h-16 sm:h-10" />
 
-        <Raw>@if (!empty($kicker))</Raw>
         <Text class="m-0 mb-3 text-[12.5px] font-semibold uppercase tracking-[0.1em] text-teal-pale">
-          {{ blade('$kicker') }}
+          {{ blade('$locationName') }}
         </Text>
-        <Raw>@endif</Raw>
 
         <Heading class="font-sora text-[30px]/9 font-bold tracking-tight text-bg">
           {{ blade('$title') }}
