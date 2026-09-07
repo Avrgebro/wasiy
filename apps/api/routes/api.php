@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\ResidentController;
 use App\Http\Controllers\Api\ResidentInvitationController;
 use App\Http\Controllers\Api\StaffInvitationController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UnitMembershipController;
 use App\Http\Controllers\Api\VehicleController;
@@ -88,6 +89,10 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::get('/me/sessions', 'index');
         Route::delete('/me/sessions/others', 'destroyOthers');
     });
+
+    // The subscription page (ADR 0040) stays readable once an account has
+    // lapsed: that is when its admin needs the invoice.
+    Route::get('/account/subscription', [SubscriptionController::class, 'show']);
 
     Route::controller(AccessContextController::class)->group(function () {
         Route::post('/context/account', 'selectAccount');

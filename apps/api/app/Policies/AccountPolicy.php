@@ -31,4 +31,10 @@ class AccountPolicy
     {
         return $this->access->hasAccountRole($user, $account, AccountRole::AccountAdmin);
     }
+
+    /** Plan, invoices and payment proofs (ADR 0040): the account admin's alone. */
+    public function manageBilling(User $user, Account $account): bool
+    {
+        return $this->access->hasAccountRole($user, $account, AccountRole::AccountAdmin);
+    }
 }

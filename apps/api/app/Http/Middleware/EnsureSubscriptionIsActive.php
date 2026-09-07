@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use App\Models\Account;
 use App\Models\User;
-use App\Services\AccessAuthorizationService;
 use App\Services\AccessContextService;
 use Closure;
 use Illuminate\Http\Request;
@@ -20,10 +19,7 @@ class EnsureSubscriptionIsActive
 {
     public const ERROR_CODE = 'subscription_lapsed';
 
-    public function __construct(
-        private readonly AccessContextService $context,
-        private readonly AccessAuthorizationService $access,
-    ) {}
+    public function __construct(private readonly AccessContextService $context) {}
 
     /**
      * @param  Closure(Request): Response  $next
@@ -31,7 +27,7 @@ class EnsureSubscriptionIsActive
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $account = $user instanceof User ? $this->activeAccount($request, $user) : null;
+        $account = $user instanceof User ? $this->context->activeAccountOrSingle($request, $user) : null;
 
         if ($account instanceof Account && $account->subscription?->isLapsed()) {
             return response()->json([
@@ -41,23 +37,5 @@ class EnsureSubscriptionIsActive
         }
 
         return $next($request);
-    }
-
-    /**
-     * The session's selection when there is one; otherwise the same implicit
-     * choice the access context makes for single-account users, so a fresh
-     * session cannot slip past the gate by skipping /me.
-     */
-    private function activeAccount(Request $request, User $user): ?Account
-    {
-        $accountId = $this->context->activeAccountId($request);
-
-        if ($accountId !== null) {
-            return Account::query()->with('subscription')->find($accountId);
-        }
-
-        $accounts = $this->access->accessibleAccounts($user)->with('subscription')->limit(2)->get();
-
-        return $accounts->count() === 1 ? $accounts->first() : null;
     }
 }

@@ -155,6 +155,26 @@ class AccessContextService
     }
 
     /**
+     * The session's active Account, or the implicit one for a single-account
+     * user, mirroring resolve() without touching the session. For endpoints
+     * and middleware that must work before /me has run (subscription gate,
+     * subscription page).
+     */
+    public function activeAccountOrSingle(Request $request, User $user): ?Account
+    {
+        $accountId = $this->activeAccountId($request);
+        if ($accountId !== null) {
+            $account = Account::query()->find($accountId);
+
+            return $account instanceof Account && $this->access->canAccessAccount($user, $account) ? $account : null;
+        }
+
+        $accounts = $this->access->accessibleAccounts($user)->limit(2)->get();
+
+        return $accounts->count() === 1 ? $accounts->first() : null;
+    }
+
+    /**
      * Drop the session's Active Location when it is the given one — used by
      * Location deactivation so the actor is not left operating a Location
      * that no longer grants access. Other users' sessions self-heal through
