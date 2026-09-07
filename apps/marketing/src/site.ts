@@ -14,7 +14,7 @@ export const SITE = {
   locale: 'es_PE',
   lang: 'es',
   email: 'hola@wasiy.co',
-  phone: '+51 1 640 2210',
+  phone: '+51 920 014 330',
   city: 'Lima',
   country: 'PE',
   currency: 'PEN',
