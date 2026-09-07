@@ -1,5 +1,5 @@
-import { NumberInput, PasswordInput, Select, TextInput } from '@mantine/core'
-import type { NumberInputProps, PasswordInputProps, SelectProps, TextInputProps } from '@mantine/core'
+import { Checkbox, NumberInput, PasswordInput, Select, TextInput } from '@mantine/core'
+import type { CheckboxProps, NumberInputProps, PasswordInputProps, SelectProps, TextInputProps } from '@mantine/core'
 import type { ReactNode } from 'react'
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form'
 import { fieldErrorMessage } from '../../lib/errors'
@@ -146,6 +146,39 @@ export function FormPasswordInput<T extends FieldValues>({
           error={fieldErrorMessage(fieldState.error)}
           label={label}
           leftSection={leftSection}
+          styles={styles}
+        />
+      )}
+    />
+  )
+}
+
+/** Boolean field; the checkbox reports `checked`, not `value`, so it can't spread `field` directly. */
+export function FormCheckbox<T extends FieldValues>({
+  color,
+  control,
+  label,
+  name,
+  radius,
+  size,
+  styles,
+}: Pick<FormFieldProps<T>, 'control' | 'label' | 'name'> & Pick<CheckboxProps, 'color' | 'radius' | 'size' | 'styles'>) {
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field, fieldState }) => (
+        <Checkbox
+          checked={!!field.value}
+          color={color}
+          error={fieldErrorMessage(fieldState.error)}
+          label={label}
+          name={field.name}
+          onBlur={field.onBlur}
+          onChange={event => field.onChange(event.currentTarget.checked)}
+          radius={radius}
+          ref={field.ref}
+          size={size}
           styles={styles}
         />
       )}

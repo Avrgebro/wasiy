@@ -4,7 +4,6 @@ import {
   Alert,
   Anchor,
   Button,
-  Checkbox,
   Divider,
 } from '@mantine/core'
 import { getRouteApi, useRouter } from '@tanstack/react-router'
@@ -22,7 +21,7 @@ import { authFieldStyles } from './auth-field-styles'
 import { loginSchema, type LoginFormValues } from './schemas'
 import type { MeResponse } from './types'
 import { WasiyLogo } from '../../components/layout/shared/wasiy-logo'
-import { FormPasswordInput, FormTextInput } from '../../components/ui/form-fields'
+import { FormCheckbox, FormPasswordInput, FormTextInput } from '../../components/ui/form-fields'
 import { submitHandlingServerErrors } from '../../lib/errors'
 
 const loginRouteApi = getRouteApi('/login')
@@ -204,10 +203,11 @@ export function LoginPage() {
                 name="password"
                 styles={authFieldStyles}
               />
-              <Checkbox
+              <FormCheckbox
                 color="accent"
+                control={form.control}
                 label={t('auth.rememberMe')}
-                {...form.register('remember')}
+                name="remember"
                 radius={5}
                 size="sm"
                 styles={{

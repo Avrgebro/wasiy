@@ -1,10 +1,10 @@
-import { ArrowRightIcon, BuildingsIcon, CheckReadIcon, GlobalIcon, LetterIcon, LockPasswordIcon, MapPointIcon } from '@solar-icons/react/linear'
+import { ArrowRightIcon, BuildingsIcon, GlobalIcon, LetterIcon, LockPasswordIcon, MapPointIcon } from '@solar-icons/react/linear'
 import { money, monthlyTotal, type PlanPricing } from './format'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from '@tanstack/react-router'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Controller, useForm, useWatch, type FieldValues, type UseFormReturn } from 'react-hook-form'
-import { Button, Checkbox, PinInput, Radio, UnstyledButton } from '@mantine/core'
+import { useForm, useWatch, type FieldValues, type UseFormReturn } from 'react-hook-form'
+import { Button, CheckIcon, PinInput, Radio, UnstyledButton } from '@mantine/core'
 import { authFieldStyles } from '../auth/auth-field-styles'
 import { RegistrationPlanCard } from './registration-plan-card'
 import '@fontsource/instrument-sans/400.css'
@@ -13,8 +13,8 @@ import '@fontsource/sora/600.css'
 import '@fontsource/sora/700.css'
 import { WasiyLogo } from '../../components/layout/shared/wasiy-logo'
 import { ApiError } from '../../app/api-client'
-import { FormNumberInput, FormPasswordInput, FormSelect, FormTextInput } from '../../components/ui/form-fields'
-import { applyLaravelValidationErrors, fieldErrorMessage } from '../../lib/errors'
+import { FormCheckbox, FormNumberInput, FormPasswordInput, FormSelect, FormTextInput } from '../../components/ui/form-fields'
+import { applyLaravelValidationErrors } from '../../lib/errors'
 import { accountSchema, buildingSchema, type AccountFormValues, type BuildingFormInput, type BuildingFormValues } from './schemas'
 import type { MeResponse } from '../auth/types'
 import { completeRegistration, getRegistrationPlans, registrationCountries, resendRegistrationCode, startRegistration, verifyRegistrationCode, type PendingRegistration, type RegistrationPlan } from './api'
@@ -140,7 +140,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
                 >
                   <span className={`flex items-center gap-2.5 whitespace-nowrap text-sm font-semibold ${index > step ? 'text-[var(--mantine-color-placeholder)]' : 'text-[var(--mantine-color-text)]'}`}>
                     <span aria-hidden="true" className={`flex size-7 items-center justify-center rounded-full text-xs ${index === step ? 'bg-[var(--mantine-color-teal-6)] text-white' : index < step ? 'bg-[#E6F1EB] text-[#2E7D5B]' : 'border border-[var(--mantine-color-default-border)] bg-white'}`}>
-                      {index < step ? <CheckReadIcon size={16} /> : index + 1}
+                      {index < step ? <CheckIcon size={12} /> : index + 1}
                     </span>
                     {label}
                   </span>
@@ -181,9 +181,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
                     <FormTextInput control={accountForm.control} name="email" label="Correo electrónico" type="email" autoComplete="email" placeholder="ana@administradora.pe" leftSection={<LetterIcon aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />} styles={authFieldStyles} />
                     <FormPasswordInput control={accountForm.control} name="password" label="Contraseña" autoComplete="new-password" placeholder="Mínimo 8 caracteres" leftSection={<LockPasswordIcon aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />} styles={authFieldStyles} />
                     <FormPasswordInput control={accountForm.control} name="password_confirmation" label="Confirmar contraseña" autoComplete="new-password" placeholder="Vuelve a escribir tu contraseña" leftSection={<LockPasswordIcon aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />} styles={authFieldStyles} />
-                    <Controller control={accountForm.control} name="terms_accepted" render={({ field, fieldState }) => (
-                      <Checkbox color="accent" radius={5} size="sm" styles={{ label: { fontSize: 13.5, color: 'var(--mantine-color-dimmed)' } }} name={field.name} ref={field.ref} onBlur={field.onBlur} checked={field.value} onChange={e => field.onChange(e.currentTarget.checked)} error={fieldErrorMessage(fieldState.error)} label="Acepto los términos del servicio y la política de privacidad." />
-                    )} />
+                    <FormCheckbox control={accountForm.control} name="terms_accepted" color="accent" radius={5} size="sm" styles={{ label: { fontSize: 13.5, color: 'var(--mantine-color-dimmed)' } }} label="Acepto los términos del servicio y la política de privacidad." />
                     <Button color="accent" h={48} radius={10} styles={{ label: { fontSize: 15, fontWeight: 600 } }} type="submit" fullWidth loading={busy} rightSection={<ArrowRightIcon aria-hidden="true" size={15} />}>Crear cuenta</Button>
                   </fieldset>
                 </form>
