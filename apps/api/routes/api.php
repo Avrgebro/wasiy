@@ -95,6 +95,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
     // lapsed: that is when its admin needs the invoice.
     Route::get('/account/subscription', [SubscriptionController::class, 'show']);
     Route::patch('/account/subscription/units', [SubscriptionController::class, 'updateUnits']);
+    Route::post('/account/subscription/plan-change-request', [SubscriptionController::class, 'requestPlanChange'])->middleware('throttle:10,1');
     Route::post('/account/invoices/{invoice}/proofs', [InvoiceProofController::class, 'store'])->middleware('throttle:20,1');
     Route::get('/account/invoices/{invoice}/proofs/{proof}', [InvoiceProofController::class, 'show']);
 

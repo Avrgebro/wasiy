@@ -1834,8 +1834,11 @@
       "inUse": "In use",
       "request": "Request change",
       "portfolio": "Portafolio, for administrators with several buildings, is arranged with the sales team.",
-      "mailSubject": "Plan change · {{account}}",
-      "mailBody": "Hi, I want to move the account {{account}} to the {{plan}} plan at the next renewal."
+      "requestedPill": "Requested",
+      "withdraw": "Withdraw request",
+      "requested": "Request sent. We will confirm by email.",
+      "withdrawn": "Request withdrawn.",
+      "requestedNote": "You asked to move to the {{plan}} plan. It applies at the next renewal, on {{date}}."
     },
     "proof": {
       "title": "Confirm payment",

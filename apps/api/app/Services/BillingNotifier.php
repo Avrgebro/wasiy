@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Models\Subscription;
 use App\Notifications\BillingNoticeNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Notification;
@@ -38,6 +39,32 @@ class BillingNotifier
     public function paymentRejected(Invoice $invoice): void
     {
         $this->toAdmins($invoice, 'Comprobante rechazado', "No pudimos confirmar el pago de la factura {$invoice->number}: {$invoice->rejection_reason} Puedes subir otro comprobante desde Suscripción.", 'Ver factura');
+    }
+
+    public function planChangeRequested(Subscription $subscription): void
+    {
+        $account = $subscription->account;
+        $facts = [
+            ['label' => 'Plan actual', 'value' => $subscription->plan->name],
+            ['label' => 'Plan solicitado', 'value' => $subscription->requestedPlan->name],
+            ['label' => 'Unidades contratadas', 'value' => (string) $subscription->billable_units],
+            ['label' => 'Próxima renovación', 'value' => $this->day($subscription->access_until)],
+        ];
+        Notification::route('mail', (string) config('wasiy.billing.review_email'))->notify(new BillingNoticeNotification(
+            accountName: $account->name,
+            title: 'Solicitud de cambio de plan',
+            intro: "{$account->name} pide pasar al plan {$subscription->requestedPlan->name} en la siguiente renovación.",
+            facts: $facts,
+        ));
+        $emails = $this->recipients->adminEmails($account);
+        if ($emails->isNotEmpty()) {
+            Notification::route('mail', $emails->all())->notify(new BillingNoticeNotification(
+                accountName: $account->name,
+                title: 'Solicitud recibida',
+                intro: "Recibimos tu solicitud para pasar al plan {$subscription->requestedPlan->name}. Se aplica en la siguiente renovación y te confirmamos por correo.",
+                facts: $facts,
+            ));
+        }
     }
 
     private function toAdmins(Invoice $invoice, string $title, string $intro, ?string $actionLabel = null): void

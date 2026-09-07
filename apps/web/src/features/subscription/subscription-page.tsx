@@ -1,11 +1,13 @@
 import { Alert, Badge, Button, CopyButton, Skeleton, Text } from '@mantine/core'
 import { ArrowDownIcon, CheckCircleIcon, CopyIcon, InfoCircleIcon, WalletIcon } from '@solar-icons/react/linear'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { formatDate } from '../../lib/dates'
+import { getErrorMessage } from '../../lib/errors'
+import { notifyError, notifySuccess } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
-import { getSubscriptionPage, paymentProofUrl, subscriptionPageQueryKey, type Invoice, type SubscriptionPageData } from './api'
+import { getSubscriptionPage, paymentProofUrl, requestPlanChange, subscriptionPageQueryKey, type Invoice, type SubscriptionPageData } from './api'
 import { ChangeUnitsDrawer } from './change-units-drawer'
 import { ConfirmPaymentDrawer } from './confirm-payment-drawer'
 import { formatLongDay, formatPeriod, formatPlanMoney } from './format'
@@ -328,31 +330,48 @@ function InvoiceRow({ invoice, onConfirmPayment }: { invoice: Invoice; onConfirm
   )
 }
 
-/** Block 6. Totals for this account's contracted units; the change is requested by email and applies at renewal. */
+/** Block 6. Totals for this account's contracted units; the change is requested here and applied by the team at the renewal. */
 function ChangePlanCard({ data }: { data: SubscriptionPageData }) {
   const { t } = useTranslation('common')
-  const subject = encodeURIComponent(t('subscription.changePlan.mailSubject', { account: data.account.name }))
+  const queryClient = useQueryClient()
+  const requested = data.subscription.requested_plan
+  const mutation = useMutation({
+    mutationFn: requestPlanChange,
+    onSuccess: ({ data: next }, plan) => {
+      queryClient.setQueryData(subscriptionPageQueryKey, { data: next })
+      notifySuccess(t(plan ? 'subscription.changePlan.requested' : 'subscription.changePlan.withdrawn'))
+    },
+    onError: (error) => notifyError(getErrorMessage(error)),
+    meta: { suppressErrorNotification: true },
+  })
 
   return (
     <Card description={t('subscription.changePlan.hint', { count: data.subscription.billable_units })} title={t('subscription.changePlan.title')}>
       <div className="grid gap-3 sm:grid-cols-2">
-        {data.plans.map((plan) => (
-          <div key={plan.code} className={`flex flex-col gap-2 rounded-inner border p-4 ${plan.is_current ? 'border-[var(--mantine-color-teal-4)] bg-[var(--wa-tint)]' : 'border-[var(--mantine-color-default-border)]'}`}>
-            <div className="flex items-center justify-between gap-2">
-              <p className="m-0 text-base font-semibold text-[var(--mantine-color-text)]">{plan.name}</p>
-              {plan.is_current ? <Badge color="teal" radius="xl" size="sm" variant="light">{t('subscription.changePlan.current')}</Badge> : null}
+        {data.plans.map((plan) => {
+          const isRequested = requested?.code === plan.code
+          return (
+            <div key={plan.code} className={`flex flex-col gap-2 rounded-inner border p-4 ${plan.is_current ? 'border-[var(--mantine-color-teal-4)] bg-[var(--wa-tint)]' : 'border-[var(--mantine-color-default-border)]'}`}>
+              <div className="flex items-center justify-between gap-2">
+                <p className="m-0 text-base font-semibold text-[var(--mantine-color-text)]">{plan.name}</p>
+                {plan.is_current ? <Badge color="teal" radius="xl" size="sm" variant="light">{t('subscription.changePlan.current')}</Badge> : null}
+                {isRequested ? <Badge color="accent" radius="xl" size="sm" variant="light">{t('subscription.changePlan.requestedPill')}</Badge> : null}
+              </div>
+              <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.pricing', { price: formatPlanMoney(plan.unit_price_minor, data.plan.currency), count: plan.included_units })}</p>
+              <p className="m-0 flex items-baseline gap-1"><span className="font-display text-xl font-bold text-[var(--mantine-color-text)]">{formatPlanMoney(plan.total_minor, data.plan.currency)}</span><span className="text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.perMonth')}</span></p>
+              <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{plan.features.join(' · ')}</p>
+              {plan.is_current ? (
+                <span className="mt-auto text-xs font-semibold text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.inUse')}</span>
+              ) : isRequested ? (
+                <Button className="mt-auto" disabled={mutation.isPending} onClick={() => mutation.mutate(null)} variant="subtle">{t('subscription.changePlan.withdraw')}</Button>
+              ) : (
+                <Button className="mt-auto" disabled={mutation.isPending || requested !== null} onClick={() => mutation.mutate(plan.code)} variant="default">{t('subscription.changePlan.request')}</Button>
+              )}
             </div>
-            <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.pricing', { price: formatPlanMoney(plan.unit_price_minor, data.plan.currency), count: plan.included_units })}</p>
-            <p className="m-0 flex items-baseline gap-1"><span className="font-display text-xl font-bold text-[var(--mantine-color-text)]">{formatPlanMoney(plan.total_minor, data.plan.currency)}</span><span className="text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.perMonth')}</span></p>
-            <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{plan.features.join(' · ')}</p>
-            {plan.is_current ? (
-              <span className="mt-auto text-xs font-semibold text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.inUse')}</span>
-            ) : (
-              <Button className="mt-auto" component="a" href={`mailto:${data.contact_email}?subject=${subject}&body=${encodeURIComponent(t('subscription.changePlan.mailBody', { account: data.account.name, plan: plan.name }))}`} variant="default">{t('subscription.changePlan.request')}</Button>
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
+      {requested ? <p className="m-0 mt-3 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.requestedNote', { plan: requested.name, date: formatLongDay(data.subscription.access_until) })}</p> : null}
       <p className="m-0 mt-4 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.portfolio')}</p>
     </Card>
   )

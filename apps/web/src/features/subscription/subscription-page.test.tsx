@@ -23,7 +23,7 @@ function pageData(overrides: Partial<SubscriptionPageData> = {}): SubscriptionPa
   return {
     account: { id: 'acc_1', name: 'Administradora Horizonte' },
     plan: { code: 'operativo', name: 'Operativo', unit_price_minor: 650, currency: 'PEN', included_units: 10, features: ['Portal del residente', 'Reservas'] },
-    subscription: { status: 'trialing', trial_ends_at: '2026-09-21T12:00:00Z', access_until: '2026-09-21T12:00:00Z', days_left: 5, is_lapsed: false, billable_units: 40, units_in_use: 37, pending_billable_units: null, pending_units_from: null, last_paid_at: null },
+    subscription: { status: 'trialing', trial_ends_at: '2026-09-21T12:00:00Z', access_until: '2026-09-21T12:00:00Z', days_left: 5, is_lapsed: false, billable_units: 40, units_in_use: 37, pending_billable_units: null, pending_units_from: null, last_paid_at: null, requested_plan: null, plan_change_requested_at: null },
     breakdown: { base_units: 10, base_minor: 6500, extra_units: 30, extra_minor: 19500, total_minor: 26000 },
     invoices: [
       { id: 'i1', number: 'F-2026-0042', period_starts_on: '2026-09-21', period_ends_on: '2026-10-20', amount_minor: 26000, currency: 'PEN', status: 'pending', due_on: '2026-09-21', paid_at: null, payment_method: null, rejection_reason: null, latest_proof: null },
@@ -94,7 +94,7 @@ describe('SubscriptionPage', () => {
 
     expect(within(change).getByText('Totales calculados para las 40 unidades contratadas.')).toBeInTheDocument()
     expect(within(change).getByText('Plan actual')).toBeInTheDocument()
-    expect(within(change).getByRole('link', { name: 'Solicitar cambio' })).toHaveAttribute('href', expect.stringContaining('mailto:hola@wasiy.co'))
+    expect(within(change).getByRole('button', { name: 'Solicitar cambio' })).toBeEnabled()
   })
 
   it('shows the lapsed state with the button down to the invoice, and the empty invoice state', async () => {

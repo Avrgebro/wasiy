@@ -1834,8 +1834,11 @@
       "inUse": "En uso",
       "request": "Solicitar cambio",
       "portfolio": "Portafolio, para administradoras con varios edificios, se coordina con el equipo comercial.",
-      "mailSubject": "Cambio de plan · {{account}}",
-      "mailBody": "Hola, quiero cambiar la cuenta {{account}} al plan {{plan}} en la siguiente renovación."
+      "requestedPill": "Solicitado",
+      "withdraw": "Cancelar solicitud",
+      "requested": "Solicitud enviada. Te confirmamos por correo.",
+      "withdrawn": "Solicitud cancelada.",
+      "requestedNote": "Pediste pasar al plan {{plan}}. Se aplica en la siguiente renovación, el {{date}}."
     },
     "proof": {
       "title": "Confirmar pago",

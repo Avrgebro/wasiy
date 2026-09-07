@@ -61,6 +61,8 @@ export type SubscriptionPageData = {
     pending_billable_units: number | null
     pending_units_from: string | null
     last_paid_at: string | null
+    requested_plan: { code: string; name: string } | null
+    plan_change_requested_at: string | null
   }
   breakdown: { base_units: number; base_minor: number; extra_units: number; extra_minor: number; total_minor: number }
   invoices: Invoice[]
@@ -94,3 +96,7 @@ export function paymentProofUrl(invoiceId: string, proofId: string) {
 /** Up applies now and bills on the next invoice; down is scheduled for the renewal (ADR 0040). */
 export const updateContractedUnits = (units: number) =>
   apiRequest<{ data: SubscriptionPageData }>('/api/account/subscription/units', { method: 'PATCH', data: { units } })
+
+/** Plan changes are manual and apply at the renewal; null withdraws the request (ADR 0040). */
+export const requestPlanChange = (plan: string | null) =>
+  apiRequest<{ data: SubscriptionPageData }>('/api/account/subscription/plan-change-request', { method: 'POST', data: { plan } })

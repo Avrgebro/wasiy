@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Billing\ChangeContractedUnits;
+use App\Actions\Billing\RequestPlanChange;
 use App\Enums\RegistryStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
@@ -30,7 +31,7 @@ class SubscriptionController extends Controller
         abort_unless($account instanceof Account, 409, 'Selecciona una cuenta para ver su suscripción.');
         Gate::authorize('manageBilling', $account);
 
-        $subscription = $account->subscription()->with('plan')->first();
+        $subscription = $account->subscription()->with(['plan', 'requestedPlan'])->first();
         if (! $subscription instanceof Subscription) {
             return response()->json(['data' => null]);
         }
@@ -58,6 +59,8 @@ class SubscriptionController extends Controller
                 'pending_billable_units' => $subscription->pending_billable_units,
                 'pending_units_from' => $subscription->pending_units_from?->toDateString(),
                 'last_paid_at' => $lastPaid?->paid_at?->toIso8601String(),
+                'requested_plan' => $subscription->requestedPlan ? ['code' => $subscription->requestedPlan->code, 'name' => $subscription->requestedPlan->name] : null,
+                'plan_change_requested_at' => $subscription->plan_change_requested_at?->toIso8601String(),
             ],
             'breakdown' => [
                 'base_units' => $plan->included_units, 'base_minor' => $base,
@@ -88,6 +91,22 @@ class SubscriptionController extends Controller
 
         $validated = $request->validate(['units' => ['required', 'integer', 'min:1', 'max:10000']]);
         $change->handle($subscription, (int) $validated['units']);
+
+        return $this->show($request);
+    }
+
+    /** "Solicitar cambio": recorded on the subscription and mailed to the team; a null plan withdraws it. */
+    public function requestPlanChange(Request $request, RequestPlanChange $requestChange): JsonResponse
+    {
+        $account = $this->context->activeAccountOrSingle($request, $request->user());
+        abort_unless($account instanceof Account, 409, 'Selecciona una cuenta para ver su suscripción.');
+        Gate::authorize('manageBilling', $account);
+        $subscription = $account->subscription;
+        abort_unless($subscription instanceof Subscription, 404);
+
+        $validated = $request->validate(['plan' => ['nullable', 'string', 'exists:plans,code']]);
+        $plan = $validated['plan'] ? Plan::query()->where('code', $validated['plan'])->sole() : null;
+        $requestChange->handle($subscription, $plan);
 
         return $this->show($request);
     }
