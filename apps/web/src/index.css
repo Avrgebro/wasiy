@@ -192,8 +192,15 @@
     --checkbox-size-sm: 1.5rem;
   }
 
-  .mantine-SegmentedControl-root {
-    min-height: 2.75rem;
+  /* The touch target comes from the label, not a min-height on the root:
+     the sliding indicator is measured from the active label, so a taller
+     root left the labels and indicator hugging the top with a gap below.
+     2.25rem label + 3px root padding + 1px border per side = 44px. */
+  .mantine-SegmentedControl-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
   }
 }
 
