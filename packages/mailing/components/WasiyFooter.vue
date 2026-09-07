@@ -5,16 +5,10 @@
     lugar.") so email and app speak with one voice; keep them in sync.
   -->
   <Section class="px-6 py-11">
-    <Row>
-      <Column class="w-auto pr-2 align-middle">
-        <a :href="bladeConfig('wasiy.marketing.url')" class="no-underline">
-          <Img :src="assetUrl('images/mail/mark-teal.png')" width="20" height="20" alt="" />
-        </a>
-      </Column>
-      <Column class="align-middle">
-        <a :href="bladeConfig('wasiy.marketing.url')" class="font-sora text-[15px] font-semibold text-ink no-underline">wasiy</a>
-      </Column>
-    </Row>
+    <a :href="bladeConfig('wasiy.marketing.url')" class="inline-block no-underline">
+      <Img :src="assetUrl('images/mail/mark-teal.png')" width="20" height="20" alt="" class="inline-block align-middle" />
+      <span class="ml-2 inline-block align-middle font-sora text-[15px] font-semibold text-ink">wasiy</span>
+    </a>
 
     <Text class="m-0 mt-2 text-[12.5px] text-muted">Todo lo que pasa en tu edificio, en un solo lugar.</Text>
 

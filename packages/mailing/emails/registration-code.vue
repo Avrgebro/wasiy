@@ -7,20 +7,16 @@
   <WasiyLayout>
     <Preheader>Tu código de verificación es {{ blade('$code') }}. Vence en {{ blade('$minutes') }} minutos.</Preheader>
 
-    <Container class="max-w-xl p-0 py-10 sm:p-6">
-      <Section class="rounded-t-lg bg-teal px-6 pt-6 pb-11">
-        <Row>
-          <Column class="w-auto pr-2 align-middle">
-            <a :href="bladeConfig('wasiy.marketing.url')" class="no-underline">
-              <Img :src="assetUrl('images/mail/mark-cream.png')" width="28" height="28" alt="Wasiy" />
-            </a>
-          </Column>
-          <Column class="align-middle">
-            <a :href="bladeConfig('wasiy.marketing.url')" class="font-sora text-[21px] font-semibold tracking-tight text-bg no-underline">wasiy</a>
-          </Column>
-        </Row>
+    <Container class="max-w-xl p-0 py-10 sm:py-0">
+      <Section class="rounded-t-lg bg-teal px-6 pt-6 pb-11 sm:rounded-none">
+        <!-- Inline, not Row/Column: those stack on phones and would put the
+             wordmark under the mark. -->
+        <a :href="bladeConfig('wasiy.marketing.url')" class="inline-block no-underline">
+          <Img :src="assetUrl('images/mail/mark-cream.png')" width="28" height="28" alt="Wasiy" class="inline-block align-middle" />
+          <span class="ml-2 inline-block align-middle font-sora text-[21px] font-semibold tracking-tight text-bg">wasiy</span>
+        </a>
 
-        <Spacer class="h-16" />
+        <Spacer class="h-16 sm:h-10" />
 
         <Text class="m-0 mb-3 text-[12.5px] font-semibold uppercase tracking-[0.1em] text-teal-pale">
           Registro
@@ -31,7 +27,7 @@
         </Heading>
       </Section>
 
-      <Section class="rounded-b-lg bg-white px-6 py-12">
+      <Section class="rounded-b-lg bg-white px-6 py-12 sm:rounded-none">
         <Text class="m-0 text-base text-ink">Hola,</Text>
 
         <Text class="mt-4 text-base text-muted">
