@@ -449,7 +449,8 @@
     "finances": "Finances",
     "settings": "Settings",
     "packages": "Packages",
-    "subscription": "Subscription"
+    "subscription": "Subscription",
+    "account": "Account"
   },
   "notifications": {
     "label": "View notifications"
