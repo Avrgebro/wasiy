@@ -31,6 +31,7 @@ import { Route as AuthenticatedAdminLocationsRouteImport } from './routes-admin/
 import { Route as AuthenticatedAdminFinancesRouteImport } from './routes-admin/_authenticated/admin/finances'
 import { Route as AuthenticatedAdminAnnouncementsRouteImport } from './routes-admin/_authenticated/admin/announcements'
 import { Route as AuthenticatedAdminActivityRouteImport } from './routes-admin/_authenticated/admin/activity'
+import { Route as AuthenticatedAdminAccountRouteImport } from './routes-admin/_authenticated/admin/account'
 import { Route as AuthenticatedAdminUnitsUnitIdRouteImport } from './routes-admin/_authenticated/admin/units_.$unitId'
 import { Route as AuthenticatedAdminRegistryVehiclesRouteImport } from './routes-admin/_authenticated/admin/registry/vehicles'
 import { Route as AuthenticatedAdminRegistryUnitsRouteImport } from './routes-admin/_authenticated/admin/registry/units'
@@ -159,6 +160,12 @@ const AuthenticatedAdminActivityRoute =
     path: '/activity',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminAccountRoute =
+  AuthenticatedAdminAccountRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminUnitsUnitIdRoute =
   AuthenticatedAdminUnitsUnitIdRouteImport.update({
     id: '/units_/$unitId',
@@ -204,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/access-paused': typeof AuthenticatedAccessPausedRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
+  '/admin/account': typeof AuthenticatedAdminAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
   '/admin/finances': typeof AuthenticatedAdminFinancesRoute
@@ -232,6 +240,7 @@ export interface FileRoutesByTo {
   '/registro': typeof RegistroRoute
   '/access-paused': typeof AuthenticatedAccessPausedRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
+  '/admin/account': typeof AuthenticatedAdminAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
   '/admin/finances': typeof AuthenticatedAdminFinancesRoute
@@ -263,6 +272,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/access-paused': typeof AuthenticatedAccessPausedRoute
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
+  '/_authenticated/admin/account': typeof AuthenticatedAdminAccountRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/_authenticated/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
   '/_authenticated/admin/finances': typeof AuthenticatedAdminFinancesRoute
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/access-paused'
     | '/select-account'
+    | '/admin/account'
     | '/admin/activity'
     | '/admin/announcements'
     | '/admin/finances'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/registro'
     | '/access-paused'
     | '/select-account'
+    | '/admin/account'
     | '/admin/activity'
     | '/admin/announcements'
     | '/admin/finances'
@@ -352,6 +364,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/access-paused'
     | '/_authenticated/select-account'
+    | '/_authenticated/admin/account'
     | '/_authenticated/admin/activity'
     | '/_authenticated/admin/announcements'
     | '/_authenticated/admin/finances'
@@ -539,6 +552,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminActivityRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/account': {
+      id: '/_authenticated/admin/account'
+      path: '/account'
+      fullPath: '/admin/account'
+      preLoaderRoute: typeof AuthenticatedAdminAccountRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/units_/$unitId': {
       id: '/_authenticated/admin/units_/$unitId'
       path: '/units/$unitId'
@@ -585,6 +605,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminAccountRoute: typeof AuthenticatedAdminAccountRoute
   AuthenticatedAdminActivityRoute: typeof AuthenticatedAdminActivityRoute
   AuthenticatedAdminAnnouncementsRoute: typeof AuthenticatedAdminAnnouncementsRoute
   AuthenticatedAdminFinancesRoute: typeof AuthenticatedAdminFinancesRoute
@@ -608,6 +629,7 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminAccountRoute: AuthenticatedAdminAccountRoute,
     AuthenticatedAdminActivityRoute: AuthenticatedAdminActivityRoute,
     AuthenticatedAdminAnnouncementsRoute: AuthenticatedAdminAnnouncementsRoute,
     AuthenticatedAdminFinancesRoute: AuthenticatedAdminFinancesRoute,

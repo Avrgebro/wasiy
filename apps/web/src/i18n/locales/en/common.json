@@ -1777,5 +1777,65 @@
     "pausedTitle": "Access to this account is paused",
     "pausedSince": "The subscription for {{account}} expired on {{date}}.",
     "pausedSinceUnknown": "The subscription for {{account}} has expired."
+  },
+  "account": {
+    "title": "My account",
+    "subtitle": "Your login details and preferences. Nothing here affects residents or the building settings.",
+    "identity": {
+      "title": "Identity"
+    },
+    "personal": {
+      "title": "Personal details",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "saved": "Changes saved"
+    },
+    "email": {
+      "title": "Login email",
+      "hint": "Your username for signing in and where system notices arrive.",
+      "verified": "Verified",
+      "change": "Change email",
+      "step": "Step {{step}} of 2",
+      "new": "New email",
+      "sendCode": "Send code",
+      "nothingChangesYet": "Your current email stays active. Nothing changes yet.",
+      "codeSentTo": "We sent a 6-digit code to",
+      "changesOnConfirm": "The email changes once you confirm it.",
+      "codeLabel": "Verification code",
+      "codeDigit": "Code digit",
+      "codeDigitN": "Digit {{n}}",
+      "confirm": "Confirm",
+      "resend": "Resend code",
+      "resendIn": "Resend code in {{seconds}}s",
+      "fallback": "If you cancel or the code expires, you keep signing in with {{email}}.",
+      "changed": "Email updated a moment ago"
+    },
+    "password": {
+      "title": "Password",
+      "current": "Current password",
+      "new": "New password",
+      "minHint": "At least 8 characters.",
+      "confirm": "Confirm password",
+      "submit": "Update password",
+      "changed": "Password updated a moment ago"
+    },
+    "sessions": {
+      "title": "Active sessions",
+      "hint": "Where your account is open right now.",
+      "current": "This session",
+      "activeNow": "active now",
+      "lastActive": "last active {{when}}",
+      "closeOthers": "Sign out other sessions",
+      "closeOthersConfirm": "Sign out other sessions",
+      "closed": "Other sessions were signed out"
+    },
+    "accesses": {
+      "title": "Accounts and access",
+      "hint": "Roles are assigned by each account’s administrator; here they are read-only.",
+      "wholeAccount": "Whole account"
+    },
+    "preferences": {
+      "title": "Preferences"
+    }
   }
 }

@@ -1777,5 +1777,65 @@
     "pausedTitle": "El acceso a esta cuenta está pausado",
     "pausedSince": "La suscripción de {{account}} venció el {{date}}.",
     "pausedSinceUnknown": "La suscripción de {{account}} venció."
+  },
+  "account": {
+    "title": "Mi cuenta",
+    "subtitle": "Tus datos de acceso y preferencias. No afecta a los residentes ni a la configuración del edificio.",
+    "identity": {
+      "title": "Identidad"
+    },
+    "personal": {
+      "title": "Datos personales",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "saved": "Cambios guardados"
+    },
+    "email": {
+      "title": "Correo de acceso",
+      "hint": "Es tu usuario para iniciar sesión y donde llegan los avisos del sistema.",
+      "verified": "Verificado",
+      "change": "Cambiar correo",
+      "step": "Paso {{step}} de 2",
+      "new": "Correo nuevo",
+      "sendCode": "Enviar código",
+      "nothingChangesYet": "Tu correo actual sigue activo. Nada cambia todavía.",
+      "codeSentTo": "Enviamos un código de 6 dígitos a",
+      "changesOnConfirm": "El correo cambiará al confirmarlo.",
+      "codeLabel": "Código de verificación",
+      "codeDigit": "Dígito del código",
+      "codeDigitN": "Dígito {{n}}",
+      "confirm": "Confirmar",
+      "resend": "Reenviar código",
+      "resendIn": "Reenviar código en {{seconds}}s",
+      "fallback": "Si cancelas o el código expira, sigues entrando con {{email}}.",
+      "changed": "Correo actualizado hace un momento"
+    },
+    "password": {
+      "title": "Contraseña",
+      "current": "Contraseña actual",
+      "new": "Nueva contraseña",
+      "minHint": "Mínimo 8 caracteres.",
+      "confirm": "Confirmar contraseña",
+      "submit": "Actualizar contraseña",
+      "changed": "Contraseña actualizada hace un momento"
+    },
+    "sessions": {
+      "title": "Sesiones activas",
+      "hint": "Dónde está abierta tu cuenta ahora mismo.",
+      "current": "Esta sesión",
+      "activeNow": "activa ahora",
+      "lastActive": "última actividad {{when}}",
+      "closeOthers": "Cerrar las demás sesiones",
+      "closeOthersConfirm": "Cerrar las demás sesiones",
+      "closed": "Las demás sesiones se cerraron"
+    },
+    "accesses": {
+      "title": "Cuentas y accesos",
+      "hint": "Los roles los asigna el administrador de cada cuenta; aquí solo se consultan.",
+      "wholeAccount": "Toda la cuenta"
+    },
+    "preferences": {
+      "title": "Preferencias"
+    }
   }
 }

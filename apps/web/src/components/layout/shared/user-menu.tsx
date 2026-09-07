@@ -1,8 +1,8 @@
-import { LogoutIcon, MonitorIcon, MoonStarsIcon, ShieldCheckIcon, Sun2Icon } from '@solar-icons/react/linear'
-import { Avatar, Drawer, Menu, UnstyledButton, useMantineColorScheme, type MantineColorScheme } from '@mantine/core'
+import { AltArrowRightIcon, LogoutIcon, ShieldCheckIcon } from '@solar-icons/react/linear'
+import { Avatar, Drawer, Menu, UnstyledButton } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
-import { useRouter } from '@tanstack/react-router'
-import { useState, type ComponentType } from 'react'
+import { Link, useRouter } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getRoleLabelKey } from '../../../features/auth/access'
 import { useLocationContext, useLogout, useMe } from '../../../features/auth/hooks'
@@ -10,17 +10,11 @@ import { useLocationContext, useLogout, useMe } from '../../../features/auth/hoo
 /** Same seam as the sidebar's mobile behaviour: below sm the menu is a sheet. */
 const BELOW_SM_MEDIA_QUERY = '(max-width: 39.999em)'
 
-const THEME_CHOICES: { value: MantineColorScheme; icon: ComponentType<{ size?: number }>; labelKey: string }[] = [
-  { value: 'light', icon: Sun2Icon, labelKey: 'theme.choiceLight' },
-  { value: 'dark', icon: MoonStarsIcon, labelKey: 'theme.choiceDark' },
-  { value: 'auto', icon: MonitorIcon, labelKey: 'theme.choiceSystem' },
-]
-
 /**
- * The account menu behind the topbar avatar (mockup 20): who you are, the
- * theme and the way out, nothing else. Desktop anchors a 272px menu to the
- * avatar; phones get a bottom sheet the thumb can reach. Both render the
- * same three blocks, sized for the surface.
+ * The account menu behind the topbar avatar (mockup 20, trimmed to two
+ * blocks): who you are, which opens Mi cuenta, and the way out. The theme
+ * picker lives on Mi cuenta. Desktop anchors a 272px menu to the avatar;
+ * phones get a bottom sheet the thumb can reach.
  */
 export function UserMenu() {
   const { t } = useTranslation('common')
@@ -97,7 +91,7 @@ export function UserMenu() {
 }
 
 /**
- * The three blocks. `compact` is the desktop menu (40px avatar, 40px rows);
+ * The two blocks. `compact` is the desktop menu (40px avatar, 40px rows);
  * the sheet gets 48px and 52px so every target suits a thumb.
  */
 function AccountMenuContent({ compact, onDone }: { compact: boolean; onDone: () => void }) {
@@ -106,7 +100,6 @@ function AccountMenuContent({ compact, onDone }: { compact: boolean; onDone: () 
   const me = useMe().data
   const { currentLocation } = useLocationContext()
   const logoutMutation = useLogout()
-  const { colorScheme, setColorScheme } = useMantineColorScheme()
 
   const role =
     me?.roles.account[0]?.role ??
@@ -123,60 +116,24 @@ function AccountMenuContent({ compact, onDone }: { compact: boolean; onDone: () 
 
   return (
     <div className={compact ? '' : 'pb-[max(1.25rem,env(safe-area-inset-bottom))]'}>
-      <div className={`flex items-center gap-3 ${compact ? 'px-4 pt-[15px] pb-3' : 'px-5 pt-3 pb-3.5'}`}>
+      <Link
+        aria-label={t('account.title')}
+        className={`flex items-start gap-3 no-underline transition-colors hover:bg-[var(--mantine-color-default-hover)] ${compact ? 'px-4 py-3.5' : 'px-5 pt-3 pb-3.5'}`}
+        onClick={onDone}
+        to="/admin/account"
+      >
         <Avatar color="teal" name={me?.user.name} radius="xl" size={compact ? 40 : 48} variant="filled" />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className={`truncate font-semibold text-[var(--mantine-color-text)] ${compact ? 'text-sm' : 'font-display text-base tracking-tight'}`}>
             {me?.user.name}
           </span>
           <span className={`truncate text-[var(--mantine-color-dimmed)] ${compact ? 'text-xs' : 'text-[12.5px]'}`}>{me?.user.email}</span>
+          {role ? <span className="mt-1"><RolePill label={t(getRoleLabelKey(role))} /></span> : null}
         </div>
-        {role && !compact ? <RolePill label={t(getRoleLabelKey(role))} /> : null}
-      </div>
-      {role && compact ? (
-        <div className="px-4 pb-3.5">
-          <RolePill label={t(getRoleLabelKey(role))} />
-        </div>
-      ) : null}
+        <AltArrowRightIcon aria-hidden="true" className="mt-3 shrink-0 text-[var(--mantine-color-dimmed)]" size={16} />
+      </Link>
 
       <div className={`h-px bg-[var(--mantine-color-default-border)] ${compact ? '' : 'mx-5'}`} />
-
-      <div className={compact ? 'px-4 py-3.5' : 'px-5 pt-4 pb-1.5'}>
-        <p className="m-0 mb-2.5 text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--mantine-color-dimmed)]">{t('theme.label')}</p>
-        <div
-          aria-label={t('theme.label')}
-          className={`grid grid-cols-3 rounded-[10px] border border-[var(--mantine-color-default-border)] bg-[var(--wa-field)] ${compact ? 'gap-1 p-1' : 'gap-[5px] p-[5px]'}`}
-          role="radiogroup"
-        >
-          {THEME_CHOICES.map(({ value, icon: Icon, labelKey }) => {
-            const active = colorScheme === value
-            return (
-              <button
-                key={value}
-                aria-checked={active}
-                className={`flex flex-col items-center justify-center rounded-[7px] border-0 bg-transparent font-medium transition-colors ${
-                  compact ? 'gap-[5px] py-2 text-[11px]' : 'h-[62px] gap-1.5 text-xs'
-                } ${
-                  active
-                    ? 'bg-[var(--wa-tint)] font-semibold text-[var(--mantine-color-text)] shadow-[inset_0_0_0_1px_var(--mantine-color-teal-4)]'
-                    : 'text-[var(--mantine-color-dimmed)] hover:bg-[var(--mantine-color-default-hover)]'
-                }`}
-                onClick={() => setColorScheme(value)}
-                role="radio"
-                type="button"
-              >
-                <Icon aria-hidden="true" size={compact ? 16 : 19} />
-                {t(labelKey)}
-              </button>
-            )
-          })}
-        </div>
-        <p className={`m-0 mt-2 text-[var(--mantine-color-dimmed)] ${compact ? 'text-[11px]' : 'text-[11.5px]'}`}>
-          {t(compact ? 'theme.systemHint' : 'theme.systemHintMobile')}
-        </p>
-      </div>
-
-      <div className={`h-px bg-[var(--mantine-color-default-border)] ${compact ? '' : 'mx-5 mt-3.5'}`} />
 
       <div className={compact ? 'p-2' : 'px-3 pt-2.5'}>
         <button

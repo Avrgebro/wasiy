@@ -130,9 +130,11 @@ export function FormSelect<T extends FieldValues>({
 export function FormPasswordInput<T extends FieldValues>({
   autoComplete,
   control,
+  description,
   label,
   leftSection,
   name,
+  placeholder,
   styles,
 }: FormFieldProps<T> & { styles?: PasswordInputProps['styles'] }) {
   return (
@@ -143,6 +145,8 @@ export function FormPasswordInput<T extends FieldValues>({
         <PasswordInput
           {...field}
           autoComplete={autoComplete}
+          description={description}
+          placeholder={placeholder}
           error={fieldErrorMessage(fieldState.error)}
           label={label}
           leftSection={leftSection}

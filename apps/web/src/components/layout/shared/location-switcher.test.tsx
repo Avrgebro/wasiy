@@ -32,6 +32,7 @@ const mocks = vi.hoisted(() => {
         timezone: 'America/Lima',
         locations_count: 7,
         subscription: null,
+        access: { account_role: null, locations: [] },
       },
     ],
     active_account: {
@@ -41,6 +42,7 @@ const mocks = vi.hoisted(() => {
       timezone: 'America/Lima',
       locations_count: 7,
       subscription: null,
+      access: { account_role: null, locations: [] },
     },
     active_location: {
       id: 'loc_1',

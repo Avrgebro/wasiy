@@ -1,5 +1,6 @@
 {
   "staffFeatures": [
+    "account",
     "announcements",
     "buildings",
     "dashboard",

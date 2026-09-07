@@ -2,6 +2,7 @@ import { MantineProvider } from '@mantine/core'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ReactNode } from 'react'
 import '../../../i18n'
 import { mantineTheme } from '../../../app/theme'
 import { UserMenu } from './user-menu'
@@ -22,7 +23,10 @@ vi.mock('@mantine/hooks', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@mantine/hooks')>()),
   useMediaQuery: () => mocks.mobile,
 }))
-vi.mock('@tanstack/react-router', () => ({ useRouter: () => ({ navigate: mocks.navigate }) }))
+vi.mock('@tanstack/react-router', () => ({
+  useRouter: () => ({ navigate: mocks.navigate }),
+  Link: ({ to, children, ...props }: { to: string; children: ReactNode; [key: string]: unknown }) => <a href={to} {...props}>{children}</a>,
+}))
 vi.mock('../../../features/auth/hooks', () => ({
   useMe: () => ({ data: mocks.me }),
   useLocationContext: () => ({ currentLocation: null, accessibleLocations: [], hasMultipleLocations: false }),
@@ -40,7 +44,7 @@ function renderMenu() {
 afterEach(() => { cleanup(); mocks.mobile = false; vi.clearAllMocks() })
 
 describe('UserMenu', () => {
-  it('anchors a menu with identity, role, theme choices and logout on desktop', async () => {
+  it('anchors a menu with identity, role and logout on desktop', async () => {
     renderMenu()
     const user = userEvent.setup()
     await user.click(screen.getByRole('button', { name: 'Abrir menú de usuario' }))
@@ -49,18 +53,15 @@ describe('UserMenu', () => {
     expect(within(menu).getByText('Ana Torres')).toBeInTheDocument()
     expect(within(menu).getByText('ana.torres@wasiy.pe')).toBeInTheDocument()
     expect(within(menu).getByText('Superadmin')).toBeInTheDocument()
-    const themes = within(menu).getByRole('radiogroup', { name: 'Tema' })
-    expect(within(themes).getAllByRole('radio').map((el) => el.textContent)).toEqual(['Claro', 'Oscuro', 'Sistema'])
-    expect(within(themes).getByRole('radio', { name: 'Sistema' })).toHaveAttribute('aria-checked', 'true')
-
-    await user.click(within(themes).getByRole('radio', { name: 'Oscuro' }))
-    expect(within(themes).getByRole('radio', { name: 'Oscuro' })).toHaveAttribute('aria-checked', 'true')
+    // Two blocks only: the identity link into Mi cuenta and the way out.
+    expect(within(menu).getByRole('link', { name: 'Mi cuenta' })).toHaveAttribute('href', '/admin/account')
+    expect(within(menu).queryByRole('radiogroup')).not.toBeInTheDocument()
 
     await user.click(within(menu).getByRole('button', { name: 'Cerrar sesión' }))
     expect(mocks.logout).toHaveBeenCalledOnce()
   })
 
-  it('opens a bottom sheet with the same blocks on phones', async () => {
+  it('opens a bottom sheet with the same two blocks on phones', async () => {
     mocks.mobile = true
     renderMenu()
     const user = userEvent.setup()
@@ -70,7 +71,7 @@ describe('UserMenu', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
     expect(within(sheet).getByText('Ana Torres')).toBeInTheDocument()
     expect(within(sheet).getByText('Superadmin')).toBeInTheDocument()
-    expect(within(sheet).getByText('Sistema sigue la preferencia de tu teléfono.')).toBeInTheDocument()
+    expect(within(sheet).getByRole('link', { name: 'Mi cuenta' })).toHaveAttribute('href', '/admin/account')
     expect(within(sheet).getByRole('button', { name: 'Cerrar sesión' })).toBeInTheDocument()
   })
 })

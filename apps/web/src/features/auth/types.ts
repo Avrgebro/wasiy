@@ -56,6 +56,13 @@ export type AccountSummary = {
   locations_count: number
   /** Null for accounts created by hand; those are never gated. */
   subscription: SubscriptionSummary | null
+  /** What the user holds in this account, for "Cuentas y accesos". */
+  access: AccountAccess
+}
+
+export type AccountAccess = {
+  account_role: AccountRole | null
+  locations: Array<{ location_id: string; location_name: string; role: LocationRole }>
 }
 
 export type LocationSummary = {
