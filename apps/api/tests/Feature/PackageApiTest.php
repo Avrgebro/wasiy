@@ -9,6 +9,7 @@ use App\Models\ActivityLog;
 use App\Models\Location;
 use App\Models\Package;
 use App\Models\Resident;
+use App\Models\ResidentAlert;
 use App\Models\Unit;
 use App\Models\UnitMembership;
 use App\Models\User;
@@ -63,6 +64,20 @@ test('front desk registers a package for a named resident, who is notified', fun
     Notification::assertCount(1);
     expect(ActivityLog::query()->where('event_type', ActivityEventType::PackageReceived->value)->where('subject_id', $response->json('data.id'))->exists())->toBeTrue()
         ->and($carlos->email)->toBe('carlos@x.pe');
+});
+
+test('long desk notes fit in the resident alert', function () {
+    Notification::fake();
+    [$account, $location, $unit, $frontDesk] = packageWorld();
+    $portalUser = User::factory()->create();
+    $laura = memberOf($unit, ['first_name' => 'Laura', 'email' => 'laura@x.pe', 'user_id' => $portalUser->id]);
+    $notes = str_repeat('Una caja gigantesca con un texto gigantesco. ', 22);
+
+    $this->actingAs($frontDesk)
+        ->postJson("/api/locations/{$location->id}/packages", ['unit_id' => $unit->id, 'resident_id' => $laura->id, 'notes' => $notes])
+        ->assertCreated();
+
+    expect(ResidentAlert::query()->where('resident_id', $laura->id)->sole()->body)->toContain(trim($notes));
 });
 
 test('without a named resident every member with an email is notified, and nobody when there is no email', function () {
