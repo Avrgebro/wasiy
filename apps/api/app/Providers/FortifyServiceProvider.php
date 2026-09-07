@@ -55,6 +55,16 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($throttleKey);
         });
 
+        // Passwordless login gets its own buckets so five wrong codes never
+        // block the "send me a new code" request that fixes them.
+        RateLimiter::for('login-code-request', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('login-code-verify', function (Request $request) {
+            return Limit::perMinute(10)->by($request->session()->getId().'|'.$request->ip());
+        });
+
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
