@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { installAuthInterceptors } from '../../app/api-client'
-import { sessionQueryKey } from './query-options'
+import { sessionQueryKey, sessionQueryOptions } from './query-options'
 import type { Session } from './types'
 
 // Handles session loss detected outside route guards — e.g. an API call
@@ -13,8 +13,18 @@ export function installSessionExpiryHandler(
   queryClient: QueryClient,
   router: { invalidate: () => Promise<void> },
 ) {
-  installAuthInterceptors(() => {
-    queryClient.setQueryData<Session>(sessionQueryKey, { status: 'anonymous' })
-    void router.invalidate()
-  })
+  installAuthInterceptors(
+    () => {
+      queryClient.setQueryData<Session>(sessionQueryKey, { status: 'anonymous' })
+      void router.invalidate()
+    },
+    // A 402 means the active Account lapsed since /me was last read: fetch
+    // the fresh state (which now says is_lapsed) and re-run the guards, which
+    // converge on the subscription page.
+    () => {
+      void queryClient
+        .fetchQuery({ ...sessionQueryOptions(), staleTime: 0 })
+        .then(() => router.invalidate(), () => undefined)
+    },
+  )
 }

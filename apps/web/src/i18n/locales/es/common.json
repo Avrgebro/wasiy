@@ -448,7 +448,8 @@
     "visitors": "Visitantes",
     "finances": "Finanzas",
     "settings": "Configuración",
-    "packages": "Paquetería"
+    "packages": "Paquetería",
+    "subscription": "Suscripción"
   },
   "notifications": {
     "label": "Ver notificaciones"
@@ -1738,5 +1739,34 @@
       "confirmArchiveTitle": "Archivar «{{title}}»",
       "confirmArchiveBody": "El anuncio deja de mostrarse en el portal. Las alertas ya enviadas se conservan."
     }
+  },
+  "subscription": {
+    "title": "Suscripción",
+    "subtitle": "Plan y estado de la cuenta {{account}}.",
+    "none": "Esta cuenta no tiene una suscripción registrada.",
+    "plan": "Plan",
+    "planDetail": "{{price}} por unidad al mes",
+    "billableUnits": "Unidades facturables",
+    "billableUnitsDetail": "Se facturan como mínimo las unidades incluidas en el plan.",
+    "monthlyTotal": "Total mensual",
+    "monthlyTotalDetail": "Después de la prueba gratis.",
+    "status": "Estado",
+    "status_trialing": "Prueba gratis",
+    "status_active": "Activa",
+    "status_expired": "Vencida",
+    "trialEndsOn": "La prueba termina el {{date}}.",
+    "accessUntil": "Acceso hasta el {{date}}.",
+    "lapsedOn": "Venció el {{date}}.",
+    "howToPayTitle": "Cómo activar tu plan",
+    "howToPayBody": "Escríbenos a <mail>{{email}}</mail> con el nombre de tu cuenta y te indicamos cómo pagar por transferencia, Yape o Plin. No hay cobros automáticos.",
+    "bannerTrialTitle": "Tu prueba gratis termina el {{date}}",
+    "bannerTrialBody_one": "Queda {{count}} día. Después necesitas activar tu plan para seguir usando Wasiy.",
+    "bannerTrialBody_other": "Quedan {{count}} días. Después necesitas activar tu plan para seguir usando Wasiy.",
+    "bannerLapsedTitle": "Tu suscripción venció el {{date}}",
+    "bannerLapsedBody": "Activa tu plan para volver a usar Wasiy.",
+    "bannerLapsedBodyStaff": "Avisa al administrador de la cuenta para activar el plan.",
+    "bannerAction": "Ver suscripción",
+    "lockedTitle": "El acceso a esta cuenta está pausado",
+    "lockedBody": "Los datos siguen guardados. En cuanto se active el plan, todo vuelve a estar disponible."
   }
 }

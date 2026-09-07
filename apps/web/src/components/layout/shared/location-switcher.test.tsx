@@ -31,6 +31,7 @@ const mocks = vi.hoisted(() => {
         slug: 'administradora-horizonte',
         timezone: 'America/Lima',
         locations_count: 7,
+        subscription: null,
       },
     ],
     active_account: {
@@ -39,6 +40,7 @@ const mocks = vi.hoisted(() => {
       slug: 'administradora-horizonte',
       timezone: 'America/Lima',
       locations_count: 7,
+      subscription: null,
     },
     active_location: {
       id: 'loc_1',

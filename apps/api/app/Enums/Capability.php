@@ -40,6 +40,9 @@ enum Capability: string
     /** Account-wide: locations, staff, activity, settings. */
     case ManageAccount = 'account.manage';
 
+    /** See the plan, trial and payment state; the only role that can pay. */
+    case ManageSubscription = 'subscription.manage';
+
     /**
      * The permission matrix. An account admin holds every capability in every
      * Location of the account; a location role grants its row in that

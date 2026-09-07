@@ -10,6 +10,22 @@ The top-level customer workspace. An Account is managed by one primary Admin and
 
 The Account currently selected as the User's workspace. Users with access to multiple Accounts must select an Active Account before entering account-scoped dashboard routes.
 
+### Plan
+
+A priced offer for an Account: a code, a name, a unit price in minor units and currency, the units included in the base price, a location limit and a feature list. Plans are seeded, not user-created; only available plans can be chosen at registration.
+
+### Subscription
+
+The one row that ties an Account to its Plan: status (trialing, active, expired), the unit price and currency locked at signup, the billable units, the trial window, the Access Until date and when the terms were accepted. Accounts created by hand have none and are never gated.
+
+### Trial
+
+The free period that self-serve registration starts, fourteen days from completion. During the trial the Subscription status is trialing and Access Until equals the trial end.
+
+### Access Until
+
+The moment the staff surface stops answering for an Account. Enforcement reads this date, never the status; a payment extends it. The resident portal ignores it.
+
 ### Admin
 
 The primary manager of an Account. The Admin can add Users and assign them to Locations.

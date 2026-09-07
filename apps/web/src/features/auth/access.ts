@@ -61,7 +61,7 @@ export const MANAGER_CAPABILITIES: Capability[] = [
   'announcements.manage',
   'location.settings',
 ]
-export const ADMIN_CAPABILITIES: Capability[] = [...MANAGER_CAPABILITIES, 'account.manage']
+export const ADMIN_CAPABILITIES: Capability[] = [...MANAGER_CAPABILITIES, 'account.manage', 'subscription.manage']
 
 /**
  * Every staff role shares the admin surface; front desk sees the read-only
@@ -128,4 +128,18 @@ export type Surface = 'admin' | 'portal'
 export const surfaceAccess: Record<Surface, (me: MeResponse) => boolean> = {
   admin: canAccessAdmin,
   portal: canAccessPortal,
+}
+
+/** The active Account's subscription, or null for hand-made accounts and before an account is selected. */
+export function getSubscription(me: MeResponse) {
+  return me.active_account?.subscription ?? null
+}
+
+/**
+ * Whether the staff surface is locked for the active Account. Mirrors the
+ * API's EnsureSubscriptionIsActive gate, which is the enforcement; this only
+ * decides where the SPA sends people (ADR 0039).
+ */
+export function isSubscriptionLapsed(me: MeResponse) {
+  return getSubscription(me)?.is_lapsed ?? false
 }

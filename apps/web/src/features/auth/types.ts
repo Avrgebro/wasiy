@@ -18,6 +18,7 @@ export type Capability =
   | 'announcements.manage'
   | 'location.settings'
   | 'account.manage'
+  | 'subscription.manage'
 
 export type AuthUser = {
   id: string
@@ -27,12 +28,34 @@ export type AuthUser = {
   email: string
 }
 
+export type SubscriptionStatus = 'trialing' | 'active' | 'expired'
+
+/**
+ * The Account's standing with its plan, computed by the API (ADR 0039).
+ * days_left and is_lapsed come from the server so every client agrees on
+ * the countdown and the lock; the SPA never compares dates itself.
+ */
+export type SubscriptionSummary = {
+  status: SubscriptionStatus
+  plan: { code: string; name: string }
+  unit_price_minor: number
+  billable_units: number
+  currency: string
+  trial_ends_at: string
+  access_until: string
+  days_left: number
+  is_lapsed: boolean
+  contact_email: string
+}
+
 export type AccountSummary = {
   id: string
   name: string
   slug: string
   timezone: string
   locations_count: number
+  /** Null for accounts created by hand; those are never gated. */
+  subscription: SubscriptionSummary | null
 }
 
 export type LocationSummary = {

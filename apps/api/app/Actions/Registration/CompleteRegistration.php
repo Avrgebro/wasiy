@@ -5,6 +5,7 @@ namespace App\Actions\Registration;
 use App\Actions\Locations\CreateLocation;
 use App\Enums\AccountRole;
 use App\Enums\LocationType;
+use App\Enums\SubscriptionStatus;
 use App\Models\Account;
 use App\Models\Plan;
 use App\Models\StaffMembership;
@@ -57,7 +58,7 @@ class CompleteRegistration
             'country' => $data['country'], 'timezone' => self::TIMEZONE,
         ]);
         Subscription::create([
-            'account_id' => $account->id, 'plan_id' => $plan->id, 'status' => 'trialing',
+            'account_id' => $account->id, 'plan_id' => $plan->id, 'status' => SubscriptionStatus::Trialing,
             // The real unit count stays on the location; billing covers at least the included units.
             'unit_price_minor' => $plan->unit_price_minor, 'billable_units' => max((int) $data['units'], $plan->included_units), 'currency' => $plan->currency,
             'trial_starts_at' => now(), 'trial_ends_at' => now()->addDays(self::TRIAL_DAYS), 'access_until' => now()->addDays(self::TRIAL_DAYS),

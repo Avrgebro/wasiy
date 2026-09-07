@@ -448,7 +448,8 @@
     "visitors": "Visitors",
     "finances": "Finances",
     "settings": "Settings",
-    "packages": "Packages"
+    "packages": "Packages",
+    "subscription": "Subscription"
   },
   "notifications": {
     "label": "View notifications"
@@ -1738,5 +1739,34 @@
       "confirmArchiveTitle": "Archive “{{title}}”",
       "confirmArchiveBody": "The announcement stops showing in the portal. Alerts already sent are kept."
     }
+  },
+  "subscription": {
+    "title": "Subscription",
+    "subtitle": "Plan and status for {{account}}.",
+    "none": "This account has no subscription on record.",
+    "plan": "Plan",
+    "planDetail": "{{price}} per unit per month",
+    "billableUnits": "Billable units",
+    "billableUnitsDetail": "At least the units included in the plan are billed.",
+    "monthlyTotal": "Monthly total",
+    "monthlyTotalDetail": "After the free trial.",
+    "status": "Status",
+    "status_trialing": "Free trial",
+    "status_active": "Active",
+    "status_expired": "Expired",
+    "trialEndsOn": "The trial ends on {{date}}.",
+    "accessUntil": "Access until {{date}}.",
+    "lapsedOn": "Expired on {{date}}.",
+    "howToPayTitle": "How to activate your plan",
+    "howToPayBody": "Write to <mail>{{email}}</mail> with your account name and we will tell you how to pay by bank transfer, Yape or Plin. There are no automatic charges.",
+    "bannerTrialTitle": "Your free trial ends on {{date}}",
+    "bannerTrialBody_one": "{{count}} day left. After that you need to activate your plan to keep using Wasiy.",
+    "bannerTrialBody_other": "{{count}} days left. After that you need to activate your plan to keep using Wasiy.",
+    "bannerLapsedTitle": "Your subscription expired on {{date}}",
+    "bannerLapsedBody": "Activate your plan to use Wasiy again.",
+    "bannerLapsedBodyStaff": "Ask the account administrator to activate the plan.",
+    "bannerAction": "View subscription",
+    "lockedTitle": "Access to this account is paused",
+    "lockedBody": "Your data is safe. Everything comes back as soon as the plan is activated."
   }
 }

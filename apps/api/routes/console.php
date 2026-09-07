@@ -9,6 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('invitations:expire-stale')->daily();
+Schedule::command('subscriptions:expire-lapsed')->daily();
 Schedule::command('visits:auto-check-out')->everyTenMinutes();
 Schedule::command('alerts:prune')->daily();
 Schedule::command('announcements:publish-due')->everyMinute();

@@ -13,8 +13,8 @@ export function axiosResponse(config: AxiosResponse['config'], data: unknown, st
 /** A resident with two units; Torre A · 402 is the primary contact's and therefore the default active unit. */
 export const residentMe = {
   user: { id: 'usr_1', first_name: 'Carlos', last_name: 'Mendoza', name: 'Carlos Mendoza', email: 'carlos@x.pe' },
-  accounts: [{ id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1 }],
-  active_account: { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1 },
+  accounts: [{ id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, subscription: null }],
+  active_account: { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, subscription: null },
   active_location: null,
   roles: { account: [], location: [] },
   accessible_locations: [],

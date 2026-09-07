@@ -20,6 +20,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes-admin/_aut
 import { Route as InvitationsStaffTokenRouteImport } from './routes-admin/invitations/staff.$token'
 import { Route as AuthenticatedAdminVisitorsRouteImport } from './routes-admin/_authenticated/admin/visitors'
 import { Route as AuthenticatedAdminUnitsRouteImport } from './routes-admin/_authenticated/admin/units'
+import { Route as AuthenticatedAdminSubscriptionRouteImport } from './routes-admin/_authenticated/admin/subscription'
 import { Route as AuthenticatedAdminStaffRouteImport } from './routes-admin/_authenticated/admin/staff'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes-admin/_authenticated/admin/settings'
 import { Route as AuthenticatedAdminResidentsRouteImport } from './routes-admin/_authenticated/admin/residents'
@@ -92,6 +93,12 @@ const AuthenticatedAdminUnitsRoute = AuthenticatedAdminUnitsRouteImport.update({
   path: '/units',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminSubscriptionRoute =
+  AuthenticatedAdminSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminStaffRoute = AuthenticatedAdminStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/admin/residents': typeof AuthenticatedAdminResidentsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/admin/subscription': typeof AuthenticatedAdminSubscriptionRoute
   '/admin/units': typeof AuthenticatedAdminUnitsRoute
   '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
@@ -224,6 +232,7 @@ export interface FileRoutesByTo {
   '/admin/residents': typeof AuthenticatedAdminResidentsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/admin/subscription': typeof AuthenticatedAdminSubscriptionRoute
   '/admin/units': typeof AuthenticatedAdminUnitsRoute
   '/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
@@ -253,6 +262,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/residents': typeof AuthenticatedAdminResidentsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
+  '/_authenticated/admin/subscription': typeof AuthenticatedAdminSubscriptionRoute
   '/_authenticated/admin/units': typeof AuthenticatedAdminUnitsRoute
   '/_authenticated/admin/visitors': typeof AuthenticatedAdminVisitorsRoute
   '/invitations/staff/$token': typeof InvitationsStaffTokenRoute
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/admin/residents'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/subscription'
     | '/admin/units'
     | '/admin/visitors'
     | '/invitations/staff/$token'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/admin/residents'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/subscription'
     | '/admin/units'
     | '/admin/visitors'
     | '/invitations/staff/$token'
@@ -336,6 +348,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/residents'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/staff'
+    | '/_authenticated/admin/subscription'
     | '/_authenticated/admin/units'
     | '/_authenticated/admin/visitors'
     | '/invitations/staff/$token'
@@ -434,6 +447,13 @@ declare module '@tanstack/react-router' {
       path: '/units'
       fullPath: '/admin/units'
       preLoaderRoute: typeof AuthenticatedAdminUnitsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/subscription': {
+      id: '/_authenticated/admin/subscription'
+      path: '/subscription'
+      fullPath: '/admin/subscription'
+      preLoaderRoute: typeof AuthenticatedAdminSubscriptionRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/staff': {
@@ -554,6 +574,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminResidentsRoute: typeof AuthenticatedAdminResidentsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminStaffRoute: typeof AuthenticatedAdminStaffRoute
+  AuthenticatedAdminSubscriptionRoute: typeof AuthenticatedAdminSubscriptionRoute
   AuthenticatedAdminUnitsRoute: typeof AuthenticatedAdminUnitsRoute
   AuthenticatedAdminVisitorsRoute: typeof AuthenticatedAdminVisitorsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -576,6 +597,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminResidentsRoute: AuthenticatedAdminResidentsRoute,
     AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
     AuthenticatedAdminStaffRoute: AuthenticatedAdminStaffRoute,
+    AuthenticatedAdminSubscriptionRoute: AuthenticatedAdminSubscriptionRoute,
     AuthenticatedAdminUnitsRoute: AuthenticatedAdminUnitsRoute,
     AuthenticatedAdminVisitorsRoute: AuthenticatedAdminVisitorsRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,

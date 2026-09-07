@@ -8,6 +8,7 @@ use App\Enums\Capability;
 use App\Models\Account;
 use App\Models\Location;
 use App\Models\StaffMembership;
+use App\Models\Subscription;
 use App\Models\UnitMembership;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -53,6 +54,7 @@ class AccessContextService
         ]);
 
         $accounts = $this->access->accessibleAccounts($user)
+            ->with('subscription.plan')
             ->withCount('locations')
             ->orderBy('name')
             ->get();
@@ -256,6 +258,35 @@ class AccessContextService
             // Loaded via withCount() in buildContext; the fallback covers
             // Account instances that arrive without it.
             'locations_count' => (int) ($account->locations_count ?? $account->locations()->count()),
+            // Null for accounts created by hand; the SPA shows no banner and
+            // the API applies no gate (ADR 0039).
+            'subscription' => $this->subscriptionSummary($account->subscription),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function subscriptionSummary(?Subscription $subscription): ?array
+    {
+        if (! $subscription instanceof Subscription) {
+            return null;
+        }
+
+        return [
+            'status' => $subscription->status->value,
+            'plan' => ['code' => $subscription->plan->code, 'name' => $subscription->plan->name],
+            'unit_price_minor' => $subscription->unit_price_minor,
+            'billable_units' => $subscription->billable_units,
+            'currency' => $subscription->currency,
+            'trial_ends_at' => $subscription->trial_ends_at->toIso8601String(),
+            'access_until' => $subscription->access_until->toIso8601String(),
+            // Computed here so every client agrees on the countdown and the lock.
+            'days_left' => $subscription->daysLeft(),
+            'is_lapsed' => $subscription->isLapsed(),
+            // Payment is manual for now: the subscription page tells admins
+            // where to write. Same inbox the marketing forms notify.
+            'contact_email' => (string) config('wasiy.leads.notify_email'),
         ];
     }
 

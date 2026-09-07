@@ -33,12 +33,18 @@ export class ApiError extends Error {
   }
 }
 
-// The callback must be idempotent: it fires for every 401, including ones
-// already being resolved into an anonymous session by getSession.
-export function installAuthInterceptors(onUnauthorized: () => void) {
+// The callbacks must be idempotent: onUnauthorized fires for every 401,
+// including ones already being resolved into an anonymous session by
+// getSession; onPaymentRequired fires for every 402 the subscription gate
+// returns once an account has lapsed (ADR 0039).
+export function installAuthInterceptors(onUnauthorized: () => void, onPaymentRequired?: () => void) {
   return apiClient.interceptors.response.use(undefined, (error: AxiosError) => {
     if (error.response?.status === 401) {
       onUnauthorized()
+    }
+
+    if (error.response?.status === 402) {
+      onPaymentRequired?.()
     }
 
     return Promise.reject(error)
