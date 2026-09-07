@@ -10,15 +10,16 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['account_id', 'plan_id', 'status', 'unit_price_minor', 'billable_units', 'currency', 'trial_starts_at', 'trial_ends_at', 'access_until', 'terms_accepted_at'])]
+#[Fillable(['account_id', 'plan_id', 'status', 'unit_price_minor', 'billable_units', 'pending_billable_units', 'pending_units_from', 'currency', 'trial_starts_at', 'trial_ends_at', 'access_until', 'terms_accepted_at'])]
 class Subscription extends Model
 {
     use HasFactory, HasUlids;
 
     protected function casts(): array
     {
-        return ['status' => SubscriptionStatus::class, 'trial_starts_at' => 'immutable_datetime', 'trial_ends_at' => 'immutable_datetime', 'access_until' => 'immutable_datetime', 'terms_accepted_at' => 'immutable_datetime'];
+        return ['status' => SubscriptionStatus::class, 'pending_units_from' => 'immutable_date', 'trial_starts_at' => 'immutable_datetime', 'trial_ends_at' => 'immutable_datetime', 'access_until' => 'immutable_datetime', 'terms_accepted_at' => 'immutable_datetime'];
     }
 
     /** The gate reads the date, not the status, so a lapse takes effect on time regardless of the scheduler. */
@@ -33,6 +34,16 @@ class Subscription extends Model
         $now = $now ?? CarbonImmutable::now();
 
         return $this->isLapsed($now) ? 0 : (int) ceil($now->diffInSeconds($this->access_until) / 86400);
+    }
+
+    /** The scheduled decrease, when it is due by the given period start (ADR 0040). */
+    public function pendingUnitsApplyOn(CarbonImmutable $periodStart): ?int
+    {
+        if ($this->pending_billable_units === null || $this->pending_units_from === null) {
+            return null;
+        }
+
+        return $this->pending_units_from->lte($periodStart) ? (int) $this->pending_billable_units : null;
     }
 
     /**
@@ -56,5 +67,19 @@ class Subscription extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    /**
+     * @return HasMany<Invoice, $this>
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /** The one invoice still waiting on money, if any; issuing never opens a second. */
+    public function openInvoice(): ?Invoice
+    {
+        return $this->invoices()->open()->latest('issued_at')->first();
     }
 }

@@ -10,6 +10,7 @@ Artisan::command('inspire', function () {
 
 Schedule::command('invitations:expire-stale')->daily();
 Schedule::command('subscriptions:expire-lapsed')->daily();
+Schedule::command('invoices:issue')->daily();
 Schedule::command('visits:auto-check-out')->everyTenMinutes();
 Schedule::command('alerts:prune')->daily();
 Schedule::command('announcements:publish-due')->everyMinute();
