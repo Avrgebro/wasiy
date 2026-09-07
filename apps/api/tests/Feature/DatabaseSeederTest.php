@@ -12,6 +12,7 @@ use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Amenity;
 use App\Models\Location;
+use App\Models\Reservation;
 use App\Models\Resident;
 use App\Models\StaffLocationRole;
 use App\Models\StaffMembership;
@@ -22,6 +23,7 @@ use App\Models\UserInvitation;
 use App\Models\Vehicle;
 use App\Notifications\StaffInvitationNotification;
 use App\Services\UserInvitationTokenResolver;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -469,9 +471,9 @@ test('it seeds the m6 locations settings amenity matrix and photos', function ()
 });
 
 test('demo reservations respect availability on different seed days', function (string $date) {
-    $this->travelTo(\Carbon\CarbonImmutable::parse($date, 'America/Lima')->utc());
+    $this->travelTo(CarbonImmutable::parse($date, 'America/Lima')->utc());
     $this->seed();
-    $reservations = \App\Models\Reservation::with('amenity.location')->get();
+    $reservations = Reservation::with('amenity.location')->get();
     expect($reservations)->not->toBeEmpty();
     foreach ($reservations as $reservation) {
         $start = $reservation->starts_at->setTimezone($reservation->amenity->location->timezone);
