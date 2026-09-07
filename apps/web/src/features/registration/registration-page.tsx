@@ -63,7 +63,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
     return () => window.clearTimeout(timer)
   }, [cooldown])
 
-  async function perform<T extends FieldValues>(action: () => Promise<void>, form?: UseFormReturn<T>) {
+  async function perform<T extends FieldValues>(action: () => Promise<void>, form?: UseFormReturn<T>, onFieldErrors?: () => void) {
     if (submitting.current) return
     submitting.current = true
     setBusy(true)
@@ -71,7 +71,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
     try { await action() } catch (error) {
       if (error instanceof ApiError) {
         // Field-level 422s go under their input; everything else to the banner.
-        if (form && applyLaravelValidationErrors<T>(error, form.setError, Object.keys(form.getValues()))) return
+        if (form && applyLaravelValidationErrors<T>(error, form.setError, Object.keys(form.getValues()))) { onFieldErrors?.(); return }
         const codeMessages = error.errors?.code
         if (verification && codeMessages?.length) { setCodeError(codeMessages.join(' ')); return }
         setError(error.status === 419 ? 'Tu sesión venció. Inténtalo otra vez.' : error.status === 429 ? 'Has realizado varios intentos. Espera un momento antes de continuar.' : Object.values(error.errors ?? {}).flat().join(' ') || error.message || 'No pudimos conectar. Inténtalo otra vez.')
@@ -109,7 +109,8 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
       const { session } = await completeRegistration({ ...values, plan, unit_price_minor: selected.price })
       accountForm.resetField('password'); accountForm.resetField('password_confirmation')
       await onComplete(session)
-    })
+    // Building fields are hidden on the summary, so show their server errors where they live.
+    }, buildingForm, () => setStep(1))
   })()
 
   return (
@@ -125,7 +126,8 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-5 pb-14 pt-8 md:px-12 md:pt-11">
+      {/* Tablets stack the form and plan card in one centered column; two columns need lg. */}
+      <main className="mx-auto max-w-[640px] px-5 pb-14 pt-8 md:px-8 md:pt-11 lg:max-w-6xl lg:px-12">
         <nav aria-label="Progreso del registro" className="mb-8 hidden md:block">
           <ol className="flex items-center gap-4">
             {steps.map((label, index) => (
@@ -156,7 +158,7 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
 
         {error && <p role="alert" className="mb-5 rounded-xl border border-[var(--mantine-color-error-3)] bg-[var(--mantine-color-error-0)] p-4 text-sm text-[var(--mantine-color-error-8)]">{error}</p>}
         {!selected ? <p role="alert">No hay planes disponibles en este momento. Inténtalo más tarde.</p> : (
-          <div className={verification ? 'mx-auto max-w-[620px]' : 'grid items-start gap-10 md:grid-cols-[minmax(0,560fr)_minmax(0,340fr)]'}>
+          <div className={verification ? 'mx-auto max-w-[620px]' : 'grid items-start gap-8 lg:grid-cols-[minmax(0,560fr)_minmax(0,340fr)] lg:gap-10'}>
             <section className={verification ? 'rounded-[18px] border border-[var(--mantine-color-default-border)] bg-white p-5 md:p-8' : 'min-w-0'}>
               <div className="mb-[26px]">
                 {verification && <div className="mb-5 text-[var(--mantine-color-teal-6)]"><LetterIcon aria-hidden="true" size={32} /></div>}
@@ -230,12 +232,8 @@ export function RegistrationPage({ initialPlan = 'operativo', initialPending, ca
                       <span className="rounded-full bg-[#E6F1EB] px-3 py-1 text-xs font-semibold text-[#2E7D5B]">Verificado</span>
                     </div>
                     <div className="flex items-center justify-between gap-3 px-5 py-4">
-                      <div className="min-w-0 [overflow-wrap:anywhere]"><p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]">Edificio</p><strong className="text-sm">{building.name}</strong><p className="mt-1 text-[13px] text-[var(--mantine-color-dimmed)]">{building.address}, {building.district}, {building.city} · {countryLabel}</p></div>
+                      <div className="min-w-0 [overflow-wrap:anywhere]"><p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]">Edificio</p><strong className="text-sm">{building.name}</strong><p className="mt-1 text-[13px] text-[var(--mantine-color-dimmed)]">{building.address}, {building.district}, {building.city} · {countryLabel}</p><p className="mt-1 text-[13px] text-[var(--mantine-color-dimmed)]">{units} unidades</p></div>
                       <Button variant="default" radius={10} className="shrink-0" disabled={busy} aria-label="Editar edificio" onClick={() => setStep(1)}>Editar</Button>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 px-5 py-4">
-                      <div><p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]">Unidades</p><strong className="text-sm">{units} unidades</strong></div>
-                      <Button variant="default" radius={10} disabled={busy} aria-label="Editar unidades" onClick={() => setStep(1)}>Editar</Button>
                     </div>
                   </div>
                   <fieldset className="min-w-0 border-0 p-0">
