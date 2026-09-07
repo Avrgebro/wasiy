@@ -26,6 +26,18 @@ The free period that self-serve registration starts, fourteen days from completi
 
 The moment the staff surface stops answering for an Account. Enforcement reads this date, never the status; a payment extends it. The resident portal ignores it.
 
+### Contracted Units
+
+The number of units an Account pays for, declared by the customer at registration and adjustable from the subscription page. Invoices are always for this number, never for a count of units in the account. It is also a hard cap on active units; increases apply at once, decreases at the next renewal, and the Plan's included units are the floor.
+
+### Invoice
+
+One billing period of a Subscription: period covered, contracted units and unit price at issue time, amount, due date and status (pending, under review, paid, rejected). Issued by a daily command ahead of Access Until; never during the Trial. Confirming its payment extends Access Until.
+
+### Payment Proof
+
+An image or PDF the account admin uploads against an Invoice to show a manual payment, with optional date, method, amount and operation number. Reviewed by the Wasiy team in Filament, who confirm or reject it with a reason.
+
 ### Admin
 
 The primary manager of an Account. The Admin can add Users and assign them to Locations.
