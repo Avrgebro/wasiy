@@ -13,14 +13,6 @@ export const SITE = {
     'Visitas, reservas de amenidades y registro del edificio, en orden. El centro de operación para administradoras y juntas de propietarios en Perú.',
   locale: 'es_PE',
   lang: 'es',
-  /**
-   * App hosts per environment. Used as the fallback when APP_URL is not set —
-   * see resolveAppUrl below.
-   */
-  app: {
-    production: 'https://app.wasiy.co',
-    staging: 'https://app.stage.wasiy.co',
-  },
   email: 'hola@wasiy.co',
   phone: '+51 1 640 2210',
   city: 'Lima',
@@ -83,28 +75,29 @@ function toOrigin(value: string): string {
 }
 
 /**
- * Origin of the resident/staff app this deployment should link to.
+ * Origin read from a required build-time variable. No fallback on purpose:
+ * every environment says explicitly which app and API it links to, and a
+ * missing value fails the build instead of guessing.
  *
- * Resolution order:
- *  1. `APP_URL` — set it per environment in the Vercel dashboard to override.
- *     Accepts `app.stage.wasiy.co` or `https://app.stage.wasiy.co`.
- *  2. Derived from the deployment context: the canonical production build gets
- *     the production app, everything else (staging, previews, `vercel dev`)
- *     gets the staging app.
- *
- * Because of step 2 this is already correct with no dashboard configuration:
- * prod builds link to app.wasiy.co, stage builds to app.stage.wasiy.co. A
- * misconfigured deployment fails safe toward staging rather than pointing
- * testers at production.
+ * Reads `process.env` for the same reason isCanonicalProduction does; Astro
+ * loads `.env` files into it for local builds, Vercel injects dashboard
+ * variables. Accepts a bare host or a full origin.
  */
-export function resolveAppUrl(
+export function requireOrigin(
+  name: 'APP_URL' | 'API_URL',
   env: Record<string, string | undefined> = process.env,
 ): string {
-  const explicit = env.APP_URL?.trim();
-  if (explicit) return toOrigin(explicit);
+  const value = env[name]?.trim();
+  if (!value) {
+    throw new Error(
+      `${name} is not set. Add it to apps/marketing/.env for local builds or to the Vercel project's environment variables (see .env.example).`,
+    );
+  }
 
-  return isCanonicalProduction(env) ? SITE.app.production : SITE.app.staging;
+  return toOrigin(value);
 }
 
-/** Resolved once at build time. */
-export const APP_URL = resolveAppUrl();
+/** Staff app the header "Acceder" and the plan CTAs link to. Resolved once at build time. */
+export const APP_URL = requireOrigin('APP_URL');
+/** Laravel API the contact and demo forms post to. Resolved once at build time. */
+export const API_URL = requireOrigin('API_URL');

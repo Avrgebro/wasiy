@@ -38,6 +38,12 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Public marketing forms: a burst cap and a daily cap per IP.
+        RateLimiter::for('leads', fn (Request $request) => [
+            Limit::perMinute(5)->by('leads-min:'.$request->ip()),
+            Limit::perDay(20)->by('leads-day:'.$request->ip()),
+        ]);
+
         // Case- and accent-insensitive substring search over the given SQL
         // expressions, with LIKE wildcards in the term escaped. Single owner
         // of the escaping rule for every list endpoint and the spotlight.

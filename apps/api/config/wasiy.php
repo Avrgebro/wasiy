@@ -24,6 +24,10 @@ return [
         // Read alerts older than this are pruned by alerts:prune.
         'retention_days' => (int) env('WASIY_ALERT_RETENTION_DAYS', 90),
     ],
+    'leads' => [
+        // Sales inbox that gets a heads-up for every marketing form submission.
+        'notify_email' => env('WASIY_LEADS_NOTIFY_EMAIL', 'hola@wasiy.co'),
+    ],
     'photos' => [
         'disk' => env('WASIY_PHOTO_DISK', 'local'),
         // JPG and PNG at up to 10 MB, per the dropzone contract in the

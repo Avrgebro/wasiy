@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { SITE } from '../site';
+import { API_URL, SITE } from '../site';
 ---
 
 <Layout
@@ -105,7 +105,7 @@ import { SITE } from '../site';
         </div>
       </div>
 
-      <form class="panel" novalidate>
+      <form class="panel" novalidate data-api={API_URL}>
         <div class="form-body">
           <div>
             <div class="panel-title">Agenda tu demo</div>
@@ -115,7 +115,7 @@ import { SITE } from '../site';
           <div class="row">
             <label>
               <span class="field-label">Nombre</span>
-              <input type="text" name="nombre" placeholder="Marco Delgado" autocomplete="name" />
+              <input type="text" name="nombre" placeholder="Marco Delgado" autocomplete="name" required />
             </label>
             <label>
               <span class="field-label">Teléfono</span>
@@ -137,17 +137,17 @@ import { SITE } from '../site';
             <input type="text" name="organizacion" placeholder="Administradora Horizonte" autocomplete="organization" />
           </label>
 
-          <fieldset class="chips" data-mode="single">
+          <fieldset class="chips" data-mode="single" data-field="units_range">
             <legend class="field-label">¿Cuántas unidades administras?</legend>
             <div class="chip-row">
-              <button type="button" class="chip">1–50</button>
-              <button type="button" class="chip">51–200</button>
-              <button type="button" class="chip">201–600</button>
-              <button type="button" class="chip">600+</button>
+              <button type="button" class="chip" data-value="1-50">1–50</button>
+              <button type="button" class="chip" data-value="51-200">51–200</button>
+              <button type="button" class="chip" data-value="201-600">201–600</button>
+              <button type="button" class="chip" data-value="600+">600+</button>
             </div>
           </fieldset>
 
-          <fieldset class="chips" data-mode="multi">
+          <fieldset class="chips" data-mode="multi" data-field="interests">
             <legend class="field-label">¿Qué te urge resolver?</legend>
             <div class="chip-row">
               <button type="button" class="chip">Visitas</button>
@@ -157,7 +157,7 @@ import { SITE } from '../site';
             </div>
           </fieldset>
 
-          <fieldset class="chips" data-mode="single">
+          <fieldset class="chips" data-mode="single" data-field="preferred_slot">
             <legend class="field-label">Franja preferida</legend>
             <div class="chip-row slots">
               <button type="button" class="chip slot" data-franja="manana">Mañana</button>
@@ -166,6 +166,11 @@ import { SITE } from '../site';
             </div>
           </fieldset>
 
+          <label class="honeypot" aria-hidden="true">
+            Sitio web
+            <input type="text" name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <p class="form-error" role="alert" hidden></p>
           <button type="submit" class="submit">
             Agendar mi demo
             <svg viewBox="0 0 16 16" width="15" height="15" fill="none" aria-hidden="true">
@@ -220,7 +225,17 @@ import { SITE } from '../site';
 </Layout>
 
 <script>
+  import { honeypotValue, submitLead } from '../scripts/leads';
+
   const form = document.querySelector<HTMLFormElement>('form.panel');
+  const errorEl = form?.querySelector<HTMLElement>('.form-error');
+  const submitButton = form?.querySelector<HTMLButtonElement>('.submit');
+
+  /** Selected chip values for a fieldset, from data-value or the label text. */
+  const chipValues = (field: string) =>
+    Array.from(form?.querySelectorAll<HTMLButtonElement>(`.chips[data-field="${field}"] .chip.on`) ?? [])
+      .map((chip) => chip.dataset.value ?? chip.dataset.franja ?? chip.textContent?.trim() ?? '')
+      .filter(Boolean);
 
   // Chip groups: single-select behaves like radios, multi-select like checkboxes.
   form?.querySelectorAll<HTMLFieldSetElement>('.chips').forEach((group) => {
@@ -247,13 +262,33 @@ import { SITE } from '../site';
 
   let slot = new Date();
 
-  form?.addEventListener('submit', (e) => {
+  form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = form.querySelector<HTMLInputElement>('input[name="correo"]');
-    if (!email?.value || !email.checkValidity()) {
-      email?.reportValidity();
+    if (!form.reportValidity()) return;
+    const value = (name: string) => form.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value.trim() ?? '';
+    if (errorEl) errorEl.hidden = true;
+    if (submitButton) submitButton.disabled = true;
+    try {
+      await submitLead(form.dataset.api!, {
+        source: 'demo',
+        name: value('nombre'),
+        email: value('correo'),
+        phone: value('telefono') || undefined,
+        organization: value('organizacion') || undefined,
+        units_range: chipValues('units_range')[0],
+        interests: chipValues('interests'),
+        preferred_slot: chipValues('preferred_slot')[0],
+        website: honeypotValue(form),
+      });
+    } catch (error) {
+      if (errorEl) {
+        errorEl.textContent = error instanceof Error ? error.message : 'No pudimos enviar tu solicitud.';
+        errorEl.hidden = false;
+      }
+      if (submitButton) submitButton.disabled = false;
       return;
     }
+    if (submitButton) submitButton.disabled = false;
     slot = proposedSlot();
     const label = new Intl.DateTimeFormat('es-PE', {
       weekday: 'long',
@@ -613,6 +648,34 @@ import { SITE } from '../site';
 
   .submit:hover {
     background: var(--gold-light);
+  }
+
+  .submit:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  /* Off-screen rather than display:none so autofill bots still see it. */
+  .honeypot {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form-error {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fdecec;
+    border: 1px solid #f3b9b9;
+    color: #8a1f1f;
+    font: 400 13.5px/1.5 var(--font-instrument);
+  }
+
+  .form-error[hidden] {
+    display: none;
   }
 
   .disclaimer {

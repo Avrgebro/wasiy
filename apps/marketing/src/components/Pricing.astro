@@ -174,11 +174,17 @@ const ctaHref = (href: string) => (href.startsWith('/registro') ? `${APP_URL}${h
     cursor: pointer;
   }
 
-  .action.outline,
+  /* Same treatment as the header's Acceder button. */
+  .action.outline {
+    color: var(--teal);
+    border: 1.5px solid var(--card-border);
+    background: var(--white);
+  }
+
   .action.outline:hover {
     color: var(--teal);
-    border: 1.5px solid var(--teal);
-    background: transparent;
+    border-color: var(--teal);
+    background: var(--white);
   }
 
   .featured .action.outline,

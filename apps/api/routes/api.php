@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UnitMembershipController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\VisitController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +47,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/public/plans', [RegistrationController::class, 'plans']);
+// Marketing forms; the 'leads' limiter (AppServiceProvider) throttles by IP.
+Route::post('/public/leads', [LeadController::class, 'store'])->middleware('throttle:leads');
 
 Route::controller(ResidentInvitationController::class)->group(function () {
     Route::get('/resident-invitations/{token}', 'show');
