@@ -4,15 +4,22 @@
  */
 export interface Plan {
   name: string;
-  /** Price as displayed. */
+  /** Price as displayed: the monthly base for the included units. */
   amount: string;
-  /** Unit suffix shown next to the amount; omitted for quote-based tiers. */
+  /** Suffix shown next to the amount; omitted for quote-based tiers. */
   per?: string;
-  /** Numeric price per unit/month, or null when pricing is quote-based. */
+  /** What the base covers and what extra units cost; omitted for quote-based tiers. */
+  includes?: string;
+  /** Numeric base price per month, or null when pricing is quote-based. */
   price: number | null;
   pitch: string;
   features: string[];
   cta: string;
+  /**
+   * Where the CTA goes. A site path for quote-based tiers; for self-serve
+   * tiers the app's /registro route, resolved against APP_URL at build time
+   * by Pricing.astro so stage builds point at the stage app.
+   */
   href: string;
   ctaStyle: 'solid' | 'outline';
   featured?: boolean;
@@ -22,9 +29,10 @@ export interface Plan {
 export const plans: Plan[] = [
   {
     name: 'Esencial',
-    amount: 'S/ 4.50',
-    per: ' / unidad / mes',
-    price: 4.5,
+    amount: 'S/ 45',
+    per: ' / mes',
+    includes: 'Incluye hasta 10 unidades · S/ 4.50 por unidad adicional',
+    price: 45,
     pitch: 'Para un solo edificio que quiere dejar el cuaderno.',
     features: [
       'Registro de visitantes',
@@ -32,15 +40,16 @@ export const plans: Plan[] = [
       'Anuncios',
       'Portal del residente',
     ],
-    cta: 'Agendar demo',
-    href: '/demo',
+    cta: 'Empezar prueba gratis',
+    href: '/registro?plan=esencial',
     ctaStyle: 'outline',
   },
   {
     name: 'Operativo',
-    amount: 'S/ 6.50',
-    per: ' / unidad / mes',
-    price: 6.5,
+    amount: 'S/ 65',
+    per: ' / mes',
+    includes: 'Incluye hasta 10 unidades · S/ 6.50 por unidad adicional',
+    price: 65,
     pitch: 'La operación completa: recepción, reservas y auditoría.',
     features: [
       'Todo lo de Esencial',
@@ -49,8 +58,8 @@ export const plans: Plan[] = [
       'Registro de actividad',
       'Exportaciones CSV',
     ],
-    cta: 'Agendar demo',
-    href: '/demo',
+    cta: 'Empezar prueba gratis',
+    href: '/registro?plan=operativo',
     ctaStyle: 'solid',
     featured: true,
     badge: 'Recomendado',

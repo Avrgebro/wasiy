@@ -162,8 +162,8 @@ return [
     */
 
     'features' => [
-        // Registration stays disabled: every user is provisioned through a
-        // UserInvitation, so there is no legitimate self-signup path.
+        // Generic registration stays disabled: signup must complete the
+        // session-bound OTP and account/location provisioning flow.
         Features::resetPasswords(),
         // Features::emailVerification(),
         Features::updateProfileInformation(),

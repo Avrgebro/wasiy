@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\UnitController;
 use App\Http\Controllers\Api\UnitMembershipController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Api\VisitController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Middleware\EnsureUserIsActive;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +44,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | The emailed token is the credential.
 */
+
+Route::get('/public/plans', [RegistrationController::class, 'plans']);
 
 Route::controller(ResidentInvitationController::class)->group(function () {
     Route::get('/resident-invitations/{token}', 'show');

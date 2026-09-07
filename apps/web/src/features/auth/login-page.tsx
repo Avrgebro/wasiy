@@ -16,25 +16,13 @@ import { useTranslation } from 'react-i18next'
 import { getDefaultAuthenticatedRoute } from './access'
 import { getSafeRedirectPath } from './guards'
 import { useLogin } from './hooks'
+import { authFieldStyles } from './auth-field-styles'
 import { loginSchema, type LoginFormValues } from './schemas'
 import { WasiyLogo } from '../../components/layout/shared/wasiy-logo'
 import { FormPasswordInput, FormTextInput } from '../../components/ui/form-fields'
 import { submitHandlingServerErrors } from '../../lib/errors'
 
 const loginRouteApi = getRouteApi('/login')
-
-/** Mockup metrics: 46px fields, 10px radius, 12.5px/600 muted labels. */
-const fieldStyles = {
-  label: {
-    fontSize: 12.5,
-    fontWeight: 600,
-    color: 'var(--mantine-color-dimmed)',
-    marginBottom: 7,
-    width: '100%',
-  },
-  input: { height: 46, borderRadius: 10, fontSize: 14.5 },
-  innerInput: { height: 44, fontSize: 14.5 },
-} as const
 
 /**
  * Oversized Wasiy mark as a background watermark. Same geometry as
@@ -186,7 +174,7 @@ export function LoginPage() {
                 leftSection={<LetterIcon aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />}
                 name="email"
                 placeholder="maria.torres@wasiy.pe"
-                styles={fieldStyles}
+                styles={authFieldStyles}
               />
               <FormPasswordInput
                 autoComplete="current-password"
@@ -201,7 +189,7 @@ export function LoginPage() {
                 }
                 leftSection={<LockPasswordIcon aria-hidden="true" color="var(--mantine-color-placeholder)" size={16} />}
                 name="password"
-                styles={fieldStyles}
+                styles={authFieldStyles}
               />
               <Checkbox
                 color="accent"

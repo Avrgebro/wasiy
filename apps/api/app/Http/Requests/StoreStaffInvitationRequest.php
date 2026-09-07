@@ -32,7 +32,7 @@ class StoreStaffInvitationRequest extends FormRequest
         $account = $this->route('account');
 
         return [
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => ['required', 'string', 'email:rfc,filter', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'account_role' => ['nullable', Rule::enum(AccountRole::class)],

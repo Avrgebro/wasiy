@@ -1,15 +1,19 @@
 ---
 import { plans } from '../data/plans';
+import { APP_URL } from '../site';
+
+/** Self-serve tiers register in the app; everything else stays on this site. */
+const ctaHref = (href: string) => (href.startsWith('/registro') ? `${APP_URL}${href}` : href);
 ---
 
 <section id="precios">
   <div class="inner">
     <div class="intro">
       <div class="kicker">Precios</div>
-      <h2>Por unidad, por mes. Sin letra chica.</h2>
+      <h2>Un precio base por edificio. Sin letra chica.</h2>
       <p>
-        Pagas por las unidades que tiene el edificio. Sin licencias por usuario y sin módulos
-        que se cobran aparte.
+        Cada plan incluye hasta 10 unidades. Si tu edificio tiene más, pagas solo por las
+        adicionales. Sin licencias por usuario y sin módulos que se cobran aparte.
       </p>
     </div>
 
@@ -23,13 +27,14 @@ import { plans } from '../data/plans';
               <span class="amount">{plan.amount}</span>
               {plan.per && <span class="per">{plan.per}</span>}
             </div>
+            {plan.includes && <div class="includes">{plan.includes}</div>}
             <div class="pitch">{plan.pitch}</div>
             <div class="features">
               {plan.features.map((feature) => (
                 <span>✓ {feature}</span>
               ))}
             </div>
-            <a class:list={['action', plan.ctaStyle]} href={plan.href}>
+            <a class:list={['action', plan.ctaStyle]} href={ctaHref(plan.href)}>
               {plan.cta}
             </a>
           </div>
@@ -128,6 +133,12 @@ import { plans } from '../data/plans';
     color: var(--muted);
   }
 
+  .includes {
+    margin-top: -8px;
+    font: 500 13px var(--font-instrument);
+    color: var(--teal-mid);
+  }
+
   .pitch {
     font: 400 13.5px var(--font-instrument);
     color: var(--muted);
@@ -148,6 +159,7 @@ import { plans } from '../data/plans';
   }
 
   .featured .per,
+  .featured .includes,
   .featured .pitch {
     color: var(--teal-pale);
   }

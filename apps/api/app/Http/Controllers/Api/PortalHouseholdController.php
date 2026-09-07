@@ -63,7 +63,7 @@ class PortalHouseholdController extends Controller
             'first_name' => ['required', 'string', 'max:120'],
             'last_name' => ['required', 'string', 'max:120'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:40'],
-            'email' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'email' => ['sometimes', 'nullable', 'email:rfc,filter', 'max:255'],
             'resident_type' => ['required', Rule::in(array_map(fn (ResidentType $type) => $type->value, self::PORTAL_TYPES))],
         ]);
         $unit = Unit::query()->with('location')->findOrFail($validated['unit_id']);

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes-admin/__root'
+import { Route as RegistroRouteImport } from './routes-admin/registro'
 import { Route as NoAccessRouteImport } from './routes-admin/no-access'
 import { Route as LoginRouteImport } from './routes-admin/login'
 import { Route as AuthenticatedRouteImport } from './routes-admin/_authenticated'
@@ -35,6 +36,11 @@ import { Route as AuthenticatedAdminRegistryResidentsRouteImport } from './route
 import { Route as AuthenticatedAdminLocationsLocationIdRouteImport } from './routes-admin/_authenticated/admin/locations_.$locationId'
 import { Route as AuthenticatedAdminRegistryUnitsUnitIdRouteImport } from './routes-admin/_authenticated/admin/registry/units_.$unitId'
 
+const RegistroRoute = RegistroRouteImport.update({
+  id: '/registro',
+  path: '/registro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
   path: '/no-access',
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/registro': typeof RegistroRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/registro': typeof RegistroRoute
   '/select-account': typeof AuthenticatedSelectAccountRoute
   '/admin/activity': typeof AuthenticatedAdminActivityRoute
   '/admin/announcements': typeof AuthenticatedAdminAnnouncementsRoute
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/registro': typeof RegistroRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/select-account': typeof AuthenticatedSelectAccountRoute
   '/_authenticated/admin/activity': typeof AuthenticatedAdminActivityRoute
@@ -261,6 +270,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/no-access'
+    | '/registro'
     | '/admin'
     | '/select-account'
     | '/admin/activity'
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/no-access'
+    | '/registro'
     | '/select-account'
     | '/admin/activity'
     | '/admin/announcements'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/no-access'
+    | '/registro'
     | '/_authenticated/admin'
     | '/_authenticated/select-account'
     | '/_authenticated/admin/activity'
@@ -341,11 +353,19 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
+  RegistroRoute: typeof RegistroRoute
   InvitationsStaffTokenRoute: typeof InvitationsStaffTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/registro': {
+      id: '/registro'
+      path: '/registro'
+      fullPath: '/registro'
+      preLoaderRoute: typeof RegistroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/no-access': {
       id: '/no-access'
       path: '/no-access'
@@ -595,6 +615,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
+  RegistroRoute: RegistroRoute,
   InvitationsStaffTokenRoute: InvitationsStaffTokenRoute,
 }
 export const routeTree = rootRouteImport

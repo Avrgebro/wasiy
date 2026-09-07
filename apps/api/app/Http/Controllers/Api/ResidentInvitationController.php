@@ -36,7 +36,7 @@ class ResidentInvitationController extends Controller
         InviteResidentUser $inviteResidentUser,
     ): JsonResponse {
         $validated = $request->validate([
-            'email' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'email' => ['sometimes', 'nullable', 'email:rfc,filter', 'max:255'],
         ]);
 
         /** @var User $actor */

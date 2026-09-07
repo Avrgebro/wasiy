@@ -210,7 +210,7 @@ class ResidentController extends Controller
             'first_name' => ['sometimes', 'required', 'string', 'max:255'],
             'last_name' => ['sometimes', 'required', 'string', 'max:255'],
             'phone' => ['sometimes', ...PhoneNumber::rules($country)],
-            'email' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'email' => ['sometimes', 'nullable', 'email:rfc,filter', 'max:255'],
             'status' => ['sometimes', 'required', Rule::enum(RegistryStatus::class)],
         ]);
         if (array_key_exists('phone', $validated)) {
@@ -287,7 +287,7 @@ class ResidentController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'email' => ['sometimes', 'nullable', 'email', 'max:255'],
+            'email' => ['sometimes', 'nullable', 'email:rfc,filter', 'max:255'],
             // A person enters a location through a unit; without one the
             // location-scoped directory could never list them (M11).
             'memberships' => ['required', 'array', 'min:1'],

@@ -35,6 +35,22 @@ function createAccountAdmin(Account $account): User
     return $admin;
 }
 
+it('rejects an invitation email without a dotted domain', function () {
+    $account = Account::factory()->create();
+    $admin = createAccountAdmin($account);
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/staff/invitations", [
+            'email' => 'jose@wasiy',
+            'first_name' => 'Jose',
+            'last_name' => 'Bejarano',
+            'account_role' => null,
+            'location_assignments' => [],
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('email');
+});
+
 test('account admins can invite staff users with location assignments', function () {
     config(['wasiy.invitations.staff_expires_days' => 21]);
 

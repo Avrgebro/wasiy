@@ -42,7 +42,7 @@ class UpdateLocationRequest extends FormRequest
             'postal_code' => ['sometimes', 'nullable', 'string', 'max:32'],
             'country' => ['sometimes', 'string', 'size:2', 'alpha'],
             'phone' => ['sometimes', ...PhoneNumber::rules((string) $this->input('country', $this->route('location')?->country ?? PhoneNumber::FALLBACK_COUNTRY))],
-            'contact_email' => ['sometimes', 'nullable', 'string', 'email', 'max:255'],
+            'contact_email' => ['sometimes', 'nullable', 'string', 'email:rfc,filter', 'max:255'],
             'access_notes' => ['sometimes', 'nullable', 'string', 'max:5000'],
         ];
     }
