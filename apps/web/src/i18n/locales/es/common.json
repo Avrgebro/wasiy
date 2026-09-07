@@ -551,7 +551,12 @@
     "dark": "Usar modo oscuro",
     "light": "Usar modo claro",
     "label": "Tema",
-    "auto": "Usar tema del sistema"
+    "auto": "Usar tema del sistema",
+    "choiceLight": "Claro",
+    "choiceDark": "Oscuro",
+    "choiceSystem": "Sistema",
+    "systemHint": "Sistema sigue la preferencia de tu equipo.",
+    "systemHintMobile": "Sistema sigue la preferencia de tu teléfono."
   },
   "validation": {
     "emailInvalid": "Ingresa un correo válido.",

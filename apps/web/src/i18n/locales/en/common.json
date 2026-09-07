@@ -551,7 +551,12 @@
     "dark": "Use dark mode",
     "light": "Use light mode",
     "label": "Theme",
-    "auto": "Use system theme"
+    "auto": "Use system theme",
+    "choiceLight": "Light",
+    "choiceDark": "Dark",
+    "choiceSystem": "System",
+    "systemHint": "System follows your computer’s preference.",
+    "systemHintMobile": "System follows your phone’s preference."
   },
   "validation": {
     "emailInvalid": "Enter a valid email.",
