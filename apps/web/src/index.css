@@ -198,9 +198,36 @@
      2.25rem label + 3px root padding + 1px border per side = 44px. */
   .mantine-SegmentedControl-label {
     display: flex;
+    flex: 1;
     align-items: center;
     justify-content: center;
     min-height: 2.25rem;
+    /* Mantine keeps labels on one line, so a full-width control's minimum
+       width is the sum of its labels; in a flex column that stretched the
+       whole form past the phone's edge (register-visit drawer). Let the
+       control shrink and long labels wrap instead; hyphens only kick in for
+       a word that cannot fit on its own line. */
+    white-space: normal;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+    line-height: 1.2;
+    /* One step down from the md default so ordinary words fit a phone cell
+       whole; Mantine sets --sc-font-size inline, so the label is the place. */
+    font-size: var(--mantine-font-size-sm);
+  }
+
+  /* Narrower side padding so common words fit a phone-width cell unbroken;
+     the flex column makes every label as tall as the tallest, so the
+     indicator covers the whole cell whichever option is active. */
+  .mantine-SegmentedControl-root {
+    --sc-padding-md: 4px 6px;
+    min-width: 0;
+  }
+
+  .mantine-SegmentedControl-control {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 }
 
