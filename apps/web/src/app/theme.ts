@@ -253,6 +253,12 @@ export const mantineTheme: MantineThemeOverride = createTheme({
             }
           : { root: {} },
     }),
+    Input: Input.extend({
+      defaultProps: { size: "md" },
+    }),
+    Button: {
+      defaultProps: { size: "md", radius: "md" },
+    },
   },
   other: {
     style: "mantine",
