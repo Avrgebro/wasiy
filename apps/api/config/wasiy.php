@@ -4,17 +4,15 @@ return [
     'invitations' => [
         'staff_expires_days' => (int) env('WASIY_STAFF_INVITATION_EXPIRES_DAYS', 14),
         'resident_expires_days' => (int) env('WASIY_RESIDENT_INVITATION_EXPIRES_DAYS', 14),
-        // Claim URLs must point at the SPA origin, not APP_URL. The API host
-        // serves no page for these paths.
+        // Staff app origin (ADR 0038). Emails link here for anything on the
+        // staff surface, never APP_URL: the API host serves no pages. Only
+        // hosts vary per environment; the paths are fixed by the SPA's route
+        // tree, so they live here rather than in env.
         'spa_url' => env('WASIY_SPA_URL', 'http://localhost:5174'),
-        'resident_claim_url' => env(
-            'WASIY_RESIDENT_INVITATION_CLAIM_URL',
-            env('WASIY_SPA_URL', 'http://localhost:5174').'/invitations/resident/{token}',
-        ),
-        'staff_claim_url' => env(
-            'WASIY_STAFF_INVITATION_CLAIM_URL',
-            env('WASIY_SPA_URL', 'http://localhost:5174').'/invitations/staff/{token}',
-        ),
+        'staff_claim_url' => rtrim(env('WASIY_SPA_URL', 'http://localhost:5174'), '/').'/invitations/staff/{token}',
+        // The resident claim page ships in the portal build, so its link
+        // takes the portal host.
+        'resident_claim_url' => rtrim(env('WASIY_PORTAL_URL', 'http://localhost:5175'), '/').'/invitations/resident/{token}',
     ],
     'marketing' => [
         // Public site the email logo and footer link to. Defaults to the local
@@ -22,7 +20,8 @@ return [
         'url' => env('WASIY_MARKETING_URL', 'http://localhost:4321'),
     ],
     'portal' => [
-        // Where alert emails send residents (mockup 03d "Ver reserva").
+        // Resident portal origin (ADR 0038): alert emails and the resident
+        // invitation link here.
         'url' => env('WASIY_PORTAL_URL', 'http://localhost:5175'),
     ],
     'alerts' => [

@@ -86,7 +86,7 @@ The backend is complete. This slice makes the emailed link land somewhere real a
 
 Backend:
 
-- Point `WASIY_RESIDENT_INVITATION_CLAIM_URL` at the SPA origin, not `APP_URL`. The current default resolves to the API host at a path defined in neither `routes/web.php` nor the SPA route tree. Add it to `.env.example` with the SPA origin and document the production value.
+- ~~Point `WASIY_RESIDENT_INVITATION_CLAIM_URL` at the SPA origin, not `APP_URL`.~~ Done differently: claim links are derived in `config/wasiy.php` from `WASIY_SPA_URL` (staff) and `WASIY_PORTAL_URL` (resident); the per-link override keys no longer exist.
 - In `ClaimResidentInvitation`, authenticate the user after the invitation is marked accepted and regenerate the session.
 - Return the same payload `MeController` produces so the SPA can seed its session cache.
 

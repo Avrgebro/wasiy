@@ -8,6 +8,7 @@ use App\Models\Account;
 use App\Models\Location;
 use App\Models\User;
 use App\Models\UserInvitation;
+use App\Notifications\ResidentInvitationNotification;
 use App\Notifications\StaffInvitationNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -87,4 +88,34 @@ test('the public invitation endpoints are rate limited per IP', function () {
     }
 
     $this->getJson('/api/staff-invitations/unknown-token')->assertTooManyRequests();
+});
+
+test('each invitation links to its own surface host', function () {
+    config()->set('wasiy.invitations.staff_claim_url', 'https://app.wasiy.test/invitations/staff/{token}');
+    config()->set('wasiy.invitations.resident_claim_url', 'https://portal.wasiy.test/invitations/resident/{token}');
+
+    $account = Account::factory()->create();
+    $staff = staffInvitation($account, ['account_role' => AccountRole::AccountAdmin->value, 'location_assignments' => []]);
+
+    $staffHtml = (string) (new StaffInvitationNotification($staff, 'staff-token'))->toMail(new AnonymousNotifiable)->render();
+    expect($staffHtml)->toContain('href="https://app.wasiy.test/invitations/staff/staff-token"');
+
+    $resident = UserInvitation::query()->create([
+        'account_id' => $account->id,
+        'email' => 'vecina@wasiy.test',
+        'first_name' => 'Vecina',
+        'last_name' => 'Nueva',
+        'token_hash' => hash('sha256', 'other'),
+        'purpose' => UserInvitationPurpose::Resident,
+        'status' => UserInvitationStatus::Pending,
+        'expires_at' => now()->addDays(14),
+    ]);
+
+    $residentHtml = (string) (new ResidentInvitationNotification($resident, 'resident-token'))->toMail(new AnonymousNotifiable)->render();
+    expect($residentHtml)->toContain('https://portal.wasiy.test/invitations/resident/resident-token');
+});
+
+test('the default claim links are built from the staff and portal hosts', function () {
+    expect(config('wasiy.invitations.staff_claim_url'))->toBe(config('wasiy.invitations.spa_url').'/invitations/staff/{token}')
+        ->and(config('wasiy.invitations.resident_claim_url'))->toBe(config('wasiy.portal.url').'/invitations/resident/{token}');
 });
