@@ -33,8 +33,8 @@ return [
         'notify_email' => env('WASIY_LEADS_NOTIFY_EMAIL', 'hola@wasiy.co'),
     ],
     'billing' => [
-        // Payment proofs: bank documents, so a private disk streamed through the API.
-        'proofs_disk' => env('WASIY_PROOFS_DISK', 'local'),
+        // Payment proofs are bank documents: stored on the default disk and
+        // streamed only through the authenticated API, never as public URLs.
         'proof_max_file_kb' => (int) env('WASIY_PROOF_MAX_FILE_KB', 10240),
         // Where the team hears about proofs to review.
         'review_email' => env('WASIY_BILLING_REVIEW_EMAIL', env('WASIY_LEADS_NOTIFY_EMAIL', 'hola@wasiy.co')),
@@ -54,7 +54,6 @@ return [
         'plin' => ['number' => env('WASIY_BILLING_PLIN_NUMBER'), 'holder' => env('WASIY_BILLING_HOLDER', 'Wasiy SAC')],
     ],
     'photos' => [
-        'disk' => env('WASIY_PHOTO_DISK', 'local'),
         // JPG and PNG at up to 10 MB, per the dropzone contract in the
         // mockups; Laravel stays authoritative regardless of the dropzone.
         'max_file_kb' => (int) env('WASIY_PHOTO_MAX_FILE_KB', 10240),

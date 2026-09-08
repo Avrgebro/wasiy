@@ -31,7 +31,9 @@ class StorePhoto
                 ]);
             }
 
-            $disk = (string) config('wasiy.photos.disk');
+            // Every upload lands on the app's default disk (FILESYSTEM_DISK);
+            // the row records which one so reads survive a later switch.
+            $disk = (string) config('filesystems.default');
             $path = $file->storePubliclyAs(
                 "photos/{$account->id}",
                 Str::ulid()->toBase32().'.'.$file->extension(),

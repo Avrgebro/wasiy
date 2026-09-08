@@ -143,7 +143,7 @@ class DemoLocationsSeeder extends Seeder
             return;
         }
 
-        $disk = (string) config('wasiy.photos.disk');
+        $disk = (string) config('filesystems.default');
         $path = "photos/{$owner->account_id}/".Str::ulid()->toBase32().'.jpg';
 
         [$red, $green, $blue] = sscanf($hexColor, '#%02x%02x%02x');

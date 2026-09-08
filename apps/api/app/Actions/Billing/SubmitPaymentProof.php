@@ -30,7 +30,8 @@ class SubmitPaymentProof
                 throw ValidationException::withMessages(['file' => 'Esta factura ya está en revisión o pagada.']);
             }
 
-            $disk = (string) config('wasiy.billing.proofs_disk');
+            // Default disk (FILESYSTEM_DISK), recorded on the row like photos.
+            $disk = (string) config('filesystems.default');
             $path = $file->storeAs("payment-proofs/{$invoice->account_id}", Str::ulid()->toBase32().'.'.$file->extension(), ['disk' => $disk]);
 
             $proof = $invoice->proofs()->create([
