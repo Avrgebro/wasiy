@@ -879,6 +879,40 @@ test('accepting twice is gone', function () {
     $this->postJson("/api/staff-invitations/{$token}/accept", $payload)->assertGone();
 });
 
+test('a new invitee cannot accept while someone else is signed in', function () {
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create();
+    $admin = createAccountAdmin($account);
+    $someoneElse = User::factory()->create();
+
+    $token = inviteStaffAndCaptureToken($account, $admin, [
+        'email' => 'fresh@wasiy.test',
+        'first_name' => 'Fresh',
+        'last_name' => 'Hire',
+        'account_role' => null,
+        'location_assignments' => [
+            ['location_id' => $location->id, 'role' => LocationRole::FrontDesk->value],
+        ],
+    ]);
+
+    $payload = [
+        'password' => 'a-strong-password',
+        'password_confirmation' => 'a-strong-password',
+    ];
+
+    $this->actingAs($someoneElse)
+        ->postJson("/api/staff-invitations/{$token}/accept", $payload)
+        ->assertStatus(409);
+
+    $this->assertDatabaseMissing('users', ['email' => 'fresh@wasiy.test']);
+    expect(UserInvitation::query()->where('email', 'fresh@wasiy.test')->sole()->status)->toBe(UserInvitationStatus::Pending);
+
+    $this->app['auth']->forgetGuards();
+
+    // With the other session gone the same link works.
+    $this->postJson("/api/staff-invitations/{$token}/accept", $payload)->assertOk();
+});
+
 test('an existing user must be signed in as themselves to accept', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();

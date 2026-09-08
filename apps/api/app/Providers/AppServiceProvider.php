@@ -44,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
             Limit::perDay(20)->by('leads-day:'.$request->ip()),
         ]);
 
+        // Invitation lookups and accepts are unauthenticated and keyed by an
+        // emailed token; the token is unguessable, so this only caps abuse
+        // (hashing passwords, hammering the token lookup) per IP.
+        RateLimiter::for('invitations', fn (Request $request) => Limit::perMinute(20)->by('invitations:'.$request->ip()));
+
         // Case- and accent-insensitive substring search over the given SQL
         // expressions, with LIKE wildcards in the term escaped. Single owner
         // of the escaping rule for every list endpoint and the spotlight.

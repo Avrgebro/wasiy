@@ -560,6 +560,7 @@
     "systemHintMobile": "System follows your phone’s preference."
   },
   "validation": {
+    "nameTooLong": "Must be at most 255 characters.",
     "emailInvalid": "Enter a valid email.",
     "passwordTooLong": "The password must be at most 72 bytes.",
     "termsRequired": "Accept the terms to continue.",
@@ -611,6 +612,14 @@
     "timeRequired": "Pick the time."
   },
   "invitations": {
+    "passwordPlaceholder": "At least 8 characters",
+    "accountEmail": "Your access will be tied to {{email}}.",
+    "acceptingAs": "You will accept as {{email}}.",
+    "wrongAccountBodySignedInAs": "This invitation is for {{email}}, but you are signed in as {{current}}. Sign out and sign back in with the invited address to accept it.",
+    "expiresOn": "This link expires on {{date}}.",
+    "skippedLocations_one": "One location in the invitation no longer exists; the rest of the access was granted.",
+    "skippedLocations_other": "{{count}} locations in the invitation no longer exist; the rest of the access was granted.",
+    "alreadyHaveAccess": "Already have access to Wasiy?",
     "residentTitle": "Activate your resident portal",
     "residentIntro": "You have been invited to the {{account}} resident portal as {{name}}. Choose a password to activate your access.",
     "newPassword": "Create a password",

@@ -55,14 +55,17 @@ Route::get('/public/plans', [RegistrationController::class, 'plans']);
 // Marketing forms; the 'leads' limiter (AppServiceProvider) throttles by IP.
 Route::post('/public/leads', [LeadController::class, 'store'])->middleware('throttle:leads');
 
-Route::controller(ResidentInvitationController::class)->group(function () {
-    Route::get('/resident-invitations/{token}', 'show');
-    Route::post('/resident-invitations/{token}/claim', 'claim');
-});
+// The 'invitations' limiter (AppServiceProvider) throttles by IP.
+Route::middleware('throttle:invitations')->group(function () {
+    Route::controller(ResidentInvitationController::class)->group(function () {
+        Route::get('/resident-invitations/{token}', 'show');
+        Route::post('/resident-invitations/{token}/claim', 'claim');
+    });
 
-Route::controller(StaffInvitationController::class)->group(function () {
-    Route::get('/staff-invitations/{token}', 'show');
-    Route::post('/staff-invitations/{token}/accept', 'accept');
+    Route::controller(StaffInvitationController::class)->group(function () {
+        Route::get('/staff-invitations/{token}', 'show');
+        Route::post('/staff-invitations/{token}/accept', 'accept');
+    });
 });
 
 Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function () {

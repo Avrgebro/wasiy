@@ -62,6 +62,13 @@ class AcceptStaffInvitation
                     throw InvitationException::belongsToAnotherUser();
                 }
             } else {
+                // Someone else's session is open on this browser: creating the
+                // invitee's user would silently swap that session for theirs.
+                // Make them end it first, as the existing-user path does.
+                if ($authenticatedUser !== null) {
+                    throw InvitationException::belongsToAnotherUser();
+                }
+
                 $user = $this->createUser->handle(
                     $invitation,
                     $data['first_name'] ?? $invitation->first_name,

@@ -80,3 +80,11 @@ test('a superadmin invitation shows the role without a locations row', function 
         ->not->toContain('Ubicaci')
         ->not->toContain('{{');
 });
+
+test('the public invitation endpoints are rate limited per IP', function () {
+    foreach (range(1, 20) as $attempt) {
+        $this->getJson('/api/staff-invitations/unknown-token')->assertGone();
+    }
+
+    $this->getJson('/api/staff-invitations/unknown-token')->assertTooManyRequests();
+});

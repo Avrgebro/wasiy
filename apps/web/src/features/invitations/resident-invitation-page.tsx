@@ -1,14 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button } from '@mantine/core'
+import { Alert } from '@mantine/core'
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useClaimResidentInvitation, useResidentInvitation } from './hooks'
 import {
   InvitationLoading,
+  InvitationHeader,
   InvitationShell,
+  InvitationSubmit,
   InvitationUnavailable,
 } from './invitation-shell'
+import { authFieldStyles } from '../auth/auth-field-styles'
 import { postInvitationRoute } from './post-invitation-route'
 import {
   claimInvitationSchema,
@@ -57,16 +60,13 @@ export function ResidentInvitationPage({ token }: { token: string }) {
   return (
     <InvitationShell>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <h1 className="text-2xl font-bold text-[var(--mantine-color-text)]">
-          {t('invitations.residentTitle')}
-        </h1>
-        <p className="mt-2 text-sm text-[var(--mantine-color-dimmed)]">
+        <InvitationHeader title={t('invitations.residentTitle')}>
           {t('invitations.residentIntro', {
             account: invitation.account.name,
             name: invitation.resident.name,
           })}
-        </p>
-        <div className="mt-5 grid gap-4">
+        </InvitationHeader>
+        <div className="mt-6 grid gap-4">
           {rootError ? (
             <Alert color="error" title={t('invitations.claimFailed')}>
               {rootError}
@@ -77,16 +77,22 @@ export function ResidentInvitationPage({ token }: { token: string }) {
             control={form.control}
             label={t('invitations.newPassword')}
             name="password"
+            placeholder={t('invitations.passwordPlaceholder')}
+            styles={authFieldStyles}
           />
           <FormPasswordInput
             autoComplete="new-password"
             control={form.control}
             label={t('invitations.confirmPassword')}
             name="passwordConfirmation"
+            styles={authFieldStyles}
           />
-          <Button loading={claimMutation.isPending} type="submit">
+          <InvitationSubmit loading={claimMutation.isPending} type="submit">
             {t('invitations.activateAccess')}
-          </Button>
+          </InvitationSubmit>
+          <p className="m-0 text-center text-[13px] text-[var(--mantine-color-dimmed)]">
+            {t('invitations.accountEmail', { email: invitation.email })}
+          </p>
         </div>
       </form>
     </InvitationShell>
