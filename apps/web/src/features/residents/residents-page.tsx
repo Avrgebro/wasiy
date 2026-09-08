@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { DataTable } from '../../components/table/data-table'
+import { openRowColumn } from '../../components/table/open-row-column'
 import { TintChip } from '../../components/ui/chips'
 import { FilterButton } from '../../components/table/filter-button'
 import { TableToolbar } from '../../components/table/table-toolbar'
@@ -146,7 +147,7 @@ function ResidentsContent({
         <TintChip color={row.original.status === 'active' ? 'success' : 'gray'}>{t(`registry.statuses.${row.original.status}`)}</TintChip>
       ),
     },
-    { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span> },
+    openRowColumn(),
   ]
 
   return (

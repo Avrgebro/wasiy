@@ -10,6 +10,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
+import { openRowColumn } from '../../components/table/open-row-column'
 import { TintChip } from '../../components/ui/chips'
 import { StatCard } from '../../components/ui/stat-card'
 import { getErrorMessage } from '../../lib/errors'
@@ -198,12 +199,7 @@ function FinancesContent({
         <TintChip color={statusColor(row.original.status)}>{statusLabel(row.original, t)}</TintChip>
       ),
     },
-    {
-      id: 'open',
-      header: '',
-      meta: { className: 'w-6 text-right' },
-      cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span>,
-    },
+    openRowColumn(),
   ]
 
   return (

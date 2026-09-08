@@ -1,7 +1,7 @@
-import { ActionIcon, Menu, Text } from '@mantine/core'
-import { MenuDotsIcon } from '@solar-icons/react/linear'
+import { Text } from '@mantine/core'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslation } from 'react-i18next'
+import { openRowColumn } from '../../components/table/open-row-column'
 import { accountRoles } from '../auth/access'
 import type { StaffSummary } from './api'
 import {
@@ -10,19 +10,12 @@ import {
   StaffName,
   StaffStatusBadge,
 } from './staff-row-parts'
-import { staffStatus } from './staff-status'
 
-export function useStaffColumns({
-  meUserId,
-  onDeactivate,
-  onEdit,
-  onReactivate,
-}: {
-  meUserId: string
-  onDeactivate: (staff: StaffSummary) => void
-  onEdit: (staff: StaffSummary) => void
-  onReactivate: (staff: StaffSummary) => void
-}): ColumnDef<StaffSummary>[] {
+/**
+ * Rows carry no per-row menu: clicking one opens the access drawer, which
+ * holds edit, deactivate and reactivate like every other list in the app.
+ */
+export function useStaffColumns({ meUserId }: { meUserId: string }): ColumnDef<StaffSummary>[] {
   const { t } = useTranslation('common')
 
   return [
@@ -53,40 +46,6 @@ export function useStaffColumns({
       header: t('registry.status'),
       cell: ({ row }) => <StaffStatusBadge staff={row.original} />,
     },
-    {
-      id: 'actions',
-      header: () => null,
-      meta: { className: 'w-12' },
-      cell: ({ row }) => {
-        const staff = row.original
-        const deactivated = staffStatus(staff) === 'deactivated'
-
-        return (
-          <Menu position="bottom-end" withinPortal>
-            <Menu.Target>
-              <ActionIcon aria-label={t('staff.actions')} color="gray" variant="subtle">
-                <MenuDotsIcon size={16} style={{ transform: 'rotate(90deg)' }} />
-              </ActionIcon>
-            </Menu.Target>
-            <Menu.Dropdown>
-              {deactivated ? (
-                <Menu.Item onClick={() => onReactivate(staff)}>
-                  {t('staff.reactivate')}
-                </Menu.Item>
-              ) : (
-                <>
-                  <Menu.Item onClick={() => onEdit(staff)}>{t('staff.editAccess')}</Menu.Item>
-                  {staff.id === meUserId ? null : (
-                    <Menu.Item color="error" onClick={() => onDeactivate(staff)}>
-                      {t('staff.deactivate')}
-                    </Menu.Item>
-                  )}
-                </>
-              )}
-            </Menu.Dropdown>
-          </Menu>
-        )
-      },
-    },
+    openRowColumn(),
   ]
 }

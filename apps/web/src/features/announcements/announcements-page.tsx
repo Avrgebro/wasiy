@@ -8,6 +8,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
+import { openRowColumn } from '../../components/table/open-row-column'
 import { QuickFilters } from '../../components/table/quick-filters'
 import { SearchInput } from '../../components/table/search-input'
 import { TableToolbar } from '../../components/table/table-toolbar'
@@ -126,7 +127,7 @@ function AnnouncementsContent({ canManage, locationId, locationName, timezone }:
         </Text>
       ),
     },
-    { id: 'open', header: '', meta: { className: 'w-6 text-right' }, cell: () => <span className="text-[15px] text-[var(--wa-text-3)]">›</span> },
+    openRowColumn(),
   ]
 
   return (

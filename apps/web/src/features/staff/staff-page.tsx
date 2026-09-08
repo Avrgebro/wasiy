@@ -99,12 +99,7 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
     },
   })
 
-  const columns = useStaffColumns({
-    meUserId: me.user.id,
-    onDeactivate: setDeactivating,
-    onEdit: openEdit,
-    onReactivate: (staff) => reactivateMutation.mutate(staff),
-  })
+  const columns = useStaffColumns({ meUserId: me.user.id })
 
   const rows = listQuery.data?.data ?? []
   const isFiltered = Boolean(search.search || search.role || search.location_id || search.status)
@@ -147,8 +142,10 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
         loading={listQuery.isLoading}
         meta={listQuery.data?.meta}
         rowClassName={staffRowClassName}
+        selectedId={drawerOpened ? editing?.id : null}
         toolbar={<StaffFilters locations={locationOptions} search={search} onChange={updateSearch} />}
         onPageChange={(page) => updateSearch({ page })}
+        onRowClick={openEdit}
       />
 
       <StaffAccessDrawer
@@ -165,6 +162,15 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
               }
             : undefined
         }
+        onReactivate={
+          editing && editing.deactivated_at
+            ? () => {
+                setDrawerOpened(false)
+                reactivateMutation.mutate(editing)
+              }
+            : undefined
+        }
+        reactivating={reactivateMutation.isPending}
       />
       <StaffDeactivateModal
         accountId={accountId}

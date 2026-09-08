@@ -689,7 +689,7 @@
     "saveChanges": "Save changes",
     "deactivate": "Deactivate user",
     "deactivateHint": "They will lose access immediately. Their activity history is kept.",
-    "actions": "Actions",
+    "reactivateHint": "Access is restored with the same role and locations they had before.",
     "adminReplacesLocations": "Saving as superadmin will remove the current location assignments.",
     "reactivate": "Reactivate",
     "reactivated": "Access reactivated.",

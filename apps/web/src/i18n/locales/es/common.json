@@ -689,7 +689,7 @@
     "saveChanges": "Guardar cambios",
     "deactivate": "Desactivar usuario",
     "deactivateHint": "Perderá el acceso de inmediato. Su historial de actividad se conserva.",
-    "actions": "Acciones",
+    "reactivateHint": "Se restaura el acceso con el mismo rol y las mismas ubicaciones que tenía.",
     "adminReplacesLocations": "Al guardar como superadmin se quitarán las asignaciones de ubicación actuales.",
     "reactivate": "Reactivar",
     "reactivated": "Acceso reactivado.",

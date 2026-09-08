@@ -126,7 +126,9 @@ export function StaffAccessDrawer({
   locations,
   onClose,
   onDeactivate,
+  onReactivate,
   opened,
+  reactivating = false,
 }: {
   accountId: string
   editing: StaffSummary | null
@@ -134,7 +136,10 @@ export function StaffAccessDrawer({
   onClose: () => void
   /** Opens the deactivation confirmation; absent for self-edits. */
   onDeactivate?: () => void
+  /** Restores access for a deactivated member; absent while they are active. */
+  onReactivate?: () => void
   opened: boolean
+  reactivating?: boolean
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -361,7 +366,17 @@ export function StaffAccessDrawer({
             </Text>
           ) : null}
         </div>
-        {editing && onDeactivate && !editing.deactivated_at ? (
+        {editing && editing.deactivated_at && onReactivate ? (
+          <DangerZone
+            action={
+              <Button className="w-full" loading={reactivating} variant="default" onClick={onReactivate}>
+                {t('staff.reactivate')}
+              </Button>
+            }
+            description={t('staff.reactivateHint')}
+            title={t('units.form.sensitiveZone')}
+          />
+        ) : editing && onDeactivate && !editing.deactivated_at ? (
           <DangerZone
             action={
               <Button className="w-full" color="error" variant="light" onClick={onDeactivate}>
