@@ -29,6 +29,8 @@
         <env name="TURNSTILE_SECRET" value=""/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="FILESYSTEM_DISK" value="local"/>
+        <env name="WASIY_PHOTO_DISK" value="local"/>
+        <env name="WASIY_PROOFS_DISK" value="local"/>
         <env name="WASIY_EXPORT_DISK" value="local"/>
         <env name="WASIY_IMPORT_DISK" value="local"/>
         <env name="SESSION_DRIVER" value="array"/>
