@@ -3,6 +3,7 @@ import { ArrowDownIcon, CheckCircleIcon, CopyIcon, InfoCircleIcon, WalletIcon } 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SectionCard, SectionCardFooter } from '../../components/ui/section-card'
 import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
 import { notifyError, notifySuccess } from '../../lib/notify'
@@ -58,25 +59,8 @@ export function SubscriptionPage({ onConfirmPayment }: { onConfirmPayment?: (inv
         </>
       ) : null}
       <ConfirmPaymentDrawer invoice={confirming} onClose={() => setConfirming(null)} />
-      {data ? <ChangeUnitsDrawer key={`${data.subscription.billable_units}-${changingUnits}`} data={data} onClose={() => setChangingUnits(false)} opened={changingUnits} /> : null}
+      {data ? <ChangeUnitsDrawer data={data} onClose={() => setChangingUnits(false)} opened={changingUnits} /> : null}
     </div>
-  )
-}
-
-function Card({ children, title, actions, description, className = '' }: { children: ReactNode; title?: ReactNode; actions?: ReactNode; description?: ReactNode; className?: string }) {
-  return (
-    <section className={`rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5 ${className}`}>
-      {title ? (
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-          <div className="min-w-0">
-            <h2 className="m-0 text-base font-bold text-[var(--mantine-color-text)]">{title}</h2>
-            {description ? <p className="mt-1 mb-0 text-sm text-[var(--mantine-color-dimmed)]">{description}</p> : null}
-          </div>
-          {actions ? <div className="shrink-0">{actions}</div> : null}
-        </div>
-      ) : null}
-      {children}
-    </section>
   )
 }
 
@@ -107,22 +91,22 @@ function StateCard({ data, onSeeInvoice }: { data: SubscriptionPageData; onSeeIn
   }[kind]
 
   return (
-    <Card className={`border-l-4 ${{ accent: 'border-l-[var(--wa-accent)]', success: 'border-l-[var(--wa-success)]', error: 'border-l-[var(--wa-error)]' }[tone]}`}>
+    <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
       <div className="flex flex-wrap items-center gap-2">
         <Badge color={tone} radius="xl" size="md" variant="light">{pill}</Badge>
         <span className="text-xs text-[var(--mantine-color-dimmed)]">{kicker}</span>
       </div>
-      <p className="m-0 mt-3 font-display text-2xl font-bold tracking-tight text-[var(--mantine-color-text)]">{headline}</p>
-      <p className="m-0 mt-2 text-sm leading-relaxed text-[var(--mantine-color-dimmed)]">{body}</p>
+      <p className="m-0 mt-3 font-display text-xl font-semibold tracking-tight text-[var(--mantine-color-text)]">{headline}</p>
+      <p className="m-0 mt-1.5 text-sm leading-relaxed text-[var(--mantine-color-dimmed)]">{body}</p>
       {kind === 'lapsed' && pending ? (
         <Button className="mt-4" color="accent" leftSection={<ArrowDownIcon aria-hidden="true" size={16} />} onClick={onSeeInvoice}>{t('subscription.state.seePendingInvoice')}</Button>
       ) : null}
       {kind === 'trial' && pending ? (
-        <button className="mt-3 inline-flex items-center gap-1 border-0 bg-transparent p-0 text-sm font-semibold text-[var(--wa-teal-text)]" onClick={onSeeInvoice} type="button">
+        <button className="mt-3 inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-sm font-semibold text-[var(--wa-teal-text)]" onClick={onSeeInvoice} type="button">
           {t('subscription.state.seeInvoice')} <ArrowDownIcon aria-hidden="true" size={14} />
         </button>
       ) : null}
-    </Card>
+    </section>
   )
 }
 
@@ -132,19 +116,20 @@ function PlanCard({ data }: { data: SubscriptionPageData }) {
   const { plan } = data
 
   return (
-    <Card title={t('subscription.plan.title')}>
-      <p className="m-0 font-display text-xl font-bold text-[var(--mantine-color-text)]">{plan.name}</p>
-      <p className="m-0 mt-1 flex items-baseline gap-1.5">
-        <span className="font-display text-2xl font-bold text-[var(--mantine-color-text)]">{formatPlanMoney(plan.unit_price_minor, plan.currency)}</span>
-        <span className="text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.plan.perUnit')}</span>
-      </p>
-      <p className="m-0 mt-1 text-sm text-[var(--mantine-color-dimmed)]">{t('subscription.plan.includes', { count: plan.included_units })}</p>
-      <ul className="m-0 mt-4 flex list-none flex-col gap-2 p-0 text-sm text-[var(--mantine-color-text)]">
+    <SectionCard footer={<SectionCardFooter hint={t('subscription.plan.includes', { count: plan.included_units })} />} title={t('subscription.plan.title')}>
+      <div>
+        <p className="m-0 font-display text-xl font-bold text-[var(--mantine-color-text)]">{plan.name}</p>
+        <p className="m-0 mt-1 flex items-baseline gap-1.5">
+          <span className="font-display text-2xl font-bold text-[var(--mantine-color-text)]">{formatPlanMoney(plan.unit_price_minor, plan.currency)}</span>
+          <span className="text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.plan.perUnit')}</span>
+        </p>
+      </div>
+      <ul className="m-0 flex list-none flex-col gap-2 p-0 text-sm text-[var(--mantine-color-text)]">
         {plan.features.map((feature) => (
           <li key={feature} className="flex items-start gap-2"><CheckCircleIcon aria-hidden="true" className="mt-0.5 shrink-0 text-[var(--mantine-color-teal-4)]" size={16} />{feature}</li>
         ))}
       </ul>
-    </Card>
+    </SectionCard>
   )
 }
 
@@ -156,29 +141,28 @@ function BillingCard({ data, onExpand }: { data: SubscriptionPageData; onExpand:
   const currency = plan.currency
 
   return (
-    <Card title={t('subscription.billing.title')}>
+    <SectionCard
+      footer={<SectionCardFooter actions={<Button onClick={onExpand} size="xs" variant="default">{t('subscription.billing.expand')}</Button>} />}
+      title={t('subscription.billing.title')}
+    >
       <dl className="m-0 flex flex-col gap-2 text-sm">
         <Row label={t('subscription.billing.baseLine', { plan: plan.name, count: breakdown.base_units })} value={formatPlanMoney(breakdown.base_minor, currency)} />
         {breakdown.extra_units > 0 ? <Row label={t('subscription.billing.extraLine', { count: breakdown.extra_units, price: formatPlanMoney(plan.unit_price_minor, currency) })} value={formatPlanMoney(breakdown.extra_minor, currency)} /> : null}
         <div className="my-1 h-px bg-[var(--mantine-color-default-border)]" />
         <Row label={<strong className="text-[var(--mantine-color-text)]">{t('subscription.billing.total')}</strong>} value={<strong className="font-display text-lg text-[var(--mantine-color-text)]">{formatPlanMoney(breakdown.total_minor, currency)}</strong>} />
       </dl>
-
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <Stat label={t('subscription.billing.contracted')} value={subscription.billable_units} />
         <Stat label={t('subscription.billing.inUse')} value={subscription.units_in_use} />
       </div>
-      <p className={`m-0 mt-3 flex items-start gap-2 text-sm ${headroom <= 0 ? 'text-[var(--wa-accent)]' : 'text-[var(--mantine-color-dimmed)]'}`}>
+      <p className={`m-0 flex items-start gap-2 text-sm ${headroom <= 0 ? 'text-[var(--wa-accent)]' : 'text-[var(--mantine-color-dimmed)]'}`}>
         {headroom <= 0 ? <InfoCircleIcon aria-hidden="true" className="mt-0.5 shrink-0" size={16} /> : null}
         {headroom <= 0 ? t('subscription.billing.atLimit') : t('subscription.billing.headroom', { count: headroom })}
       </p>
-      <Button className="mt-3 w-full sm:w-auto" onClick={onExpand} variant="default">{t('subscription.billing.expand')}</Button>
       {subscription.pending_billable_units !== null && subscription.pending_units_from ? (
-        <p className="m-0 mt-3 text-xs text-[var(--mantine-color-dimmed)]">
-          {t('subscription.billing.scheduled', { date: formatLongDay(`${subscription.pending_units_from}T12:00:00`), count: subscription.pending_billable_units })}
-        </p>
+        <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.billing.scheduled', { date: formatLongDay(`${subscription.pending_units_from}T12:00:00`), count: subscription.pending_billable_units })}</p>
       ) : null}
-    </Card>
+    </SectionCard>
   )
 }
 
@@ -208,12 +192,21 @@ function HowToPayCard({ data }: { data: SubscriptionPageData }) {
   if (!instructions) return null
 
   return (
-    <Card description={t('subscription.pay.hint')} title={t('subscription.pay.title')}>
+    <SectionCard
+      footer={pending ? (
+        <SectionCardFooter
+          actions={<Copy value={pending.number} />}
+          hint={<>{t('subscription.pay.reference')} <span className="ml-1 font-mono text-sm font-semibold text-[var(--mantine-color-text)]">{pending.number}</span></>}
+        />
+      ) : undefined}
+      headerActions={<span className="text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.pay.hint')}</span>}
+      title={t('subscription.pay.title')}
+    >
       <div className="grid gap-3 md:grid-cols-2">
         {instructions.transfer ? (
           <div className="rounded-inner border border-[var(--mantine-color-default-border)] p-4 md:col-span-2">
             <p className="m-0 flex items-center gap-2 text-sm font-semibold text-[var(--mantine-color-text)]"><WalletIcon aria-hidden="true" size={16} />{t('subscription.pay.transfer')}</p>
-            <dl className="m-0 mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            <dl className="m-0 mt-3 flex flex-col gap-2">
               <Fact label={t('subscription.pay.bank')} value={`${instructions.transfer.bank} · ${instructions.transfer.account_type}`} />
               <Fact copy label={t('subscription.pay.account')} value={instructions.transfer.account_number} />
               {instructions.transfer.cci ? <Fact copy label={t('subscription.pay.cci')} value={instructions.transfer.cci} /> : null}
@@ -224,39 +217,29 @@ function HowToPayCard({ data }: { data: SubscriptionPageData }) {
         {instructions.yape ? <WalletCard holder={instructions.yape.holder} name="Yape" number={instructions.yape.number} /> : null}
         {instructions.plin ? <WalletCard holder={instructions.plin.holder} name="Plin" number={instructions.plin.number} /> : null}
       </div>
-      {pending ? (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-inner bg-[var(--wa-surface-2)] px-4 py-3">
-          <div>
-            <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.pay.reference')}</p>
-            <p className="m-0 font-mono text-base font-semibold text-[var(--mantine-color-text)]">{pending.number}</p>
-          </div>
-          <Copy value={pending.number} />
-        </div>
-      ) : null}
-    </Card>
+    </SectionCard>
   )
 }
 
 function WalletCard({ name, number, holder }: { name: string; number: string; holder: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] p-4">
-      <div>
+    <div className="rounded-inner border border-[var(--mantine-color-default-border)] p-4">
+      <div className="flex items-center justify-between gap-3">
         <p className="m-0 text-sm font-semibold text-[var(--mantine-color-text)]">{name}</p>
-        <p className="m-0 mt-1 font-mono text-base text-[var(--mantine-color-text)]">{number}</p>
-        <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{holder}</p>
+        <Copy value={number} />
       </div>
-      <Copy value={number} />
+      <p className="m-0 mt-2 font-mono text-sm text-[var(--mantine-color-text)]">{number}</p>
+      <p className="m-0 mt-0.5 text-xs text-[var(--mantine-color-dimmed)]">{holder}</p>
     </div>
   )
 }
 
+/** One row: a fixed-width label, the value, and a copy button at the end when the value is meant to be pasted. */
 function Fact({ label, value, copy = false }: { label: string; value: string; copy?: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="min-w-0">
-        <dt className="text-xs text-[var(--mantine-color-dimmed)]">{label}</dt>
-        <dd className={`m-0 text-[var(--mantine-color-text)] ${copy ? 'font-mono' : ''}`}>{value}</dd>
-      </div>
+    <div className="flex items-center gap-3">
+      <dt className="w-14 shrink-0 text-xs text-[var(--mantine-color-dimmed)]">{label}</dt>
+      <dd className={`m-0 min-w-0 flex-1 truncate text-sm text-[var(--mantine-color-text)] ${copy ? 'font-mono' : ''}`}>{value}</dd>
       {copy ? <Copy value={value} /> : null}
     </div>
   )
@@ -267,7 +250,7 @@ function Copy({ value }: { value: string }) {
   return (
     <CopyButton value={value}>
       {({ copied, copy }) => (
-        <Button color={copied ? 'success' : undefined} leftSection={copied ? <CheckCircleIcon aria-hidden="true" size={14} /> : <CopyIcon aria-hidden="true" size={14} />} onClick={copy} size="compact-sm" variant="default">
+        <Button className="shrink-0" color={copied ? 'success' : 'teal'} leftSection={copied ? <CheckCircleIcon aria-hidden="true" size={12} /> : <CopyIcon aria-hidden="true" size={12} />} onClick={copy} size="compact-xs" variant="default">
           {copied ? t('subscription.pay.copied') : t('subscription.pay.copy')}
         </Button>
       )}
@@ -280,8 +263,7 @@ function InvoicesCard({ data, onConfirmPayment, ref }: { data: SubscriptionPageD
   const { t } = useTranslation('common')
 
   return (
-    <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5 scroll-mt-4" ref={ref}>
-      <h2 className="m-0 mb-4 text-base font-bold text-[var(--mantine-color-text)]">{t('subscription.invoices.title')}</h2>
+    <SectionCard className="scroll-mt-4" ref={ref} title={t('subscription.invoices.title')}>
       {data.invoices.length === 0 ? (
         <div className="rounded-inner border border-dashed border-[var(--mantine-color-default-border)] px-4 py-8 text-center">
           <p className="m-0 text-sm font-semibold text-[var(--mantine-color-text)]">{t('subscription.invoices.emptyTitle')}</p>
@@ -292,7 +274,7 @@ function InvoicesCard({ data, onConfirmPayment, ref }: { data: SubscriptionPageD
           {data.invoices.map((invoice) => <InvoiceRow key={invoice.id} invoice={invoice} onConfirmPayment={onConfirmPayment} />)}
         </ul>
       )}
-    </section>
+    </SectionCard>
   )
 }
 
@@ -346,7 +328,11 @@ function ChangePlanCard({ data }: { data: SubscriptionPageData }) {
   })
 
   return (
-    <Card description={t('subscription.changePlan.hint', { count: data.subscription.billable_units })} title={t('subscription.changePlan.title')}>
+    <SectionCard
+      footer={<SectionCardFooter hint={t('subscription.changePlan.portfolio')} />}
+      headerActions={<span className="text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.hint', { count: data.subscription.billable_units })}</span>}
+      title={t('subscription.changePlan.title')}
+    >
       <div className="grid gap-3 sm:grid-cols-2">
         {data.plans.map((plan) => {
           const isRequested = requested?.code === plan.code
@@ -371,8 +357,6 @@ function ChangePlanCard({ data }: { data: SubscriptionPageData }) {
           )
         })}
       </div>
-      {requested ? <p className="m-0 mt-3 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.requestedNote', { plan: requested.name, date: formatLongDay(data.subscription.access_until) })}</p> : null}
-      <p className="m-0 mt-4 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.portfolio')}</p>
-    </Card>
+    </SectionCard>
   )
 }

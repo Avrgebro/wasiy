@@ -24,11 +24,20 @@ export function ChangeUnitsDrawer({ data, opened, onClose }: { data: Subscriptio
   const total = Math.max(value, plan.included_units) * plan.unit_price_minor
   const direction = value > subscription.billable_units ? 'up' : value < subscription.billable_units ? 'down' : 'same'
 
+  // Stays mounted like every drawer so Mantine can animate it; state resets on close.
+  function close() {
+    setUnits(subscription.billable_units)
+    setError('')
+    onClose()
+  }
+
   const mutation = useMutation({
     mutationFn: updateContractedUnits,
     onSuccess: ({ data: next }) => {
       queryClient.setQueryData(subscriptionPageQueryKey, { data: next })
       notifySuccess(t('subscription.units.saved'))
+      setUnits(next.subscription.billable_units)
+      setError('')
       onClose()
     },
     onError: (err) => setError(err instanceof ApiError && err.errors?.units ? err.errors.units.join(' ') : getErrorMessage(err)),
@@ -44,7 +53,7 @@ export function ChangeUnitsDrawer({ data, opened, onClose }: { data: Subscriptio
         : t('subscription.units.same')
 
   return (
-    <AppDrawer onClose={onClose} opened={opened} subtitle={t('subscription.units.subtitle')} title={t('subscription.units.title')} width={480}>
+    <AppDrawer onClose={close} opened={opened} subtitle={t('subscription.units.subtitle')} title={t('subscription.units.title')} width={480}>
       <form className="flex min-h-0 flex-1 flex-col" noValidate onSubmit={(event) => { event.preventDefault(); setError(''); mutation.mutate(value) }}>
         <AppDrawerBody>
           <NumberInput
@@ -70,7 +79,7 @@ export function ChangeUnitsDrawer({ data, opened, onClose }: { data: Subscriptio
         <AppDrawerFooter>
           <div className="flex flex-col gap-3 sm:flex-row-reverse">
             <Button className="w-full sm:w-auto" color="accent" disabled={direction === 'same' && subscription.pending_billable_units === null} loading={mutation.isPending} type="submit">{t('subscription.units.submit')}</Button>
-            <Button className="w-full sm:w-auto" onClick={onClose} variant="default">{t('actions.cancel')}</Button>
+            <Button className="w-full sm:w-auto" onClick={close} variant="default">{t('actions.cancel')}</Button>
           </div>
         </AppDrawerFooter>
       </form>

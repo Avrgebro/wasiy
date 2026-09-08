@@ -1837,8 +1837,7 @@
       "requestedPill": "Requested",
       "withdraw": "Withdraw request",
       "requested": "Request sent. We will confirm by email.",
-      "withdrawn": "Request withdrawn.",
-      "requestedNote": "You asked to move to the {{plan}} plan. It applies at the next renewal, on {{date}}."
+      "withdrawn": "Request withdrawn."
     },
     "proof": {
       "title": "Confirm payment",

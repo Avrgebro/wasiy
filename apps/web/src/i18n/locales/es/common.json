@@ -1837,8 +1837,7 @@
       "requestedPill": "Solicitado",
       "withdraw": "Cancelar solicitud",
       "requested": "Solicitud enviada. Te confirmamos por correo.",
-      "withdrawn": "Solicitud cancelada.",
-      "requestedNote": "Pediste pasar al plan {{plan}}. Se aplica en la siguiente renovación, el {{date}}."
+      "withdrawn": "Solicitud cancelada."
     },
     "proof": {
       "title": "Confirmar pago",
