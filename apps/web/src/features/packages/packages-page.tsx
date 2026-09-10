@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
 import { openRowColumn } from '../../components/table/open-row-column'
-import { TintChip } from '../../components/ui/chips'
+import { StatusPill } from '../../components/ui/chips'
 import { SearchInput } from '../../components/table/search-input'
 import { TableToolbar } from '../../components/table/table-toolbar'
 import { QuickFilters } from '../../components/table/quick-filters'
@@ -20,6 +20,7 @@ import { getPackages, type PackageSummary } from './api'
 import { PackageDrawer } from './package-drawer'
 import { RegisterPackageDrawer } from './register-package-drawer'
 import { PACKAGE_CHIPS, type PackagesSearchValues } from './schemas'
+import { packageStatusColor } from './presentation'
 
 const routeApi = getRouteApi('/_authenticated/admin/packages')
 
@@ -124,7 +125,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
       accessorKey: 'status',
       header: t('packages.columns.status'),
       cell: ({ row }) => (
-        <TintChip color={row.original.status === 'pending' ? 'warning' : 'success'}>{t(`packages.statuses.${row.original.status}`)}</TintChip>
+        <StatusPill color={packageStatusColor(row.original.status)}>{t(`packages.statuses.${row.original.status}`)}</StatusPill>
       ),
     },
     openRowColumn(),

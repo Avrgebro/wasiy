@@ -1,4 +1,4 @@
-import { Badge, Button, Skeleton, Text, TextInput } from '@mantine/core'
+import { Button, Skeleton, Text, TextInput } from '@mantine/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -14,6 +14,8 @@ import { shortDateTime } from '../finances/month'
 import { portalColor } from '../units/unit-presentation'
 import { deactivatePerson, getResident, invitePerson, reactivatePerson, type ResidentSummary } from './api'
 import { inviteSchema } from './schemas'
+import { residentStatusColor } from './presentation'
+import { StatusPill } from '../../components/ui/chips'
 
 /**
  * Mockup 15 drawer: contact facts, the units the person lives in (managed
@@ -141,9 +143,9 @@ export function PersonDrawer({
               <DrawerFact
                 label={t('registry.status')}
                 value={
-                  <Badge color={person.status === 'active' ? 'success' : 'gray'} radius="xl" size="sm" variant="light">
+                  <StatusPill color={residentStatusColor(person.status)}>
                     {t(`registry.statuses.${person.status}`)}
-                  </Badge>
+                  </StatusPill>
                 }
               />
               <DrawerFact label={t('residents.detail.since')} value={person.created_at ? t('residents.detail.sinceValue', { date: formatDate(person.created_at) }) : '—'} />
@@ -197,9 +199,9 @@ export function PersonDrawer({
             <DrawerSection description={t('residents.detail.portalHint')} label={t('units.detail.portal')} />
             <div className="flex flex-col gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <Badge color={portalColor(person.portal_state)} radius="xl" size="sm" variant="surface">
+                <StatusPill color={portalColor(person.portal_state)}>
                   {t(`units.portal.${person.portal_state}`)}
-                </Badge>
+                </StatusPill>
                 {canManage && person.portal_state !== 'active' && !inviting ? (
                   <Button size="compact-sm" variant="subtle" onClick={() => setInviting(true)}>
                     {t(person.portal_state === 'invited' ? 'units.member.resendInvite' : 'residents.detail.invite')}

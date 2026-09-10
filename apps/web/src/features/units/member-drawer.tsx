@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Badge, Button, SegmentedControl, Select, Switch, Text } from '@mantine/core'
+import { Alert, Button, SegmentedControl, Select, Switch, Text } from '@mantine/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -23,6 +23,7 @@ import {
 } from './api'
 import { memberSchema, type MemberFormValues } from './schemas'
 import { portalColor } from './unit-presentation'
+import { StatusPill } from '../../components/ui/chips'
 
 const EMPTY: MemberFormValues = {
   mode: 'existing',
@@ -285,9 +286,9 @@ export function MemberDrawer({
               <DrawerSection label={t('units.detail.portal')} />
               <DrawerField note={!member.email && member.portal_state !== 'active' ? t('units.member.inviteNeedsEmail') : undefined}>
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3">
-                  <Badge color={portalColor(member.portal_state)} radius="xl" size="sm" variant="surface">
+                  <StatusPill color={portalColor(member.portal_state)}>
                     {t(`units.portal.${member.portal_state}`)}
-                  </Badge>
+                  </StatusPill>
                   {member.portal_state !== 'active' ? (
                     <Button
                       disabled={!member.email}

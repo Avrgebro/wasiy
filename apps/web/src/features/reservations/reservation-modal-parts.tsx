@@ -19,7 +19,7 @@ export function ReservationSlotBand({
         {shortDayLabel(localDateString(new Date(reservation.starts_at), timezone))} ·{' '}
         {formatTimeRange(reservation, timezone)}
       </Text>
-      <ReservationStatusBadge reservation={reservation} variant="surface" />
+      <ReservationStatusBadge reservation={reservation} />
     </div>
   )
 }

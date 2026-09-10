@@ -5,7 +5,7 @@ import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AccessChip, TintChip } from '../../components/ui/chips'
+import { AccessChip, StatusPill } from '../../components/ui/chips'
 import { getErrorMessage } from '../../lib/errors'
 import {
   deactivateAmenity,
@@ -192,13 +192,13 @@ export function LocationAmenitiesTab({
                       </Text>
                     </Table.Td>
                     <Table.Td>
-                      <TintChip color={deactivated ? 'gray' : amenity.is_reservable ? 'success' : 'teal'}>
+                      <StatusPill color={deactivated ? 'gray' : amenity.is_reservable ? 'success' : 'teal'}>
                         {deactivated
                           ? t('amenities.statuses.deactivated')
                           : amenity.is_reservable
                             ? t('amenities.statuses.reservable')
                             : t('amenities.statuses.common')}
-                      </TintChip>
+                      </StatusPill>
                     </Table.Td>
                     <Table.Td className="whitespace-nowrap">
                       {readOnly ? null : (

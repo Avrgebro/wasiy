@@ -37,7 +37,17 @@
   --wa-accent: #e0a438;
   --wa-bg: #f7f5f0;
   --wa-surface: #ffffff;
-  --wa-surface-2: #f2efe9;
+  /* Surface 2°: one clear step below white so pills, fields and inner cards
+     read on a card (#F2EFE9 was 1.15:1 against white, 1.05:1 against paper).
+     `-base` is the raw value; `--wa-surface-2` re-points to the card color
+     inside panels (see the Drawer/Modal block below). */
+  --wa-surface-2-base: #eae5db;
+  --wa-surface-2: var(--wa-surface-2-base);
+  /* Panels (Drawer, Modal): paper in light, so they read as a slice of the
+     canvas and white cards inside them keep their step; surface in dark. */
+  --wa-panel: var(--wa-bg);
+  /* A pill placed on a surface-2 box inverts to this so it does not vanish. */
+  --wa-pill-inverse: var(--wa-surface);
   /* Field background: white on light; in dark it sinks one step below the
      card (mockups draw inputs at the app background, not the surface). */
   --wa-field: #ffffff;
@@ -102,7 +112,9 @@
   --wa-accent: #e8b45c;
   --wa-bg: #101d1e;
   --wa-surface: #16282a;
-  --wa-surface-2: #1d3335;
+  --wa-surface-2-base: #1d3335;
+  --wa-surface-2: var(--wa-surface-2-base);
+  --wa-panel: var(--wa-surface);
   --wa-field: #101d1e;
   --wa-text: #e9ece8;
   --wa-text-2: #9fb0ae;
@@ -277,6 +289,17 @@
 .mantine-Button-root[data-variant='default']:hover,
 .mantine-ActionIcon-root[data-variant='default']:hover {
   border-color: var(--wa-text-3);
+}
+
+/* Inside a light panel the canvas is already paper, so the second surface
+   steps UP to white (inner cards, pills, bands) instead of down, and the
+   inverse pill takes the cream. Dark panels sit on the surface and keep the
+   normal ladder. SegmentedControl indicators keep the base value on purpose:
+   their track is the white field, so they must stay cream (see theme.ts). */
+:root:not([data-mantine-color-scheme='dark']) .mantine-Drawer-content,
+:root:not([data-mantine-color-scheme='dark']) .mantine-Modal-content {
+  --wa-surface-2: var(--wa-surface);
+  --wa-pill-inverse: var(--wa-surface-2-base);
 }
 
 /* Jerarquía por elevación en oscuro: no shadows, borders delimit. */

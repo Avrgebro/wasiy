@@ -1,4 +1,8 @@
-import type { ReactNode } from 'react'
+import { forwardRef } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react'
+
+const CHIP_CLASS =
+  'inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-2.5 py-1 text-xs font-medium'
 
 /**
  * The outlined pill the design uses for location·role access chips —
@@ -6,11 +10,7 @@ import type { ReactNode } from 'react'
  * several assignments. Built on theme variables so both color schemes work.
  */
 export function AccessChip({ children }: { children: ReactNode }) {
-  return (
-    <span className="whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-2.5 py-1 text-xs font-medium text-[var(--mantine-color-dimmed)]">
-      {children}
-    </span>
-  )
+  return <span className={`${CHIP_CLASS} text-[var(--mantine-color-dimmed)]`}>{children}</span>
 }
 
 const PILL_TEXT: Record<string, string> = {
@@ -23,18 +23,35 @@ const PILL_TEXT: Record<string, string> = {
   gray: 'var(--mantine-color-dimmed)',
 }
 
+type StatusPillProps = {
+  /** Semantic role name (`success`, `warning`, `error`, `info`, `teal`, `accent`, `gray`). */
+  color: string
+  component?: 'span' | 'button'
+  type?: 'button'
+  children: ReactNode
+} & Omit<HTMLAttributes<HTMLElement>, 'color' | 'children'>
+
 /**
- * The status pill for cells where a Badge would truncate: same recipe as the
- * theme's `light` Badge — role-colored text on the neutral second surface —
- * but the label never ellipsizes; the row scrolls instead.
+ * The status pill, everywhere (tables, drawers, cards): the AccessChip
+ * outline — default border, body fill, 12px medium sentence case — with the
+ * role color on the text only. The outline carries the shape, so the pill
+ * never depends on a surface step and never collides with a band or a hover;
+ * the label never ellipsizes, the row scrolls instead. Pass `component="button"`
+ * for an interactive pill (tooltips); extra props reach the element.
  */
-export function TintChip({ color, children }: { color: string; children: ReactNode }) {
+export const StatusPill = forwardRef<HTMLElement, StatusPillProps>(function StatusPill(
+  { color, component, className, children, style, ...rest },
+  ref,
+) {
+  const Tag = component ?? 'span'
   return (
-    <span
-      className="whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold"
-      style={{ backgroundColor: 'var(--wa-surface-2)', color: PILL_TEXT[color] ?? PILL_TEXT.teal }}
+    <Tag
+      ref={ref as never}
+      className={`${CHIP_CLASS} ${className ?? ''}`}
+      style={{ color: PILL_TEXT[color] ?? PILL_TEXT.teal, ...style }}
+      {...rest}
     >
       {children}
-    </span>
+    </Tag>
   )
-}
+})

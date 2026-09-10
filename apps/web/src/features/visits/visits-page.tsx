@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { DataTable } from '../../components/table/data-table'
 import { openRowColumn } from '../../components/table/open-row-column'
-import { TintChip } from '../../components/ui/chips'
+import { AccessChip, StatusPill } from '../../components/ui/chips'
 import { FilterButton } from '../../components/table/filter-button'
 import { TableToolbar } from '../../components/table/table-toolbar'
 import { QuickFilters } from '../../components/table/quick-filters'
@@ -21,7 +21,7 @@ import { useMe, usePhoneFormat } from '../auth/hooks'
 import { getVisits, type VisitSummary } from './api'
 import { RegisterVisitDrawer } from './register-visit-drawer'
 import { VISIT_CHIPS, VISIT_CONFIRMATIONS, type VisitsSearchValues } from './schemas'
-import { checkInLabel } from './visit-presentation'
+import { checkInLabel, visitStatusColor } from './visit-presentation'
 import { VisitDrawer } from './visit-drawer'
 
 const routeApi = getRouteApi('/_authenticated/admin/visitors')
@@ -139,16 +139,14 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
       header: t('visits.columns.confirmation'),
       meta: { hideBelow: 'lg' },
       cell: ({ row }) => (
-        <span className="whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] px-2.5 py-[3px] text-[11.5px] font-medium text-[var(--mantine-color-dimmed)]">
-          {t(`visits.confirmations.${row.original.confirmation}`)}
-        </span>
+        <AccessChip>{t(`visits.confirmations.${row.original.confirmation}`)}</AccessChip>
       ),
     },
     {
       accessorKey: 'status',
       header: t('packages.columns.status'),
       cell: ({ row }) => (
-        <TintChip color={row.original.status === 'inside' ? 'success' : row.original.status === 'expected' ? 'info' : 'gray'}>{t(`visits.statuses.${row.original.status}`)}</TintChip>
+        <StatusPill color={visitStatusColor(row.original.status)}>{t(`visits.statuses.${row.original.status}`)}</StatusPill>
       ),
     },
     openRowColumn(),

@@ -1,4 +1,4 @@
-import { Badge, Button, Skeleton, Text, Textarea } from '@mantine/core'
+import { Button, Skeleton, Text, Textarea } from '@mantine/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -36,6 +36,7 @@ import {
   type ReservationSummary,
 } from './api'
 import { ReservationSlotBand } from './reservation-modal-parts'
+import { StatusPill } from '../../components/ui/chips'
 
 type Decision = 'approve' | 'observe' | 'reject' | 'cancel'
 
@@ -264,9 +265,9 @@ function Charges({
             <span className={`font-mono text-sm font-semibold ${amountClassName(movement)}`}>
               {formatMoney(movement.amount)}
             </span>
-            <Badge color={statusColor(movement.status)} radius="xl" size="sm" variant="light">
+            <StatusPill color={statusColor(movement.status)}>
               {statusLabel(movement, t)}
-            </Badge>
+            </StatusPill>
             {next ? (
               <Button
                 loading={loadingId === movement.id}

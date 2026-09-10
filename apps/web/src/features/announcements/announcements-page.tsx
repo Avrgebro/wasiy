@@ -12,7 +12,7 @@ import { openRowColumn } from '../../components/table/open-row-column'
 import { QuickFilters } from '../../components/table/quick-filters'
 import { SearchInput } from '../../components/table/search-input'
 import { TableToolbar } from '../../components/table/table-toolbar'
-import { TintChip } from '../../components/ui/chips'
+import { StatusPill } from '../../components/ui/chips'
 import { getErrorMessage } from '../../lib/errors'
 import { can } from '../auth/access'
 import { useMe } from '../auth/hooks'
@@ -95,7 +95,7 @@ function AnnouncementsContent({ canManage, locationId, locationName, timezone }:
     {
       accessorKey: 'status',
       header: t('announcements.columns.status'),
-      cell: ({ row }) => <TintChip color={announcementStatusColor(row.original.status)}>{t(`announcements.statuses.${row.original.status}`)}</TintChip>,
+      cell: ({ row }) => <StatusPill color={announcementStatusColor(row.original.status)}>{t(`announcements.statuses.${row.original.status}`)}</StatusPill>,
     },
     {
       id: 'validity',

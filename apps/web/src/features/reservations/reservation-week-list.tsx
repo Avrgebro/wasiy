@@ -90,7 +90,7 @@ export function ReservationWeekList({
                     return (
                       <div
                         key={reservation.id}
-                        className={`${ROW_GRID} cursor-pointer border-b border-[var(--mantine-color-default-border)] text-[13.5px] transition-colors hover:bg-[var(--mantine-color-default-hover)]`}
+                        className={`${ROW_GRID} cursor-pointer border-b border-[var(--mantine-color-default-border)] text-[13.5px] transition-colors hover:bg-[var(--wa-hover)]`}
                         role="button"
                         tabIndex={0}
                         onClick={() => onSelect(reservation)}

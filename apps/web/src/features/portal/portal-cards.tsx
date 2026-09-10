@@ -1,7 +1,7 @@
 import { Badge, Text } from '@mantine/core'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { TintChip } from '../../components/ui/chips'
+import { AccessChip } from '../../components/ui/chips'
 
 /**
  * The portal card (Portal 01, 04), measured from the artboards: 14px radius,
@@ -34,7 +34,7 @@ export function PortalCard({
     <section className="flex flex-col gap-[7px] rounded-[14px] border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] px-3 pt-[11px] pb-[9px]">
       <div className="flex items-center gap-2">
         <h2 className="m-0 font-display text-[14.5px] font-semibold tracking-tight">{title}</h2>
-        {count !== undefined ? <TintChip color="teal">{count}</TintChip> : null}
+        {count !== undefined ? <AccessChip>{count}</AccessChip> : null}
       </div>
       {isEmpty ? (
         <Text c="dimmed" size="sm">

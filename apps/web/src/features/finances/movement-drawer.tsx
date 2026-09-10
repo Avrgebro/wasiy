@@ -1,4 +1,4 @@
-import { Badge, Button, Skeleton, Text, Textarea } from '@mantine/core'
+import { Button, Skeleton, Text, Textarea } from '@mantine/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -24,6 +24,7 @@ import {
   statusLabel,
   transitionLabel,
 } from './movement-presentation'
+import { StatusPill } from '../../components/ui/chips'
 
 const DESTRUCTIVE: MovementStatus[] = ['voided', 'retained']
 
@@ -99,9 +100,9 @@ export function MovementDrawer({
               <span className={`text-[34px] font-semibold tracking-tight ${amountClassName(movement)}`}>
                 {formatMoney(movement.amount, { negative: movement.direction === 'expense' })}
               </span>
-              <Badge color={statusColor(movement.status)} radius="xl" size="md" variant="light">
+              <StatusPill color={statusColor(movement.status)}>
                 {statusLabel(movement, t)}
-              </Badge>
+              </StatusPill>
             </div>
 
             <DrawerFacts>

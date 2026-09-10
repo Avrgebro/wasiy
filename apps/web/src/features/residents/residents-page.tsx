@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { buildFilterChips } from '../../components/table/build-filter-chips'
 import { DataTable } from '../../components/table/data-table'
 import { openRowColumn } from '../../components/table/open-row-column'
-import { TintChip } from '../../components/ui/chips'
+import { StatusPill } from '../../components/ui/chips'
 import { FilterButton } from '../../components/table/filter-button'
 import { TableToolbar } from '../../components/table/table-toolbar'
 import { SearchInput } from '../../components/table/search-input'
@@ -23,6 +23,7 @@ import { getResidents, type ResidentSummary } from './api'
 import { PersonDrawer } from './person-drawer'
 import { PersonFormDrawer } from './person-form-drawer'
 import type { ResidentsSearchValues } from './schemas'
+import { residentStatusColor } from './presentation'
 
 const routeApi = getRouteApi('/_authenticated/admin/residents')
 
@@ -144,7 +145,7 @@ function ResidentsContent({
       header: t('registry.status'),
       meta: { hideBelow: 'lg' },
       cell: ({ row }) => (
-        <TintChip color={row.original.status === 'active' ? 'success' : 'gray'}>{t(`registry.statuses.${row.original.status}`)}</TintChip>
+        <StatusPill color={residentStatusColor(row.original.status)}>{t(`registry.statuses.${row.original.status}`)}</StatusPill>
       ),
     },
     openRowColumn(),

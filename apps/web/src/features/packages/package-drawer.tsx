@@ -1,4 +1,4 @@
-import { Badge, Button, Text, Textarea } from '@mantine/core'
+import { Button, Text, Textarea } from '@mantine/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -9,6 +9,8 @@ import { getErrorMessage } from '../../lib/errors'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { shortDate, shortDateTime } from '../finances/month'
 import { deliverPackage, type PackageSummary } from './api'
+import { packageStatusColor } from './presentation'
+import { StatusPill } from '../../components/ui/chips'
 
 /** Mockup 14 drawer: the facts and the one action, Marcar entregado. */
 export function PackageDrawer({
@@ -60,9 +62,9 @@ export function PackageDrawer({
       <AppDrawerBody>
         {pkg ? (
           <>
-            <Badge className="self-start" color={pending ? 'warning' : 'success'} radius="xl" size="md" variant="light">
+            <StatusPill className="self-start" color={packageStatusColor(pkg.status)}>
               {t(`packages.statuses.${pkg.status}`)}
-            </Badge>
+            </StatusPill>
             <DrawerFacts>
               <DrawerFact
                 label={t('packages.columns.unit')}

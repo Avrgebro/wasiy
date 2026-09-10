@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Badge, Button, PinInput } from '@mantine/core'
+import { Button, PinInput } from '@mantine/core'
 import { ShieldCheckIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState, type FormEvent } from 'react'
@@ -13,6 +13,7 @@ import type { AuthUser } from '../auth/types'
 import { AccountCard, InlineSuccess } from './account-card'
 import { cancelEmailChange, getEmailChange, requestEmailChange, resendEmailChange, verifyEmailChange, type PendingEmailChange } from './api'
 import { emailChangeSchema, type EmailChangeFormValues } from './schemas'
+import { StatusPill } from '../../components/ui/chips'
 
 const pendingKey = ['auth', 'email-change'] as const
 
@@ -91,7 +92,7 @@ export function EmailCard({ user }: { user: AuthUser }) {
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-base font-semibold text-[var(--mantine-color-text)] [overflow-wrap:anywhere]">{user.email}</span>
-            <Badge color="success" leftSection={<ShieldCheckIcon aria-hidden="true" size={11} />} radius="xl" size="sm" variant="light">{t('account.email.verified')}</Badge>
+            <StatusPill color="success"><ShieldCheckIcon aria-hidden="true" size={11} />{t('account.email.verified')}</StatusPill>
           </div>
           {changed ? <InlineSuccess>{t('account.email.changed')}</InlineSuccess> : null}
         </div>

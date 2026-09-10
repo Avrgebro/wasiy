@@ -1,6 +1,6 @@
 import { PageAction } from '../../components/ui/page-action'
 import { TableEmptyState } from '../../components/table/table-empty-state'
-import { Alert, Badge, Button, Loader, Table, Text } from '@mantine/core'
+import { Alert, Button, Loader, Table, Text } from '@mantine/core'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
@@ -12,21 +12,14 @@ import { can, isAccountAdmin } from '../auth/access'
 import { useMe } from '../auth/hooks'
 import type { MeResponse } from '../auth/types'
 import { RegisterPackageDrawer } from '../packages/register-package-drawer'
-import type { ReservationSummary } from '../reservations/api'
+import { reservationStatusColor, reservationStatusKey } from '../reservations/reservation-presentation'
 import { formatTimeRange } from '../reservations/week'
 import { RegisterVisitDrawer } from '../visits/register-visit-drawer'
 import { durationLabel } from '../visits/visit-presentation'
 import { getLocationDashboard, type DashboardManagement, type DashboardToday } from './api'
 import { bareAgeLabel, packageAgeLabel, relativeLabel, unitChipLabel } from './dashboard-presentation'
 import { locationDashboardQueryKey } from './query-options'
-
-const RESERVATION_STATUS_COLORS: Record<ReservationSummary['status'], string> = {
-  pending: 'warning',
-  approved: 'success',
-  observed: 'info',
-  rejected: 'error',
-  cancelled: 'gray',
-}
+import { StatusPill } from '../../components/ui/chips'
 
 export function DashboardPage() {
   const { t } = useTranslation('common')
@@ -223,9 +216,9 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <PanelCard
           caption={
-            <Badge color="success" radius="xl" size="sm" variant="light">
+            <StatusPill color="success">
               {t('dashboard.cards.insideCount', { count: today.visitors_inside_count })}
-            </Badge>
+            </StatusPill>
           }
           footer={<CardLink to="/admin/visitors">{t('dashboard.cards.viewAll')}</CardLink>}
           title={t('dashboard.cards.visitorsInside')}
@@ -248,9 +241,9 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
 
         <PanelCard
           caption={
-            <Badge color="accent" radius="xl" size="sm" variant="light">
+            <StatusPill color="accent">
               {t('dashboard.cards.atDeskCount', { count: today.packages_pending_count })}
-            </Badge>
+            </StatusPill>
           }
           footer={<CardLink to="/admin/packages">{t('dashboard.cards.viewAll')}</CardLink>}
           title={t('dashboard.cards.packagesPending')}
@@ -291,7 +284,7 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
               </Table.Thead>
               <Table.Tbody>
                 {today.reservations_today.map((reservation) => {
-                  const statusKey = reservation.is_completed ? 'completed' : reservation.status
+                  const statusKey = reservationStatusKey(reservation)
 
                   return (
                     <Table.Tr key={reservation.id}>
@@ -300,9 +293,9 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
                       <Table.Td className="font-mono text-[12.5px]">{reservation.unit_number}</Table.Td>
                       <Table.Td className="hidden md:table-cell">{reservation.resident_name ?? '—'}</Table.Td>
                       <Table.Td>
-                        <Badge color={reservation.is_completed ? 'gray' : RESERVATION_STATUS_COLORS[reservation.status]} radius="xl" size="sm" variant="light">
+                        <StatusPill color={reservationStatusColor(statusKey)}>
                           {t(`reservations.statuses.${statusKey}`)}
-                        </Badge>
+                        </StatusPill>
                       </Table.Td>
                     </Table.Tr>
                   )

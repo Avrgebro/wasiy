@@ -12,7 +12,8 @@ Un rol, dos valores. Cada token existe en claro y en oscuro: nada aparece solo e
 | Acento | Una sola acción principal por pantalla; cifras destacadas | `#E0A438` | `#E8B45C` |
 | Fondo | Lienzo de la aplicación | `#F7F5F0` | `#101D1E` |
 | Superficie | Tarjetas, tablas, paneles elevados | `#FFFFFF` | `#16282A` |
-| Superficie 2° | Campos, píldoras, tarjetas internas, riel lateral | `#F2EFE9` | `#1D3335` |
+| Superficie 2° | Píldoras, tarjetas internas, bandas, riel lateral | `#EAE5DB` | `#1D3335` |
+| Panel | Drawers y modales: papel en claro (una porción del lienzo), superficie en oscuro | `#F7F5F0` | `#16282A` |
 | Texto | Contenido principal | `#1C2B2C` | `#E9ECE8` |
 | Texto 2° | Metadatos, etiquetas, ayudas | `#5A6B6B` | `#9FB0AE` |
 | Texto 3° | Pistas, chevrones, marcas de tiempo, segundas líneas | `#9AA6A4` | `#5F7371` |
@@ -20,7 +21,7 @@ Un rol, dos valores. Cada token existe en claro y en oscuro: nada aparece solo e
 | Divisor | Separadores de fila dentro de una superficie | `#EAEEEA` | `#22383A` |
 | Borde fuerte | Contorno de botones `default` (deben leerse sobre tarjeta blanca) | `#C5CFCC` | `#365052` |
 | Hover | Relleno de fila al pasar o seleccionar (tablas) | `#F7F5F0` | `#1B2F31` |
-| Hover de control | Botones y opciones con variante `default` al pasar: Superficie 2°, distinta del lienzo y de la tarjeta | `#F2EFE9` | `#1D3335` |
+| Hover de control | Botones y opciones con variante `default` al pasar: Superficie 2°, distinta del lienzo, del panel y de la tarjeta | `#EAE5DB` | `#1D3335` |
 | Éxito | Confirmado, dentro, al día | `#2E7D5B` | `#4FA97C` |
 | Advertencia | Esperado, por vencer, pendiente | `#B97F24` | `#E0A438` |
 | Error | Rechazado, revocado, vencido | `#C0442E` | `#E0705C` |
@@ -30,7 +31,9 @@ Un rol, dos valores. Cada token existe en claro y en oscuro: nada aparece solo e
 
 **Paridad de roles.** Cada token existe en ambos esquemas. *Interactivo* se añade también en claro (`#106E74`, ≈ 6.2:1 sobre papel) para enlaces y texto accionable, que antes se resolvían con el primario y perdían distinción del texto normal.
 
-**Superficie 2°.** El segundo nivel de superficie —campos, píldoras, tarjetas internas, riel lateral— se declara en los dos esquemas: en claro baja del blanco al papel (`#F2EFE9`; los mockups claros usan este valor, no el `#EFEBE2` del panel de referencia inicial), en oscuro sube del fondo (`#1D3335`). La jerarquía se construye por elevación, no por bordes.
+**Superficie 2°.** El segundo nivel de superficie —píldoras, tarjetas internas, bandas, riel lateral— se declara en los dos esquemas: en claro baja del blanco a un crema claramente separado (`#EAE5DB`; el `#F2EFE9` de los mockups quedaba a 1.05:1 del papel y 1.15:1 del blanco, indistinguible en pantalla), en oscuro sube del fondo (`#1D3335`). La jerarquía se construye por elevación, no por bordes.
+
+**Escalera en claro.** Papel (lienzo y paneles) → blanco (tarjetas, campos) → crema (superficie 2°). Cada elemento toma el escalón *siguiente* al de la superficie donde se apoya. Dentro de un panel (Drawer, Modal), que ya es papel, `--wa-surface-2` se redirige al blanco y `--wa-pill-inverse` al crema (`index.css`, bloque `.mantine-Drawer-content`), de modo que las tarjetas internas y píldoras que usan `bg-[var(--wa-surface-2)]` suben en vez de fundirse con el fondo sin cambiar el componente. El valor crudo vive en `--wa-surface-2-base` (indicador del SegmentedControl, cuyo carril es el campo blanco). En oscuro el panel es superficie y la escalera no cambia.
 
 **Estados.** Los cuatro estados se recalibran, no se reutilizan: en oscuro suben en luminosidad y bajan en saturación para no vibrar sobre petróleo. El ámbar cumple doble papel —acento y advertencia—, así que la advertencia siempre lleva ícono y etiqueta.
 

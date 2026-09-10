@@ -111,7 +111,7 @@ const info: MantineColorsTuple = [
  */
 const gray: MantineColorsTuple = [
   "#F7F5F0", // 0  ← bg / hover
-  "#F2EFE9", // 1  ← surface 2°
+  "#EAE5DB", // 1  ← surface 2°
   "#EAEEEA", // 2  ← divider
   "#DDE4E1", // 3  ← border
   "#C5CFCC", // 4
@@ -190,15 +190,16 @@ export const mantineTheme: MantineThemeOverride = createTheme({
   // `c` props.
   autoContrast: true,
   components: {
-    // Panels are cards, not canvas: Mantine paints Drawer and Modal with the
-    // body color, which in dark mode is the app background (#101D1E), the same
-    // tone the mockups reserve for fields. The panel takes the surface
-    // (white / #16282A) so fields sink into it as drawn.
+    // Panels take --wa-panel: paper in light (a slice of the canvas, so the
+    // white cards and fields inside keep their step) and the surface in dark
+    // (Mantine would paint the body color there, the app background the
+    // mockups reserve for fields). index.css flips --wa-surface-2 to white
+    // inside light panels so inner cards do not melt into the paper.
     Drawer: Drawer.extend({
-      styles: { content: { backgroundColor: "var(--mantine-color-default)" }, header: { backgroundColor: "var(--mantine-color-default)" } },
+      styles: { content: { backgroundColor: "var(--wa-panel)" }, header: { backgroundColor: "var(--wa-panel)" } },
     }),
     Modal: Modal.extend({
-      styles: { content: { backgroundColor: "var(--mantine-color-default)" }, header: { backgroundColor: "var(--mantine-color-default)" } },
+      styles: { content: { backgroundColor: "var(--wa-panel)" }, header: { backgroundColor: "var(--wa-panel)" } },
     }),
     // Hints read as "what you typed means" when they sit under the field;
     // above it they push labels apart in two-column rows (UX audit).
@@ -224,7 +225,7 @@ export const mantineTheme: MantineThemeOverride = createTheme({
       defaultProps: { size: "md", radius: "md", withItemsBorders: false },
       styles: {
         root: { backgroundColor: "var(--wa-field)", border: "1px solid var(--mantine-color-default-border)", padding: 3 },
-        indicator: { backgroundColor: "var(--wa-surface-2)", border: "1px solid var(--mantine-color-default-border)", boxShadow: "none" },
+        indicator: { backgroundColor: "var(--wa-surface-2-base)", border: "1px solid var(--mantine-color-default-border)", boxShadow: "none" },
         label: { fontWeight: 600, color: "var(--mantine-color-dimmed)" },
       },
     }),
@@ -240,14 +241,14 @@ export const mantineTheme: MantineThemeOverride = createTheme({
     Badge: Badge.extend({
       defaultProps: { radius: "xl" },
       // `light`: the pill on a card. `surface`: the same pill placed on a
-      // surface-2 box (drawer inner cards, bands), where it inverts to the
-      // card color so it does not vanish — exactly as the mockups draw it.
+      // surface-2 box (inner cards, bands), where it inverts (--wa-pill-inverse:
+      // white on a page, cream inside a light panel) so it does not vanish.
       vars: (_theme, props) =>
         props.variant === "light" || props.variant === "surface"
           ? {
               root: {
                 "--badge-bg":
-                  props.variant === "surface" ? "var(--mantine-color-default)" : "var(--wa-surface-2)",
+                  props.variant === "surface" ? "var(--wa-pill-inverse)" : "var(--wa-surface-2)",
                 "--badge-color": PILL_TEXT[props.color ?? "teal"] ?? PILL_TEXT.teal,
               },
             }
@@ -281,10 +282,11 @@ export const cssVariablesResolver: CSSVariablesResolver = () => ({
     "--mantine-color-default-border": "#DDE4E1",
     "--mantine-color-dimmed": "#5A6B6B",
     "--mantine-color-placeholder": "#9AA6A4",
-    // Default-variant hover (buttons, options): surface 2°, distinct from both
-    // white cards and the paper canvas so a hovered button never blends in.
-    // Table rows hover on --wa-hover (paper) instead; see index.css.
-    "--mantine-color-default-hover": "#F2EFE9",
+    // Default-variant hover (buttons, options): surface 2° base, one clear
+    // step below both white cards and the paper canvas (and paper panels), so
+    // a hovered button never blends into whatever it sits on. Table rows
+    // hover on --wa-hover (paper) instead; see index.css.
+    "--mantine-color-default-hover": "#EAE5DB",
     // «Interactivo» role: links get their own color (≈6.2:1 on paper)
     // instead of reusing the primary, which read as plain text.
     "--mantine-color-anchor": "#106E74",

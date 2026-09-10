@@ -2,7 +2,7 @@ import { Text } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { accountRoles, getRoleLabelKey } from '../auth/access'
 import type { StaffSummary } from './api'
-import { AccessChip, TintChip } from '../../components/ui/chips'
+import { AccessChip, StatusPill } from '../../components/ui/chips'
 import { staffStatus, type StaffStatus } from './staff-status'
 
 const MAX_VISIBLE_ASSIGNMENTS = 2
@@ -17,7 +17,7 @@ export function StaffStatusBadge({ staff }: { staff: StaffSummary }) {
   const { t } = useTranslation('common')
   const status = staffStatus(staff)
 
-  return <TintChip color={statusColors[status]}>{t(`staff.statuses.${status}`)}</TintChip>
+  return <StatusPill color={statusColors[status]}>{t(`staff.statuses.${status}`)}</StatusPill>
 }
 
 export function StaffAccountRoleBadge({ staff }: { staff: StaffSummary }) {
@@ -27,7 +27,7 @@ export function StaffAccountRoleBadge({ staff }: { staff: StaffSummary }) {
     return null
   }
 
-  return <TintChip color="teal">{t(getRoleLabelKey(accountRoles.accountAdmin))}</TintChip>
+  return <StatusPill color="teal">{t(getRoleLabelKey(accountRoles.accountAdmin))}</StatusPill>
 }
 
 export function StaffLocationChips({ staff }: { staff: StaffSummary }) {

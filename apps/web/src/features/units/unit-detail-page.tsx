@@ -1,5 +1,5 @@
 import { PageAction } from '../../components/ui/page-action'
-import { Alert, Badge, Button, Skeleton, Text, Textarea } from '@mantine/core'
+import { Alert, Button, Skeleton, Text, Textarea } from '@mantine/core'
 import { KeySquareIcon } from '@solar-icons/react/linear'
 import { useMediaQuery } from '@mantine/hooks'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -17,7 +17,9 @@ import type { MovementSummary } from '../finances/api'
 import { monthLabel, shortDate, shortDateTime } from '../finances/month'
 import type { PackageSummary } from '../packages/api'
 import type { VisitSummary } from '../visits/api'
-import { checkInLabel } from '../visits/visit-presentation'
+import { checkInLabel, visitStatusColor } from '../visits/visit-presentation'
+import { packageStatusColor } from '../packages/presentation'
+import { reservationStatusColor, reservationStatusKey } from '../reservations/reservation-presentation'
 import { amountClassName, statusColor, statusLabel } from '../finances/movement-presentation'
 import type { ReservationSummary } from '../reservations/api'
 import { formatTimeRange, localDateString, shortDayLabel } from '../reservations/week'
@@ -28,6 +30,7 @@ import { MemberDrawer } from './member-drawer'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { VehicleDrawer } from './vehicle-drawer'
 import { typeLabel } from './unit-presentation'
+import { StatusPill } from '../../components/ui/chips'
 
 const routeApi = getRouteApi('/_authenticated/admin/units_/$unitId')
 
@@ -178,9 +181,9 @@ function UnitDetailContent({
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="m-0 font-display text-2xl font-semibold tracking-tight text-[var(--mantine-color-text)]">{title}</h1>
               {unit.status === 'inactive' ? (
-                <Badge color="gray" radius="xl" size="sm" variant="light">
+                <StatusPill color="gray">
                   {t('units.statuses.inactive')}
-                </Badge>
+                </StatusPill>
               ) : null}
             </div>
             <Text c="dimmed" mt={4} size="sm">
@@ -331,9 +334,9 @@ function UnitDetailContent({
                 .map((member) => (
                   <div key={member.membership_id} className="flex items-center justify-between gap-3 px-5 py-2.5">
                     <Text size="sm">{member.name}</Text>
-                    <Badge color="success" radius="xl" size="sm" variant="light">
+                    <StatusPill color="success">
                       {t('registry.portal.enabled')}
-                    </Badge>
+                    </StatusPill>
                   </div>
                 ))
             )}
@@ -450,9 +453,9 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void
             {member.name}
           </Text>
           {member.is_primary_contact ? (
-            <Badge color="accent" radius="xl" size="xs" variant="light">
+            <StatusPill color="accent">
               {t('units.detail.primaryContact')}
-            </Badge>
+            </StatusPill>
           ) : null}
         </div>
         <Text c="dimmed" className="truncate" size="xs">
@@ -486,9 +489,9 @@ function ReservationRow({ reservation, timezone }: { reservation: ReservationSum
             .join(' · ')}
         </Text>
       </div>
-      <Badge color={reservation.status === 'approved' ? 'success' : reservation.status === 'observed' ? 'info' : 'warning'} radius="xl" size="sm" variant="light">
-        {t(`reservations.statuses.${reservation.status}`)}
-      </Badge>
+      <StatusPill color={reservationStatusColor(reservationStatusKey(reservation))}>
+        {t(`reservations.statuses.${reservationStatusKey(reservation)}`)}
+      </StatusPill>
     </div>
   )
 }
@@ -509,9 +512,9 @@ function MovementRow({ movement }: { movement: MovementSummary }) {
       <span className={`font-mono text-sm font-semibold ${amountClassName(movement)}`}>
         {formatMoney(movement.amount, { negative: movement.direction === 'expense' })}
       </span>
-      <Badge color={statusColor(movement.status)} radius="xl" size="sm" variant="light">
+      <StatusPill color={statusColor(movement.status)}>
         {statusLabel(movement, t)}
-      </Badge>
+      </StatusPill>
     </div>
   )
 }
@@ -530,9 +533,9 @@ function VisitRow({ timezone, visit }: { timezone: string; visit: VisitSummary }
           {t(`visits.confirmations.${visit.confirmation}`)}
         </Text>
       </div>
-      <Badge color={visit.status === 'inside' ? 'success' : 'gray'} radius="xl" size="sm" variant="light">
+      <StatusPill color={visitStatusColor(visit.status)}>
         {t(`visits.statuses.${visit.status}`)}
-      </Badge>
+      </StatusPill>
     </div>
   )
 }
@@ -551,9 +554,9 @@ function PackageRow({ pkg, timezone }: { pkg: PackageSummary; timezone: string }
           {pkg.notes ?? '—'}
         </Text>
       </div>
-      <Badge color="warning" radius="xl" size="sm" variant="light">
-        {t('packages.statuses.pending')}
-      </Badge>
+      <StatusPill color={packageStatusColor(pkg.status)}>
+        {t(`packages.statuses.${pkg.status}`)}
+      </StatusPill>
     </div>
   )
 }
@@ -574,9 +577,9 @@ function VehicleRow({ onOpen, vehicle }: { onOpen?: () => void; vehicle: Vehicle
         <div className="flex items-center gap-2">
           <span className="font-mono text-sm font-semibold">{vehicle.plate ?? t(`registry.vehicleTypes.${vehicle.vehicle_type}`)}</span>
           {inactive ? (
-            <Badge color="gray" radius="xl" size="xs" variant="light">
+            <StatusPill color="gray">
               {t('registry.statuses.inactive')}
-            </Badge>
+            </StatusPill>
           ) : null}
         </div>
         <Text c="dimmed" size="xs">

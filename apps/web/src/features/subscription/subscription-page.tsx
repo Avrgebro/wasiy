@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, CopyButton, Skeleton, Text } from '@mantine/core'
+import { Alert, Button, CopyButton, Skeleton, Text } from '@mantine/core'
 import { ArrowDownIcon, CheckCircleIcon, CopyIcon, InfoCircleIcon, WalletIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState, type ReactNode } from 'react'
@@ -12,6 +12,7 @@ import { getSubscriptionPage, paymentProofUrl, requestPlanChange, subscriptionPa
 import { ChangeUnitsDrawer } from './change-units-drawer'
 import { ConfirmPaymentDrawer } from './confirm-payment-drawer'
 import { formatLongDay, formatPeriod, formatPlanMoney } from './format'
+import { StatusPill } from '../../components/ui/chips'
 
 /**
  * /admin/subscription (mockup 22, ADR 0040): what am I paying for, where do
@@ -93,7 +94,7 @@ function StateCard({ data, onSeeInvoice }: { data: SubscriptionPageData; onSeeIn
   return (
     <section className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge color={tone} radius="xl" size="md" variant="light">{pill}</Badge>
+        <StatusPill color={tone}>{pill}</StatusPill>
         <span className="text-xs text-[var(--mantine-color-dimmed)]">{kicker}</span>
       </div>
       <p className="m-0 mt-3 font-display text-xl font-semibold tracking-tight text-[var(--mantine-color-text)]">{headline}</p>
@@ -296,7 +297,7 @@ function InvoiceRow({ invoice, onConfirmPayment }: { invoice: Invoice; onConfirm
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-sm font-semibold text-[var(--mantine-color-text)]">{invoice.number}</span>
-          <Badge color={INVOICE_TONE[invoice.status]} radius="xl" size="sm" variant="light">{t(`subscription.invoices.status_${invoice.status}`)}</Badge>
+          <StatusPill color={INVOICE_TONE[invoice.status]}>{t(`subscription.invoices.status_${invoice.status}`)}</StatusPill>
           <span className="ml-auto text-sm font-semibold text-[var(--mantine-color-text)] sm:ml-2">{formatPlanMoney(invoice.amount_minor, invoice.currency)}</span>
         </div>
         <p className="m-0 mt-0.5 text-xs text-[var(--mantine-color-dimmed)]">{formatPeriod(invoice.period_starts_on, invoice.period_ends_on)}</p>
@@ -340,8 +341,8 @@ function ChangePlanCard({ data }: { data: SubscriptionPageData }) {
             <div key={plan.code} className={`flex flex-col gap-2 rounded-inner border p-4 ${plan.is_current ? 'border-[var(--mantine-color-teal-4)] bg-[var(--wa-tint)]' : 'border-[var(--mantine-color-default-border)]'}`}>
               <div className="flex items-center justify-between gap-2">
                 <p className="m-0 text-base font-semibold text-[var(--mantine-color-text)]">{plan.name}</p>
-                {plan.is_current ? <Badge color="teal" radius="xl" size="sm" variant="light">{t('subscription.changePlan.current')}</Badge> : null}
-                {isRequested ? <Badge color="accent" radius="xl" size="sm" variant="light">{t('subscription.changePlan.requestedPill')}</Badge> : null}
+                {plan.is_current ? <StatusPill color="teal">{t('subscription.changePlan.current')}</StatusPill> : null}
+                {isRequested ? <StatusPill color="accent">{t('subscription.changePlan.requestedPill')}</StatusPill> : null}
               </div>
               <p className="m-0 text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.pricing', { price: formatPlanMoney(plan.unit_price_minor, data.plan.currency), count: plan.included_units })}</p>
               <p className="m-0 flex items-baseline gap-1"><span className="font-display text-xl font-bold text-[var(--mantine-color-text)]">{formatPlanMoney(plan.total_minor, data.plan.currency)}</span><span className="text-xs text-[var(--mantine-color-dimmed)]">{t('subscription.changePlan.perMonth')}</span></p>

@@ -27,3 +27,8 @@ export function checkInLabel(iso: string | null, timezone: string, now: Date, lo
 
   return `${day} · ${time}`
 }
+
+/** Pill color for a visit status: inside is live, expected is upcoming, anything else is over. */
+export function visitStatusColor(status: VisitSummary['status']): string {
+  return status === 'inside' ? 'success' : status === 'expected' ? 'info' : 'gray'
+}

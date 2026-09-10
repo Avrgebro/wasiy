@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DataTable } from '../../components/table/data-table'
 import { openRowColumn } from '../../components/table/open-row-column'
-import { TintChip } from '../../components/ui/chips'
+import { StatusPill } from '../../components/ui/chips'
 import { StatCard } from '../../components/ui/stat-card'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
@@ -196,7 +196,7 @@ function FinancesContent({
       header: t('finances.columns.status'),
       meta: { sortKey: 'status' },
       cell: ({ row }) => (
-        <TintChip color={statusColor(row.original.status)}>{statusLabel(row.original, t)}</TintChip>
+        <StatusPill color={statusColor(row.original.status)}>{statusLabel(row.original, t)}</StatusPill>
       ),
     },
     openRowColumn(),

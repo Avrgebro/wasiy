@@ -1,7 +1,8 @@
-import { Badge, Text } from '@mantine/core'
+import { Text } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import type { LocationSummary } from './api'
 import { LocationCoverPlaceholder } from './location-cover-placeholder'
+import { StatusPill } from '../../components/ui/chips'
 
 function CountStat({ accent, label, value }: { accent?: boolean; label: string; value: number }) {
   return (
@@ -72,14 +73,10 @@ export function LocationCard({
             <Text fw={600} size="lg" truncate>
               {location.name}
             </Text>
-            <Badge
-              color={deactivated ? 'gray' : 'success'}
-              radius="xl"
-              size="sm"
-              variant="light"
-            >
+            <StatusPill
+              color={deactivated ? 'gray' : 'success'}>
               {t(`locations.statuses.${location.status}`)}
-            </Badge>
+            </StatusPill>
           </div>
           <Text c="dimmed" size="sm" truncate>
             {location.formatted_address ?? '—'}

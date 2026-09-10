@@ -1,4 +1,4 @@
-import { Badge, Button, Text, Textarea } from '@mantine/core'
+import { Button, Text, Textarea } from '@mantine/core'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
@@ -11,7 +11,8 @@ import { getErrorMessage } from '../../lib/errors'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { shortDateTime } from '../finances/month'
 import { checkOutVisit, type VisitSummary } from './api'
-import { checkInLabel, durationLabel } from './visit-presentation'
+import { checkInLabel, durationLabel, visitStatusColor } from './visit-presentation'
+import { StatusPill } from '../../components/ui/chips'
 
 /** Mockup 16 drawer: time inside (live), facts, timeline, Marcar salida. */
 export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void; timezone: string; visit: VisitSummary | null }) {
@@ -69,9 +70,9 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
         {visit ? (
           <>
             <div className="flex flex-wrap items-center gap-3">
-              <Badge color={inside ? 'success' : 'gray'} radius="xl" size="md" variant="light">
+              <StatusPill color={visitStatusColor(visit.status)}>
                 {t(`visits.statuses.${visit.status}`)}
-              </Badge>
+              </StatusPill>
               <span className="font-mono text-2xl font-semibold">{durationLabel(visit, now, t)}</span>
               <Text c="dimmed" size="sm">
                 {t(inside ? 'visits.detail.insideBuilding' : 'visits.detail.duration')}

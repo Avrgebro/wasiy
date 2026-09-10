@@ -1,6 +1,6 @@
 import { PageAction } from '../../components/ui/page-action'
 import { keepContextData } from '../../lib/keep-context-data'
-import { Alert, Avatar, Badge, Text } from '@mantine/core'
+import { Alert, Avatar, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -17,6 +17,7 @@ import { getUnits, type UnitSummary } from './api'
 import { attentionParams, type UnitsSearchValues } from './schemas'
 import { UnitFormDrawer } from './unit-form-drawer'
 import { UnitsFilters } from './units-filters'
+import { StatusPill } from '../../components/ui/chips'
 
 const routeApi = getRouteApi('/_authenticated/admin/units')
 
@@ -81,9 +82,9 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
         <span className="flex items-center gap-2">
           <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
           {row.original.status === 'inactive' ? (
-            <Badge color="gray" radius="xl" size="xs" variant="light">
+            <StatusPill color="gray">
               {t('units.statuses.inactive')}
-            </Badge>
+            </StatusPill>
           ) : null}
         </span>
       ),

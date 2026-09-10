@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Badge, Button, SegmentedControl, Select, Text, Textarea } from '@mantine/core'
+import { Alert, Button, SegmentedControl, Select, Text, Textarea } from '@mantine/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -16,6 +16,7 @@ import { getResidents } from '../residents/api'
 import { useActiveUnitOptions } from '../units/use-active-unit-options'
 import { confirmArrival, getVisits, registerVisit, type VisitSummary } from './api'
 import { registerVisitSchema, VISIT_CONFIRMATIONS, type RegisterVisitValues } from './schemas'
+import { StatusPill } from '../../components/ui/chips'
 
 const EMPTY: RegisterVisitValues = { visitor_name: '', document: '', phone: '', unit_id: '', resident_id: '', confirmation: 'none', notes: '' }
 
@@ -188,9 +189,9 @@ export function RegisterVisitDrawer({
                     </span>
                   </span>
                   {expected?.id === visit.id ? (
-                    <Badge color="info" radius="xl" size="sm" variant="light">
+                    <StatusPill color="info">
                       {t('visits.expected.chosen')}
-                    </Badge>
+                    </StatusPill>
                   ) : (
                     <Button size="compact-sm" variant="default" onClick={() => pickExpected(visit)}>
                       {t('visits.expected.confirm')}
@@ -214,9 +215,9 @@ export function RegisterVisitDrawer({
           {expected ? (
             <DrawerField note={t('visits.expected.confirmationLocked')}>
               <div>
-                <Badge color="info" radius="xl" size="md" variant="light">
+                <StatusPill color="info">
                   {t('visits.confirmations.pre_registered')}
-                </Badge>
+                </StatusPill>
               </div>
             </DrawerField>
           ) : (

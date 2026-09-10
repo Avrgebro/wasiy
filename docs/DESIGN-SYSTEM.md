@@ -31,6 +31,7 @@ Rules:
 
 - In dark mode the accent doubles as the warning color, so a warning always carries an icon and a label, never color alone.
 - Hierarchy is built by elevation in dark mode (no shadows, borders and surface steps delimit) and by paper-versus-white in light mode.
+- Light mode ladder: paper (canvas, Drawer, Modal) → white (cards, fields) → cream surface 2°. Inside a Drawer or Modal `--wa-surface-2` resolves to white and `variant="surface"` pills to cream, so inner cards keep a visible step without per-component changes (`colorschema.md` → Escalera en claro).
 - The old violet direction is gone; the mockups in `docs/mockups/` are the visual reference.
 
 ### Using color in code
@@ -160,10 +161,10 @@ Mapping used in the product:
 
 Rules:
 
-- Status pills are Mantine `Badge` with `variant="light"` and `size="sm"` (radius `xl` is the theme default). The theme remaps that variant to the design system's pill: **role-colored text on the neutral second surface** (`--wa-surface-2`), never a tinted background — the mockups draw every pill this way. `gray` means dimmed text, `teal` means the interactive token. On a surface-2 box (drawer inner cards, bands) use `variant="surface"`: same text, background flips to the card color so the pill does not vanish. Where a label must never truncate in a narrow cell, use `TintChip` from `components/ui/chips.tsx`, which follows the same recipe. Filled badges are reserved for counters (the Por aprobar count), not statuses.
+- Status pills are `StatusPill` from `components/ui/chips.tsx`, everywhere: tables, drawers, detail pages, dashboard panels. It is the outlined access chip (1px default border, body fill, 12px medium sentence case, never truncates) with the role color on the text only; `gray` means dimmed text, `teal` the interactive token. The outline carries the shape, so the pill never depends on a surface step and never collides with a group band, a hover or a cream panel. Neutral tags (location·role, confirmation kind, counts) use `AccessChip`, the same shape with dimmed text. Mantine `Badge` is reserved for counters (`variant="filled"`, the Por aprobar count) and the portal's own pills; the theme's `light`/`surface` Badge remap remains for those.
 - Colored figures (amounts, KPI values) use the `--wa-*` tokens, not the badge tint variables.
 - Amber is both accent and dark-mode warning, so a warning always carries text; badges never rely on color alone.
-- Presentation rules for a status (label, color, allowed inline action) live in one module per feature (`movement-presentation.ts`, `reservation-modal-parts.tsx`) so a row and its drawer never disagree.
+- Presentation rules for a status (label, color, allowed inline action) live in one module per feature (`movement-presentation.ts`, `reservation-presentation.ts`, `visit-presentation.ts`, `residents/presentation.ts`, `packages/presentation.ts`, `units/unit-presentation.ts`, `announcements/presentation.ts`) so a row, its drawer and the dashboard never disagree. No inline status→color ternaries in cells.
 - Tables should remain readable in grayscale; color is secondary support.
 
 ## Buttons

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Badge, Button, Skeleton } from '@mantine/core'
+import { Button, Skeleton } from '@mantine/core'
 import { MonitorIcon, SmartphoneIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -11,6 +11,7 @@ import { submitHandlingServerErrors } from '../../lib/errors'
 import { AccountCard, InlineSuccess } from './account-card'
 import { closeOtherSessions, getSessions, type AccountSession } from './api'
 import { currentPasswordSchema, type CurrentPasswordFormValues } from './schemas'
+import { StatusPill } from '../../components/ui/chips'
 
 const sessionsQueryKey = ['auth', 'sessions'] as const
 
@@ -72,7 +73,7 @@ function SessionRow({ session }: { session: AccountSession }) {
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-[var(--mantine-color-text)]">{session.device}</span>
-          {session.is_current ? <Badge color="teal" radius="xl" size="xs" variant="light">{t('account.sessions.current')}</Badge> : null}
+          {session.is_current ? <StatusPill color="teal">{t('account.sessions.current')}</StatusPill> : null}
         </div>
         <p className="m-0 mt-0.5 text-xs text-[var(--mantine-color-dimmed)]">
           {[session.ip_address, session.is_current ? t('account.sessions.activeNow') : t('account.sessions.lastActive', { when: formatRelative(session.last_active_at) })].filter(Boolean).join(' · ')}
