@@ -1125,7 +1125,7 @@
     "title": "Finanzas",
     "subtitle": "Ingresos, egresos y depósitos · {{location}} · {{month}}",
     "noLocation": "Selecciona una ubicación para ver sus finanzas.",
-    "disclaimer": "Wasiy no procesa pagos: aquí se registran manualmente los ingresos (cuotas y depósitos de reservas) y los egresos del edificio (luz, agua, limpieza, mantenimiento). La contabilidad formal llegará como módulo futuro.",
+    "disclaimer": "Wasiy no procesa pagos: aquí se registran manualmente los ingresos (cuotas y depósitos de reservas) y los egresos del edificio (luz, agua, limpieza, mantenimiento).",
     "currentMonth": "Mes actual",
     "chooseMonth": "Elegir mes",
     "previousYear": "Año anterior",

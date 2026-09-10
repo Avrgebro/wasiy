@@ -1125,7 +1125,7 @@
     "title": "Finances",
     "subtitle": "Income, expenses and deposits · {{location}} · {{month}}",
     "noLocation": "Select a location to see its finances.",
-    "disclaimer": "Wasiy does not process payments: income (reservation fees and deposits) and building expenses (power, water, cleaning, maintenance) are recorded here by hand. Formal accounting will arrive as a future module.",
+    "disclaimer": "Wasiy does not process payments: income (reservation fees and deposits) and building expenses (power, water, cleaning, maintenance) are recorded here by hand.",
     "currentMonth": "Current month",
     "chooseMonth": "Choose month",
     "previousYear": "Previous year",
