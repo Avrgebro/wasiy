@@ -6,8 +6,12 @@ import { useTranslation } from 'react-i18next'
 import type { ReservationSummary } from './api'
 import { formatTimeRange, localDateString, longDayLabel } from './week'
 
+// Phones show amenity, unit, time and status; the resident column joins from
+// md. No fixed minimum width: a 640px floor made the whole page scroll
+// sideways on a phone as soon as the list had rows.
 const ROW_GRID =
-  'grid grid-cols-[1.2fr_0.6fr_0.9fr_100px_110px] items-center gap-3 px-4 py-3'
+  'grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.6fr)_auto_auto] md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.6fr)_minmax(0,0.9fr)_100px_110px] items-center gap-3 px-4 py-3'
+const RESIDENT_COLUMN = 'hidden md:block'
 
 /**
  * Amenity accent bar colors cycle through the Puerto roles so neighboring
@@ -59,14 +63,14 @@ export function ReservationWeekList({
   return (
     <div className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
       {toolbar ? <div className="border-b border-[var(--mantine-color-default-border)]">{toolbar}</div> : null}
-      {loading ? <div className="grid min-h-64 place-items-center"><Loader aria-label={t('common.loading')} /></div> : days.length === 0 ? <TableEmptyState /> : <div className={`overflow-x-auto ${fetching ? 'opacity-60' : ''}`}>
-        <div className="min-w-[640px]">
+      {loading ? <div className="grid min-h-64 place-items-center"><Loader aria-label={t('common.loading')} /></div> : days.length === 0 ? <TableEmptyState /> : <div className={fetching ? 'opacity-60' : undefined}>
+        <div>
           <div
             className={`${ROW_GRID} border-b border-[var(--mantine-color-default-border)] py-2.5 text-[11.5px] font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]`}
           >
             <span>{t('reservations.columns.amenity')}</span>
             <span>{t('reservations.columns.unit')}</span>
-            <span>{t('reservations.columns.resident')}</span>
+            <span className={RESIDENT_COLUMN}>{t('reservations.columns.resident')}</span>
             <span>{t('reservations.columns.time')}</span>
             <span>{t('reservations.columns.status')}</span>
           </div>
@@ -101,7 +105,7 @@ export function ReservationWeekList({
                           }
                         }}
                       >
-                        <span className="flex items-center gap-2.5">
+                        <span className="flex min-w-0 items-center gap-2.5">
                           <span
                             className="h-[26px] w-[3px] shrink-0 rounded-full"
                             style={{ background: `var(${accentFor(reservation.amenity_id, palette)})` }}
@@ -113,10 +117,10 @@ export function ReservationWeekList({
                         <Text c="dimmed" size="sm" truncate>
                           {reservation.unit_number}
                         </Text>
-                        <Text c="dimmed" size="sm" truncate>
+                        <Text c="dimmed" className={RESIDENT_COLUMN} size="sm" truncate>
                           {reservation.resident_name ?? '—'}
                         </Text>
-                        <Text c="dimmed" size="sm">
+                        <Text c="dimmed" className="whitespace-nowrap" size="sm">
                           {formatTimeRange(reservation, timezone)}
                         </Text>
                         <ReservationStatusBadge reservation={reservation} />
