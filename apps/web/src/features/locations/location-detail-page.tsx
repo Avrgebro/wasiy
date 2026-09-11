@@ -142,7 +142,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         ) : (
           <LocationCoverPlaceholder logoSize={280} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.55)] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.85)] via-transparent to-transparent" />
         {!deactivated && (
           <button
             aria-label={t('locations.detail.changeCover')}
@@ -237,12 +237,19 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
           })
         }
       >
-        <Tabs.List>
-          <Tabs.Tab value="info">{t('locations.tabs.info')}</Tabs.Tab>
-          <Tabs.Tab value="amenities">{t('locations.tabs.amenities')}</Tabs.Tab>
-          <Tabs.Tab value="staff">{t('locations.tabs.staff')}</Tabs.Tab>
-          <Tabs.Tab value="settings">{t('locations.tabs.settings')}</Tabs.Tab>
-        </Tabs.List>
+        {/* One line at every width: Mantine wraps the list by default, which
+            on a phone pushed the fourth tab under the other three. A wrapper
+            scrolls sideways (scrollbar hidden) while the list grows to its
+            content, so Mantine's underline — an absolute pseudo-element on
+            the list — spans every tab and not just the visible box. */}
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <Tabs.List className="w-max min-w-full flex-nowrap">
+            <Tabs.Tab className="shrink-0" value="info">{t('locations.tabs.info')}</Tabs.Tab>
+            <Tabs.Tab className="shrink-0" value="amenities">{t('locations.tabs.amenities')}</Tabs.Tab>
+            <Tabs.Tab className="shrink-0" value="staff">{t('locations.tabs.staff')}</Tabs.Tab>
+            <Tabs.Tab className="shrink-0" value="settings">{t('locations.tabs.settings')}</Tabs.Tab>
+          </Tabs.List>
+        </div>
 
         <Tabs.Panel pt="lg" value="info">
           <LocationInfoTab
