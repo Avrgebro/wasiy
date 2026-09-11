@@ -168,7 +168,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         {/* In flow (not absolute) so on narrow screens the actions wrap
             below the name instead of overlapping it. */}
         <div className="relative flex flex-wrap items-end justify-between gap-3 px-4 pb-[18px] pt-8 sm:px-6">
-          <div className="flex min-w-0 items-end gap-4">
+          <div className="flex min-w-0 items-start gap-4">
             {/* Brand tile stands in for the location avatar for now (mockup 03). */}
             <div className="grid size-12 shrink-0 place-items-center rounded-inner border border-[#2A3F40] bg-[#124E52] text-[#F7F5F0] sm:size-16 sm:rounded-surface">
               <WasiyLogo size={28} />
