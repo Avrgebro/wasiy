@@ -16,4 +16,6 @@ Free text let a typo fork a tower: "Torre A" and "Torre  A" were two buildings t
 
 ## Consequences
 
+The default building of a single-tower location is not shown as a row. The settings tab shows a switch («Esta ubicación tiene varias torres»), off; the internal row stays unnamed and invisible so the page never reads as a half-filled form. Turning it on names the existing tower and creates the second in one save, with a notice that existing units stay in the first. With two or more towers the switch stays on and the editable list appears; turning it off is allowed only while the extra towers are empty and deletes them, then clears the first tower's name (2026-09-10).
+
 The unit form shows a required tower select only when the Location has two or more Buildings. The location settings page gains an editable list of towers with per-row unit counts. The CSV import, when redesigned, resolves the "edificio" column to a Building and can flag unknown names instead of creating them silently. Towers can grow attributes (floors, intercom prefix) without touching units.
