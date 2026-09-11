@@ -30,10 +30,9 @@ class DemoLocationsSeeder extends Seeder
         $admin = User::query()->where('email', 'admin@wasiy.test')->sole();
 
         // The cascade with something real to show: the account sets the
-        // defaults, Edificio Central overrides one of them.
+        // default, Edificio Central overrides it.
         $account->forceFill(['settings' => [
             'visitor_auto_checkout_hours' => 24,
-            'reservation_max_advance_days' => 30,
         ]])->save();
         $central->forceFill(['settings' => [
             'visitor_auto_checkout_hours' => 12,
@@ -49,19 +48,17 @@ class DemoLocationsSeeder extends Seeder
         $this->amenity($central, 'salon-de-eventos', [
             'name' => 'Salón de eventos',
             'description' => 'Salón con cocina de apoyo, proyector y capacidad para 80 personas sentadas.',
-            'capacity' => 80,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Approval,
             'availability' => $this->everyDay('09:00', '22:00'),
-            'max_duration_minutes' => 360,
-            'max_concurrent_per_unit' => 1,
+            // Events are booked in half-day blocks.
+            'slot_minutes' => 360,
             'fee_amount' => 150,
             'deposit_amount' => 300,
         ]);
 
         $this->amenity($central, 'gimnasio', [
             'name' => 'Gimnasio',
-            'capacity' => 15,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
             'availability' => $this->everyDay('05:00', '23:00'),
@@ -69,9 +66,9 @@ class DemoLocationsSeeder extends Seeder
 
         $this->amenity($central, 'parrilla-terraza', [
             'name' => 'Parrilla / terraza',
-            'capacity' => 25,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
+            'slot_minutes' => 120,
             'availability' => [
                 'friday' => [['start' => '12:00', 'end' => '22:00']],
                 'saturday' => [['start' => '12:00', 'end' => '22:00']],
@@ -87,7 +84,6 @@ class DemoLocationsSeeder extends Seeder
 
         $squash = $this->amenity($central, 'cancha-de-squash', [
             'name' => 'Cancha de squash',
-            'capacity' => 4,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
             'availability' => $this->everyDay('06:00', '21:00'),

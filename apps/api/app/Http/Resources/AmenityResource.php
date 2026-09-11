@@ -3,7 +3,6 @@
 namespace App\Http\Resources;
 
 use App\Models\Amenity;
-use App\Services\SettingsResolver;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,21 +24,9 @@ class AmenityResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'is_reservable' => $this->is_reservable,
-            'capacity' => $this->capacity,
             'booking_mode' => $this->booking_mode->value,
             'availability' => $this->availability ?? (object) [],
-            'max_duration_minutes' => $this->max_duration_minutes,
-            'min_duration_minutes' => $this->min_duration_minutes,
-            'buffer_minutes' => $this->buffer_minutes,
-            'max_advance_days' => $this->max_advance_days,
-            'max_concurrent_per_unit' => $this->max_concurrent_per_unit,
-            'cancellation_window_hours' => $this->cancellation_window_hours,
-            // Own values above, resolved values here: the UI shows inherited
-            // defaults as placeholders and the reservations milestone reads
-            // one effective number.
-            'effective_booking_policy' => $this->is_reservable
-                ? app(SettingsResolver::class)->bookingPolicyFor($this->resource)
-                : null,
+            'slot_minutes' => $this->slotMinutes(),
             'fee_amount' => $this->fee_amount,
             'deposit_amount' => $this->deposit_amount,
             'status' => $this->isDeactivated() ? 'deactivated' : 'active',

@@ -1,6 +1,6 @@
-import { Alert, Button, NumberInput, Switch, Text, Textarea, TextInput } from '@mantine/core'
+import { Alert, Button, NumberInput, Select, Switch, Text, Textarea, TextInput } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
@@ -8,7 +8,6 @@ import { DangerZone } from '../../components/ui/detail-drawer-parts'
 import { DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { ApiError } from '../../app/api-client'
 import { getErrorMessage } from '../../lib/errors'
-import { getLocationSettings } from './api'
 import {
   createAmenity,
   updateAmenity,
@@ -18,34 +17,29 @@ import {
 } from './amenities-api'
 import { AmenityAvailabilityEditor } from './amenity-availability-editor'
 import { availabilityHasConflicts, WEEKDAYS } from './amenity-schedule'
+import { SLOT_MINUTES_OPTIONS, slotLengthLabel } from './amenity-slots'
 
 type FormState = {
   name: string
   description: string
-  capacity: number | ''
   is_reservable: boolean
   requires_approval: boolean
   availability: Availability
-  max_advance_days: number | ''
-  max_concurrent_per_unit: number | ''
-  cancellation_window_hours: number | ''
-  max_duration_hours: number | ''
+  slot_minutes: number
   fee_amount: number | ''
   deposit_amount: number | ''
 }
+
+
 
 function amenityDefaults(amenity?: AmenitySummary | null): FormState {
   return {
     name: amenity?.name ?? '',
     description: amenity?.description ?? '',
-    capacity: amenity?.capacity ?? '',
     is_reservable: amenity?.is_reservable ?? true,
     requires_approval: amenity?.booking_mode === 'approval',
     availability: amenity?.availability ?? {},
-    max_advance_days: amenity?.max_advance_days ?? '',
-    max_concurrent_per_unit: amenity?.max_concurrent_per_unit ?? '',
-    cancellation_window_hours: amenity?.cancellation_window_hours ?? '',
-    max_duration_hours: amenity?.max_duration_minutes ? amenity.max_duration_minutes / 60 : '',
+    slot_minutes: amenity?.slot_minutes ?? 60,
     fee_amount: amenity?.fee_amount ?? '',
     deposit_amount: amenity?.deposit_amount ?? '',
   }
@@ -62,28 +56,20 @@ function toPayload(form: FormState): AmenityPayload {
   return {
     name: form.name.trim(),
     description: form.description.trim() === '' ? null : form.description.trim(),
-    capacity: form.capacity === '' ? null : form.capacity,
     is_reservable: form.is_reservable,
     booking_mode: form.requires_approval ? 'approval' : 'instant',
     availability,
-    // Empty policy fields submit null — inherit from the location — never
-    // the placeholder value the input displays.
-    max_advance_days: form.max_advance_days === '' ? null : form.max_advance_days,
-    max_concurrent_per_unit: form.max_concurrent_per_unit === '' ? null : form.max_concurrent_per_unit,
-    cancellation_window_hours:
-      form.cancellation_window_hours === '' ? null : form.cancellation_window_hours,
-    max_duration_minutes: form.max_duration_hours === '' ? null : form.max_duration_hours * 60,
+    slot_minutes: form.slot_minutes,
     fee_amount: form.fee_amount === '' ? null : form.fee_amount,
     deposit_amount: form.deposit_amount === '' ? null : form.deposit_amount,
   }
 }
 
 /**
- * The 06c drawer: básicos, disponibilidad, política de reserva, cuotas.
- * Booking policy fields show the inherited location value as helper text —
- * "Vacío = heredar de la ubicación (30 días)" — so inheritance is visible
- * rather than implied. Photos are managed from the edit flow once the
- * amenity exists.
+ * The 06c drawer, after ADR 0041: básicos, disponibilidad, reserva (slot
+ * length and approval), cuotas. No booking policy — a reservation is an
+ * exclusive run of slots inside the schedule, nothing else to configure.
+ * Photos are managed from the edit flow once the amenity exists.
  */
 export function AmenityFormDrawer({
   accountId,
@@ -124,7 +110,6 @@ export function AmenityFormDrawer({
         accountId={accountId}
         editing={editing}
         locationId={locationId}
-        opened={opened}
         reactivating={reactivating}
         timezone={timezone}
         onClose={onClose}
@@ -142,7 +127,6 @@ function AmenityForm({
   onClose,
   onDeactivate,
   onReactivate,
-  opened,
   reactivating,
   timezone,
 }: {
@@ -152,7 +136,6 @@ function AmenityForm({
   onClose: () => void
   onDeactivate?: () => void
   onReactivate?: () => void
-  opened: boolean
   reactivating: boolean
   timezone: string
 }) {
@@ -160,15 +143,6 @@ function AmenityForm({
   const queryClient = useQueryClient()
   const [form, setForm] = useState<FormState>(amenityDefaults(editing))
   const [serverError, setServerError] = useState<string | null>(null)
-
-  // The location's resolved reservation defaults feed the inheritance
-  // helper text under each empty policy field.
-  const settingsQuery = useQuery({
-    enabled: opened,
-    queryKey: ['locations', 'settings', accountId, locationId],
-    queryFn: () => getLocationSettings(accountId, locationId),
-  })
-  const locationDefaults = settingsQuery.data?.data.values
 
   const mutation = useMutation({
     mutationFn: (payload: AmenityPayload) =>
@@ -196,23 +170,6 @@ function AmenityForm({
   const conflicts = availabilityHasConflicts(form.availability)
   const nameMissing = form.name.trim() === ''
 
-  function inheritHint(field: 'max_advance_days' | 'max_concurrent_per_unit' | 'cancellation_window_hours', unitKey: string) {
-    if (!locationDefaults) {
-      return undefined
-    }
-
-    const inherited = {
-      max_advance_days: locationDefaults.reservation_max_advance_days,
-      max_concurrent_per_unit: locationDefaults.reservation_max_concurrent_per_unit,
-      cancellation_window_hours: locationDefaults.reservation_cancellation_window_hours,
-    }[field]
-    const unit = t(unitKey)
-
-    return form[field] === ''
-      ? t('amenities.policy.inheritHint', { value: inherited, unit })
-      : t('amenities.policy.overrideHint', { value: inherited, unit })
-  }
-
   return (
     <form
       className="flex min-h-0 flex-1 flex-col"
@@ -235,17 +192,6 @@ function AmenityForm({
             value={form.name}
             onChange={(event) => set('name', event.currentTarget.value)}
           />
-          <DrawerRow>
-            <NumberInput
-              allowNegative={false}
-              label={t('amenities.form.capacity')}
-              min={1}
-              placeholder="—"
-              suffix={` ${t('amenities.form.people')}`}
-              value={form.capacity}
-              onChange={(value) => set('capacity', typeof value === 'number' ? value : '')}
-            />
-          </DrawerRow>
           <Textarea
             label={t('amenities.form.description')}
             rows={2}
@@ -269,54 +215,15 @@ function AmenityForm({
 
           {form.is_reservable ? (
             <>
-              <DrawerSection label={t('amenities.sections.policy')} />
-              <DrawerRow className="sm:[&_.mantine-InputWrapper-label]:min-h-[2.5rem] sm:[&_.mantine-InputWrapper-label]:flex sm:[&_.mantine-InputWrapper-label]:items-end">
-                <NumberInput
-                  allowNegative={false}
-                  description={inheritHint('max_advance_days', 'settings.reservations.days')}
-                  label={t('settings.reservations.maxAdvance')}
-                  min={1}
-                  placeholder={String(locationDefaults?.reservation_max_advance_days ?? '')}
-                  value={form.max_advance_days}
-                  onChange={(value) => set('max_advance_days', typeof value === 'number' ? value : '')}
-                />
-                <NumberInput
-                  allowNegative={false}
-                  description={inheritHint('max_concurrent_per_unit', 'settings.reservations.reservations')}
-                  label={t('settings.reservations.maxConcurrent')}
-                  min={1}
-                  placeholder={String(locationDefaults?.reservation_max_concurrent_per_unit ?? '')}
-                  value={form.max_concurrent_per_unit}
-                  onChange={(value) =>
-                    set('max_concurrent_per_unit', typeof value === 'number' ? value : '')
-                  }
-                />
-                <NumberInput
-                  allowNegative={false}
-                  description={inheritHint('cancellation_window_hours', 'settings.reservations.hours')}
-                  label={t('settings.reservations.cancellationWindow')}
-                  min={1}
-                  placeholder={String(locationDefaults?.reservation_cancellation_window_hours ?? '')}
-                  value={form.cancellation_window_hours}
-                  onChange={(value) =>
-                    set('cancellation_window_hours', typeof value === 'number' ? value : '')
-                  }
-                />
-                <NumberInput
-                  allowNegative={false}
-                  description={
-                    form.max_duration_hours === ''
-                      ? t('amenities.form.maxDurationHint')
-                      : undefined
-                  }
-                  label={t('amenities.form.maxDuration')}
-                  min={1}
-                  placeholder="—"
-                  suffix={` ${t('settings.reservations.hours')}`}
-                  value={form.max_duration_hours}
-                  onChange={(value) => set('max_duration_hours', typeof value === 'number' ? value : '')}
-                />
-              </DrawerRow>
+              <DrawerSection label={t('amenities.sections.booking')} />
+              <Select
+                allowDeselect={false}
+                data={SLOT_MINUTES_OPTIONS.map((minutes) => ({ value: String(minutes), label: slotLengthLabel(minutes, t) }))}
+                description={t('amenities.form.slotLengthHint')}
+                label={t('amenities.form.slotLength')}
+                value={String(form.slot_minutes)}
+                onChange={(value) => value && set('slot_minutes', Number(value))}
+              />
               <Switch
                 checked={form.requires_approval}
                 description={t('amenities.form.approvalHint')}

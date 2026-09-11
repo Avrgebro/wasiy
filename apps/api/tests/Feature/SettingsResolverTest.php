@@ -23,11 +23,11 @@ test('null settings at both levels resolve to system defaults', function () {
 
 test('a location override wins over an account value', function () {
     $location = Location::factory()->create();
-    $location->account->forceFill(['settings' => ['reservation_max_advance_days' => 60]])->save();
-    $location->forceFill(['settings' => ['reservation_max_advance_days' => 15]])->save();
+    $location->account->forceFill(['settings' => ['visitor_auto_checkout_hours' => 60]])->save();
+    $location->forceFill(['settings' => ['visitor_auto_checkout_hours' => 15]])->save();
 
-    expect(resolver()->forLocation($location)->reservationMaxAdvanceDays)->toBe(15)
-        ->and(resolver()->forAccount($location->account)->reservationMaxAdvanceDays)->toBe(60);
+    expect(resolver()->forLocation($location)->visitorAutoCheckoutHours)->toBe(15)
+        ->and(resolver()->forAccount($location->account)->visitorAutoCheckoutHours)->toBe(60);
 });
 
 test('a key absent at the location inherits the account value and follows it', function () {
@@ -45,12 +45,12 @@ test('a key absent at the location inherits the account value and follows it', f
 test('a location key set to the same value as the account does not follow a later account change', function () {
     $location = Location::factory()->create();
     $account = $location->account;
-    $account->forceFill(['settings' => ['reservation_cancellation_window_hours' => 24]])->save();
-    $location->forceFill(['settings' => ['reservation_cancellation_window_hours' => 24]])->save();
+    $account->forceFill(['settings' => ['visitor_auto_checkout_hours' => 24]])->save();
+    $location->forceFill(['settings' => ['visitor_auto_checkout_hours' => 24]])->save();
 
-    $account->forceFill(['settings' => ['reservation_cancellation_window_hours' => 48]])->save();
+    $account->forceFill(['settings' => ['visitor_auto_checkout_hours' => 48]])->save();
 
-    expect(resolver()->forLocation($location->refresh())->reservationCancellationWindowHours)->toBe(24);
+    expect(resolver()->forLocation($location->refresh())->visitorAutoCheckoutHours)->toBe(24);
 });
 
 test('a zero auto checkout override means never and is an override, not inheritance', function () {
@@ -64,13 +64,14 @@ test('a zero auto checkout override means never and is an override, not inherita
 
 test('explain reports the correct source level per key', function () {
     $location = Location::factory()->create();
-    $location->account->forceFill(['settings' => ['reservation_max_advance_days' => 60]])->save();
+    $location->account->forceFill(['settings' => ['visitor_auto_checkout_hours' => 60]])->save();
     $location->forceFill(['settings' => ['quiet_hours_enabled' => true, 'quiet_hours_start' => '22:00', 'quiet_hours_end' => '07:00']])->save();
 
     $explained = resolver()->explain($location);
 
     expect($explained['quiet_hours_enabled'])->toBe(['value' => true, 'source' => 'location', 'account_value' => false])
-        ->and($explained['reservation_max_advance_days'])->toBe(['value' => 60, 'source' => 'account', 'account_value' => 60])
+        ->and($explained['visitor_auto_checkout_hours'])->toBe(['value' => 60, 'source' => 'account', 'account_value' => 60])
+        ->and($explained)->not->toHaveKey('reservation_max_advance_days')
         ->and($explained['announcements_email_residents'])->toBe(['value' => false, 'source' => 'default', 'account_value' => false])
         ->and(array_keys($explained))->toBe(array_keys(OperationalSettings::DEFAULTS));
 });
@@ -82,7 +83,7 @@ test('an unknown key is rejected', function () {
 test('an invalid value is rejected', function (string $key, mixed $value) {
     OperationalSettings::resolve([$key => $value]);
 })->with([
-    'negative advance days' => ['reservation_max_advance_days', -1],
+    'retired reservation key' => ['reservation_max_advance_days', 30],
     'boolean as int' => ['visitor_preregistration_enabled', 1],
     'malformed quiet hours time' => ['quiet_hours_start', '25:00'],
     'negative auto checkout hours' => ['visitor_auto_checkout_hours', -1],

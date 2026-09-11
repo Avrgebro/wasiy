@@ -31,6 +31,7 @@ class AmenityFactory extends Factory
             'availability' => [
                 'monday' => [['start' => '09:00', 'end' => '22:00']],
             ],
+            'slot_minutes' => 60,
         ];
     }
 

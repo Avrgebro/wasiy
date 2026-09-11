@@ -26,7 +26,7 @@ class CreateReservation
     /**
      * Staff create on behalf of a unit. Instant amenities are approved on
      * the spot; approval-mode ones enter the queue as pending. The Amenity
-     * row lock is the serialization point for every capacity check.
+     * row lock is the serialization point for the exclusive-slot check.
      */
     public function handle(
         Amenity $amenity,

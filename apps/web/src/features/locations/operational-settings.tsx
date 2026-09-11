@@ -1,4 +1,4 @@
-import { Alert, Button, NumberInput, Skeleton, Switch, Text, TextInput } from '@mantine/core'
+import { Alert, Button, Skeleton, Switch, Text, TextInput } from '@mantine/core'
 import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
@@ -28,7 +28,7 @@ const AUTO_CHECKOUT_CHOICES = [4, 8, 12, 24, 0] as const
 
 /**
  * The Configuración tab (mockup 06) and the account-level settings page:
- * four groups, each with its own Descartar / Guardar, every control showing
+ * three groups, each with its own Descartar / Guardar, every control showing
  * its effective value including inherited defaults — never empty inputs.
  */
 export function OperationalSettingsPanel({
@@ -54,7 +54,6 @@ export function OperationalSettingsPanel({
   if (query.isLoading) {
     return (
       <div className="grid grid-cols-1 items-start gap-4 @3xl:grid-cols-2">
-        <Skeleton height={230} radius="lg" />
         <Skeleton height={230} radius="lg" />
         <Skeleton height={210} radius="lg" />
         <Skeleton height={210} radius="lg" />
@@ -88,7 +87,6 @@ export function OperationalSettingsPanel({
       </Text>
       <div className="grid grid-cols-1 items-start gap-4 @3xl:grid-cols-2">
         <VisitorsGroup {...shared} />
-        <ReservationsGroup {...shared} />
         <QuietHoursGroup {...shared} timezone={timezone} />
         <AnnouncementsGroup {...shared} />
       </div>
@@ -344,71 +342,6 @@ function VisitorsGroup(props: GroupProps) {
           }
         />
       </div>
-    </SettingsGroup>
-  )
-}
-
-function ReservationsGroup(props: GroupProps) {
-  const { explanation, level, readOnly, t } = props
-  const group = useGroup(props)
-
-  const fields = [
-    { key: 'reservation_max_advance_days', label: t('settings.reservations.maxAdvance'), unit: t('settings.reservations.days') },
-    { key: 'reservation_max_concurrent_per_unit', label: t('settings.reservations.maxConcurrent'), unit: t('settings.reservations.reservations') },
-    { key: 'reservation_cancellation_window_hours', label: t('settings.reservations.cancellationWindow'), unit: t('settings.reservations.hours') },
-  ] as const
-
-  return (
-    <SettingsGroup
-      footerHint={t('settings.reservations.footer')}
-      group={group}
-      readOnly={readOnly}
-      t={t}
-      title={t('settings.reservations.title')}
-    >
-      <div className="flex flex-wrap gap-x-6 gap-y-4">
-        {fields.map((field) => {
-          const info = explanation[field.key]
-
-          return (
-            <div key={field.key} className="flex flex-col gap-1.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--mantine-color-dimmed)]">
-                {field.label}
-              </span>
-              <NumberInput
-                allowNegative={false}
-                aria-label={field.label}
-                className="w-32"
-                disabled={readOnly}
-                min={1}
-                suffix={` ${field.unit}`}
-                value={group.effective(field.key)}
-                onChange={(value) => {
-                  if (typeof value === 'number') {
-                    group.set(field.key, value)
-                  }
-                }}
-              />
-              <EffectLine
-                cleared={group.draft[field.key] === null}
-                overridden={info.source === level}
-                t={t}
-                text={
-                  level === 'location'
-                    ? info.source === 'location'
-                      ? t('settings.overridesAccount', { account: info.account_value })
-                      : t('settings.inheritedFromAccount', { account: info.account_value })
-                    : t('settings.effectOnly', { effective: group.effective(field.key) })
-                }
-                onClear={level === 'location' ? () => group.set(field.key, null) : undefined}
-              />
-            </div>
-          )
-        })}
-      </div>
-      <Text c="dimmed" size="xs">
-        {t('settings.reservations.amenityOverrideHint')}
-      </Text>
     </SettingsGroup>
   )
 }

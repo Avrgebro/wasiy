@@ -4,13 +4,12 @@ namespace App\Services;
 
 use App\Data\OperationalSettings;
 use App\Models\Account;
-use App\Models\Amenity;
 use App\Models\Location;
 
 /**
  * The single owner of the Account → Location settings cascade. Each level
  * stores only the keys it overrides; every read resolves through the chain
- * to one effective value. The Amenity level joins this chain in M6 slice 8.
+ * to one effective value. Reservation policy is not part of it (ADR 0041).
  */
 class SettingsResolver
 {
@@ -25,37 +24,6 @@ class SettingsResolver
             $location->account->settings ?? [],
             $location->settings ?? [],
         );
-    }
-
-    /**
-     * The Amenity level of the cascade. An Amenity's nullable policy columns
-     * inherit from its Location's resolved settings, so the reservations
-     * milestone reads one effective value and never re-implements the
-     * fallback.
-     *
-     * @return array<string, array{value: int, source: 'amenity'|'location'}>
-     */
-    public function bookingPolicyFor(Amenity $amenity): array
-    {
-        $locationSettings = $this->forLocation($amenity->location);
-
-        $inherited = [
-            'max_advance_days' => $locationSettings->reservationMaxAdvanceDays,
-            'max_concurrent_per_unit' => $locationSettings->reservationMaxConcurrentPerUnit,
-            'cancellation_window_hours' => $locationSettings->reservationCancellationWindowHours,
-        ];
-
-        $policy = [];
-
-        foreach ($inherited as $key => $locationValue) {
-            $own = $amenity->{$key};
-            $policy[$key] = [
-                'value' => $own ?? $locationValue,
-                'source' => $own === null ? 'location' : 'amenity',
-            ];
-        }
-
-        return $policy;
     }
 
     /**

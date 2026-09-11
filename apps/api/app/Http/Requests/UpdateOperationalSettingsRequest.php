@@ -29,9 +29,6 @@ class UpdateOperationalSettingsRequest extends FormRequest
             'visitor_preregistration_enabled' => ['sometimes', 'nullable', 'boolean'],
             // 0 means "never close automatically"; null clears the override.
             'visitor_auto_checkout_hours' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:168'],
-            'reservation_max_advance_days' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:365'],
-            'reservation_max_concurrent_per_unit' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:50'],
-            'reservation_cancellation_window_hours' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:720'],
             'quiet_hours_enabled' => ['sometimes', 'nullable', 'boolean'],
             'quiet_hours_start' => ['sometimes', 'nullable', 'date_format:H:i'],
             'quiet_hours_end' => ['sometimes', 'nullable', 'date_format:H:i'],

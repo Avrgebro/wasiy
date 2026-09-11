@@ -11,21 +11,19 @@ use App\Models\Reservation;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\ResidentAlerts;
-use App\Services\SettingsResolver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Every status transition in one place: approve re-runs the booking rule
- * under the same Amenity lock creation uses, so an approval can never
- * overshoot capacity that filled up while the request waited.
+ * under the same Amenity lock creation uses, so an approval can never land
+ * on a slot that was taken while the request waited.
  */
 class DecideReservation
 {
     public function __construct(
         private readonly ValidateReservationSlot $validator,
         private readonly ActivityLogger $activityLogger,
-        private readonly SettingsResolver $settings,
         private readonly SyncReservationMovements $movements,
         private readonly ResidentAlerts $alerts,
     ) {}
@@ -84,11 +82,11 @@ class DecideReservation
     }
 
     /**
-     * Pending, observed, and approved reservations can be cancelled. An
-     * approved reservation inside the amenity's cancellation window can only
-     * be cancelled by an account admin ($bypassWindow).
+     * Pending, observed, and approved reservations can be cancelled. Staff
+     * may cancel at any time; a resident ($asResident) only while the
+     * booking has not started (ADR 0041).
      */
-    public function cancel(Reservation $reservation, User $actor, ?string $note = null, bool $bypassWindow = false): Reservation
+    public function cancel(Reservation $reservation, User $actor, ?string $note = null, bool $asResident = false): Reservation
     {
         if ($reservation->status->isDecided() && $reservation->status !== ReservationStatus::Approved) {
             throw ValidationException::withMessages([
@@ -96,15 +94,10 @@ class DecideReservation
             ]);
         }
 
-        if ($reservation->status === ReservationStatus::Approved && ! $bypassWindow) {
-            $policy = $this->settings->bookingPolicyFor($reservation->amenity);
-            $windowHours = $policy['cancellation_window_hours']['value'] ?? null;
-
-            if ($windowHours !== null && now()->gt($reservation->starts_at->subHours($windowHours))) {
-                throw ValidationException::withMessages([
-                    'status' => __('The cancellation window for this reservation has closed.'),
-                ]);
-            }
+        if ($asResident && $reservation->starts_at->lte(now())) {
+            throw ValidationException::withMessages([
+                'status' => __('A reservation that has started can no longer be cancelled.'),
+            ]);
         }
 
         return DB::transaction(function () use ($reservation, $actor, $note): Reservation {

@@ -1,79 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, Select, Text, TextInput } from '@mantine/core'
 import { DrawerRow } from '../../components/ui/detail-drawer-parts'
-import type { AvailabilityWindow } from '../locations/amenities-api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../app/api-client'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
+import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
-import type { AmenitySummary } from '../locations/amenities-api'
+import { getAmenityAvailability, type AmenitySummary } from '../locations/amenities-api'
 import { getResidents } from '../residents/api'
 import { getUnits } from '../units/api'
 import { createReservation } from './api'
 import { reservationFormSchema, type ReservationFormValues } from './schemas'
-import { WEEKDAY_KEYS } from './week'
-
-const STEP_MINUTES = 30
-
-function toMinutes(time: string): number {
-  const [hours, minutes] = time.split(':').map(Number)
-
-  return hours * 60 + minutes
-}
-
-function toTime(minutes: number): string {
-  return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`
-}
-
-/** Every valid 30-minute start inside the day's windows. */
-function startOptions(windows: AvailabilityWindow[]): string[] {
-  return windows.flatMap((window) => {
-    const options: string[] = []
-    for (let m = toMinutes(window.start); m + STEP_MINUTES <= toMinutes(window.end); m += STEP_MINUTES) {
-      options.push(toTime(m))
-    }
-
-    return options
-  })
-}
-
-/**
- * Ends reachable from the chosen start: inside the same window, at least the
- * minimum duration (rounded up to the grid), at most the maximum.
- */
-function endOptions(
-  windows: AvailabilityWindow[],
-  start: string,
-  minDuration: number | null,
-  maxDuration: number | null,
-): string[] {
-  const startMinutes = toMinutes(start)
-  const window = windows.find(
-    (candidate) => startMinutes >= toMinutes(candidate.start) && startMinutes < toMinutes(candidate.end),
-  )
-
-  if (!window) {
-    return []
-  }
-
-  const minEnd =
-    startMinutes + Math.max(STEP_MINUTES, Math.ceil((minDuration ?? 0) / STEP_MINUTES) * STEP_MINUTES)
-  const maxEnd = Math.min(
-    toMinutes(window.end),
-    maxDuration === null ? Number.POSITIVE_INFINITY : startMinutes + maxDuration,
-  )
-
-  const options: string[] = []
-  for (let m = minEnd; m <= maxEnd; m += STEP_MINUTES) {
-    options.push(toTime(m))
-  }
-
-  return options
-}
+import { endOptionsFrom, MAX_ADVANCE_DAYS } from './reservation-slots'
+import { addDays, localDateString } from './week'
 
 const emptyValues: ReservationFormValues = {
   amenity_id: '',
@@ -106,12 +48,14 @@ export function ReservationFormDrawer({
   locationId,
   onClose,
   opened,
+  timezone,
 }: {
   accountId: string
   amenities: AmenitySummary[]
   locationId: string
   onClose: () => void
   opened: boolean
+  timezone: string
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -155,23 +99,37 @@ export function ReservationFormDrawer({
     label: resident.name,
   }))
 
-  const selected = reservable.find((amenity) => amenity.id === amenityId)
-  const weekday = date ? WEEKDAY_KEYS[new Date(`${date}T12:00:00Z`).getUTCDay()] : null
-  const windows = selected && weekday ? (selected.availability[weekday] ?? []) : []
-  const windowsHint =
-    selected && date
-      ? windows.length === 0
-        ? t('reservations.form.closedThatDay')
-        : t('reservations.form.availableWindows', {
-            windows: windows.map((window) => `${window.start}–${window.end}`).join(', '),
-          })
+  const today = localDateString(new Date(), timezone)
+  const maxDate = addDays(today, MAX_ADVANCE_DAYS)
+  const dateValid = /^\d{4}-\d{2}-\d{2}$/.test(date) && date >= today && date <= maxDate
+
+  // The server is the only place slots are computed (ADR 0041); the drawer
+  // shows what it offers and posts one of those runs back.
+  const availabilityQuery = useQuery({
+    enabled: opened && amenityId !== '' && dateValid,
+    queryKey: ['reservations', 'availability', amenityId, date, unitId],
+    queryFn: () => getAmenityAvailability(amenityId, date, unitId || undefined),
+  })
+  const slots = availabilityQuery.data?.slots ?? []
+  const freeSlots = slots.filter((slot) => slot.available)
+  const slotsHint =
+    amenityId && date
+      ? !dateValid
+        ? t('reservations.form.dateOutOfRange', { days: MAX_ADVANCE_DAYS })
+        : availabilityQuery.isLoading
+          ? null
+          : availabilityQuery.isError
+            ? getErrorMessage(availabilityQuery.error)
+            : slots.length === 0
+              ? t('reservations.form.closedThatDay')
+              : freeSlots.length === 0
+                ? t('reservations.form.fullyBooked')
+                : null
       : null
 
   const start = useWatch({ control: form.control, name: 'start' })
-  const startTimes = startOptions(windows)
-  const endTimes = start
-    ? endOptions(windows, start, selected?.min_duration_minutes ?? null, selected?.max_duration_minutes ?? null)
-    : []
+  const startTimes = freeSlots.map((slot) => ({ value: slot.start, label: `${slot.start}–${slot.end}` }))
+  const endTimes = start ? endOptionsFrom(slots, start) : []
 
   const mutation = useMutation({
     mutationFn: (values: ReservationFormValues) =>
@@ -261,6 +219,8 @@ export function ReservationFormDrawer({
                   {...field}
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('reservations.form.date')}
+                  max={maxDate}
+                  min={today}
                   type="date"
                   onChange={(event) => {
                     field.onChange(event)
@@ -271,14 +231,14 @@ export function ReservationFormDrawer({
                 />
               )}
             />
-            {windowsHint ? (
+            {slotsHint ? (
               <Text c="dimmed" mt={4} size="xs">
-                {windowsHint}
+                {slotsHint}
               </Text>
             ) : null}
           </div>
-          {/* 30-minute grid, constrained to the day's windows and the
-              amenity's duration limits; the API enforces the same rule. */}
+          {/* Start = a free slot the server offered; end = the end of that
+              slot or of any consecutive free slot after it. */}
           <DrawerRow>
             <Controller
               control={form.control}
@@ -289,7 +249,7 @@ export function ReservationFormDrawer({
                   data={startTimes}
                   disabled={startTimes.length === 0}
                   error={fieldErrorMessage(fieldState.error)}
-                  label={t('reservations.form.start')}
+                  label={t('reservations.form.startSlot')}
                   placeholder={startTimes.length === 0 ? '—' : undefined}
                   searchable
                   onChange={(value) => {

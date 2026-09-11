@@ -156,13 +156,7 @@ export function PortalReservationsPage() {
         footer={
           selected && ['pending', 'observed', 'approved'].includes(selected.status) && !selected.is_completed ? (
             <SheetAction
-              hint={
-                detail.data?.can_cancel
-                  ? detail.data.cancellation_window_hours
-                    ? t('portal.reservations.cancelWindow', { hours: detail.data.cancellation_window_hours })
-                    : t('portal.reservations.cancelAnytime')
-                  : t('portal.reservations.cancelClosed')
-              }
+              hint={t(detail.data?.can_cancel ? 'portal.reservations.cancelUntilStart' : 'portal.reservations.cancelClosed')}
             >
               <Button className="w-full" color="error" disabled={!detail.data?.can_cancel} variant="default" onClick={() => setConfirmingCancel(true)}>
                 {t('portal.reservations.cancel')}
@@ -210,7 +204,6 @@ export function PortalReservationsPage() {
 function AmenityCard({ amenity }: { amenity: PortalAmenity }) {
   const { t } = useTranslation('common')
   const facts = [
-    amenity.capacity ? t('portal.reservations.upTo', { count: amenity.capacity }) : null,
     amenity.fee_amount ? formatMoney(amenity.fee_amount) : t('portal.reservations.free'),
     amenity.deposit_amount ? t('portal.reservations.depositOf', { amount: formatMoney(amenity.deposit_amount) }) : null,
   ].filter(Boolean)

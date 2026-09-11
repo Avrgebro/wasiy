@@ -7,8 +7,6 @@ export type AvailabilityWindow = { start: string; end: string }
 
 export type Availability = Partial<Record<string, AvailabilityWindow[]>>
 
-export type BookingPolicySource = 'amenity' | 'location'
-
 export type AmenitySummary = {
   id: string
   account_id: string
@@ -17,16 +15,10 @@ export type AmenitySummary = {
   slug: string
   description: string | null
   is_reservable: boolean
-  capacity: number | null
   booking_mode: BookingModeValue
   availability: Availability
-  max_duration_minutes: number | null
-  min_duration_minutes: number | null
-  buffer_minutes: number | null
-  max_advance_days: number | null
-  max_concurrent_per_unit: number | null
-  cancellation_window_hours: number | null
-  effective_booking_policy: Record<string, { value: number; source: BookingPolicySource }> | null
+  /** Length of one bookable slot (ADR 0041); a booking covers consecutive slots. */
+  slot_minutes: number
   fee_amount: number | null
   deposit_amount: number | null
   status: 'active' | 'deactivated'
@@ -39,13 +31,9 @@ export type AmenityPayload = {
   name?: string
   description?: string | null
   is_reservable?: boolean
-  capacity?: number | null
   booking_mode?: BookingModeValue
   availability?: Availability | null
-  max_duration_minutes?: number | null
-  max_advance_days?: number | null
-  max_concurrent_per_unit?: number | null
-  cancellation_window_hours?: number | null
+  slot_minutes?: number
   fee_amount?: number | null
   deposit_amount?: number | null
 }
@@ -128,4 +116,24 @@ export function setAmenityCoverPhoto(
     `${amenitiesBase(accountId, locationId)}/${amenityId}/photos/${photoId}/cover`,
     { method: 'POST' },
   )
+}
+
+/** One bookable slot as the server offers it; `reason` explains an unavailable one. */
+export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | 'taken' | null }
+
+export type AvailabilityResponse = {
+  date: string
+  slot_minutes: number
+  booking_mode: BookingModeValue
+  fee_amount: number | null
+  deposit_amount: number | null
+  slots: AvailabilitySlot[]
+}
+
+/** The staff surface reads slots from the server like the portal does (ADR 0041). */
+export function getAmenityAvailability(amenityId: string, date: string, unitId?: string) {
+  const params = new URLSearchParams({ date })
+  if (unitId) params.set('unit_id', unitId)
+
+  return apiRequest<AvailabilityResponse>(`/api/amenities/${amenityId}/availability?${params.toString()}`)
 }

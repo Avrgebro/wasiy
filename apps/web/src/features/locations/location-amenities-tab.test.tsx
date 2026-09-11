@@ -25,7 +25,6 @@ function amenity(overrides: Partial<AmenitySummary> = {}): AmenitySummary {
     slug: 'salon-de-eventos',
     description: null,
     is_reservable: true,
-    capacity: 80,
     booking_mode: 'approval',
     availability: {
       monday: [{ start: '09:00', end: '22:00' }],
@@ -36,13 +35,7 @@ function amenity(overrides: Partial<AmenitySummary> = {}): AmenitySummary {
       saturday: [{ start: '09:00', end: '22:00' }],
       sunday: [{ start: '09:00', end: '22:00' }],
     },
-    max_duration_minutes: null,
-    min_duration_minutes: null,
-    buffer_minutes: null,
-    max_advance_days: null,
-    max_concurrent_per_unit: 1,
-    cancellation_window_hours: null,
-    effective_booking_policy: null,
+    slot_minutes: 120,
     fee_amount: 150,
     deposit_amount: 300,
     status: 'active',
@@ -59,9 +52,6 @@ function settingsResponse() {
       values: {
         visitor_preregistration_enabled: true,
         visitor_auto_checkout_hours: 0,
-        reservation_max_advance_days: 30,
-        reservation_max_concurrent_per_unit: 2,
-        reservation_cancellation_window_hours: 24,
         quiet_hours_enabled: false,
         quiet_hours_start: null,
         quiet_hours_end: null,
@@ -126,7 +116,6 @@ describe('LocationAmenitiesTab', () => {
         id: 'amn_2',
         name: 'Lobby / recepción',
         is_reservable: false,
-        capacity: null,
         fee_amount: null,
         deposit_amount: null,
         availability: {},
@@ -211,7 +200,7 @@ describe('LocationAmenitiesTab', () => {
     expect(screen.queryByRole('button', { name: 'Abrir y agregar horario' })).not.toBeInTheDocument()
   })
 
-  it('creating posts null for empty policy fields and integer fees', async () => {
+  it('creating posts the slot length (default one hour) and integer fees, no policy fields', async () => {
     let posted: Record<string, unknown> | null = null
     installAdapter([], (payload) => {
       posted = payload as Record<string, unknown>
@@ -223,6 +212,9 @@ describe('LocationAmenitiesTab', () => {
     await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])
     await user.type(await screen.findByLabelText(/Nombre/), 'Piscina')
     await user.click(screen.getAllByRole('button', { name: 'Abrir y agregar horario' })[0])
+    expect(screen.getByRole('combobox', { name: 'Duración de cada turno' })).toHaveValue('1 hora')
+    await user.click(screen.getByRole('combobox', { name: 'Duración de cada turno' }))
+    await user.click(await screen.findByRole('option', { name: '2 horas' }))
     await user.type(screen.getByLabelText('Cuota de uso'), '50')
     await user.click(screen.getByRole('button', { name: 'Crear amenidad' }))
 
@@ -231,13 +223,14 @@ describe('LocationAmenitiesTab', () => {
       name: 'Piscina',
       is_reservable: true,
       booking_mode: 'instant',
-      max_advance_days: null,
-      max_concurrent_per_unit: null,
-      cancellation_window_hours: null,
+      slot_minutes: 120,
       fee_amount: 50,
       deposit_amount: null,
       availability: { monday: [{ start: '09:00', end: '22:00' }] },
     })
+    for (const gone of ['capacity', 'max_advance_days', 'max_concurrent_per_unit', 'cancellation_window_hours', 'max_duration_minutes']) {
+      expect(posted).not.toHaveProperty(gone)
+    }
     expect(Object.keys((posted as unknown as Record<string, unknown>).availability as object)).toEqual(['monday'])
   })
 })

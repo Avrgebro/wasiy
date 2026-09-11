@@ -1,16 +1,10 @@
 import { Badge, Button, Group, Modal, Stack, Text, Textarea } from '@mantine/core'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { notifySuccess } from '../../lib/notify'
-import {
-  approveReservation,
-  observeReservation,
-  rejectReservation,
-  type ReservationSummary,
-} from './api'
+import type { ReservationSummary } from './api'
 import { ReservationField, ReservationSlotBand } from './reservation-modal-parts'
+import { useReservationDecisions } from './use-reservation-decisions'
 import { formatTimeRange, localDateString, shortDayLabel } from './week'
 
 type NoteAction = { kind: 'reject' | 'observe'; reservation: ReservationSummary }
@@ -60,35 +54,17 @@ export function ApprovalQueue({
   onSelect?: (reservation: ReservationSummary) => void
 }) {
   const { t } = useTranslation('common')
-  const queryClient = useQueryClient()
   const [noteAction, setNoteAction] = useState<NoteAction | null>(null)
   const [note, setNote] = useState('')
   const [expanded, setExpanded] = useState(false)
 
-  const invalidate = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['reservations'] })
-  }
-
-  const approveMutation = useMutation({
-    mutationFn: (reservationId: string) => approveReservation(accountId, reservationId),
-    onSuccess: async () => {
-      await invalidate()
-      notifySuccess(t('reservations.toasts.approved'))
-    },
-  })
-
-  const noteMutation = useMutation({
-    mutationFn: ({ kind, reservation }: NoteAction) =>
-      kind === 'reject'
-        ? rejectReservation(accountId, reservation.id, note)
-        : observeReservation(accountId, reservation.id, note),
-    onSuccess: async (_data, action) => {
-      await invalidate()
+  const decide = useReservationDecisions(accountId, (input) => {
+    if (input.kind !== 'approve') {
       setNoteAction(null)
       setNote('')
-      notifySuccess(t(`reservations.toasts.${action.kind === 'reject' ? 'rejected' : 'observed'}`))
-    },
+    }
   })
+  const approving = decide.isPending && decide.variables?.kind === 'approve' ? decide.variables.reservationId : null
 
 
   return (
@@ -145,9 +121,9 @@ export function ApprovalQueue({
                   <Group className="pointer-coarse:gap-3" gap={8} grow mt={11} onClick={(event) => event.stopPropagation()}>
                     <Button
                       color="accent"
-                      loading={approveMutation.isPending && approveMutation.variables === request.id}
+                      loading={approving === request.id}
                       size="xs"
-                      onClick={() => approveMutation.mutate(request.id)}
+                      onClick={() => decide.mutate({ kind: 'approve', reservationId: request.id })}
                     >
                       {t('reservations.actions.approve')}
                     </Button>
@@ -235,8 +211,8 @@ export function ApprovalQueue({
             <Button
               color={noteAction?.kind === 'reject' ? 'error' : 'accent'}
               disabled={note.trim().length === 0}
-              loading={noteMutation.isPending}
-              onClick={() => noteAction && noteMutation.mutate(noteAction)}
+              loading={decide.isPending && decide.variables?.kind !== 'approve'}
+              onClick={() => noteAction && decide.mutate({ kind: noteAction.kind, reservationId: noteAction.reservation.id, note })}
             >
               {noteAction ? t(`reservations.actions.${noteAction.kind}`) : ''}
             </Button>

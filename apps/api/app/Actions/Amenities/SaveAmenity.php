@@ -16,20 +16,15 @@ use InvalidArgumentException;
 /**
  * Create and update share one writer so normalization cannot drift: the
  * availability json is validated through AmenityAvailability, and a
- * non-reservable Amenity stores null booking policy and fees — a common
- * space has no booking to configure, and stale values must not resurface
- * when it later becomes reservable.
+ * non-reservable Amenity stores instant mode and null fees — a common space
+ * has no booking to configure, and stale values must not resurface when it
+ * later becomes reservable. The slot length keeps its value: it is a
+ * property of the space, not a policy.
  */
 class SaveAmenity
 {
     private const BOOKING_FIELDS = [
         'booking_mode',
-        'max_duration_minutes',
-        'min_duration_minutes',
-        'buffer_minutes',
-        'max_advance_days',
-        'max_concurrent_per_unit',
-        'cancellation_window_hours',
         'fee_amount',
         'deposit_amount',
     ];

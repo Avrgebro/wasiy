@@ -9,7 +9,6 @@ use App\Models\ActivityLog;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\User;
-use App\Services\SettingsResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -35,7 +34,7 @@ function validAmenityPayload(array $overrides = []): array
         'name' => 'Salón de eventos',
         'is_reservable' => true,
         'booking_mode' => BookingMode::Approval->value,
-        'capacity' => 80,
+        'slot_minutes' => 120,
         'availability' => [
             'monday' => [['start' => '09:00', 'end' => '22:00']],
             'wednesday' => [
@@ -157,26 +156,38 @@ test('a day with zero windows persists as closed', function () {
         ->and($amenity->availability)->not->toHaveKey('sunday');
 });
 
-test('null policy fields resolve through the location to the account and a set value wins', function () {
+test('the slot length is a whole number of half hours within a day', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
-    $account->forceFill(['settings' => ['reservation_max_advance_days' => 60]])->save();
-    $location->forceFill(['settings' => ['reservation_max_concurrent_per_unit' => 3]])->save();
+    $admin = amenityAdmin($account);
 
-    $amenity = Amenity::factory()->for($location)->create([
-        'max_advance_days' => null,
-        'max_concurrent_per_unit' => null,
-        'cancellation_window_hours' => 48,
-    ]);
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['slot_minutes' => 45]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('slot_minutes');
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['slot_minutes' => 900]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('slot_minutes');
 
-    $policy = app(SettingsResolver::class)->bookingPolicyFor($amenity);
+    $id = $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['slot_minutes' => 360]))
+        ->assertCreated()
+        ->assertJsonPath('data.slot_minutes', 360)
+        ->assertJsonMissingPath('data.capacity')
+        ->assertJsonMissingPath('data.effective_booking_policy')
+        ->json('data.id');
 
-    expect($policy['max_advance_days'])->toBe(['value' => 60, 'source' => 'location'])
-        ->and($policy['max_concurrent_per_unit'])->toBe(['value' => 3, 'source' => 'location'])
-        ->and($policy['cancellation_window_hours'])->toBe(['value' => 48, 'source' => 'amenity']);
+    // Absent in the payload, it defaults to an hour.
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), collect(validAmenityPayload(['name' => 'Parrilla']))->except('slot_minutes')->all())
+        ->assertCreated()
+        ->assertJsonPath('data.slot_minutes', 60);
+
+    expect(Amenity::query()->findOrFail($id)->slotMinutes())->toBe(360);
 });
 
-test('a non-reservable amenity stores null booking policy and fees', function () {
+test('a non-reservable amenity stores instant mode and null fees', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
     $admin = amenityAdmin($account);
@@ -187,14 +198,12 @@ test('a non-reservable amenity stores null booking policy and fees', function ()
             'is_reservable' => false,
         ]))
         ->assertCreated()
-        ->assertJsonPath('data.effective_booking_policy', null)
         ->json('data.id');
 
     $amenity = Amenity::query()->findOrFail($id);
 
     expect($amenity->fee_amount)->toBeNull()
         ->and($amenity->deposit_amount)->toBeNull()
-        ->and($amenity->max_advance_days)->toBeNull()
         ->and($amenity->booking_mode)->toBe(BookingMode::Instant);
 });
 

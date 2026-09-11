@@ -152,9 +152,6 @@ export function reorderLocationPhotos(accountId: string, locationId: string, pho
 export type OperationalSettingsValues = {
   visitor_preregistration_enabled: boolean
   visitor_auto_checkout_hours: number
-  reservation_max_advance_days: number
-  reservation_max_concurrent_per_unit: number
-  reservation_cancellation_window_hours: number
   quiet_hours_enabled: boolean
   quiet_hours_start: string | null
   quiet_hours_end: string | null

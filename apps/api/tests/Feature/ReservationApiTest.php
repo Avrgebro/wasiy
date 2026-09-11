@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Reservations\ValidateReservationSlot;
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\BookingMode;
@@ -122,132 +123,6 @@ test('a slot outside the availability windows is rejected', function () {
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
             'date' => $wednesday,
         ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-});
-
-test('duration limits are enforced', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
-        'min_duration_minutes' => 60,
-        'max_duration_minutes' => 120,
-    ]);
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '10:30',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('ends_at');
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '13:00',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('ends_at');
-});
-
-test('a null capacity means exclusive use and the buffer widens the collision', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
-        'capacity' => null,
-        'buffer_minutes' => 30,
-    ]);
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '12:00',
-        ]))
-        ->assertCreated();
-
-    // 12:00–13:00 would be fine without the 30-minute buffer.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '12:00', 'end' => '13:00',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-
-    // Past the buffer it books.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '12:30', 'end' => '13:30',
-        ]))
-        ->assertCreated();
-});
-
-test('capacity above one allows that many overlapping approved bookings', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['capacity' => 2]);
-    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-    $thirdUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
-        ->assertCreated();
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
-        ->assertCreated();
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $thirdUnit))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-});
-
-test('the per-unit simultaneous cap is enforced', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
-        'capacity' => 10,
-        'max_concurrent_per_unit' => 1,
-    ]);
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
-        ->assertCreated();
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '11:00', 'end' => '13:00',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('unit_id');
-});
-
-test('pending requests never hold capacity', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
-        'booking_mode' => BookingMode::Approval,
-        'capacity' => null,
-    ]);
-    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
-        ->assertCreated();
-
-    // Same slot, second request: also accepted as pending.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
-        ->assertCreated();
-});
-
-test('approving revalidates capacity so the second overlapping request loses', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
-        'booking_mode' => BookingMode::Approval,
-        'capacity' => null,
-    ]);
-    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-
-    $first = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
-        ->json('data.id');
-    $second = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
-        ->json('data.id');
-
-    $this->actingAs($admin)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$first}/approve")
-        ->assertOk()
-        ->assertJsonPath('data.status', 'approved');
-
-    $this->actingAs($admin)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$second}/approve")
         ->assertUnprocessable()
         ->assertJsonValidationErrors('starts_at');
 });
@@ -400,121 +275,221 @@ test('a staff member of another location cannot list or create', function () {
         ->assertForbidden();
 });
 
-test('the cancellation window blocks managers but not admins', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
-        'booking_mode' => BookingMode::Instant,
-        'cancellation_window_hours' => 48,
-        'availability' => [
-            'monday' => [['start' => '00:00', 'end' => '23:59']],
-            'tuesday' => [['start' => '00:00', 'end' => '23:59']],
-            'wednesday' => [['start' => '00:00', 'end' => '23:59']],
-            'thursday' => [['start' => '00:00', 'end' => '23:59']],
-            'friday' => [['start' => '00:00', 'end' => '23:59']],
-            'saturday' => [['start' => '00:00', 'end' => '23:59']],
-            'sunday' => [['start' => '00:00', 'end' => '23:59']],
-        ],
-    ]);
+function everyDayOpen(): array
+{
+    return collect(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
+        ->mapWithKeys(fn (string $day) => [$day => [['start' => '00:00', 'end' => '23:30']]])
+        ->all();
+}
 
-    $manager = User::factory()->create();
-    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
+test('bookings follow the slot grid of the window they fall in', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['slot_minutes' => 60]);
 
-    // Tomorrow: inside the 48-hour window.
-    $tomorrow = CarbonImmutable::now('America/Lima')->addDay()->format('Y-m-d');
-    $inside = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => $tomorrow, 'start' => '10:00', 'end' => '11:00',
-        ]))
-        ->assertCreated()
-        ->json('data.id');
-
-    $this->actingAs($manager)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$inside}/cancel")
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('status');
-
-    // Ten days out: outside the window, the manager may cancel.
-    $farOut = CarbonImmutable::now('America/Lima')->addDays(10)->format('Y-m-d');
-    $outside = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => $farOut, 'start' => '10:00', 'end' => '11:00',
-        ]))
-        ->assertCreated()
-        ->json('data.id');
-
-    $this->actingAs($manager)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$outside}/cancel")
-        ->assertOk()
-        ->assertJsonPath('data.status', 'cancelled');
-
-    // The admin bypasses the window entirely.
-    $insideForAdmin = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => $tomorrow, 'start' => '12:00', 'end' => '13:00',
-        ]))
-        ->assertCreated()
-        ->json('data.id');
-
-    $this->actingAs($admin)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$insideForAdmin}/cancel")
-        ->assertOk()
-        ->assertJsonPath('data.status', 'cancelled');
-});
-
-test('times must align to 30-minute blocks', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld();
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:03', 'end' => '11:00',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '11:47',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('ends_at');
-
+    // Off the grid: the window opens at 09:00, so 10:30 is half a slot in.
     $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
             'start' => '10:30', 'end' => '11:30',
         ]))
-        ->assertCreated();
-});
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
 
-test('capacity counts true peak concurrency, not every overlap of the request', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['capacity' => 2]);
-    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-    $thirdUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-
-    // Two back-to-back bookings: they overlap a 13:00–15:00 request but
-    // never each other, so the long booking still fits under capacity 2.
+    // Not a whole number of slots.
     $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '13:00', 'end' => '14:00',
-        ]))
-        ->assertCreated();
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit, [
-            'start' => '14:00', 'end' => '15:00',
-        ]))
-        ->assertCreated();
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $thirdUnit, [
-            'start' => '13:00', 'end' => '15:00',
-        ]))
-        ->assertCreated();
-
-    // Now 13:00–14:00 truly runs at capacity (2 concurrent): a fourth
-    // booking touching that hour is rejected.
-    $fourthUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $fourthUnit, [
-            'start' => '13:30', 'end' => '14:30',
+            'start' => '10:00', 'end' => '11:30',
         ]))
         ->assertUnprocessable()
         ->assertJsonValidationErrors('starts_at');
+
+    // Two consecutive slots are one booking.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'start' => '10:00', 'end' => '12:00',
+        ]))
+        ->assertCreated();
+});
+
+test('only approved bookings hold the slot: pending never blocks, approving revalidates', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
+        'booking_mode' => BookingMode::Approval,
+    ]);
+    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
+
+    $first = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
+        ->assertCreated()
+        ->json('data.id');
+    // Same slot, second request: accepted as pending.
+    $second = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/reservations/{$first}/approve")
+        ->assertOk()
+        ->assertJsonPath('data.status', 'approved');
+
+    // The slot is now held: the second request cannot be approved, and a new
+    // instant booking overlapping it is refused. Back-to-back still books.
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/reservations/{$second}/approve")
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
+
+    $amenity->forceFill(['booking_mode' => BookingMode::Instant])->save();
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit, [
+            'start' => '11:00', 'end' => '13:00',
+        ]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit, [
+            'start' => '12:00', 'end' => '13:00',
+        ]))
+        ->assertCreated();
+});
+
+test('a booking must start in the future and within the 90-day horizon, on the staff surface too', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['availability' => everyDayOpen()]);
+
+    $this->travelTo(CarbonImmutable::parse('2026-10-05 15:00', 'America/Lima')->utc());
+
+    // Earlier today.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'date' => '2026-10-05', 'start' => '10:00', 'end' => '11:00',
+        ]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
+
+    // Later today books.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'date' => '2026-10-05', 'start' => '16:00', 'end' => '17:00',
+        ]))
+        ->assertCreated();
+
+    $horizon = CarbonImmutable::parse('2026-10-05', 'America/Lima')->addDays(ValidateReservationSlot::MAX_ADVANCE_DAYS);
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'date' => $horizon->format('Y-m-d'), 'start' => '10:00', 'end' => '11:00',
+        ]))
+        ->assertCreated();
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'date' => $horizon->addDay()->format('Y-m-d'), 'start' => '10:00', 'end' => '11:00',
+        ]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
+});
+
+test('staff may cancel a booking after it has started', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
+        'booking_mode' => BookingMode::Instant,
+    ]);
+    $manager = User::factory()->create();
+    grantLocationRole($account, $location, $manager, LocationRole::LocationManager);
+
+    $monday = nextMonday();
+    $id = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
+        ->assertCreated()
+        ->json('data.id');
+
+    $this->travelTo(CarbonImmutable::parse("{$monday} 10:30", 'America/Lima')->utc());
+
+    $this->actingAs($manager)
+        ->postJson("/api/accounts/{$account->id}/reservations/{$id}/cancel")
+        ->assertOk()
+        ->assertJsonPath('data.status', 'cancelled');
+});
+
+test('the staff availability endpoint lists the slots and drops a tail shorter than a slot', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['slot_minutes' => 120]);
+    $frontDesk = User::factory()->create();
+    grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
+
+    // Tuesday runs 09:00–12:00: one two-hour slot fits, the last hour is not offered.
+    $tuesday = CarbonImmutable::parse(nextMonday())->addDay()->format('Y-m-d');
+
+    $this->actingAs($frontDesk)
+        ->getJson("/api/amenities/{$amenity->id}/availability?date={$tuesday}")
+        ->assertOk()
+        ->assertJsonPath('slot_minutes', 120)
+        ->assertJsonPath('fee_amount', 150)
+        ->assertJsonCount(1, 'slots')
+        ->assertJsonPath('slots.0', ['start' => '09:00', 'end' => '11:00', 'available' => true, 'reason' => null]);
+
+    // Monday 09:00–22:00 with an approved 13:00–15:00 booking: six slots, one taken.
+    $monday = nextMonday();
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['start' => '13:00', 'end' => '15:00']))
+        ->assertCreated();
+
+    $slots = collect($this->actingAs($admin)
+        ->getJson("/api/amenities/{$amenity->id}/availability?date={$monday}&unit_id={$unit->id}")
+        ->assertOk()
+        ->assertJsonCount(6, 'slots')
+        ->json('slots'))->keyBy('start');
+
+    expect($slots['13:00']['reason'])->toBe('taken')
+        ->and($slots['11:00']['available'])->toBeTrue()
+        ->and($slots['19:00']['end'])->toBe('21:00');
+
+    // Outsiders and past days are refused.
+    $outsider = User::factory()->create();
+    $this->actingAs($outsider)->getJson("/api/amenities/{$amenity->id}/availability?date={$monday}")->assertForbidden();
+    $this->actingAs($admin)
+        ->getJson("/api/amenities/{$amenity->id}/availability?date=".CarbonImmutable::now('America/Lima')->subDay()->toDateString())
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('date');
+});
+
+test('slots and bookings keep wall-clock labels across a daylight-saving transition', function () {
+    // Madrid falls back on 2026-10-25: 03:00 CEST becomes 02:00 CET, a 25-hour day.
+    // travelTo takes UTC instances: a zoned mock leaks its offset into how
+    // Eloquent parses stored timestamps.
+    $account = Account::factory()->create();
+    $location = Location::factory()->for($account)->create(['timezone' => 'Europe/Madrid']);
+    $amenity = Amenity::factory()->for($location)->create([
+        'account_id' => $account->id,
+        'booking_mode' => BookingMode::Instant,
+        'availability' => ['sunday' => [['start' => '00:00', 'end' => '06:00']]],
+        'slot_minutes' => 60,
+    ]);
+    $unit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
+    $admin = User::factory()->create();
+    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
+
+    $this->travelTo(CarbonImmutable::parse('2026-10-20 12:00', 'Europe/Madrid')->utc());
+
+    $slots = $this->actingAs($admin)
+        ->getJson("/api/amenities/{$amenity->id}/availability?date=2026-10-25")
+        ->assertOk()
+        ->assertJsonCount(6, 'slots')
+        ->json('slots');
+
+    expect(array_column($slots, 'start'))->toBe(['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'])
+        ->and($slots[5]['end'])->toBe('06:00');
+
+    // 04:00–06:00 local is after the fall-back: 03:00–05:00 UTC.
+    $response = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), [
+            'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
+            'date' => '2026-10-25', 'start' => '04:00', 'end' => '06:00',
+        ])
+        ->assertCreated();
+
+    expect($response->json('data.starts_at'))->toBe(CarbonImmutable::parse('2026-10-25 03:00', 'UTC')->toJSON())
+        ->and($response->json('data.ends_at'))->toBe(CarbonImmutable::parse('2026-10-25 05:00', 'UTC')->toJSON());
+
+    // The taken slots carry the same labels.
+    $after = collect($this->actingAs($admin)
+        ->getJson("/api/amenities/{$amenity->id}/availability?date=2026-10-25")
+        ->json('slots'))->keyBy('start');
+    expect($after['04:00']['reason'])->toBe('taken')
+        ->and($after['05:00']['reason'])->toBe('taken')
+        ->and($after['03:00']['available'])->toBeTrue();
 });

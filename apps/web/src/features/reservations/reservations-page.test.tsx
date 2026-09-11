@@ -59,6 +59,11 @@ function meResponse() {
 }
 
 /** Tomorrow at the given Lima wall-clock hour, as a UTC ISO instant. */
+/** Y-m-d one week ahead in the location calendar, inside the 90-day horizon. */
+function nextWeekDate(): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(Date.now() + 7 * 86_400_000))
+}
+
 function tomorrowAt(hour: number): string {
   const now = new Date()
   const lima = new Date(now.getTime() - 5 * 3_600_000)
@@ -104,6 +109,24 @@ function installAdapter(
 
     if (url === '/api/me') {
       return Promise.resolve(axiosResponse(config, meResponse()))
+    }
+
+    if (url.includes('/availability?')) {
+      return Promise.resolve(
+        axiosResponse(config, {
+          date: url.match(/date=([\d-]+)/)?.[1],
+          slot_minutes: 60,
+          booking_mode: 'approval',
+          fee_amount: null,
+          deposit_amount: null,
+          slots: [
+            { start: '10:00', end: '11:00', available: true, reason: null },
+            { start: '11:00', end: '12:00', available: true, reason: null },
+            { start: '12:00', end: '13:00', available: false, reason: 'taken' },
+            { start: '13:00', end: '14:00', available: true, reason: null },
+          ],
+        }),
+      )
     }
 
     if (url.includes('/amenities')) {
@@ -311,11 +334,15 @@ describe('ReservationsPage', () => {
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
     await user.click(await screen.findByRole('option', { name: 'Depto. 704' }))
 
-    await user.type(within(drawer).getByLabelText('Fecha'), '2026-09-07')
-    await user.click(within(drawer).getByRole('combobox', { name: 'Inicio' }))
-    await user.click(await screen.findByRole('option', { name: '10:00' }))
+    const date = nextWeekDate()
+    await user.type(within(drawer).getByLabelText('Fecha'), date)
+    // Start = a free slot the server offered; end = that slot's end or the
+    // end of a consecutive free run (12:00 is taken, so 14:00 is unreachable).
+    await user.click(within(drawer).getByRole('combobox', { name: 'Turno de inicio' }))
+    await user.click(await screen.findByRole('option', { name: '10:00–11:00' }))
     await user.click(within(drawer).getByRole('combobox', { name: 'Fin' }))
-    await user.click(await screen.findByRole('option', { name: '12:00' }))
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual(['11:00', '12:00'])
+    await user.click(screen.getByRole('option', { name: '12:00' }))
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))
 
     await waitFor(() => {
@@ -324,7 +351,7 @@ describe('ReservationsPage', () => {
           amenity_id: 'am_1',
           unit_id: 'un_1',
           resident_id: null,
-          date: '2026-09-07',
+          date,
           start: '10:00',
           end: '12:00',
         },
@@ -351,9 +378,9 @@ describe('ReservationsPage', () => {
     await user.click(await screen.findByRole('option', { name: 'Parrilla / terraza' }))
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
     await user.click(await screen.findByRole('option', { name: 'Depto. 704' }))
-    await user.type(within(drawer).getByLabelText('Fecha'), '2026-09-07')
-    await user.click(within(drawer).getByRole('combobox', { name: 'Inicio' }))
-    await user.click(await screen.findByRole('option', { name: '10:00' }))
+    await user.type(within(drawer).getByLabelText('Fecha'), nextWeekDate())
+    await user.click(within(drawer).getByRole('combobox', { name: 'Turno de inicio' }))
+    await user.click(await screen.findByRole('option', { name: '10:00–11:00' }))
     await user.click(within(drawer).getByRole('combobox', { name: 'Fin' }))
     await user.click(await screen.findByRole('option', { name: '11:00' }))
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))

@@ -275,39 +275,25 @@
         "instant": "Reserva inmediata",
         "approval": "Requiere aprobación"
       },
-      "upTo": "Hasta {{count}} personas",
       "free": "Sin costo",
       "depositOf": "depósito {{amount}}",
-      "capacity": "Capacidad",
-      "people": "{{count}} personas",
-      "maxDuration": "Duración máxima",
       "hours_one": "{{count}} hora",
       "hours_other": "{{count}} horas",
       "minutes": "{{count}} min",
       "fee": "Costo",
       "deposit": "Depósito",
-      "advance": "Anticipación",
-      "upToDays": "hasta {{count}} días",
       "cancellation": "Cancelación",
-      "upToHours": "hasta {{count}} h antes",
-      "rules": "Reglas",
-      "approvalExplainer": "Administración confirma cada solicitud. El depósito se devuelve tras la revisión del ambiente; la unidad responde por sus invitados.",
-      "instantExplainer": "La reserva se confirma al instante. La unidad responde por sus invitados y por el estado del ambiente.",
       "amenityMissing": "Esta amenidad ya no está disponible.",
-      "slotsIntro": "Las horas mostradas ya descuentan otras reservas. Si la amenidad requiere aprobación, administración confirmará tu solicitud.",
       "pickDay": "Elegir día",
       "pickSlot": "Elegir horario",
       "closedThatDay": "La amenidad no abre ese día.",
       "slotReason": {
         "past": "Pasó",
-        "taken": "Ocupado",
-        "unit_limit": "Límite de tu unidad"
+        "taken": "Ocupado"
       },
       "requestedBy": "Solicitada por",
       "staffNote": "Nota de administración",
       "cancel": "Cancelar reserva",
-      "cancelWindow": "Puedes cancelar hasta {{hours}} h antes.",
-      "cancelAnytime": "Puedes cancelar en cualquier momento antes del inicio.",
       "cancelClosed": "El plazo de cancelación venció.",
       "cancelTitle": "¿Cancelar la reserva de {{amenity}}?",
       "cancelBody": "El horario quedará libre para otras unidades. Si ya había un cobro, administración lo anulará.",
@@ -319,7 +305,9 @@
         "cancelled": "Cancelada",
         "updated": "Actualizada",
         "staff": "administración"
-      }
+      },
+      "slotLength": "Duración por turno",
+      "cancelUntilStart": "Puedes cancelar hasta la hora de inicio."
     },
     "alerts": {
       "title": "Alertas",
@@ -930,11 +918,12 @@
       "unit": "Unidad",
       "resident": "Residente (opcional)",
       "date": "Fecha",
-      "start": "Inicio",
       "end": "Fin",
-      "availableWindows": "Disponible ese día: {{windows}}",
       "closedThatDay": "La amenidad está cerrada ese día.",
-      "submit": "Registrar reserva"
+      "submit": "Registrar reserva",
+      "startSlot": "Turno de inicio",
+      "dateOutOfRange": "Elige una fecha entre hoy y {{days}} días adelante.",
+      "fullyBooked": "No quedan turnos libres ese día."
     },
     "detail": {
       "fee": "Cuota",
@@ -996,17 +985,6 @@
       "autoCheckoutHint": "Las visitas sin salida registrada se cierran solas.",
       "never": "Nunca"
     },
-    "reservations": {
-      "title": "Reservas",
-      "maxAdvance": "Días de anticipación máx.",
-      "maxConcurrent": "Reservas simultáneas por unidad",
-      "cancellationWindow": "Ventana de cancelación",
-      "days": "días",
-      "reservations": "reservas",
-      "hours": "horas",
-      "amenityOverrideHint": "Cada amenidad puede sobrescribir estos valores en su propia política de reserva.",
-      "footer": "Aplica a las amenidades que no definan su propio valor."
-    },
     "quietHours": {
       "title": "Horario de silencio",
       "enabled": "Horario de silencio activo",
@@ -1052,7 +1030,6 @@
     "columns": {
       "amenity": "Amenidad",
       "schedule": "Horario",
-      "capacity": "Aforo",
       "fee": "Cuota / depósito",
       "approval": "Aprobación",
       "actions": "Acciones"
@@ -1064,29 +1041,27 @@
     "sections": {
       "basics": "Básicos",
       "availability": "Disponibilidad",
-      "policy": "Política de reserva",
-      "fees": "Cuotas"
+      "fees": "Cuotas",
+      "booking": "Reserva"
     },
     "form": {
       "name": "Nombre",
       "namePlaceholder": "ej. Salón de eventos",
-      "capacity": "Aforo",
-      "people": "personas",
       "description": "Descripción",
       "reservable": "Reservable",
       "reservableHint": "Si se desactiva queda como espacio común, sin reservas.",
-      "maxDuration": "Duración máxima",
-      "maxDurationHint": "Opcional (sin límite)",
       "requiresApproval": "Requiere aprobación",
       "approvalHint": "Si se desactiva, la reserva se confirma al instante.",
       "fee": "Cuota de uso",
       "deposit": "Depósito reembolsable",
       "feesHint": "Montos en soles, sin decimales. El depósito se registra manualmente al confirmar la reserva.",
-      "photosAfterCreate": "Podrás agregar fotos al editar la amenidad una vez creada."
-    },
-    "policy": {
-      "inheritHint": "Hereda: {{value}} {{unit}}",
-      "overrideHint": "Sobrescribe (base: {{value}} {{unit}})"
+      "photosAfterCreate": "Podrás agregar fotos al editar la amenidad una vez creada.",
+      "slotLength": "Duración de cada turno",
+      "slotLengthHint": "Los residentes reservan uno o más turnos seguidos dentro del horario.",
+      "slotMinutes": "{{count}} min",
+      "slotHours_one": "{{count}} hora",
+      "slotHours_other": "{{count}} horas",
+      "slotHoursDecimal": "{{hours}} horas"
     },
     "availability": {
       "columns": "Día · abierto · horarios",

@@ -30,7 +30,7 @@ const { PortalBookingPage } = await import('./portal-booking-page')
 
 const originalAdapter = apiClient.defaults.adapter
 
-const amenity = { id: 'am_1', name: 'Salón de eventos', description: 'Ambiente cerrado con cocina y sonido.', capacity: 40, booking_mode: 'approval', max_duration_minutes: 240, min_duration_minutes: 120, effective_booking_policy: { max_advance_days: { value: 30, source: 'location' }, max_concurrent_per_unit: { value: 2, source: 'location' }, cancellation_window_hours: { value: 24, source: 'location' } }, fee_amount: 150, deposit_amount: 300, photos: [], cover_photo_url: null }
+const amenity = { id: 'am_1', name: 'Salón de eventos', description: 'Ambiente cerrado con cocina y sonido.', booking_mode: 'approval', slot_minutes: 120, fee_amount: 150, deposit_amount: 300, photos: [], cover_photo_url: null }
 const reservation = { id: 'rv_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_402', unit_number: '402', resident_name: 'Carlos Mendoza', starts_at: '2026-09-07T00:00:00Z', ends_at: '2026-09-07T02:00:00Z', status: 'pending', is_completed: false, status_note: null, fee_snapshot: 150, deposit_snapshot: 300, created_by_name: 'Carlos Mendoza', decided_by_name: null, decided_at: null, created_at: '2026-09-04T13:40:00Z' }
 
 function install(onWrite?: (url: string, body: unknown) => void) {
@@ -45,7 +45,7 @@ function install(onWrite?: (url: string, body: unknown) => void) {
       const rows = url.includes('scope=past') ? [] : [reservation]
       return Promise.resolve(axiosResponse(config, { data: rows, meta: { current_page: 1, last_page: 1, per_page: 15, total: rows.length } }))
     }
-    if (url.startsWith('/api/portal/reservations/rv_1')) return Promise.resolve(axiosResponse(config, { data: reservation, history: [{ id: 'al_1', event_type: 'reservation.created', status: 'pending', note: null, actor_name: 'Carlos Mendoza', created_at: '2026-09-04T13:40:00Z' }], can_cancel: true, cancellation_window_hours: 24 }))
+    if (url.startsWith('/api/portal/reservations/rv_1')) return Promise.resolve(axiosResponse(config, { data: reservation, history: [{ id: 'al_1', event_type: 'reservation.created', status: 'pending', note: null, actor_name: 'Carlos Mendoza', created_at: '2026-09-04T13:40:00Z' }], can_cancel: true }))
     if (url.includes('/portal/amenities?')) return Promise.resolve(axiosResponse(config, { data: [amenity] }))
     if (url.includes('/availability?')) {
       return Promise.resolve(axiosResponse(config, { date: url.match(/date=([\d-]+)/)?.[1], slot_minutes: 120, booking_mode: 'approval', fee_amount: 150, deposit_amount: 300, slots: [{ start: '09:00', end: '11:00', available: true, reason: null }, { start: '12:00', end: '14:00', available: false, reason: 'taken' }, { start: '19:00', end: '21:00', available: true, reason: null }] }))
@@ -63,7 +63,7 @@ afterEach(() => {
 })
 
 describe('portal reservations', () => {
-  it('lists my bookings, opens the detail sheet with the window hint, and cancels', async () => {
+  it('lists my bookings, opens the detail sheet with the cancel hint, and cancels', async () => {
     const writes: string[] = []
     install((url) => writes.push(url))
     renderPortal(<PortalReservationsPage />)
@@ -72,7 +72,7 @@ describe('portal reservations', () => {
     expect(await screen.findByRole('tab', { name: 'Mis reservas · 1' })).toBeInTheDocument()
     await user.click(await screen.findByText('Salón de eventos'))
     const sheet = await screen.findByRole('dialog')
-    expect(await within(sheet).findByText('Puedes cancelar hasta 24 h antes.')).toBeInTheDocument()
+    expect(await within(sheet).findByText('Puedes cancelar hasta la hora de inicio.')).toBeInTheDocument()
     expect(within(sheet).getByText('S/ 150')).toBeInTheDocument()
     expect(within(sheet).getByText('Solicitada')).toBeInTheDocument()
 
@@ -90,7 +90,7 @@ describe('portal reservations', () => {
 
     expect(await screen.findByText('Salón de eventos')).toBeInTheDocument()
     expect(screen.getByText('Requiere aprobación')).toBeInTheDocument()
-    expect(screen.getByText('Hasta 40 personas · S/ 150 · depósito S/ 300')).toBeInTheDocument()
+    expect(screen.getByText('S/ 150 · depósito S/ 300')).toBeInTheDocument()
   })
 
   it('books a free slot for the selected day and sends the request', async () => {

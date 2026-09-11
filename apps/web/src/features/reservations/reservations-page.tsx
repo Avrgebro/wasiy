@@ -273,6 +273,7 @@ function ReservationsContent({
         amenities={amenitiesQuery.data?.data ?? []}
         locationId={locationId}
         opened={drawerOpened}
+        timezone={timezone}
         onClose={() => setDrawerOpened(false)}
       />
     </div>

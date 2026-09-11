@@ -57,10 +57,6 @@ export function PortalBookingPage() {
         </ActionIcon>
         <h1 className="m-0 text-xl font-bold">{amenity?.name ?? t('portal.reservations.book')}</h1>
       </div>
-      <Text c="dimmed" size="sm">
-        {t('portal.reservations.slotsIntro')}
-      </Text>
-
       <div className="-mx-4 overflow-x-auto px-4" role="listbox" aria-label={t('portal.reservations.pickDay')}>
         <div className="flex gap-2">
           {days.map((day) => {

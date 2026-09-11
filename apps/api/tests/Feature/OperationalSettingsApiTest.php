@@ -32,7 +32,8 @@ test('location settings resolve through the account with per-key sources', funct
         ->assertJsonPath('data.values.visitor_auto_checkout_hours', 12)
         ->assertJsonPath('data.explanation.visitor_auto_checkout_hours.source', 'location')
         ->assertJsonPath('data.explanation.visitor_auto_checkout_hours.account_value', 24)
-        ->assertJsonPath('data.explanation.reservation_max_advance_days.source', 'default');
+        ->assertJsonPath('data.explanation.quiet_hours_enabled.source', 'default')
+        ->assertJsonMissingPath('data.values.reservation_max_advance_days');
 });
 
 test('a put merges per key and null clears an override back to inherited', function () {
@@ -104,9 +105,9 @@ test('a location manager can read and update settings for an assigned location o
 
     $this->actingAs($manager)->getJson("{$base}/{$location->id}/settings")->assertOk();
     $this->actingAs($manager)
-        ->putJson("{$base}/{$location->id}/settings", ['reservation_max_advance_days' => 15])
+        ->putJson("{$base}/{$location->id}/settings", ['visitor_auto_checkout_hours' => 15])
         ->assertOk()
-        ->assertJsonPath('data.values.reservation_max_advance_days', 15);
+        ->assertJsonPath('data.values.visitor_auto_checkout_hours', 15);
 
     $this->actingAs($manager)->getJson("{$base}/{$other->id}/settings")->assertForbidden();
     $this->actingAs($manager)->putJson("{$base}/{$other->id}/settings", [])->assertForbidden();
@@ -123,18 +124,18 @@ test('account settings are admin only and a manager gets 403', function () {
     $this->actingAs($manager)->putJson("/api/accounts/{$account->id}/settings", [])->assertForbidden();
 
     $this->actingAs($admin)
-        ->putJson("/api/accounts/{$account->id}/settings", ['reservation_max_advance_days' => 60])
+        ->putJson("/api/accounts/{$account->id}/settings", ['visitor_auto_checkout_hours' => 60])
         ->assertOk()
-        ->assertJsonPath('data.values.reservation_max_advance_days', 60)
-        ->assertJsonPath('data.explanation.reservation_max_advance_days.source', 'account')
+        ->assertJsonPath('data.values.visitor_auto_checkout_hours', 60)
+        ->assertJsonPath('data.explanation.visitor_auto_checkout_hours.source', 'account')
         ->assertJsonPath('data.explanation.quiet_hours_enabled.source', 'default');
 
     // The location now inherits the new account default.
     $this->actingAs($admin)
         ->getJson("/api/accounts/{$account->id}/locations/{$location->id}/settings")
         ->assertOk()
-        ->assertJsonPath('data.values.reservation_max_advance_days', 60)
-        ->assertJsonPath('data.explanation.reservation_max_advance_days.source', 'account');
+        ->assertJsonPath('data.values.visitor_auto_checkout_hours', 60)
+        ->assertJsonPath('data.explanation.visitor_auto_checkout_hours.source', 'account');
 });
 
 test('every settings mutation writes exactly one activity entry', function () {
@@ -146,7 +147,7 @@ test('every settings mutation writes exactly one activity entry', function () {
         ->putJson("/api/accounts/{$account->id}/locations/{$location->id}/settings", ['quiet_hours_enabled' => true])
         ->assertOk();
     $this->actingAs($admin)
-        ->putJson("/api/accounts/{$account->id}/settings", ['reservation_max_advance_days' => 60])
+        ->putJson("/api/accounts/{$account->id}/settings", ['visitor_auto_checkout_hours' => 60])
         ->assertOk();
 
     expect(ActivityLog::query()->where('event_type', ActivityEventType::LocationSettingsChanged->value)->count())->toBe(1)

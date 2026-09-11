@@ -152,13 +152,9 @@ export function getPortalPackages(unitId: string, status?: 'pending' | 'delivere
 export type PortalAmenity = {
   id: string
   name: string
-  type: string
   description: string | null
-  capacity: number | null
   booking_mode: 'instant' | 'approval'
-  max_duration_minutes: number | null
-  min_duration_minutes: number | null
-  effective_booking_policy: Record<'max_advance_days' | 'max_concurrent_per_unit' | 'cancellation_window_hours', { value: number | null; source: string }> | null
+  slot_minutes: number
   fee_amount: number | null
   deposit_amount: number | null
   photos: { id: string; url: string; is_cover: boolean }[]
@@ -169,7 +165,7 @@ export function getPortalAmenities(unitId: string) {
   return apiRequest<{ data: PortalAmenity[] }>(`/api/portal/amenities?${buildParams({ unit_id: unitId }).toString()}`)
 }
 
-export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | 'taken' | 'unit_limit' | null }
+export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | 'taken' | null }
 
 export type AvailabilityResponse = {
   date: string
@@ -213,7 +209,7 @@ export function getPortalReservations(unitId: string, scope: 'upcoming' | 'past'
 }
 
 export function getPortalReservation(reservationId: string) {
-  return apiRequest<{ data: PortalReservation; history: PortalReservationHistory[]; can_cancel: boolean; cancellation_window_hours: number | null }>(`/api/portal/reservations/${reservationId}`)
+  return apiRequest<{ data: PortalReservation; history: PortalReservationHistory[]; can_cancel: boolean }>(`/api/portal/reservations/${reservationId}`)
 }
 
 export function requestReservation(payload: { unit_id: string; amenity_id: string; date: string; start: string; end: string }) {

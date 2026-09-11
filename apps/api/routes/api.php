@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AccountProfileController;
 use App\Http\Controllers\Api\AccountSessionsController;
 use App\Http\Controllers\Api\AccountSettingsController;
 use App\Http\Controllers\Api\AccountStaffController;
+use App\Http\Controllers\Api\AmenityAvailabilityController;
 use App\Http\Controllers\Api\AmenityController;
 use App\Http\Controllers\Api\AmenityPhotoController;
 use App\Http\Controllers\Api\AnnouncementController;
@@ -250,6 +251,9 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
         Route::get('/locations/{location}/dashboard', LocationDashboardController::class)
             ->can('view', 'location');
         Route::get('/locations/{location}/search', LocationSearchController::class);
+
+        // Amenity slots for the Nueva reserva drawer (ADR 0041)
+        Route::get('/amenities/{amenity}/availability', AmenityAvailabilityController::class);
 
         // Buildings
         Route::controller(BuildingController::class)->group(function () {

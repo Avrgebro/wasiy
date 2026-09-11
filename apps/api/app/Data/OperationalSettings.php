@@ -7,8 +7,8 @@ use InvalidArgumentException;
 use JsonSerializable;
 
 /**
- * The resolved operational policy for one level of the Account → Location →
- * Amenity cascade. Every key has a system default, so a fully absent settings
+ * The resolved operational policy for one level of the Account → Location
+ * cascade (reservation policy left the cascade in ADR 0041). Every key has a system default, so a fully absent settings
  * column and a fully populated one behave identically at the call site.
  *
  * Instances are always fully resolved: partial override layers exist only in
@@ -28,9 +28,6 @@ class OperationalSettings implements Arrayable, JsonSerializable
         // "never" case is 0, not null: in the settings write contract a JSON
         // null always means "clear this override back to inherited".
         'visitor_auto_checkout_hours' => 0,
-        'reservation_max_advance_days' => 30,
-        'reservation_max_concurrent_per_unit' => 2,
-        'reservation_cancellation_window_hours' => 24,
         'quiet_hours_enabled' => false,
         'quiet_hours_start' => null,
         'quiet_hours_end' => null,
@@ -41,9 +38,6 @@ class OperationalSettings implements Arrayable, JsonSerializable
     public function __construct(
         public readonly bool $visitorPreregistrationEnabled,
         public readonly int $visitorAutoCheckoutHours,
-        public readonly int $reservationMaxAdvanceDays,
-        public readonly int $reservationMaxConcurrentPerUnit,
-        public readonly int $reservationCancellationWindowHours,
         public readonly bool $quietHoursEnabled,
         public readonly ?string $quietHoursStart,
         public readonly ?string $quietHoursEnd,
@@ -75,9 +69,6 @@ class OperationalSettings implements Arrayable, JsonSerializable
         return new self(
             visitorPreregistrationEnabled: $values['visitor_preregistration_enabled'],
             visitorAutoCheckoutHours: $values['visitor_auto_checkout_hours'],
-            reservationMaxAdvanceDays: $values['reservation_max_advance_days'],
-            reservationMaxConcurrentPerUnit: $values['reservation_max_concurrent_per_unit'],
-            reservationCancellationWindowHours: $values['reservation_cancellation_window_hours'],
             quietHoursEnabled: $values['quiet_hours_enabled'],
             quietHoursStart: $values['quiet_hours_start'],
             quietHoursEnd: $values['quiet_hours_end'],
@@ -106,9 +97,6 @@ class OperationalSettings implements Arrayable, JsonSerializable
                 'announcements_location_manager_can_post',
                 'announcements_email_residents' => is_bool($value),
                 'visitor_auto_checkout_hours' => is_int($value) && $value >= 0,
-                'reservation_max_advance_days',
-                'reservation_max_concurrent_per_unit',
-                'reservation_cancellation_window_hours' => is_int($value) && $value > 0,
                 // Stored override layers never hold null: null in a write
                 // payload means "clear the override", handled before storage.
                 'quiet_hours_start',
@@ -130,9 +118,6 @@ class OperationalSettings implements Arrayable, JsonSerializable
         return [
             'visitor_preregistration_enabled' => $this->visitorPreregistrationEnabled,
             'visitor_auto_checkout_hours' => $this->visitorAutoCheckoutHours,
-            'reservation_max_advance_days' => $this->reservationMaxAdvanceDays,
-            'reservation_max_concurrent_per_unit' => $this->reservationMaxConcurrentPerUnit,
-            'reservation_cancellation_window_hours' => $this->reservationCancellationWindowHours,
             'quiet_hours_enabled' => $this->quietHoursEnabled,
             'quiet_hours_start' => $this->quietHoursStart,
             'quiet_hours_end' => $this->quietHoursEnd,

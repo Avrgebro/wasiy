@@ -21,15 +21,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'slug',
     'description',
     'is_reservable',
-    'capacity',
     'booking_mode',
     'availability',
-    'max_duration_minutes',
-    'min_duration_minutes',
-    'buffer_minutes',
-    'max_advance_days',
-    'max_concurrent_per_unit',
-    'cancellation_window_hours',
+    'slot_minutes',
     'fee_amount',
     'deposit_amount',
 ])]
@@ -65,6 +59,12 @@ class Amenity extends Model
                 ? AmenityAvailability::alwaysClosed()
                 : AmenityAvailability::fromArray($this->availability),
         );
+    }
+
+    /** Slot length in minutes (ADR 0041); the column default is 60. */
+    public function slotMinutes(): int
+    {
+        return (int) ($this->slot_minutes ?? 60);
     }
 
     public function isDeactivated(): bool

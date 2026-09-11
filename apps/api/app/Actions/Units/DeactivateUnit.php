@@ -48,7 +48,7 @@ class DeactivateUnit
                 ->where('starts_at', '>', now())
                 ->get();
             foreach ($reservations as $reservation) {
-                $this->decide->cancel($reservation, $actor, __('Unidad desactivada.'), bypassWindow: true);
+                $this->decide->cancel($reservation, $actor, __('Unidad desactivada.'));
             }
 
             $unit->forceFill(['status' => RegistryStatus::Inactive])->save();

@@ -12,7 +12,6 @@ use App\Models\Reservation;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\AccessAuthorizationService;
-use App\Services\SettingsResolver;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -20,13 +19,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Resident-facing bookings (portal P2), scoped to one unit. Requests reuse the
  * staff action, so instant amenities confirm on the spot and approval ones
- * enter the same queue. Cancelling honours the cancellation window; only
- * staff may bypass it.
+ * enter the same queue. Residents may cancel until the booking starts.
  */
 class PortalReservationController extends Controller
 {
@@ -34,7 +31,6 @@ class PortalReservationController extends Controller
 
     public function __construct(
         private readonly AccessAuthorizationService $access,
-        private readonly SettingsResolver $settings,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -82,15 +78,11 @@ class PortalReservationController extends Controller
             ])
             ->all();
 
-        $policy = $this->settings->bookingPolicyFor($reservation->amenity);
-        $windowHours = $policy['cancellation_window_hours']['value'] ?? null;
-
         return (new ReservationResource($reservation))->additional([
             'history' => $history,
-            'cancellation_window_hours' => $windowHours,
-            // Whether the resident can still cancel: undecided or approved, and outside the window.
+            // Whether the resident can still cancel: undecided or approved, and not started (ADR 0041).
             'can_cancel' => in_array($reservation->status->value, ['pending', 'observed', 'approved'], true)
-                && ($windowHours === null || now()->addHours($windowHours)->lt($reservation->starts_at)),
+                && $reservation->starts_at->gt(now()),
         ]);
     }
 
@@ -116,14 +108,6 @@ class PortalReservationController extends Controller
         $startsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', "{$validated['date']} {$validated['start']}", $timezone);
         $endsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', "{$validated['date']} {$validated['end']}", $timezone);
 
-        if ($startsAt->lte(CarbonImmutable::now($timezone))) {
-            throw ValidationException::withMessages(['start' => __('That time has passed.')]);
-        }
-        $maxAdvance = $this->settings->bookingPolicyFor($amenity)['max_advance_days']['value'] ?? null;
-        if ($maxAdvance !== null && $startsAt->startOfDay()->gt(CarbonImmutable::now($timezone)->startOfDay()->addDays($maxAdvance))) {
-            throw ValidationException::withMessages(['date' => __('Bookings open up to :days days ahead.', ['days' => $maxAdvance])]);
-        }
-
         $reservation = $create->handle($amenity, $unit, $resident, $user, $startsAt->utc(), $endsAt->utc());
 
         return (new ReservationResource($reservation->load(self::RELATIONS)))->response()->setStatusCode(201);
@@ -136,6 +120,6 @@ class PortalReservationController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        return new ReservationResource($decide->cancel($reservation, $user, null, false)->load(self::RELATIONS));
+        return new ReservationResource($decide->cancel($reservation, $user, null, asResident: true)->load(self::RELATIONS));
     }
 }

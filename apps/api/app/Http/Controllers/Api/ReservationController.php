@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Actions\Reservations\CreateReservation;
 use App\Actions\Reservations\DecideReservation;
-use App\Enums\AccountRole;
 use App\Enums\ReservationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreReservationRequest;
@@ -181,11 +180,9 @@ class ReservationController extends Controller
 
         /** @var User $actor */
         $actor = $request->user();
-        // Admins may cancel inside the amenity's cancellation window.
-        $bypassWindow = $this->access->hasAccountRole($actor, $account, AccountRole::AccountAdmin);
 
         return new ReservationResource(
-            $decide->cancel($reservation, $actor, $validated['note'] ?? null, $bypassWindow)
+            $decide->cancel($reservation, $actor, $validated['note'] ?? null)
                 ->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements']),
         );
     }

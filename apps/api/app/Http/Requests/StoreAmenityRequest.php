@@ -38,18 +38,13 @@ class StoreAmenityRequest extends FormRequest
         return [
             'description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'is_reservable' => ['sometimes', 'boolean'],
-            'capacity' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:100000'],
             'booking_mode' => ['sometimes', Rule::enum(BookingMode::class)],
             'availability' => ['sometimes', 'nullable', 'array'],
             'availability.*' => ['array'],
             'availability.*.*.start' => ['required', 'date_format:H:i'],
             'availability.*.*.end' => ['required', 'date_format:H:i'],
-            'max_duration_minutes' => ['sometimes', 'nullable', 'integer', 'min:15', 'max:1440'],
-            'min_duration_minutes' => ['sometimes', 'nullable', 'integer', 'min:15', 'max:1440'],
-            'buffer_minutes' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:720'],
-            'max_advance_days' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:365'],
-            'max_concurrent_per_unit' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:50'],
-            'cancellation_window_hours' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:720'],
+            // Slot length (ADR 0041): whole half-hours between 30 minutes and 12 hours.
+            'slot_minutes' => ['sometimes', 'integer', 'min:30', 'max:720', 'multiple_of:30'],
             'fee_amount' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1000000'],
             'deposit_amount' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1000000'],
         ];

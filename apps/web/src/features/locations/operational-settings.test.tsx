@@ -11,9 +11,6 @@ import { OperationalSettingsPanel } from './operational-settings'
 const DEFAULTS: OperationalSettingsValues = {
   visitor_preregistration_enabled: true,
   visitor_auto_checkout_hours: 0,
-  reservation_max_advance_days: 30,
-  reservation_max_concurrent_per_unit: 2,
-  reservation_cancellation_window_hours: 24,
   quiet_hours_enabled: false,
   quiet_hours_start: null,
   quiet_hours_end: null,
@@ -83,8 +80,8 @@ describe('OperationalSettingsPanel', () => {
     expect(await screen.findByText('Visitas')).toBeInTheDocument()
     // Auto-checkout default 0 selects "Nunca".
     expect(screen.getByRole('button', { name: 'Nunca' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Días de anticipación máx.')).toHaveValue('30 días')
-    expect(screen.getByLabelText('Ventana de cancelación')).toHaveValue('24 horas')
+    // No Reservas group since ADR 0041: three groups only.
+    expect(screen.queryByText('Reservas')).not.toBeInTheDocument()
   })
 
   it('shows the effective and account values from the explanation', async () => {

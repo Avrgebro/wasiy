@@ -26,19 +26,10 @@ import {
   statusLabel,
   transitionLabel,
 } from '../finances/movement-presentation'
-import {
-  approveReservation,
-  cancelReservation,
-  getReservation,
-  observeReservation,
-  rejectReservation,
-  type ReservationHistoryEntry,
-  type ReservationSummary,
-} from './api'
+import { getReservation, type ReservationHistoryEntry, type ReservationSummary } from './api'
 import { ReservationSlotBand } from './reservation-modal-parts'
 import { StatusPill } from '../../components/ui/chips'
-
-type Decision = 'approve' | 'observe' | 'reject' | 'cancel'
+import { useReservationDecisions, type Decision } from './use-reservation-decisions'
 
 /**
  * The booking's home (mockup 08 drawer): slot and status, facts, Cobros
@@ -82,26 +73,8 @@ export function ReservationDrawer({
       queryClient.invalidateQueries({ queryKey: ['finances'] }),
     ])
 
-  const decide = useMutation({
-    mutationFn: (kind: Decision) => {
-      const trimmed = note.trim()
-      switch (kind) {
-        case 'approve':
-          return approveReservation(accountId, reservationId!)
-        case 'observe':
-          return observeReservation(accountId, reservationId!, trimmed)
-        case 'reject':
-          return rejectReservation(accountId, reservationId!, trimmed)
-        default:
-          return cancelReservation(accountId, reservationId!, trimmed || undefined)
-      }
-    },
-    onSuccess: async (_response, kind) => {
-      await invalidate()
-      setNote('')
-      notifySuccess(t(`reservations.toasts.${kind === 'approve' ? 'approved' : kind === 'observe' ? 'observed' : kind === 'reject' ? 'rejected' : 'cancelled'}`))
-    },
-  })
+  const decide = useReservationDecisions(accountId, () => setNote(''))
+  const runDecision = (kind: Decision) => decide.mutate({ kind, reservationId: reservationId!, note })
 
   const settle = useMutation({
     mutationFn: ({ movement, status }: { movement: MovementSummary; status: MovementStatus }) =>
@@ -192,7 +165,7 @@ export function ReservationDrawer({
                 note={note}
                 reservation={reservation}
                 onCancel={() => setConfirmingCancel(true)}
-                onDecide={(kind) => decide.mutate(kind)}
+                onDecide={runDecision}
                 onNote={setNote}
               />
             ) : null}
@@ -203,7 +176,7 @@ export function ReservationDrawer({
               onCancel={() => setConfirmingCancel(false)}
               onConfirm={() => {
                 setConfirmingCancel(false)
-                decide.mutate('cancel')
+                runDecision('cancel')
               }}
             />
           </>

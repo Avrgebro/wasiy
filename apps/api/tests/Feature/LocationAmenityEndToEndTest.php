@@ -62,23 +62,22 @@ test('the full m6 location and amenity path works end to end', function () {
 
     // 3. Override one setting at the account and another at the location.
     $this->actingAs($admin)
-        ->putJson("{$base}/settings", ['reservation_max_advance_days' => 60])
+        ->putJson("{$base}/settings", ['announcements_email_residents' => true])
         ->assertOk();
     $this->actingAs($admin)
         ->putJson("{$base}/locations/{$locationId}/settings", ['visitor_auto_checkout_hours' => 12])
         ->assertOk()
-        ->assertJsonPath('data.values.reservation_max_advance_days', 60)
-        ->assertJsonPath('data.explanation.reservation_max_advance_days.source', 'account')
+        ->assertJsonPath('data.values.announcements_email_residents', true)
+        ->assertJsonPath('data.explanation.announcements_email_residents.source', 'account')
         ->assertJsonPath('data.explanation.visitor_auto_checkout_hours.source', 'location');
 
-    // 4. An Amenity with a two-window day and a closed sunday, inheriting
-    //    max_advance_days from the account through the location.
+    // 4. An Amenity with a two-window day, a closed sunday and half-day slots.
     $amenityId = $this->actingAs($admin)
         ->postJson("{$base}/locations/{$locationId}/amenities", [
             'name' => 'Salón de eventos',
             'is_reservable' => true,
             'booking_mode' => BookingMode::Approval->value,
-            'capacity' => 80,
+            'slot_minutes' => 240,
             'availability' => [
                 'wednesday' => [
                     ['start' => '09:00', 'end' => '13:00'],
@@ -90,8 +89,7 @@ test('the full m6 location and amenity path works end to end', function () {
             'deposit_amount' => 300,
         ])
         ->assertCreated()
-        ->assertJsonPath('data.effective_booking_policy.max_advance_days.value', 60)
-        ->assertJsonPath('data.effective_booking_policy.max_advance_days.source', 'location')
+        ->assertJsonPath('data.slot_minutes', 240)
         ->json('data.id');
 
     expect(Amenity::query()->findOrFail($amenityId)->availabilitySchedule->isOpenOn('sunday'))->toBeFalse();

@@ -3,7 +3,7 @@ import { AltArrowLeftIcon } from '@solar-icons/react/linear'
 import { useQuery } from '@tanstack/react-query'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { DrawerFact, DrawerFacts, DrawerSection } from '../../components/ui/detail-drawer-parts'
+import { DrawerFact, DrawerFacts } from '../../components/ui/detail-drawer-parts'
 import { formatMoney } from '../../lib/money'
 import { useActiveUnit } from './active-unit-context'
 import { getPortalAmenities } from './api'
@@ -35,7 +35,6 @@ export function PortalAmenityPage() {
     )
   }
 
-  const policy = amenity.effective_booking_policy
   const hours = (minutes: number) => (minutes % 60 === 0 ? t('portal.reservations.hours', { count: minutes / 60 }) : t('portal.reservations.minutes', { count: minutes }))
 
   return (
@@ -57,15 +56,11 @@ export function PortalAmenityPage() {
       {amenity.description ? <Text size="sm">{amenity.description}</Text> : null}
 
       <DrawerFacts>
-        <DrawerFact label={t('portal.reservations.capacity')} value={amenity.capacity ? t('portal.reservations.people', { count: amenity.capacity }) : '—'} />
-        <DrawerFact label={t('portal.reservations.maxDuration')} value={amenity.max_duration_minutes ? hours(amenity.max_duration_minutes) : '—'} />
+        <DrawerFact label={t('portal.reservations.slotLength')} value={hours(amenity.slot_minutes)} />
         <DrawerFact label={t('portal.reservations.fee')} value={amenity.fee_amount ? formatMoney(amenity.fee_amount) : t('portal.reservations.free')} />
         <DrawerFact label={t('portal.reservations.deposit')} value={amenity.deposit_amount ? formatMoney(amenity.deposit_amount) : '—'} />
-        <DrawerFact label={t('portal.reservations.advance')} value={policy?.max_advance_days.value ? t('portal.reservations.upToDays', { count: policy.max_advance_days.value }) : '—'} />
-        <DrawerFact label={t('portal.reservations.cancellation')} value={policy?.cancellation_window_hours.value ? t('portal.reservations.upToHours', { count: policy.cancellation_window_hours.value }) : t('portal.reservations.cancelAnytime')} />
+        <DrawerFact label={t('portal.reservations.cancellation')} value={t('portal.reservations.cancelUntilStart')} />
       </DrawerFacts>
-
-      <DrawerSection description={amenity.booking_mode === 'approval' ? t('portal.reservations.approvalExplainer') : t('portal.reservations.instantExplainer')} label={t('portal.reservations.rules')} />
 
       <div className="mt-auto pt-2">
         <Button className="w-full" color="accent" size="md" onClick={() => void navigate({ to: '/portal/reservas/amenidades/$amenityId/horario', params: { amenityId: amenity.id } })}>

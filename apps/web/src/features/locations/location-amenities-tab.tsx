@@ -135,12 +135,6 @@ export function LocationAmenitiesTab({
         },
       },
       {
-        accessorKey: 'capacity',
-        header: t('amenities.columns.capacity'),
-        meta: { hideBelow: 'md' },
-        cell: ({ row }) => <span className={DETAIL}>{row.original.capacity ?? '—'}</span>,
-      },
-      {
         id: 'fee',
         header: t('amenities.columns.fee'),
         meta: { hideBelow: 'lg' },
