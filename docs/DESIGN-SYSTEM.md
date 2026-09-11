@@ -234,6 +234,7 @@ Defaults:
 - Inputs are Mantine `md` (`42px`), labels Mantine `sm`.
 - Field gap in drawers: `20px` (the `AppDrawerBody` grid); two short related fields share a row with `sm:grid-cols-2`.
 - Drawer width: `620px` for every `AppDrawer`; below `64rem` (tablets and phones) the sheet takes the full viewport.
+- Dropdowns inside an `AppDrawer` (Select, MultiSelect, TagsInput) render in place, not in the body portal: `AppDrawer` wraps its children in a theme that sets `comboboxProps.withinPortal: false`. Chrome on touch repaints the fixed sheet from a stale frame when a dropdown layer appears outside it, which looks like the drawer closing and reopening. Keep the portal everywhere else (table filters, popovers).
 - Forms use `react-hook-form` with a `zod` resolver (ADR 0009). Schema messages are i18n keys; server `422` errors land under their field through `submitHandlingServerErrors`, and anything unmatched goes to a root `Alert`.
 - Plain `rows` on `Textarea`, never `autosize` (it needs layout APIs jsdom lacks). Note fields use three rows everywhere.
 - Money inputs: `NumberInput` with `prefix="S/ "`, integers only, `thousandSeparator=" "`.

@@ -1,10 +1,28 @@
-import { Drawer, Group, ScrollArea, Text } from '@mantine/core'
+import { Drawer, Group, MantineThemeProvider, MultiSelect, ScrollArea, Select, TagsInput, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import type { ReactNode } from 'react'
 
 /** Default form width; below the laptop breakpoint it takes the screen. */
 const DRAWER_WIDTH = 620
 const LAPTOP_UP = '(min-width: 64rem)'
+
+/**
+ * Combobox dropdowns inside a sheet render in place, not in the body-level
+ * portal. Chrome on touch (device mode and Android) repaints the fixed sheet
+ * from a stale frame when a dropdown layer appears outside its stacking
+ * context, which reads as the drawer closing and reopening; Safari and
+ * pointer Chrome never did. Verified 2026-09-11 by bisection: transitions,
+ * compositor hints, the shared portal node and the topbar blur were all
+ * ruled out, `withinPortal: false` alone fixes it. Scoped here so table
+ * filters and the rest keep the portal and its clipping-free dropdowns.
+ */
+const IN_PLACE_DROPDOWNS = {
+  components: {
+    Select: Select.extend({ defaultProps: { comboboxProps: { withinPortal: false } } }),
+    MultiSelect: MultiSelect.extend({ defaultProps: { comboboxProps: { withinPortal: false } } }),
+    TagsInput: TagsInput.extend({ defaultProps: { comboboxProps: { withinPortal: false } } }),
+  },
+}
 
 /**
  * The sheet owns its inset: Mantine's padding is zeroed and header, body and
@@ -80,7 +98,9 @@ export function AppDrawer({
       }
       onClose={onClose}
     >
-      {children}
+      <MantineThemeProvider inherit theme={IN_PLACE_DROPDOWNS}>
+        {children}
+      </MantineThemeProvider>
     </Drawer>
   )
 }
