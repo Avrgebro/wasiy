@@ -126,6 +126,8 @@ test('reservation decisions and visitor arrivals alert the unit with a portal li
     $amenity = Amenity::factory()->for($location)->create([
         'account_id' => $location->account_id, 'name' => 'Salón de eventos',
         'availability' => ['monday' => [['start' => '09:00', 'end' => '21:00']]],
+        // The 15:00–17:00 booking below must be one slot for approve to re-validate.
+        'slot_minutes' => 120,
     ]);
     $monday = CarbonImmutable::now('America/Lima')->addWeek()->next('Monday');
     $reservation = Reservation::factory()->create([

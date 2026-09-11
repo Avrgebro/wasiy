@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { pickDate } from '../../lib/test-dates'
 import '../../i18n'
 import type { AnnouncementSummary } from './api'
 
@@ -164,13 +165,21 @@ describe('AnnouncementsPage', () => {
     await user.type(within(second).getByLabelText(/^Título/), 'Fumigación')
     await user.type(within(second).getByLabelText('Contenido'), 'Lunes por la mañana.')
     await user.click(within(second).getByRole('radio', { name: 'Programar' }))
-    await user.type(within(second).getByLabelText('Fecha'), '2026-09-08')
+    // Publish and expiry dates must be today or later: the pickers disable the past.
+    const publishOn = daysAhead(3)
+    const expiresOn = daysAhead(7)
+    await pickDate(user, within(second).getByRole('button', { name: /^Fecha/ }), publishOn)
     await user.clear(within(second).getByLabelText('Hora'))
     await user.type(within(second).getByLabelText('Hora'), '08:00')
-    await user.type(within(second).getByLabelText('Vigente hasta'), '2026-09-12')
+    await pickDate(user, within(second).getByRole('button', { name: /^Vigente hasta/ }), expiresOn)
     await user.click(within(second).getByRole('button', { name: 'Programar' }))
 
     await waitFor(() => expect(writes).toHaveLength(2))
-    expect(writes[1].body).toEqual({ title: 'Fumigación', body_md: 'Lunes por la mañana.', is_important: false, expires_on: '2026-09-12', publish_at: '2026-09-08 08:00' })
+    expect(writes[1].body).toEqual({ title: 'Fumigación', body_md: 'Lunes por la mañana.', is_important: false, expires_on: expiresOn, publish_at: `${publishOn} 08:00` })
   })
 })
+
+/** Y-m-d `days` ahead in Lima, the fixture location's calendar. */
+function daysAhead(days: number): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(Date.now() + days * 86_400_000))
+}

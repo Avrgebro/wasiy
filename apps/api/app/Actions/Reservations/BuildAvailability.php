@@ -12,7 +12,8 @@ use Illuminate\Validation\ValidationException;
  * The slot list for one amenity and one local day, the only place slots are
  * computed (ADR 0041). Each availability window is cut into consecutive
  * slots of `slot_minutes` from its start; a tail shorter than a slot is not
- * offered. Staff and portal read the same list and post what it offered.
+ * offered. A booking is exactly one of these slots. Staff and portal read
+ * the same list and post what it offered.
  */
 class BuildAvailability
 {

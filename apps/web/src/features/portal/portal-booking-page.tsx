@@ -1,4 +1,6 @@
 import { ActionIcon, Button, Loader, Text } from '@mantine/core'
+import { MiniCalendar } from '@mantine/dates'
+import { SlotGrid } from '../../components/ui/slot-grid'
 import { AltArrowLeftIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
@@ -11,7 +13,8 @@ import { useMe } from '../auth/hooks'
 import { useActiveUnit } from './active-unit-context'
 import { getAvailability, getPortalAmenities, requestReservation, type AvailabilitySlot } from './api'
 import { StatusPill } from './portal-cards'
-import { dayStripLabel, longDate, upcomingDays } from './presentation'
+import { addDays, localDateString, MAX_ADVANCE_DAYS } from '../../lib/calendar'
+import { longDate } from './presentation'
 
 const routeApi = getRouteApi('/_authenticated/portal/reservas_/amenidades/$amenityId_/horario')
 
@@ -24,8 +27,8 @@ export function PortalBookingPage() {
   const { amenityId } = routeApi.useParams()
   const { active } = useActiveUnit()
   const timezone = me?.active_location?.timezone ?? 'America/Lima'
-  const days = upcomingDays(new Date(), timezone)
-  const [date, setDate] = useState(days[0])
+  const today = localDateString(new Date(), timezone)
+  const [date, setDate] = useState(today)
   const [slot, setSlot] = useState<AvailabilitySlot | null>(null)
 
   const amenities = useQuery({ queryKey: ['portal', 'amenities', active?.unit_id], queryFn: () => getPortalAmenities(active!.unit_id), enabled: active !== null })
@@ -57,31 +60,21 @@ export function PortalBookingPage() {
         </ActionIcon>
         <h1 className="m-0 text-xl font-bold">{amenity?.name ?? t('portal.reservations.book')}</h1>
       </div>
-      <div className="-mx-4 overflow-x-auto px-4" role="listbox" aria-label={t('portal.reservations.pickDay')}>
-        <div className="flex gap-2">
-          {days.map((day) => {
-            const label = dayStripLabel(day)
-            const selected = day === date
-
-            return (
-              <button
-                key={day}
-                aria-selected={selected}
-                className={`flex min-w-11 flex-col items-center rounded-inner border px-2 py-2 text-xs ${selected ? 'border-[var(--wa-accent)] bg-[var(--wa-accent)] text-[#1c2b2c]' : 'border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] text-[var(--mantine-color-dimmed)]'}`}
-                role="option"
-                type="button"
-                onClick={() => {
-                  setDate(day)
-                  setSlot(null)
-                }}
-              >
-                <span className="font-semibold">{label.weekday}</span>
-                <span className="text-sm font-bold">{label.day}</span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      {/* Seven days at a time from today, up to the booking horizon; the
+          arrows page by a week. */}
+      <MiniCalendar
+        aria-label={t('portal.reservations.pickDay')}
+        defaultDate={today}
+        maxDate={addDays(today, MAX_ADVANCE_DAYS)}
+        minDate={today}
+        numberOfDays={7}
+        size="md"
+        value={date}
+        onChange={(day) => {
+          setDate(day)
+          setSlot(null)
+        }}
+      />
 
       <Text fw={600} size="sm">
         {longDate(date)}
@@ -100,36 +93,20 @@ export function PortalBookingPage() {
           {t('portal.reservations.closedThatDay')}
         </Text>
       ) : (
-        <ul className="m-0 flex list-none flex-col gap-2 p-0" role="listbox" aria-label={t('portal.reservations.pickSlot')}>
-          {availability.data!.slots.map((item) => {
-            const selected = slot?.start === item.start
-
-            return (
-              <li key={item.start}>
-                <button
-                  aria-selected={selected}
-                  className={`flex min-h-12 w-full items-center justify-between rounded-inner border px-4 text-left text-sm font-semibold ${selected ? 'border-[var(--wa-interactive)] bg-[var(--wa-surface-2)]' : 'border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)]'} ${item.available ? '' : 'opacity-60'}`}
-                  disabled={!item.available}
-                  role="option"
-                  type="button"
-                  onClick={() => setSlot(item)}
-                >
-                  <span>
-                    {item.start}–{item.end}
-                  </span>
-                  {!item.available ? <StatusPill color="gray">{t(`portal.reservations.slotReason.${item.reason ?? 'taken'}`)}</StatusPill> : null}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+        <SlotGrid
+          label={t('portal.reservations.pickSlot')}
+          size="md"
+          slots={availability.data!.slots}
+          value={slot?.start ?? ''}
+          onChange={(start) => setSlot(availability.data!.slots.find((item) => item.start === start) ?? null)}
+        />
       )}
 
       <div className="mt-auto flex flex-col gap-3 pt-2">
         {slot ? (
           <div className="flex items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3 text-sm">
             <span>
-              <span className="font-semibold">{`${dayStripLabel(date).weekday.toLowerCase()} ${dayStripLabel(date).day} · ${slot.start}–${slot.end}`}</span>
+              <span className="font-semibold">{`${longDate(date)} · ${slot.start}–${slot.end}`}</span>
               <span className="block text-xs text-[var(--mantine-color-dimmed)]">{summary}</span>
             </span>
             <StatusPill color={mode === 'instant' ? 'success' : 'warning'}>{t(`portal.reservations.status.${mode === 'instant' ? 'approved' : 'pending'}`)}</StatusPill>

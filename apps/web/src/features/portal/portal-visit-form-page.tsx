@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
+import { DateField } from '../../components/ui/date-field'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
@@ -104,7 +105,7 @@ export function PortalVisitFormPage() {
           control={form.control}
           name="expected_on"
           render={({ field, fieldState }) => (
-            <TextInput {...field} error={fieldErrorMessage(fieldState.error)} label={t('portal.visits.form.whichDay')} min={today} type="date" />
+            <DateField error={fieldErrorMessage(fieldState.error)} label={t('portal.visits.form.whichDay')} minDate={today} value={field.value} onBlur={field.onBlur} onChange={field.onChange} />
           )}
         />
       ) : null}

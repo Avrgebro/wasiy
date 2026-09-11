@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { pickDate } from '../../lib/test-dates'
 import { ADMIN_CAPABILITIES } from '../auth/access'
 import '../../i18n'
 import type { FinanceSummary, MovementSummary } from './api'
@@ -385,10 +386,8 @@ describe('FinancesPage', () => {
     await user.type(within(drawer).getByLabelText('Concepto'), 'Agua · áreas comunes')
     await user.type(within(drawer).getByLabelText('Detalle'), 'Recibo Sedapal')
     await user.type(within(drawer).getByLabelText('Proveedor'), 'Sedapal')
-    const occurredOn = within(drawer).getByLabelText('Fecha')
-    await user.clear(occurredOn)
-    await user.type(occurredOn, '2026-08-16')
-    await user.type(within(drawer).getByLabelText('Vence'), '2026-08-20')
+    await pickDate(user, within(drawer).getByRole('button', { name: /^Fecha/ }), '2026-08-16')
+    await pickDate(user, within(drawer).getByRole('button', { name: /^Vence/ }), '2026-08-20')
     await user.click(within(drawer).getByRole('button', { name: 'Registrar' }))
 
     await waitFor(() => {

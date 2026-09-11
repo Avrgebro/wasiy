@@ -61,7 +61,7 @@ function reservationPayload(Amenity $amenity, Unit $unit, array $overrides = [])
         'unit_id' => $unit->id,
         'date' => nextMonday(),
         'start' => '10:00',
-        'end' => '12:00',
+        'end' => '11:00',
         ...$overrides,
     ];
 }
@@ -282,7 +282,7 @@ function everyDayOpen(): array
         ->all();
 }
 
-test('bookings follow the slot grid of the window they fall in', function () {
+test('a booking is exactly one slot of the window it falls in', function () {
     [$account, $location, $amenity, $unit, $admin] = reservationWorld(['slot_minutes' => 60]);
 
     // Off the grid: the window opens at 09:00, so 10:30 is half a slot in.
@@ -293,20 +293,41 @@ test('bookings follow the slot grid of the window they fall in', function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors('starts_at');
 
-    // Not a whole number of slots.
+    // Shorter than a slot.
     $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '11:30',
+            'start' => '10:00', 'end' => '10:30',
         ]))
         ->assertUnprocessable()
         ->assertJsonValidationErrors('starts_at');
 
-    // Two consecutive slots are one booking.
+    // Two consecutive slots are two bookings, not one.
     $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
             'start' => '10:00', 'end' => '12:00',
         ]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
+
+    // The same start as a single slot books.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'start' => '10:00', 'end' => '11:00',
+        ]))
         ->assertCreated();
+
+    // The last slot ends exactly at the window close; a slot starting there does not exist.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'start' => '21:00', 'end' => '22:00',
+        ]))
+        ->assertCreated();
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'start' => '22:00', 'end' => '23:00',
+        ]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
 });
 
 test('only approved bookings hold the slot: pending never blocks, approving revalidates', function () {
@@ -331,7 +352,7 @@ test('only approved bookings hold the slot: pending never blocks, approving reva
         ->assertJsonPath('data.status', 'approved');
 
     // The slot is now held: the second request cannot be approved, and a new
-    // instant booking overlapping it is refused. Back-to-back still books.
+    // instant booking of the same slot is refused. Back-to-back still books.
     $this->actingAs($admin)
         ->postJson("/api/accounts/{$account->id}/reservations/{$second}/approve")
         ->assertUnprocessable()
@@ -339,14 +360,12 @@ test('only approved bookings hold the slot: pending never blocks, approving reva
 
     $amenity->forceFill(['booking_mode' => BookingMode::Instant])->save();
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit, [
-            'start' => '11:00', 'end' => '13:00',
-        ]))
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
         ->assertUnprocessable()
         ->assertJsonValidationErrors('starts_at');
     $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit, [
-            'start' => '12:00', 'end' => '13:00',
+            'start' => '11:00', 'end' => '12:00',
         ]))
         ->assertCreated();
 });
@@ -474,22 +493,22 @@ test('slots and bookings keep wall-clock labels across a daylight-saving transit
     expect(array_column($slots, 'start'))->toBe(['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'])
         ->and($slots[5]['end'])->toBe('06:00');
 
-    // 04:00–06:00 local is after the fall-back: 03:00–05:00 UTC.
+    // 04:00–05:00 local is after the fall-back: 03:00–04:00 UTC.
     $response = $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), [
             'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
-            'date' => '2026-10-25', 'start' => '04:00', 'end' => '06:00',
+            'date' => '2026-10-25', 'start' => '04:00', 'end' => '05:00',
         ])
         ->assertCreated();
 
     expect($response->json('data.starts_at'))->toBe(CarbonImmutable::parse('2026-10-25 03:00', 'UTC')->toJSON())
-        ->and($response->json('data.ends_at'))->toBe(CarbonImmutable::parse('2026-10-25 05:00', 'UTC')->toJSON());
+        ->and($response->json('data.ends_at'))->toBe(CarbonImmutable::parse('2026-10-25 04:00', 'UTC')->toJSON());
 
-    // The taken slots carry the same labels.
+    // The taken slot carries the same label; its neighbours stay free.
     $after = collect($this->actingAs($admin)
         ->getJson("/api/amenities/{$amenity->id}/availability?date=2026-10-25")
         ->json('slots'))->keyBy('start');
     expect($after['04:00']['reason'])->toBe('taken')
-        ->and($after['05:00']['reason'])->toBe('taken')
+        ->and($after['05:00']['available'])->toBeTrue()
         ->and($after['03:00']['available'])->toBeTrue();
 });

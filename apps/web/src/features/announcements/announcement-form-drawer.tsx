@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { DateField } from '../../components/ui/date-field'
 import { DrawerField, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
@@ -172,7 +173,7 @@ function AnnouncementForm({
                   <Controller
                     control={form.control}
                     name="publish_date"
-                    render={({ field, fieldState }) => <TextInput {...field} error={fieldErrorMessage(fieldState.error)} label={t('announcements.form.date')} min={todayIn(timezone)} type="date" />}
+                    render={({ field, fieldState }) => <DateField error={fieldErrorMessage(fieldState.error)} label={t('announcements.form.date')} minDate={todayIn(timezone)} value={field.value} onBlur={field.onBlur} onChange={field.onChange} />}
                   />
                   <Controller
                     control={form.control}
@@ -190,7 +191,7 @@ function AnnouncementForm({
           control={form.control}
           name="expires_on"
           render={({ field, fieldState }) => (
-            <TextInput {...field} description={t('announcements.form.expiresHint')} error={fieldErrorMessage(fieldState.error)} label={t('announcements.form.expiresOn')} type="date" />
+            <DateField clearable description={t('announcements.form.expiresHint')} error={fieldErrorMessage(fieldState.error)} label={t('announcements.form.expiresOn')} minDate={todayIn(timezone)} value={field.value} onBlur={field.onBlur} onChange={field.onChange} />
           )}
         />
       </AppDrawerBody>

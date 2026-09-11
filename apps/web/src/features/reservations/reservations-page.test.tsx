@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { pickDate } from '../../lib/test-dates'
 import { ADMIN_CAPABILITIES } from '../auth/access'
 import '../../i18n'
 import type { ReservationSummary } from './api'
@@ -59,9 +60,26 @@ function meResponse() {
 }
 
 /** Tomorrow at the given Lima wall-clock hour, as a UTC ISO instant. */
-/** Y-m-d one week ahead in the location calendar, inside the 90-day horizon. */
+/**
+ * Y-m-d of a Monday at least a week ahead in the location calendar, inside
+ * the 90-day horizon: the fixture amenity opens on Mondays only and the
+ * calendar disables closed weekdays.
+ */
 function nextWeekDate(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(Date.now() + 7 * 86_400_000))
+  const lima = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' })
+  for (let days = 7; days < 14; days++) {
+    const date = lima.format(new Date(Date.now() + days * 86_400_000))
+    if (new Date(`${date}T12:00:00Z`).getUTCDay() === 1) return date
+  }
+  throw new Error('unreachable')
+}
+
+/** Y-m-d of tomorrow in Lima: the board shows one day and the fixtures book tomorrow. */
+function tomorrowDate(): string {
+  const lima = new Date(Date.now() - 5 * 3_600_000)
+  lima.setUTCDate(lima.getUTCDate() + 1)
+
+  return lima.toISOString().slice(0, 10)
 }
 
 function tomorrowAt(hour: number): string {
@@ -225,7 +243,8 @@ afterEach(() => {
 })
 
 describe('ReservationsPage', () => {
-  it('renders the week list rows and the approval queue with pending requests', async () => {
+  it('renders the day board blocks and the approval queue with pending requests', async () => {
+    currentSearch.date = tomorrowDate()
     installAdapter([
       reservation(),
       reservation({
@@ -252,8 +271,9 @@ describe('ReservationsPage', () => {
     expect(screen.getAllByText('Parrilla / terraza').length).toBeGreaterThan(0)
     expect(screen.getByText('Aprobar')).toBeInTheDocument()
     expect(screen.queryByText(/conflicto:/)).not.toBeInTheDocument()
-    // Chips show the pending count.
-    expect(screen.getByRole('button', { name: 'Pendientes 1' })).toBeInTheDocument()
+    // Both bookings sit on the board as blocks in their amenity's row.
+    expect(screen.getByRole('button', { name: 'Depto. 704 · A. Torres' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Depto. 501 · M. Paredes' })).toBeInTheDocument()
   })
 
   it('keeps overlapping requests actionable without a speculative conflict label', async () => {
@@ -335,14 +355,14 @@ describe('ReservationsPage', () => {
     await user.click(await screen.findByRole('option', { name: 'Depto. 704' }))
 
     const date = nextWeekDate()
-    await user.type(within(drawer).getByLabelText('Fecha'), date)
-    // Start = a free slot the server offered; end = that slot's end or the
-    // end of a consecutive free run (12:00 is taken, so 14:00 is unreachable).
-    await user.click(within(drawer).getByRole('combobox', { name: 'Turno de inicio' }))
-    await user.click(await screen.findByRole('option', { name: '10:00–11:00' }))
-    await user.click(within(drawer).getByRole('combobox', { name: 'Fin' }))
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual(['11:00', '12:00'])
-    await user.click(screen.getByRole('option', { name: '12:00' }))
+    await pickDate(user, within(drawer).getByRole('button', { name: /Fecha/ }), date)
+    // Start = a free slot the server offered, on the grid; end = that slot's
+    // end or the end of a consecutive free run (12:00 is taken, so 14:00 is
+    // unreachable).
+    // One slot per booking on the grid: picking a slot fixes the end; the
+    // taken 12:00 slot renders disabled.
+    expect(await within(drawer).findByRole('option', { name: '12:00–13:00' })).toBeDisabled()
+    await user.click(within(drawer).getByRole('option', { name: '10:00–11:00' }))
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))
 
     await waitFor(() => {
@@ -353,7 +373,7 @@ describe('ReservationsPage', () => {
           resident_id: null,
           date,
           start: '10:00',
-          end: '12:00',
+          end: '11:00',
         },
       ])
     })
@@ -378,11 +398,8 @@ describe('ReservationsPage', () => {
     await user.click(await screen.findByRole('option', { name: 'Parrilla / terraza' }))
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
     await user.click(await screen.findByRole('option', { name: 'Depto. 704' }))
-    await user.type(within(drawer).getByLabelText('Fecha'), nextWeekDate())
-    await user.click(within(drawer).getByRole('combobox', { name: 'Turno de inicio' }))
-    await user.click(await screen.findByRole('option', { name: '10:00–11:00' }))
-    await user.click(within(drawer).getByRole('combobox', { name: 'Fin' }))
-    await user.click(await screen.findByRole('option', { name: '11:00' }))
+    await pickDate(user, within(drawer).getByRole('button', { name: /Fecha/ }), nextWeekDate())
+    await user.click(await within(drawer).findByRole('option', { name: '10:00–11:00' }))
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))
 
     expect(
@@ -412,13 +429,14 @@ describe('ReservationsPage', () => {
     expect(screen.getByText('Ver menos')).toBeInTheDocument()
   })
 
-  it('opens the detail drawer from a list row with facts, history and the cancel action', async () => {
+  it('opens the detail drawer from a board block with facts, history and the cancel action', async () => {
+    currentSearch.date = tomorrowDate()
     installAdapter([reservation({ starts_at: tomorrowAt(19), ends_at: tomorrowAt(21), created_by_name: 'A. Quispe' })])
 
     renderPage()
 
     const user = userEvent.setup()
-    await user.click(await screen.findByRole('button', { name: /Parrilla \/ terraza/ }))
+    await user.click(await screen.findByRole('button', { name: 'Depto. 704 · A. Torres' }))
 
     const drawer = await screen.findByRole('dialog')
     expect(await within(drawer).findByText('Reserva · Depto. 704 · A. Torres')).toBeInTheDocument()
@@ -433,6 +451,7 @@ describe('ReservationsPage', () => {
   })
 
   it('shows the linked ledger rows in the drawer with their forward action', async () => {
+    currentSearch.date = tomorrowDate()
     installAdapter([
       reservation({
         starts_at: tomorrowAt(19),
@@ -490,7 +509,7 @@ describe('ReservationsPage', () => {
 
     renderPage()
     const user = userEvent.setup()
-    await user.click(await screen.findByRole('button', { name: /Parrilla \/ terraza/ }))
+    await user.click(await screen.findByRole('button', { name: 'Depto. 704 · A. Torres' }))
 
     const drawer = await screen.findByRole('dialog')
     expect(await within(drawer).findByText('Cobros')).toBeInTheDocument()
@@ -503,40 +522,4 @@ describe('ReservationsPage', () => {
     )
     expect(within(drawer).getByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
   })
-})
-
-it('opens the amenity filter from the agenda header and updates the URL selection', async () => {
-  installAdapter([reservation()])
-  renderPage()
-  await screen.findByText('Por aprobar')
-  const user = userEvent.setup()
-  expect(screen.queryByRole('combobox', { name: 'Amenidad' })).not.toBeInTheDocument()
-  await user.click(screen.getByRole('button', { name: 'Filtros' }))
-  const panel = screen.getByRole('dialog', { name: 'Filtros' })
-  await user.click(within(panel).getByRole('combobox', { name: 'Amenidad' }))
-  await user.click(await screen.findByRole('option', { name: 'Parrilla / terraza' }))
-  expect(navigateSpy.mock.calls.at(-1)![0].search({ date: '2026-08-10' })).toEqual({ date: '2026-08-10', amenity_id: 'am_1' })
-})
-
-it.each(['704', '  JOSE  '])('searches weekly reservations by unit or resident: %s', async (query) => {
-  currentSearch.search = query
-  installAdapter([
-    reservation({ resident_name: 'José Torres' }),
-    reservation({ id: 'res_other', unit_number: 'Depto. 305', resident_name: null }),
-  ])
-  renderPage()
-  expect(await screen.findByText('José Torres')).toBeInTheDocument()
-  expect(screen.queryByText('Depto. 305')).not.toBeInTheDocument()
-})
-
-it('applies the header search to the URL while preserving other filters', async () => {
-  installAdapter([reservation()])
-  renderPage()
-  const user = userEvent.setup()
-  const input = await screen.findByPlaceholderText('Buscar por unidad o residente…')
-  await user.type(input, '704{Enter}')
-  expect(navigateSpy.mock.calls.at(-1)![0].search({ amenity_id: 'am_1' })).toEqual({ amenity_id: 'am_1', search: '704' })
-  await user.clear(input)
-  await user.keyboard('{Enter}')
-  expect(navigateSpy.mock.calls.at(-1)![0].search({ search: '704' })).toEqual({ search: undefined })
 })

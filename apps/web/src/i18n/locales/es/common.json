@@ -287,10 +287,6 @@
       "pickDay": "Elegir día",
       "pickSlot": "Elegir horario",
       "closedThatDay": "La amenidad no abre ese día.",
-      "slotReason": {
-        "past": "Pasó",
-        "taken": "Ocupado"
-      },
       "requestedBy": "Solicitada por",
       "staffNote": "Nota de administración",
       "cancel": "Cancelar reserva",
@@ -849,27 +845,11 @@
     "title": "Reservas",
     "subtitle": "Amenidades de {{location}}",
     "noLocation": "Selecciona una ubicación para ver sus reservas.",
-    "searchPlaceholder": "Buscar por unidad o residente…",
-    "currentWeek": "Semana actual",
-    "previousWeek": "Semana anterior",
-    "nextWeek": "Semana siguiente",
     "today": "Hoy",
-    "tomorrow": "Mañana",
-    "emptyWeek": "Sin reservas esta semana.",
-    "allAmenities": "Todas las amenidades",
-    "chips": {
-      "all": "Todas",
-      "pending": "Pendientes",
-      "approved": "Confirmadas",
-      "completed": "Completadas"
-    },
     "columns": {
       "amenity": "Amenidad",
       "unit": "Unidad",
-      "resident": "Residente",
-      "date": "Fecha",
-      "time": "Horario",
-      "status": "Estado"
+      "resident": "Residente"
     },
     "statuses": {
       "pending": "Pendiente",
@@ -918,10 +898,11 @@
       "unit": "Unidad",
       "resident": "Residente (opcional)",
       "date": "Fecha",
-      "end": "Fin",
+      "datePlaceholder": "Elegir fecha",
+      "pickAmenityAndDay": "Elige una amenidad y un día para ver los turnos disponibles.",
       "closedThatDay": "La amenidad está cerrada ese día.",
       "submit": "Registrar reserva",
-      "startSlot": "Turno de inicio",
+      "startSlot": "Horario",
       "dateOutOfRange": "Elige una fecha entre hoy y {{days}} días adelante.",
       "fullyBooked": "No quedan turnos libres ese día."
     },
@@ -948,7 +929,6 @@
         "pending": "Decidida por"
       }
     },
-    "weekOf": "Semana del {{range}}",
     "history": {
       "created": "Reserva registrada",
       "approved": "Reserva aprobada",
@@ -959,6 +939,11 @@
       "chargeGenerated": "Cobro generado: {{charge}}",
       "completed": "Reserva completada",
       "derived": "derivado del horario"
+    },
+    "previousDay": "Día anterior",
+    "nextDay": "Día siguiente",
+    "board": {
+      "noAmenities": "Esta ubicación no tiene amenidades reservables."
     }
   },
   "settings": {
@@ -1642,6 +1627,10 @@
     "confirmCollapseBody_one": "Se elimina la otra torre (está vacía) y las unidades dejan de mostrar torre.",
     "confirmCollapseBody_other": "Se eliminan las otras {{count}} torres (están vacías) y las unidades dejan de mostrar torre.",
     "lastOne": "Una ubicación conserva al menos una torre."
+  },
+  "dates": {
+    "nextMonth": "Mes siguiente",
+    "previousMonth": "Mes anterior"
   },
   "phone": {
     "country": "País",

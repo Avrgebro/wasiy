@@ -287,10 +287,6 @@
       "pickDay": "Pick a day",
       "pickSlot": "Pick a time",
       "closedThatDay": "The amenity is closed that day.",
-      "slotReason": {
-        "past": "Passed",
-        "taken": "Taken"
-      },
       "requestedBy": "Requested by",
       "staffNote": "Note from management",
       "cancel": "Cancel booking",
@@ -849,27 +845,11 @@
     "title": "Reservations",
     "subtitle": "{{location}} amenities",
     "noLocation": "Select a location to see its reservations.",
-    "searchPlaceholder": "Search by unit or resident…",
-    "currentWeek": "Current week",
-    "previousWeek": "Previous week",
-    "nextWeek": "Next week",
     "today": "Today",
-    "tomorrow": "Tomorrow",
-    "emptyWeek": "No reservations this week.",
-    "allAmenities": "All amenities",
-    "chips": {
-      "all": "All",
-      "pending": "Pending",
-      "approved": "Confirmed",
-      "completed": "Completed"
-    },
     "columns": {
       "amenity": "Amenity",
       "unit": "Unit",
-      "resident": "Resident",
-      "date": "Date",
-      "time": "Time",
-      "status": "Status"
+      "resident": "Resident"
     },
     "statuses": {
       "pending": "Pending",
@@ -918,10 +898,11 @@
       "unit": "Unit",
       "resident": "Resident (optional)",
       "date": "Date",
-      "end": "End",
+      "datePlaceholder": "Pick a date",
+      "pickAmenityAndDay": "Pick an amenity and a day to see the available slots.",
       "closedThatDay": "The amenity is closed that day.",
       "submit": "Create reservation",
-      "startSlot": "Start slot",
+      "startSlot": "Time",
       "dateOutOfRange": "Pick a date between today and {{days}} days ahead.",
       "fullyBooked": "No free slots left that day."
     },
@@ -948,7 +929,6 @@
         "pending": "Decided by"
       }
     },
-    "weekOf": "Week of {{range}}",
     "history": {
       "created": "Reservation registered",
       "approved": "Reservation approved",
@@ -959,6 +939,11 @@
       "chargeGenerated": "Charge generated: {{charge}}",
       "completed": "Reservation completed",
       "derived": "derived from the schedule"
+    },
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "board": {
+      "noAmenities": "This location has no reservable amenities."
     }
   },
   "settings": {
@@ -1642,6 +1627,10 @@
     "confirmCollapseBody_one": "The other building is deleted (it is empty) and units stop showing a tower.",
     "confirmCollapseBody_other": "The other {{count}} buildings are deleted (they are empty) and units stop showing a tower.",
     "lastOne": "A location keeps at least one building."
+  },
+  "dates": {
+    "nextMonth": "Next month",
+    "previousMonth": "Previous month"
   },
   "phone": {
     "country": "Country",

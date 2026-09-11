@@ -11,10 +11,10 @@ use Illuminate\Validation\ValidationException;
 /**
  * The booking rule (ADR 0041), shared by create and approve so both paths
  * agree: the amenity accepts bookings, the unit lives there, the interval is
- * a run of whole slots inside one availability window of that local
- * weekday, it starts in the future and within the horizon (new bookings
- * only), and no approved reservation of the amenity overlaps it. Pending and
- * observed requests never block; the approver resolves contention.
+ * exactly one slot of one availability window of that local weekday, it
+ * starts in the future and within the horizon (new bookings only), and no
+ * approved reservation of the amenity overlaps it. Pending and observed
+ * requests never block; the approver resolves contention.
  *
  * The caller runs this inside the transaction that locks the Amenity row.
  */
@@ -65,9 +65,10 @@ class ValidateReservationSlot
     }
 
     /**
-     * The interval must sit inside one window of the local weekday and be
-     * aligned to that window's slot grid: it starts a whole number of slots
-     * after the window opens and lasts a whole number of slots.
+     * The interval must be exactly one slot of one window of the local
+     * weekday: it starts on that window's grid (window start, stepping
+     * `slot_minutes`) and ends `slot_minutes` later, at or before the window
+     * closes. A tail shorter than a slot is never a slot.
      */
     private function validateSlotGrid(Amenity $amenity, CarbonImmutable $localStart, CarbonImmutable $localEnd): void
     {
@@ -84,12 +85,16 @@ class ValidateReservationSlot
             $open = self::minutes($window['start']);
             $close = self::minutes($window['end']);
 
-            if ($startMinute < $open || $endMinute > $close) {
+            if ($startMinute < $open || $startMinute >= $close) {
                 continue;
             }
 
-            if (($startMinute - $open) % $slot !== 0 || ($endMinute - $startMinute) % $slot !== 0) {
-                $this->fail('starts_at', __('Reservations follow the amenity slots of :minutes minutes.', ['minutes' => $slot]));
+            if (($startMinute - $open) % $slot !== 0 || $startMinute + $slot > $close) {
+                $this->fail('starts_at', __('The requested time falls outside the amenity availability.'));
+            }
+
+            if ($endMinute - $startMinute !== $slot) {
+                $this->fail('starts_at', __('A reservation is exactly one slot of :minutes minutes.', ['minutes' => $slot]));
             }
 
             return;

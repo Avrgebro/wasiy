@@ -237,6 +237,8 @@ Defaults:
 - Forms use `react-hook-form` with a `zod` resolver (ADR 0009). Schema messages are i18n keys; server `422` errors land under their field through `submitHandlingServerErrors`, and anything unmatched goes to a root `Alert`.
 - Plain `rows` on `Textarea`, never `autosize` (it needs layout APIs jsdom lacks). Note fields use three rows everywhere.
 - Money inputs: `NumberInput` with `prefix="S/ "`, integers only, `thousandSeparator=" "`.
+- Dates: `DateField` from `components/ui/date-field.tsx` (Mantine `DatePickerInput` from `@mantine/dates`, Spanish, Monday-first, calendar icon, long value like "5 de octubre de 2026"). Values are `YYYY-MM-DD` strings or `''`, never `Date` objects. Bounds and closed days go through `minDate` / `maxDate` / `excludeDate`. Day buttons are labelled by ISO date, so tests pick a day with `pickDate` from `lib/test-dates.ts`. No native `type="date"` inputs. Times that are typed (availability windows, quiet hours, announcement hour) stay native `type="time"`.
+- Slots: both surfaces pick one slot on `SlotGrid` from `components/ui/slot-grid.tsx` (Mantine `TimeGrid`, single value: taken and past slots disabled, each button named by its `start–end` range). The portal shows it under a Mantine `MiniCalendar` day strip; the staff drawer under a `DateField`. A booking is exactly one slot (ADR 0041), so there is no end field anywhere.
 
 ## Tables
 

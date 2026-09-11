@@ -1,9 +1,8 @@
 import { z } from 'zod'
 
 /**
- * URL contract for /admin/reservations. `date` (YYYY-MM-DD) anchors the
- * week to show, defaulting to today's. `status` is the chip, not the raw
- * API status.
+ * The reservations page URL: `date` is the day the board shows, defaulting
+ * to today; `reservation` opens the detail drawer (deep link from Finanzas).
  */
 export const reservationsSearchSchema = z.object({
   date: z
@@ -11,10 +10,6 @@ export const reservationsSearchSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional()
     .catch(undefined),
-  status: z.enum(['pending', 'approved', 'completed']).optional().catch(undefined),
-  amenity_id: z.string().optional().catch(undefined),
-  search: z.string().trim().optional().catch(undefined),
-  /** Opens the detail drawer for this booking; deep-linked from Finanzas. */
   reservation: z.string().optional().catch(undefined),
 })
 

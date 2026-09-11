@@ -83,7 +83,9 @@ function pendingReservationWithCharges(Account $account, Location $location, Uni
         'account_id' => $account->id,
         'name' => 'Salón de eventos',
         'booking_mode' => BookingMode::from($mode),
-        'availability' => ['monday' => [['start' => '09:00', 'end' => '22:00']]],
+        // The 10:00–12:00 booking below must be one slot on the grid for approve to re-validate.
+        'availability' => ['monday' => [['start' => '10:00', 'end' => '22:00']]],
+        'slot_minutes' => 120,
         'fee_amount' => 150,
         'deposit_amount' => 300,
     ]);

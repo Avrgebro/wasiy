@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { DateField } from '../../components/ui/date-field'
 import { getErrorMessage } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 import { subscriptionPageQueryKey, uploadPaymentProof, type Invoice } from './api'
@@ -108,7 +109,7 @@ export function ConfirmPaymentDrawer({ invoice, onClose }: { invoice: Invoice | 
             <div>
               <p className="m-0 mb-3 text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--mantine-color-dimmed)]">{t('subscription.proof.detailsTitle')}</p>
               <div className="grid gap-4 sm:grid-cols-2">
-                <TextInput label={t('subscription.proof.paidOn')} max={new Date().toISOString().slice(0, 10)} onChange={(event) => setPaidOn(event.currentTarget.value)} type="date" value={paidOn} />
+                <DateField label={t('subscription.proof.paidOn')} maxDate={new Date().toISOString().slice(0, 10)} value={paidOn} onChange={setPaidOn} />
                 <NumberInput allowNegative={false} decimalScale={2} label={t('subscription.proof.amount')} min={0} onChange={setAmount} prefix="S/ " thousandSeparator="," value={amount} />
               </div>
               <TextInput className="mt-4" label={t('subscription.proof.operation')} maxLength={60} onChange={(event) => setOperation(event.currentTarget.value)} placeholder={t('subscription.proof.operationPlaceholder')} value={operation} />

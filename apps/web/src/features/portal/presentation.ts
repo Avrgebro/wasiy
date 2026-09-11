@@ -99,21 +99,7 @@ export function reservationTone(status: string, completed = false): 'success' | 
   }
 }
 
-/** The next 14 days as Y-m-d strings in the location's calendar, today first. */
-export function upcomingDays(now: Date, timezone: string, count = 14): string[] {
-  const start = utcMidnight(now, timezone)
-
-  return Array.from({ length: count }, (_, index) => new Date(start + index * 86_400_000).toISOString().slice(0, 10))
-}
-
-/** "S" / "6" pieces for the day strip. */
-export function dayStripLabel(date: string) {
-  const [year, month, day] = date.split('-').map(Number)
-  const weekday = new Intl.DateTimeFormat('es-PE', { weekday: 'narrow', timeZone: 'UTC' }).format(new Date(Date.UTC(year, month - 1, day)))
-
-  return { weekday: weekday.toUpperCase(), day: String(day) }
-}
-
+/** "lunes 5 de octubre": the chosen day above the slots and in the summary band. */
 export function longDate(date: string) {
   const [year, month, day] = date.split('-').map(Number)
 

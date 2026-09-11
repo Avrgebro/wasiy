@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, NumberInput, SegmentedControl, Select, Textarea, TextInput } from '@mantine/core'
+import { DateField } from '../../components/ui/date-field'
 import { DrawerRow } from '../../components/ui/detail-drawer-parts'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
@@ -236,11 +237,12 @@ export function MovementFormDrawer({
               control={form.control}
               name="occurred_on"
               render={({ field, fieldState }) => (
-                <TextInput
-                  {...field}
+                <DateField
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('finances.form.occurredOn')}
-                  type="date"
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  onChange={field.onChange}
                 />
               )}
             />
@@ -248,11 +250,13 @@ export function MovementFormDrawer({
               control={form.control}
               name="due_on"
               render={({ field, fieldState }) => (
-                <TextInput
-                  {...field}
+                <DateField
+                  clearable
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('finances.form.dueOn')}
-                  type="date"
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  onChange={field.onChange}
                 />
               )}
             />

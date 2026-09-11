@@ -114,6 +114,10 @@ test('a resident requests a booking that enters the queue, sees it upcoming, and
     $this->actingAs($user)
         ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '10:00', 'end' => '12:00'])
         ->assertUnprocessable()->assertJsonValidationErrors('starts_at');
+    // Two slots in one request are refused too: a booking is exactly one slot.
+    $this->actingAs($user)
+        ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '09:00', 'end' => '13:00'])
+        ->assertUnprocessable()->assertJsonValidationErrors('starts_at');
     $farMonday = CarbonImmutable::parse($monday)->addWeeks(14)->format('Y-m-d');
     $this->actingAs($user)
         ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $farMonday, 'start' => '09:00', 'end' => '11:00'])
@@ -130,6 +134,21 @@ test('a resident requests a booking that enters the queue, sees it upcoming, and
         ->assertOk()->assertJsonPath('data.status', 'cancelled');
     $this->actingAs($user)->getJson("/api/portal/reservations?unit_id={$unit->id}&scope=past")
         ->assertOk()->assertJsonCount(1, 'data');
+});
+
+test('the portal accepts one slot and refuses two on the same grid', function () {
+    [$location, $amenity, $unit, $user] = portalReservationWorld(['booking_mode' => BookingMode::Instant]);
+    $monday = nextMondayLima();
+
+    // 09:00–13:00 is two 120-minute slots on the grid.
+    $this->actingAs($user)
+        ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '09:00', 'end' => '13:00'])
+        ->assertUnprocessable()->assertJsonValidationErrors('starts_at');
+
+    // 09:00–11:00 is the first slot.
+    $this->actingAs($user)
+        ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '09:00', 'end' => '11:00'])
+        ->assertCreated()->assertJsonPath('data.status', 'approved');
 });
 
 test('an instant amenity confirms on the spot and a resident cannot cancel once it has started', function () {
