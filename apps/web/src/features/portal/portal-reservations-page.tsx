@@ -174,8 +174,8 @@ export function PortalReservationsPage() {
         {selected ? (
           <div className="flex flex-col gap-2.5">
             <SheetTiles>
-              <SheetTile label={t('portal.reservations.fee')} value={selected.fee_snapshot ? formatMoney(selected.fee_snapshot) : t('portal.reservations.free')} />
-              <SheetTile label={t('portal.reservations.deposit')} value={selected.deposit_snapshot ? formatMoney(selected.deposit_snapshot) : '—'} />
+              <SheetTile label={t('portal.reservations.fee')} value={selected.fee_snapshot_minor ? formatMoney(selected.fee_snapshot_minor) : t('portal.reservations.free')} />
+              <SheetTile label={t('portal.reservations.deposit')} value={selected.deposit_snapshot_minor ? formatMoney(selected.deposit_snapshot_minor) : '—'} />
               <SheetTile label={t('portal.reservations.requestedBy')} value={selected.resident_name ?? selected.created_by_name ?? '—'} wide />
             </SheetTiles>
             {selected.status_note ? <SheetNote label={t('portal.reservations.staffNote')}>{selected.status_note}</SheetNote> : null}
@@ -204,8 +204,8 @@ export function PortalReservationsPage() {
 function AmenityCard({ amenity }: { amenity: PortalAmenity }) {
   const { t } = useTranslation('common')
   const facts = [
-    amenity.fee_amount ? formatMoney(amenity.fee_amount) : t('portal.reservations.free'),
-    amenity.deposit_amount ? t('portal.reservations.depositOf', { amount: formatMoney(amenity.deposit_amount) }) : null,
+    amenity.fee_amount_minor ? formatMoney(amenity.fee_amount_minor) : t('portal.reservations.free'),
+    amenity.deposit_amount_minor ? t('portal.reservations.depositOf', { amount: formatMoney(amenity.deposit_amount_minor) }) : null,
   ].filter(Boolean)
 
   return (

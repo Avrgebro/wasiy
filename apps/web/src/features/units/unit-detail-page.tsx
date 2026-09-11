@@ -140,7 +140,7 @@ function UnitDetailContent({
     )
   }
 
-  const { data: unit, packages, visits, reservations, movements, movements_month: month, pending_balance: balance, notes } = detailQuery.data
+  const { data: unit, packages, visits, reservations, movements, movements_month: month, pending_balance_minor: balance, notes } = detailQuery.data
   const primaryAction =
     unit.status === 'inactive' ? (
       <PageAction color="accent" fullWidth={!wide} loading={reactivate.isPending} onClick={() => reactivate.mutate()}>
@@ -194,7 +194,7 @@ function UnitDetailContent({
         {wide && canManage ? <div className="shrink-0">{primaryAction}</div> : null}
         </div>
         <div className="grid grid-cols-2 gap-2.5 sm:flex sm:flex-wrap">
-          <Fact label={t('units.detail.monthlyFee')} value={unit.maintenance_fee !== null ? formatMoney(unit.maintenance_fee) : '—'} />
+          <Fact label={t('units.detail.monthlyFee')} value={unit.maintenance_fee_minor !== null ? formatMoney(unit.maintenance_fee_minor) : '—'} />
           <Fact label={t('units.detail.share')} value={unit.participation_share !== null ? `${unit.participation_share} %` : '—'} />
           <Fact label={t('units.detail.parking')} value={unit.parking_spots.join(', ') || '—'} />
           <Fact label={t('units.detail.storage')} value={unit.storage_rooms.join(', ') || '—'} />
@@ -470,8 +470,8 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void
 function ReservationRow({ reservation, timezone }: { reservation: ReservationSummary; timezone: string }) {
   const { t } = useTranslation('common')
   const charges = [
-    reservation.fee_snapshot ? t('reservations.queue.fee', { amount: reservation.fee_snapshot }) : null,
-    reservation.deposit_snapshot ? t('reservations.queue.deposit', { amount: reservation.deposit_snapshot }) : null,
+    reservation.fee_snapshot_minor ? t('reservations.queue.fee', { amount: formatMoney(reservation.fee_snapshot_minor) }) : null,
+    reservation.deposit_snapshot_minor ? t('reservations.queue.deposit', { amount: formatMoney(reservation.deposit_snapshot_minor) }) : null,
   ].filter(Boolean)
 
   return (
@@ -510,7 +510,7 @@ function MovementRow({ movement }: { movement: MovementSummary }) {
         </Text>
       </div>
       <span className={`font-mono text-sm font-semibold ${amountClassName(movement)}`}>
-        {formatMoney(movement.amount, { negative: movement.direction === 'expense' })}
+        {formatMoney(movement.amount_minor, { negative: movement.direction === 'expense' })}
       </span>
       <StatusPill color={statusColor(movement.status)}>
         {statusLabel(movement, t)}

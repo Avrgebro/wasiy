@@ -115,12 +115,12 @@ function UnitsContent({ canManage, locationId, locationName }: { canManage: bool
       ),
     },
     {
-      accessorKey: 'maintenance_fee',
+      accessorKey: 'maintenance_fee_minor',
       header: t('units.columns.fee'),
-      meta: { sortKey: 'maintenance_fee', className: 'whitespace-nowrap' },
+      meta: { sortKey: 'maintenance_fee_minor', className: 'whitespace-nowrap' },
       cell: ({ row }) => (
         <span className="font-mono text-[13px] font-semibold text-[var(--mantine-color-dimmed)]">
-          {row.original.maintenance_fee !== null ? formatMoney(row.original.maintenance_fee) : '—'}
+          {row.original.maintenance_fee_minor !== null ? formatMoney(row.original.maintenance_fee_minor) : '—'}
         </span>
       ),
     },

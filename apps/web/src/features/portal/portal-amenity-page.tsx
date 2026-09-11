@@ -57,8 +57,8 @@ export function PortalAmenityPage() {
 
       <DrawerFacts>
         <DrawerFact label={t('portal.reservations.slotLength')} value={hours(amenity.slot_minutes)} />
-        <DrawerFact label={t('portal.reservations.fee')} value={amenity.fee_amount ? formatMoney(amenity.fee_amount) : t('portal.reservations.free')} />
-        <DrawerFact label={t('portal.reservations.deposit')} value={amenity.deposit_amount ? formatMoney(amenity.deposit_amount) : '—'} />
+        <DrawerFact label={t('portal.reservations.fee')} value={amenity.fee_amount_minor ? formatMoney(amenity.fee_amount_minor) : t('portal.reservations.free')} />
+        <DrawerFact label={t('portal.reservations.deposit')} value={amenity.deposit_amount_minor ? formatMoney(amenity.deposit_amount_minor) : '—'} />
         <DrawerFact label={t('portal.reservations.cancellation')} value={t('portal.reservations.cancelUntilStart')} />
       </DrawerFacts>
 

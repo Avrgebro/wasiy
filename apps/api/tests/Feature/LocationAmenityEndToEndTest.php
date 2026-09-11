@@ -85,8 +85,8 @@ test('the full m6 location and amenity path works end to end', function () {
                 ],
                 'sunday' => [],
             ],
-            'fee_amount' => 150,
-            'deposit_amount' => 300,
+            'fee_amount_minor' => 150,
+            'deposit_amount_minor' => 300,
         ])
         ->assertCreated()
         ->assertJsonPath('data.slot_minutes', 240)

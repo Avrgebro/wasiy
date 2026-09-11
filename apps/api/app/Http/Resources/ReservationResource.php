@@ -36,8 +36,8 @@ class ReservationResource extends JsonResource
             'is_completed' => $this->status === ReservationStatus::Approved
                 && $this->ends_at->isPast(),
             'status_note' => $this->status_note,
-            'fee_snapshot' => $this->fee_snapshot,
-            'deposit_snapshot' => $this->deposit_snapshot,
+            'fee_snapshot_minor' => $this->fee_snapshot_minor,
+            'deposit_snapshot_minor' => $this->deposit_snapshot_minor,
             // Present once approved; pending requests have no ledger rows yet.
             'movements' => FinancialMovementResource::collection($this->whenLoaded('movements')),
             'created_by' => $this->created_by,

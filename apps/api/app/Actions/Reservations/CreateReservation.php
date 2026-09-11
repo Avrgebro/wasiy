@@ -53,8 +53,8 @@ class CreateReservation
             ]);
             $reservation->forceFill([
                 'status' => $instant ? ReservationStatus::Approved : ReservationStatus::Pending,
-                'fee_snapshot' => $amenity->fee_amount,
-                'deposit_snapshot' => $amenity->deposit_amount,
+                'fee_snapshot_minor' => $amenity->fee_amount_minor,
+                'deposit_snapshot_minor' => $amenity->deposit_amount_minor,
                 'created_by' => $actor->id,
                 'decided_by' => $instant ? $actor->id : null,
                 'decided_at' => $instant ? now() : null,

@@ -10,6 +10,7 @@ use App\Models\Reservation;
 use App\Models\User;
 use App\Services\ActivityLogger;
 use App\Services\ResidentAlerts;
+use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -128,8 +129,8 @@ class DecideReservation
                 ['label' => 'Fecha', 'value' => ucfirst($starts->isoFormat('dddd D [de] MMMM'))],
                 ['label' => 'Horario', 'value' => $starts->format('H:i').' – '.$ends->format('H:i')],
                 ['label' => 'Unidad', 'value' => $reservation->unit->label()],
-                $reservation->fee_snapshot ? ['label' => 'Costo', 'value' => 'S/ '.number_format((float) $reservation->fee_snapshot, 0)] : null,
-                $reservation->deposit_snapshot ? ['label' => 'Depósito', 'value' => 'S/ '.number_format((float) $reservation->deposit_snapshot, 0)] : null,
+                $reservation->fee_snapshot_minor ? ['label' => 'Costo', 'value' => Money::soles($reservation->fee_snapshot_minor)] : null,
+                $reservation->deposit_snapshot_minor ? ['label' => 'Depósito', 'value' => Money::soles($reservation->deposit_snapshot_minor)] : null,
                 $note ? ['label' => 'Nota', 'value' => $note] : null,
             ])),
             intro: match ($kind) {

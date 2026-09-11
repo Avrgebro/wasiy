@@ -206,15 +206,15 @@ function Charges({
   const movements = reservation.movements ?? []
 
   if (movements.length === 0) {
-    const free = reservation.fee_snapshot === null && reservation.deposit_snapshot === null
+    const free = reservation.fee_snapshot_minor === null && reservation.deposit_snapshot_minor === null
 
     return (
       <Text c="dimmed" size="sm">
         {free
           ? t('reservations.queue.free')
           : [
-              reservation.fee_snapshot !== null ? `${t('reservations.detail.fee')} ${formatMoney(reservation.fee_snapshot)}` : null,
-              reservation.deposit_snapshot !== null ? `${t('reservations.detail.deposit')} ${formatMoney(reservation.deposit_snapshot)}` : null,
+              reservation.fee_snapshot_minor !== null ? `${t('reservations.detail.fee')} ${formatMoney(reservation.fee_snapshot_minor)}` : null,
+              reservation.deposit_snapshot_minor !== null ? `${t('reservations.detail.deposit')} ${formatMoney(reservation.deposit_snapshot_minor)}` : null,
             ]
               .filter(Boolean)
               .join(' · ') + ` — ${t('reservations.detail.chargesOnApproval')}`}
@@ -236,7 +236,7 @@ function Charges({
               {t(movement.category === 'reservation_deposit' ? 'reservations.detail.deposit' : 'reservations.detail.fee')}
             </span>
             <span className={`font-mono text-sm font-semibold ${amountClassName(movement)}`}>
-              {formatMoney(movement.amount)}
+              {formatMoney(movement.amount_minor)}
             </span>
             <StatusPill color={statusColor(movement.status)}>
               {statusLabel(movement, t)}
@@ -297,7 +297,7 @@ function timelineItems(
     }
 
     const charge = t(entry.category === 'reservation_deposit' ? 'reservations.detail.deposit' : 'reservations.detail.fee')
-    const amount = entry.amount !== null ? ` ${formatMoney(entry.amount)}` : ''
+    const amount = entry.amount_minor !== null ? ` ${formatMoney(entry.amount_minor)}` : ''
 
     if (entry.event_type === 'movement.recorded') {
       return {

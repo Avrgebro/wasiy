@@ -1,5 +1,6 @@
 import { Badge, Button, Group, Modal, Stack, Text, Textarea } from '@mantine/core'
 import type { TFunction } from 'i18next'
+import { formatMoney } from '../../lib/money'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReservationSummary } from './api'
@@ -25,11 +26,11 @@ function waitingDays(reservation: ReservationSummary, timezone: string): number 
 
 function feeLine(reservation: ReservationSummary, t: TFunction<'common'>) {
   const parts = []
-  if (reservation.fee_snapshot) {
-    parts.push(t('reservations.queue.fee', { amount: reservation.fee_snapshot }))
+  if (reservation.fee_snapshot_minor) {
+    parts.push(t('reservations.queue.fee', { amount: formatMoney(reservation.fee_snapshot_minor) }))
   }
-  if (reservation.deposit_snapshot) {
-    parts.push(t('reservations.queue.deposit', { amount: reservation.deposit_snapshot }))
+  if (reservation.deposit_snapshot_minor) {
+    parts.push(t('reservations.queue.deposit', { amount: formatMoney(reservation.deposit_snapshot_minor) }))
   }
 
   return parts.length > 0 ? parts.join(' + ') : t('reservations.queue.free')

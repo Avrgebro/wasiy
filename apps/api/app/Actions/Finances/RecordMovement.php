@@ -8,6 +8,7 @@ use App\Models\FinancialMovement;
 use App\Models\Location;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Support\Money;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -43,7 +44,7 @@ class RecordMovement
             $this->activityLogger->log(
                 account: $location->account,
                 eventType: ActivityEventType::MovementRecorded,
-                summary: "Se registró un movimiento: {$movement->concept} (S/ {$movement->amount}).",
+                summary: "Se registró un movimiento: {$movement->concept} (".Money::soles($movement->amount_minor).').',
                 metadata: MovementMetadata::for($movement),
                 location: $location,
                 actor: $actor,

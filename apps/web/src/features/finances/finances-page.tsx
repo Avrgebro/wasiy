@@ -182,12 +182,12 @@ function FinancesContent({
       ),
     },
     {
-      accessorKey: 'amount',
-      header: t('finances.columns.amount'),
-      meta: { className: 'whitespace-nowrap', sortKey: 'amount' },
+      accessorKey: 'amount_minor',
+      header: t('finances.columns.amount_minor'),
+      meta: { className: 'whitespace-nowrap', sortKey: 'amount_minor' },
       cell: ({ row }) => (
         <span className={`font-mono text-sm font-semibold ${amountClassName(row.original)}`}>
-          {formatMoney(row.original.amount, { negative: row.original.direction === 'expense' })}
+          {formatMoney(row.original.amount_minor, { negative: row.original.direction === 'expense' })}
         </span>
       ),
     },
@@ -306,7 +306,7 @@ function byCategoryLine(rows: CategoryTotal[], t: TFunction, withAmount: boolean
     .slice(0, limit)
     .map((row) =>
       withAmount
-        ? `${t(`finances.categories.${row.category}`)} ${formatMoney(row.total)}`
+        ? `${t(`finances.categories.${row.category}`)} ${formatMoney(row.total_minor)}`
         : `${row.count} ${t(`finances.categoriesPlural.${row.category}`, { count: row.count })}`,
     )
     .join(' · ')
@@ -314,7 +314,7 @@ function byCategoryLine(rows: CategoryTotal[], t: TFunction, withAmount: boolean
 
 function SummaryTiles({ summary }: { summary: FinanceSummary }) {
   const { t } = useTranslation('common')
-  const delta = summary.balance - summary.previous_balance
+  const delta = summary.balance_minor - summary.previous_balance_minor
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 @4xl:grid-cols-4">
@@ -322,13 +322,13 @@ function SummaryTiles({ summary }: { summary: FinanceSummary }) {
         detail={byCategoryLine(summary.income_by_category, t, false)}
         label={t('finances.tiles.income')}
         tone="success"
-        value={formatMoney(summary.income_total)}
+        value={formatMoney(summary.income_total_minor)}
       />
       <StatCard
         detail={byCategoryLine(summary.expense_by_category, t, true)}
         label={t('finances.tiles.expense')}
         tone="error"
-        value={formatMoney(summary.expense_total, { negative: summary.expense_total > 0 })}
+        value={formatMoney(summary.expense_total_minor, { negative: summary.expense_total_minor > 0 })}
       />
       <StatCard
         detail={t('finances.tiles.balanceVsPrevious', {
@@ -336,10 +336,10 @@ function SummaryTiles({ summary }: { summary: FinanceSummary }) {
           delta: `${delta > 0 ? '+ ' : ''}${formatMoney(delta)}`,
         })}
         label={t('finances.tiles.balance')}
-        value={formatMoney(summary.balance)}
+        value={formatMoney(summary.balance_minor)}
       />
       <StatCard
-        aside={t('finances.tiles.heldAside', { amount: formatMoney(summary.deposits_held_total) })}
+        aside={t('finances.tiles.heldAside', { amount: formatMoney(summary.deposits_held_total_minor) })}
         detail={t('finances.tiles.receivableDetail', {
           pending: summary.receivable_count,
           refunds: summary.deposits_to_refund_count,
@@ -347,7 +347,7 @@ function SummaryTiles({ summary }: { summary: FinanceSummary }) {
         highlighted={summary.receivable_count + summary.deposits_to_refund_count > 0}
         label={t('finances.tiles.receivable')}
         tone="accent"
-        value={formatMoney(summary.receivable_total)}
+        value={formatMoney(summary.receivable_total_minor)}
       />
     </div>
   )

@@ -138,7 +138,7 @@ class ReservationController extends Controller
                 'previous_status' => $entry->metadata['previous_status'] ?? null,
                 'note' => $entry->metadata['status_note'] ?? null,
                 'category' => $entry->metadata['category'] ?? null,
-                'amount' => $entry->metadata['amount'] ?? null,
+                'amount_minor' => $entry->metadata['amount_minor'] ?? null,
                 'actor_name' => $entry->actor?->name,
                 'created_at' => $entry->created_at?->toJSON(),
             ])

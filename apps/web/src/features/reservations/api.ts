@@ -26,8 +26,8 @@ export type ReservationSummary = {
   status: ReservationStatusValue
   is_completed: boolean
   status_note: string | null
-  fee_snapshot: number | null
-  deposit_snapshot: number | null
+  fee_snapshot_minor: number | null
+  deposit_snapshot_minor: number | null
   /** Ledger rows opened on approval; absent or empty for pending requests. */
   movements?: MovementSummary[]
   created_by_name?: string | null
@@ -63,7 +63,7 @@ export type ReservationHistoryEntry = {
   previous_status: string | null
   note: string | null
   category: string | null
-  amount: number | null
+  amount_minor: number | null
   actor_name: string | null
   created_at: string | null
 }

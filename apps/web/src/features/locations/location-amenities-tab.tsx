@@ -9,6 +9,7 @@ import { DataTable } from '../../components/table/data-table'
 import { openRowColumn } from '../../components/table/open-row-column'
 import { StatusPill } from '../../components/ui/chips'
 import { getErrorMessage } from '../../lib/errors'
+import { formatMoney } from '../../lib/money'
 import {
   deactivateAmenity,
   getAmenities,
@@ -25,14 +26,14 @@ function feeCell(t: (key: string, options?: Record<string, unknown>) => string, 
     return '—'
   }
 
-  if (!amenity.fee_amount && !amenity.deposit_amount) {
+  if (!amenity.fee_amount_minor && !amenity.deposit_amount_minor) {
     return t('amenities.noFee')
   }
 
-  const fee = amenity.fee_amount ? `S/ ${amenity.fee_amount}` : t('amenities.noFee')
+  const fee = amenity.fee_amount_minor ? formatMoney(amenity.fee_amount_minor) : t('amenities.noFee')
 
-  return amenity.deposit_amount
-    ? t('amenities.feeWithDeposit', { fee, deposit: `S/ ${amenity.deposit_amount}` })
+  return amenity.deposit_amount_minor
+    ? t('amenities.feeWithDeposit', { fee, deposit: formatMoney(amenity.deposit_amount_minor) })
     : fee
 }
 

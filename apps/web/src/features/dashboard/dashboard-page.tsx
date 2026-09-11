@@ -311,7 +311,7 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
 
 function ManagementStrip({ management, now, showActivityLink, timezone }: { management: DashboardManagement; now: Date; showActivityLink: boolean; timezone: string }) {
   const { t } = useTranslation('common')
-  const percent = management.dues_issued_total > 0 ? Math.round((management.dues_collected_total / management.dues_issued_total) * 100) : null
+  const percent = management.dues_issued_total_minor > 0 ? Math.round((management.dues_collected_total_minor / management.dues_issued_total_minor) * 100) : null
   const segments = [
     { key: 'occupied', count: management.units_occupied, color: 'var(--wa-interactive)' },
     { key: 'vacant', count: management.units_vacant, color: 'var(--mantine-color-dimmed)' },
@@ -325,15 +325,15 @@ function ManagementStrip({ management, now, showActivityLink, timezone }: { mana
 
       <div className="grid gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          detail={percent === null ? undefined : t('dashboard.tiles.duesIssued', { total: formatMoney(management.dues_issued_total), percent })}
+          detail={percent === null ? undefined : t('dashboard.tiles.duesIssued', { total: formatMoney(management.dues_issued_total_minor), percent })}
           label={t('dashboard.tiles.duesCollected')}
-          value={formatMoney(management.dues_collected_total)}
+          value={formatMoney(management.dues_collected_total_minor)}
         />
         <StatCard detail={t('dashboard.tiles.ofUnits', { total: management.units_total })} label={t('dashboard.tiles.unitsWithBalance')} value={String(management.units_with_balance_count)} />
         <StatCard
           detail={management.deposits_held_count > 0 ? t('dashboard.tiles.depositsHeldCount', { count: management.deposits_held_count }) : undefined}
           label={t('dashboard.tiles.depositsHeld')}
-          value={formatMoney(management.deposits_held_total)}
+          value={formatMoney(management.deposits_held_total_minor)}
         />
         <StatCard label={t('dashboard.tiles.residentsNotInvited')} value={String(management.residents_not_invited_count)} />
       </div>

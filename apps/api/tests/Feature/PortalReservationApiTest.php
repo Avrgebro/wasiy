@@ -27,8 +27,8 @@ function portalReservationWorld(array $amenity = []): array
         'booking_mode' => BookingMode::Approval,
         'availability' => ['monday' => [['start' => '09:00', 'end' => '21:00']]],
         'slot_minutes' => 120,
-        'fee_amount' => 150,
-        'deposit_amount' => 300,
+        'fee_amount_minor' => 150,
+        'deposit_amount_minor' => 300,
         ...$amenity,
     ]);
     $unit = Unit::factory()->for($location->account)->for($location)->create(['unit_number' => '402']);
@@ -71,9 +71,9 @@ test('availability lays slots on the windows and marks only past ones', function
         ->assertJsonCount(6, 'slots');
 
     $slots = collect($response->json('slots'))->keyBy('start');
-    expect($slots['09:00'])->toBe(['start' => '09:00', 'end' => '11:00', 'available' => false, 'reason' => 'past'])
+    expect($slots['09:00'])->toBe(['start' => '09:00', 'end' => '11:00', 'available' => false, 'reason' => 'past', 'max_slots' => 6])
         ->and($slots['11:00']['reason'])->toBe('past') // started at 11:00, it is 12:30
-        ->and($slots['13:00'])->toBe(['start' => '13:00', 'end' => '15:00', 'available' => true, 'reason' => null])
+        ->and($slots['13:00'])->toBe(['start' => '13:00', 'end' => '15:00', 'available' => true, 'reason' => null, 'max_slots' => 4])
         ->and($slots['15:00']['available'])->toBeTrue()
         ->and($slots['19:00']['end'])->toBe('21:00');
 
@@ -104,7 +104,7 @@ test('a slot another unit holds approved is still offered and bookable in the po
         ->assertJsonCount(6, 'slots')
         ->json('slots'))->keyBy('start');
 
-    expect($slots['11:00'])->toBe(['start' => '11:00', 'end' => '13:00', 'available' => true, 'reason' => null])
+    expect($slots['11:00'])->toBe(['start' => '11:00', 'end' => '13:00', 'available' => true, 'reason' => null, 'max_slots' => 5])
         ->and($slots->pluck('reason')->unique()->all())->toBe([null]);
 
     // And the resident's request for that same slot enters the queue.
@@ -121,7 +121,7 @@ test('a resident requests a booking that enters the queue, sees it upcoming, and
         ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '19:00', 'end' => '21:00'])
         ->assertCreated()
         ->assertJsonPath('data.status', 'pending')
-        ->assertJsonPath('data.fee_snapshot', 150)
+        ->assertJsonPath('data.fee_snapshot_minor', 150)
         ->assertJsonPath('data.resident_name', 'Carlos Mendoza')
         ->json('data');
 
@@ -136,9 +136,9 @@ test('a resident requests a booking that enters the queue, sees it upcoming, and
     $this->actingAs($user)
         ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '10:00', 'end' => '12:00'])
         ->assertUnprocessable()->assertJsonValidationErrors('starts_at');
-    // Two slots in one request are refused too: a booking is exactly one slot.
+    // A run that overshoots the 21:00 close is refused too.
     $this->actingAs($user)
-        ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '09:00', 'end' => '13:00'])
+        ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '19:00', 'end' => '23:00'])
         ->assertUnprocessable()->assertJsonValidationErrors('starts_at');
     $farMonday = CarbonImmutable::parse($monday)->addWeeks(14)->format('Y-m-d');
     $this->actingAs($user)
@@ -158,19 +158,24 @@ test('a resident requests a booking that enters the queue, sees it upcoming, and
         ->assertOk()->assertJsonCount(1, 'data');
 });
 
-test('the portal accepts one slot and refuses two on the same grid', function () {
+test('the portal accepts one slot or a run of consecutive slots on the same grid', function () {
     [$location, $amenity, $unit, $user] = portalReservationWorld(['booking_mode' => BookingMode::Instant]);
     $monday = nextMondayLima();
 
-    // 09:00–13:00 is two 120-minute slots on the grid.
+    // 09:00–13:00 is two 120-minute slots on the grid: one booking.
     $this->actingAs($user)
         ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '09:00', 'end' => '13:00'])
-        ->assertUnprocessable()->assertJsonValidationErrors('starts_at');
+        ->assertCreated()->assertJsonPath('data.status', 'approved');
 
-    // 09:00–11:00 is the first slot.
+    // 09:00–11:00 is the first slot on its own.
     $this->actingAs($user)
         ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '09:00', 'end' => '11:00'])
         ->assertCreated()->assertJsonPath('data.status', 'approved');
+
+    // 09:00–12:00 is a slot and a half.
+    $this->actingAs($user)
+        ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '09:00', 'end' => '12:00'])
+        ->assertUnprocessable()->assertJsonValidationErrors('starts_at');
 });
 
 test('an instant amenity confirms on the spot and a resident cannot cancel once it has started', function () {

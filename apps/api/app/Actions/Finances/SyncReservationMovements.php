@@ -28,8 +28,8 @@ class SyncReservationMovements
         $reservation->loadMissing(['amenity', 'unit', 'resident', 'location']);
 
         foreach ([
-            [MovementCategory::ReservationFee, $reservation->fee_snapshot, 'Cuota'],
-            [MovementCategory::ReservationDeposit, $reservation->deposit_snapshot, 'Depósito'],
+            [MovementCategory::ReservationFee, $reservation->fee_snapshot_minor, 'Cuota'],
+            [MovementCategory::ReservationDeposit, $reservation->deposit_snapshot_minor, 'Depósito'],
         ] as [$category, $amount, $label]) {
             if ($amount === null || $amount <= 0) {
                 continue;
@@ -47,7 +47,7 @@ class SyncReservationMovements
             $this->record->handle($reservation->location, $actor, [
                 'direction' => MovementDirection::Income,
                 'category' => $category,
-                'amount' => $amount,
+                'amount_minor' => $amount,
                 'concept' => "{$label} · {$reservation->amenity->name}",
                 'detail' => $this->detailFor($reservation),
                 'unit_id' => $reservation->unit_id,

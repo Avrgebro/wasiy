@@ -11,8 +11,9 @@ use Illuminate\Validation\ValidationException;
 /**
  * The booking rule (ADR 0041), shared by create and approve so both paths
  * agree: the amenity accepts bookings, the unit lives there, the interval is
- * exactly one slot of one availability window of that local weekday, and it
- * starts in the future and within the horizon (new bookings only).
+ * a run of one or more consecutive slots of one availability window of that
+ * local weekday, and it starts in the future and within the horizon (new
+ * bookings only).
  *
  * Slots are not exclusive: any number of units may hold the same slot in
  * any status. Overlap is never checked here; the approver sees the clash on
@@ -64,10 +65,12 @@ class ValidateReservationSlot
     }
 
     /**
-     * The interval must be exactly one slot of one window of the local
+     * The interval must be a run of whole slots of one window of the local
      * weekday: it starts on that window's grid (window start, stepping
-     * `slot_minutes`) and ends `slot_minutes` later, at or before the window
-     * closes. A tail shorter than a slot is never a slot.
+     * `slot_minutes`), its length is a positive whole multiple of
+     * `slot_minutes`, and it ends at or before the window closes. Slots are
+     * not exclusive, so the closing time is the only cap on the run. A tail
+     * shorter than a slot is never a slot.
      */
     private function validateSlotGrid(Amenity $amenity, CarbonImmutable $localStart, CarbonImmutable $localEnd): void
     {
@@ -92,8 +95,8 @@ class ValidateReservationSlot
                 $this->fail('starts_at', __('The requested time falls outside the amenity availability.'));
             }
 
-            if ($endMinute - $startMinute !== $slot) {
-                $this->fail('starts_at', __('A reservation is exactly one slot of :minutes minutes.', ['minutes' => $slot]));
+            if (($endMinute - $startMinute) % $slot !== 0 || $endMinute > $close) {
+                $this->fail('starts_at', __('A reservation covers whole slots of :minutes minutes inside the opening hours.', ['minutes' => $slot]));
             }
 
             return;

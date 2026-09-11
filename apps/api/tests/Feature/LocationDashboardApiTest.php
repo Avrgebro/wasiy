@@ -108,7 +108,7 @@ test('the today strip counts visitors, flags overdue ones, and lists packages an
 
     $amenity = Amenity::factory()->create(['account_id' => $location->account_id, 'location_id' => $location->id]);
     $todayAt = fn (int $hour) => now($location->timezone)->setTime($hour, 0);
-    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(9), 'ends_at' => $todayAt(11), 'deposit_snapshot' => 300]);
+    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(9), 'ends_at' => $todayAt(11), 'deposit_snapshot_minor' => 300]);
     Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(16), 'ends_at' => $todayAt(18)]);
     Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(12), 'ends_at' => $todayAt(13), 'status' => ReservationStatus::Cancelled]);
     Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(9)->addDay(), 'ends_at' => $todayAt(10)->addDay()]);
@@ -170,13 +170,13 @@ test('managers receive the management strip with dues, balances, deposits, occup
         'category' => MovementCategory::MaintenanceDues,
         'period' => $month,
         'status' => $status,
-        'amount' => $amount,
+        'amount_minor' => $amount,
     ]);
     $dues($unit, MovementStatus::Paid, 450);
     $dues($noPrimary, MovementStatus::Pending, 450);
     $dues($vacant, MovementStatus::Voided, 450);
-    FinancialMovement::factory()->income()->create(['location_id' => $location->id, 'unit_id' => $noPrimary->id, 'category' => MovementCategory::Fine, 'amount' => 100]);
-    FinancialMovement::factory()->create(['location_id' => $location->id, 'direction' => MovementDirection::Income, 'category' => MovementCategory::ReservationDeposit, 'status' => MovementStatus::Held, 'amount' => 300]);
+    FinancialMovement::factory()->income()->create(['location_id' => $location->id, 'unit_id' => $noPrimary->id, 'category' => MovementCategory::Fine, 'amount_minor' => 100]);
+    FinancialMovement::factory()->create(['location_id' => $location->id, 'direction' => MovementDirection::Income, 'category' => MovementCategory::ReservationDeposit, 'status' => MovementStatus::Held, 'amount_minor' => 300]);
 
     // Seven entries in this location plus one elsewhere: the feed shows six.
     ActivityLog::factory()->count(7)->create(['account_id' => $location->account_id, 'location_id' => $location->id, 'actor_user_id' => $manager->id]);
@@ -186,10 +186,10 @@ test('managers receive the management strip with dues, balances, deposits, occup
         ->getJson("/api/locations/{$location->id}/dashboard")
         ->assertOk()
         ->assertJsonPath('management.month', $month)
-        ->assertJsonPath('management.dues_issued_total', 900)
-        ->assertJsonPath('management.dues_collected_total', 450)
+        ->assertJsonPath('management.dues_issued_total_minor', 900)
+        ->assertJsonPath('management.dues_collected_total_minor', 450)
         ->assertJsonPath('management.units_with_balance_count', 1)
-        ->assertJsonPath('management.deposits_held_total', 300)
+        ->assertJsonPath('management.deposits_held_total_minor', 300)
         ->assertJsonPath('management.deposits_held_count', 1)
         ->assertJsonPath('management.residents_not_invited_count', 2)
         ->assertJsonPath('management.units_total', 3)

@@ -72,7 +72,7 @@ class UnitController extends Controller
                     ->searchLike(["CONCAT(first_name, ' ', last_name)"], $search))
                 ->orWhereHas('vehicles', fn (Builder $vehicle) => $vehicle->searchLike(['plate'], $search))))
             ->when($validated['type'] ?? null, fn (Builder $query, string $type) => $query->where('type', $type))
-            ->when(($validated['fee'] ?? null) === 'missing', fn (Builder $query) => $query->whereNull('maintenance_fee'))
+            ->when(($validated['fee'] ?? null) === 'missing', fn (Builder $query) => $query->whereNull('maintenance_fee_minor'))
             ->when($validated['occupancy'] ?? null, fn (Builder $query, string $occupancy) => match ($occupancy) {
                 'occupied' => $query->whereHas('activeUnitMemberships'),
                 'vacant' => $query->whereDoesntHave('activeUnitMemberships'),
@@ -94,7 +94,7 @@ class UnitController extends Controller
                 ->orderBy('floor', $direction),
             'unit_number' => 'unit_number',
             'status' => 'status',
-            'maintenance_fee' => 'maintenance_fee',
+            'maintenance_fee_minor' => 'maintenance_fee_minor',
             'resident_count' => 'active_unit_memberships_count',
             'created_at' => 'created_at',
         ], default: 'building_name,floor,unit_number');
@@ -118,7 +118,7 @@ class UnitController extends Controller
             app(UnitCapacity::class)->assertCanActivate($location->account()->lockForUpdate()->firstOrFail());
 
             $unit = Unit::query()->create([
-                ...$request->safe()->only(['unit_number', 'type', 'building_id', 'floor', 'participation_share', 'maintenance_fee', 'parking_spots', 'storage_rooms', 'notes']),
+                ...$request->safe()->only(['unit_number', 'type', 'building_id', 'floor', 'participation_share', 'maintenance_fee_minor', 'parking_spots', 'storage_rooms', 'notes']),
                 'account_id' => $location->account_id,
                 'location_id' => $location->id,
                 'type' => $request->safe()->enum('type', UnitType::class) ?? UnitType::Apartment,
@@ -181,7 +181,7 @@ class UnitController extends Controller
                 ->where('unit_id', $unit->id)
                 ->where('direction', 'income')
                 ->where('status', 'pending')
-                ->sum('amount')
+                ->sum('amount_minor')
             : null;
 
         $notes = ActivityLog::query()
@@ -219,7 +219,7 @@ class UnitController extends Controller
             'reservations' => ReservationResource::collection($reservations)->resolve(),
             'movements' => $movements !== null ? FinancialMovementResource::collection($movements)->resolve() : null,
             'movements_month' => $seesFinances ? $month : null,
-            'pending_balance' => $pendingBalance,
+            'pending_balance_minor' => $pendingBalance,
             'notes' => $notes,
         ], fn ($value): bool => $value !== null));
     }
@@ -284,7 +284,7 @@ class UnitController extends Controller
         DB::transaction(function () use ($request, $unit, $actor): void {
             $unit->fill($request->safe()->only([
                 'unit_number', 'type', 'building_id', 'floor', 'participation_share',
-                'maintenance_fee', 'parking_spots', 'storage_rooms', 'status', 'notes',
+                'maintenance_fee_minor', 'parking_spots', 'storage_rooms', 'status', 'notes',
             ]));
 
             if (! $unit->isDirty()) {

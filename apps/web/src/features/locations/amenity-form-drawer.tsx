@@ -1,10 +1,11 @@
-import { Alert, Button, NumberInput, Select, Switch, Text, Textarea, TextInput } from '@mantine/core'
+import { Alert, Button, Select, Switch, Text, Textarea, TextInput } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DangerZone } from '../../components/ui/detail-drawer-parts'
+import { MoneyInput } from '../../components/ui/money-input'
 import { DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { ApiError } from '../../app/api-client'
 import { getErrorMessage } from '../../lib/errors'
@@ -26,8 +27,9 @@ type FormState = {
   requires_approval: boolean
   availability: Availability
   slot_minutes: number
-  fee_amount: number | ''
-  deposit_amount: number | ''
+  /** Cents, like the API. */
+  fee_amount_minor: number | null
+  deposit_amount_minor: number | null
 }
 
 
@@ -40,8 +42,8 @@ function amenityDefaults(amenity?: AmenitySummary | null): FormState {
     requires_approval: amenity?.booking_mode === 'approval',
     availability: amenity?.availability ?? {},
     slot_minutes: amenity?.slot_minutes ?? 60,
-    fee_amount: amenity?.fee_amount ?? '',
-    deposit_amount: amenity?.deposit_amount ?? '',
+    fee_amount_minor: amenity?.fee_amount_minor ?? null,
+    deposit_amount_minor: amenity?.deposit_amount_minor ?? null,
   }
 }
 
@@ -60,8 +62,8 @@ function toPayload(form: FormState): AmenityPayload {
     booking_mode: form.requires_approval ? 'approval' : 'instant',
     availability,
     slot_minutes: form.slot_minutes,
-    fee_amount: form.fee_amount === '' ? null : form.fee_amount,
-    deposit_amount: form.deposit_amount === '' ? null : form.deposit_amount,
+    fee_amount_minor: form.fee_amount_minor,
+    deposit_amount_minor: form.deposit_amount_minor,
   }
 }
 
@@ -233,23 +235,17 @@ function AmenityForm({
 
               <DrawerSection label={t('amenities.sections.fees')} />
               <DrawerRow>
-                <NumberInput
-                  allowDecimal={false}
-                  allowNegative={false}
+                <MoneyInput
                   label={t('amenities.form.fee')}
-                  placeholder="0"
-                  prefix="S/ "
-                  value={form.fee_amount}
-                  onChange={(value) => set('fee_amount', typeof value === 'number' ? value : '')}
+                  placeholder="0.00"
+                  value={form.fee_amount_minor}
+                  onChange={(cents) => set('fee_amount_minor', cents)}
                 />
-                <NumberInput
-                  allowDecimal={false}
-                  allowNegative={false}
+                <MoneyInput
                   label={t('amenities.form.deposit')}
-                  placeholder="0"
-                  prefix="S/ "
-                  value={form.deposit_amount}
-                  onChange={(value) => set('deposit_amount', typeof value === 'number' ? value : '')}
+                  placeholder="0.00"
+                  value={form.deposit_amount_minor}
+                  onChange={(cents) => set('deposit_amount_minor', cents)}
                 />
               </DrawerRow>
               <Text c="dimmed" size="xs">

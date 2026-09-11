@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, Select, Text } from '@mantine/core'
 import { DateField } from '../../components/ui/date-field'
 import { SlotGrid } from '../../components/ui/slot-grid'
+import { durationLabel, durationOptions } from '../../lib/slot-runs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
@@ -13,6 +14,7 @@ import { notifySuccess } from '../../lib/notify'
 import { getAmenityAvailability, type AmenitySummary } from '../locations/amenities-api'
 import { getResidents } from '../residents/api'
 import { getUnits } from '../units/api'
+import { formatUnitLabel } from '../units/unit-label'
 import { createReservation } from './api'
 import { reservationFormSchema, type ReservationFormValues } from './schemas'
 import { closedWeekday, MAX_ADVANCE_DAYS } from './reservation-slots'
@@ -93,7 +95,8 @@ export function ReservationFormDrawer({
   const amenityOptions = reservable.map((amenity) => ({ value: amenity.id, label: amenity.name }))
   const unitOptions = (unitsQuery.data?.data ?? []).map((unit) => ({
     value: unit.id,
-    label: unit.unit_number,
+    // "Torre A / 402" in multi-tower locations; just the number otherwise.
+    label: formatUnitLabel(unit),
   }))
   const residentOptions = (residentsQuery.data?.data ?? []).map((resident) => ({
     value: resident.id,
@@ -113,7 +116,10 @@ export function ReservationFormDrawer({
     queryFn: () => getAmenityAvailability(amenityId, date, unitId || undefined),
   })
   const slots = availabilityQuery.data?.slots ?? []
+  const slotMinutes = availabilityQuery.data?.slot_minutes ?? 60
   const freeSlots = slots.filter((slot) => slot.available)
+  const start = useWatch({ control: form.control, name: 'start' })
+  const durations = start ? durationOptions(slots, start) : []
   const slotsHint =
     amenityId && date
       ? !dateValid
@@ -259,7 +265,27 @@ export function ReservationFormDrawer({
                 />
               )}
             />
-          ) : amenityId === '' || date === '' ? (
+          ) : null}
+          {/* A booking is a run of whole slots (ADR 0041): the duration select
+              lists one slot up to the window's closing time; one slot is the
+              default, so the common case stays one tap. */}
+          {start && durations.length > 1 ? (
+            <Controller
+              control={form.control}
+              name="end"
+              render={({ field, fieldState }) => (
+                <Select
+                  allowDeselect={false}
+                  data={durations.map((option) => ({ value: option.end, label: `${durationLabel(option.slots * slotMinutes)} · ${start}–${option.end}` }))}
+                  error={fieldErrorMessage(fieldState.error)}
+                  label={t('reservations.form.duration')}
+                  value={field.value}
+                  onChange={(value) => field.onChange(value ?? '')}
+                />
+              )}
+            />
+          ) : null}
+          {slots.length === 0 && (amenityId === '' || date === '') ? (
             <Text c="dimmed" size="sm">
               {t('reservations.form.pickAmenityAndDay')}
             </Text>

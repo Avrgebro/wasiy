@@ -30,8 +30,8 @@ class ReservationMetadata
             'status' => $reservation->status->value,
             'previous_status' => $previousStatus,
             'status_note' => $reservation->status_note,
-            'fee_snapshot' => $reservation->fee_snapshot,
-            'deposit_snapshot' => $reservation->deposit_snapshot,
+            'fee_snapshot_minor' => $reservation->fee_snapshot_minor,
+            'deposit_snapshot_minor' => $reservation->deposit_snapshot_minor,
         ], fn (mixed $value): bool => $value !== null);
     }
 }

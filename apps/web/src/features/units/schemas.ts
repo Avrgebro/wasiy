@@ -11,7 +11,8 @@ export const unitSchema = z.object({
   building_id: z.string(),
   floor: z.string().trim().max(255),
   participation_share: optionalNumber.refine((value) => value === '' || Number(value) <= 100, 'validation.shareTooHigh'),
-  maintenance_fee: optionalNumber,
+  /** Integer cents; null while empty. */
+  maintenance_fee_minor: z.number().int().nullable(),
   parking_spots: z.array(z.string().trim().min(1).max(30)).max(20),
   storage_rooms: z.array(z.string().trim().min(1).max(30)).max(20),
   notes: z.string().trim().max(5000),
@@ -25,7 +26,7 @@ export type UnitPayload = {
   building_id: string | null
   floor: string | null
   participation_share: number | null
-  maintenance_fee: number | null
+  maintenance_fee_minor: number | null
   parking_spots: string | null
   storage_rooms: string | null
   notes: string | null
@@ -40,7 +41,7 @@ export function toUnitPayload(values: UnitFormValues): UnitPayload {
     building_id: values.building_id || null,
     floor: values.floor || null,
     participation_share: number(values.participation_share),
-    maintenance_fee: number(values.maintenance_fee),
+    maintenance_fee_minor: values.maintenance_fee_minor,
     // Labels travel as the comma-joined string the API stores.
     parking_spots: values.parking_spots.length > 0 ? values.parking_spots.join(', ') : null,
     storage_rooms: values.storage_rooms.length > 0 ? values.storage_rooms.join(', ') : null,

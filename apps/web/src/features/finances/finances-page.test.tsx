@@ -57,29 +57,29 @@ function meResponse() {
 function summary(overrides: Partial<FinanceSummary> = {}): FinanceSummary {
   return {
     month: '2026-08',
-    income_total: 1240,
+    income_total_minor: 124000,
     income_count: 17,
     income_by_category: [
-      { category: 'reservation_fee', total: 1000, count: 14 },
-      { category: 'fine', total: 160, count: 2 },
-      { category: 'other_income', total: 80, count: 1 },
+      { category: 'reservation_fee', total_minor: 100000, count: 14 },
+      { category: 'fine', total_minor: 16000, count: 2 },
+      { category: 'other_income', total_minor: 8000, count: 1 },
     ],
-    expense_total: 3180,
+    expense_total_minor: 318000,
     expense_count: 3,
     expense_by_category: [
-      { category: 'cleaning', total: 1400, count: 1 },
-      { category: 'electricity', total: 1180, count: 1 },
-      { category: 'water', total: 600, count: 1 },
+      { category: 'cleaning', total_minor: 140000, count: 1 },
+      { category: 'electricity', total_minor: 118000, count: 1 },
+      { category: 'water', total_minor: 60000, count: 1 },
     ],
-    balance: -1940,
+    balance_minor: -194000,
     previous_month: '2026-07',
-    previous_balance: -1520,
-    receivable_total: 450,
+    previous_balance_minor: -152000,
+    receivable_total_minor: 45000,
     receivable_count: 3,
-    payable_total: 600,
+    payable_total_minor: 60000,
     payable_count: 1,
-    deposits_held_total: 900,
-    deposits_to_refund_total: 300,
+    deposits_held_total_minor: 90000,
+    deposits_to_refund_total_minor: 30000,
     deposits_to_refund_count: 1,
     ...overrides,
   }
@@ -94,7 +94,7 @@ function movement(overrides: Partial<MovementSummary> = {}): MovementSummary {
     category: 'water',
     status: 'pending',
     allowed_transitions: ['paid', 'voided'],
-    amount: 600,
+    amount_minor: 60000,
     concept: 'Agua · áreas comunes',
     detail: 'Recibo Sedapal · vence 20 ago',
     counterparty: 'Sedapal',
@@ -245,7 +245,7 @@ describe('FinancesPage', () => {
         category: 'reservation_deposit',
         status: 'to_refund',
         allowed_transitions: ['refunded', 'retained', 'held'],
-        amount: 300,
+        amount_minor: 30000,
         concept: 'Depósito · Salón de eventos',
         detail: 'Evento del dom 10 · sin incidencias · J. Ríos',
         counterparty: null,
@@ -257,7 +257,7 @@ describe('FinancesPage', () => {
         id: 'mv_3',
         status: 'paid',
         allowed_transitions: ['pending'],
-        amount: 1180,
+        amount_minor: 118000,
         concept: 'Luz · áreas comunes',
         counterparty: 'Luz del Sur',
         occurred_on: '2026-08-14',
@@ -266,9 +266,9 @@ describe('FinancesPage', () => {
 
     renderPage()
 
-    expect(await screen.findByText(money(1240))).toBeInTheDocument()
-    expect(screen.getByText(money(3180, { negative: true }))).toBeInTheDocument()
-    expect(screen.getByText(money(-1940))).toBeInTheDocument()
+    expect(await screen.findByText(money(124000))).toBeInTheDocument()
+    expect(screen.getByText(money(318000, { negative: true }))).toBeInTheDocument()
+    expect(screen.getByText(money(-194000))).toBeInTheDocument()
     expect(screen.getByText('· S/ 900 en garantía')).toBeInTheDocument()
     // Pending chip carries receivable + payable counts.
     expect(screen.getByRole('button', { name: 'Pendientes 4' })).toBeInTheDocument()
@@ -285,8 +285,8 @@ describe('FinancesPage', () => {
     expect(screen.getByRole('button', { name: 'agosto 2026' })).toBeInTheDocument()
     // Tile sublines are statistics, never claims.
     expect(screen.getByText('14 cuotas de reserva · 2 multas · 1 otro ingreso')).toBeInTheDocument()
-    expect(screen.getByText(`Limpieza ${money(1400)} · Luz ${money(1180)} · Agua ${money(600)}`)).toBeInTheDocument()
-    expect(screen.getByText(`vs. julio: ${money(-420)}`)).toBeInTheDocument()
+    expect(screen.getByText(`Limpieza ${money(140000)} · Luz ${money(118000)} · Agua ${money(60000)}`)).toBeInTheDocument()
+    expect(screen.getByText(`vs. julio: ${money(-42000)}`)).toBeInTheDocument()
     expect(screen.queryByText(/Se cubre con/)).not.toBeInTheDocument()
   })
 
@@ -321,7 +321,7 @@ describe('FinancesPage', () => {
           category: 'reservation_deposit',
           status: 'to_refund',
           allowed_transitions: ['refunded', 'retained', 'held'],
-          amount: 300,
+          amount_minor: 30000,
           concept: 'Depósito · Salón de eventos',
           detail: 'Evento del dom 10 · sin incidencias · J. Ríos',
           counterparty: null,
@@ -396,7 +396,7 @@ describe('FinancesPage', () => {
           direction: 'expense',
           category: 'water',
           status: 'pending',
-          amount: 600,
+          amount_minor: 60000,
           concept: 'Agua · áreas comunes',
           detail: 'Recibo Sedapal',
           counterparty: 'Sedapal',
@@ -442,7 +442,7 @@ describe('FinancesPage', () => {
   it('puts search, category filter and header sorting on the URL and the request', async () => {
     currentSearch.month = '2026-08'
     currentSearch.category = 'water,fine'
-    currentSearch.sort = '-amount'
+    currentSearch.sort = '-amount_minor'
     const requests = installAdapter([movement()])
 
     renderPage()
@@ -452,7 +452,7 @@ describe('FinancesPage', () => {
     // Applied categories echo as chips; the request carries them.
     expect(screen.getByText('Categoría: Agua')).toBeInTheDocument()
     expect(screen.getByText('Categoría: Multa')).toBeInTheDocument()
-    expect(requests.some((url) => url.includes('category=water%2Cfine') && url.includes('sort=-amount'))).toBe(true)
+    expect(requests.some((url) => url.includes('category=water%2Cfine') && url.includes('sort=-amount_minor'))).toBe(true)
 
     await user.type(screen.getByPlaceholderText('Buscar concepto, detalle o proveedor…'), 'sedapal{Enter}')
     expect(navigateSpy.mock.calls.at(-1)![0].search({ month: '2026-08', page: 2 })).toMatchObject({ search: 'sedapal', page: 1 })
@@ -478,7 +478,7 @@ describe('FinancesPage', () => {
         category: 'reservation_deposit',
         status: 'held',
         allowed_transitions: ['to_refund', 'retained', 'pending'],
-        amount: 300,
+        amount_minor: 30000,
         concept: 'Depósito · Salón de eventos',
         counterparty: null,
         unit_id: 'un_1',
@@ -507,7 +507,7 @@ describe('FinancesPage', () => {
           category: 'reservation_deposit',
           status: 'held',
           allowed_transitions: ['to_refund', 'retained', 'pending'],
-          amount: 300,
+          amount_minor: 30000,
           concept: 'Depósito · Salón de eventos',
           counterparty: null,
           unit_id: 'un_1',
@@ -519,7 +519,7 @@ describe('FinancesPage', () => {
           category: 'reservation_deposit',
           status: 'retained',
           allowed_transitions: ['held'],
-          amount: 300,
+          amount_minor: 30000,
           concept: 'Depósito · Parrilla',
           counterparty: null,
           unit_id: 'un_1',

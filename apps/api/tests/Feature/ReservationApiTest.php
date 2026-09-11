@@ -31,8 +31,8 @@ function reservationWorld(array $amenityOverrides = []): array
             'monday' => [['start' => '09:00', 'end' => '22:00']],
             'tuesday' => [['start' => '09:00', 'end' => '12:00']],
         ],
-        'fee_amount' => 150,
-        'deposit_amount' => 300,
+        'fee_amount_minor' => 150,
+        'deposit_amount_minor' => 300,
         ...$amenityOverrides,
     ]);
     $unit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
@@ -75,8 +75,8 @@ test('an instant amenity books as approved with fee snapshots and an activity en
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
         ->assertCreated()
         ->assertJsonPath('data.status', 'approved')
-        ->assertJsonPath('data.fee_snapshot', 150)
-        ->assertJsonPath('data.deposit_snapshot', 300)
+        ->assertJsonPath('data.fee_snapshot_minor', 150)
+        ->assertJsonPath('data.deposit_snapshot_minor', 300)
         ->assertJsonPath('data.unit_number', $unit->unit_number);
 
     // 10:00 in Lima is 15:00 UTC — stored UTC, validated wall-clock.
@@ -282,7 +282,7 @@ function everyDayOpen(): array
         ->all();
 }
 
-test('a booking is exactly one slot of the window it falls in', function () {
+test('a booking is a run of whole slots inside the window it falls in', function () {
     [$account, $location, $amenity, $unit, $admin] = reservationWorld(['slot_minutes' => 60]);
 
     // Off the grid: the window opens at 09:00, so 10:30 is half a slot in.
@@ -301,10 +301,34 @@ test('a booking is exactly one slot of the window it falls in', function () {
         ->assertUnprocessable()
         ->assertJsonValidationErrors('starts_at');
 
-    // Two consecutive slots are two bookings, not one.
+    // Not a whole number of slots: 90 minutes on a 60-minute grid.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'start' => '10:00', 'end' => '11:30',
+        ]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('starts_at');
+
+    // Two consecutive slots are one booking.
     $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
             'start' => '10:00', 'end' => '12:00',
+        ]))
+        ->assertCreated();
+
+    // So are three.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'start' => '14:00', 'end' => '17:00',
+        ]))
+        ->assertCreated()
+        ->assertJsonPath('data.starts_at', CarbonImmutable::parse(nextMonday().' 14:00', 'America/Lima')->utc()->toJSON())
+        ->assertJsonPath('data.ends_at', CarbonImmutable::parse(nextMonday().' 17:00', 'America/Lima')->utc()->toJSON());
+
+    // A run that crosses the window close (22:00) is refused, even though it starts on the grid.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
+            'start' => '20:00', 'end' => '23:00',
         ]))
         ->assertUnprocessable()
         ->assertJsonValidationErrors('starts_at');
@@ -471,9 +495,9 @@ test('the staff availability endpoint lists the slots and drops a tail shorter t
         ->getJson("/api/amenities/{$amenity->id}/availability?date={$tuesday}")
         ->assertOk()
         ->assertJsonPath('slot_minutes', 120)
-        ->assertJsonPath('fee_amount', 150)
+        ->assertJsonPath('fee_amount_minor', 150)
         ->assertJsonCount(1, 'slots')
-        ->assertJsonPath('slots.0', ['start' => '09:00', 'end' => '11:00', 'available' => true, 'reason' => null]);
+        ->assertJsonPath('slots.0', ['start' => '09:00', 'end' => '11:00', 'available' => true, 'reason' => null, 'max_slots' => 1]);
 
     // Monday 09:00–22:00 with an approved 13:00–15:00 booking: six slots, all
     // still offered, since a booking holds nothing.
@@ -488,7 +512,11 @@ test('the staff availability endpoint lists the slots and drops a tail shorter t
         ->assertJsonCount(6, 'slots')
         ->json('slots'))->keyBy('start');
 
-    expect($slots['13:00'])->toBe(['start' => '13:00', 'end' => '15:00', 'available' => true, 'reason' => null])
+    // max_slots counts the run from each slot to the 22:00 close: 13:00 has
+    // four two-hour slots ahead of it, the last slot has one.
+    expect($slots['13:00'])->toBe(['start' => '13:00', 'end' => '15:00', 'available' => true, 'reason' => null, 'max_slots' => 4])
+        ->and($slots['09:00']['max_slots'])->toBe(6)
+        ->and($slots['19:00']['max_slots'])->toBe(1)
         ->and($slots['11:00']['available'])->toBeTrue()
         ->and($slots['19:00']['end'])->toBe('21:00');
 
@@ -545,7 +573,7 @@ test('slots and bookings keep wall-clock labels across a daylight-saving transit
         ->getJson("/api/amenities/{$amenity->id}/availability?date=2026-10-25")
         ->json('slots'))->keyBy('start');
     expect($after->keys()->all())->toBe(['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'])
-        ->and($after['04:00'])->toBe(['start' => '04:00', 'end' => '05:00', 'available' => true, 'reason' => null])
+        ->and($after['04:00'])->toBe(['start' => '04:00', 'end' => '05:00', 'available' => true, 'reason' => null, 'max_slots' => 2])
         ->and($after['05:00']['available'])->toBeTrue()
         ->and($after['03:00']['available'])->toBeTrue();
 

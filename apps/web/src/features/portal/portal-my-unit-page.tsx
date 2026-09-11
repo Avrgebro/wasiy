@@ -89,15 +89,15 @@ export function PortalMyUnitPage() {
           <section className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
             <div className="flex items-center justify-between gap-3 px-4 py-3">
               <h2 className="m-0 font-display text-[15px] font-semibold">{t('portal.ledger.title')}</h2>
-              {ledger.data ? <StatusPill color={ledger.data.balance > 0 ? 'warning' : 'success'}>{ledger.data.balance > 0 ? t('portal.ledger.pending') : t('portal.ledger.upToDate')}</StatusPill> : null}
+              {ledger.data ? <StatusPill color={ledger.data.balance_minor > 0 ? 'warning' : 'success'}>{ledger.data.balance_minor > 0 ? t('portal.ledger.pending') : t('portal.ledger.upToDate')}</StatusPill> : null}
             </div>
             <div className="px-4 pb-3">
               {ledger.data ? (
                 <>
-                  <p className="m-0 font-display text-[26px] leading-none font-semibold">{formatMoney(ledger.data.balance)}</p>
+                  <p className="m-0 font-display text-[26px] leading-none font-semibold">{formatMoney(ledger.data.balance_minor)}</p>
                   {ledger.data.last_dues ? (
                     <Text c="dimmed" mt={6} size="xs">
-                      {t('portal.ledger.lastDues', { period: periodLabel(ledger.data.last_dues.period), amount: formatMoney(ledger.data.last_dues.amount) })}
+                      {t('portal.ledger.lastDues', { period: periodLabel(ledger.data.last_dues.period), amount: formatMoney(ledger.data.last_dues.amount_minor) })}
                     </Text>
                   ) : null}
                 </>

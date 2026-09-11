@@ -53,8 +53,8 @@ class DemoLocationsSeeder extends Seeder
             'availability' => $this->everyDay('09:00', '22:00'),
             // Events are booked in half-day blocks.
             'slot_minutes' => 360,
-            'fee_amount' => 150,
-            'deposit_amount' => 300,
+            'fee_amount_minor' => 15000,
+            'deposit_amount_minor' => 30000,
         ]);
 
         $this->amenity($central, 'gimnasio', [
@@ -74,7 +74,7 @@ class DemoLocationsSeeder extends Seeder
                 'saturday' => [['start' => '12:00', 'end' => '22:00']],
                 'sunday' => [['start' => '12:00', 'end' => '22:00']],
             ],
-            'fee_amount' => 50,
+            'fee_amount_minor' => 5000,
         ]);
 
         $this->amenity($central, 'lobby-recepcion', [

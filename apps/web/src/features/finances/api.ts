@@ -41,7 +41,7 @@ export type MovementSummary = {
   category: MovementCategory
   status: MovementStatus
   allowed_transitions: MovementStatus[]
-  amount: number
+  amount_minor: number
   concept: string
   detail: string | null
   counterparty: string | null
@@ -66,25 +66,25 @@ export type MovementSummary = {
   created_at: string | null
 }
 
-export type CategoryTotal = { category: MovementCategory; total: number; count: number }
+export type CategoryTotal = { category: MovementCategory; total_minor: number; count: number }
 
 export type FinanceSummary = {
   month: string
-  income_total: number
+  income_total_minor: number
   income_count: number
   income_by_category: CategoryTotal[]
-  expense_total: number
+  expense_total_minor: number
   expense_count: number
   expense_by_category: CategoryTotal[]
-  balance: number
+  balance_minor: number
   previous_month: string
-  previous_balance: number
-  receivable_total: number
+  previous_balance_minor: number
+  receivable_total_minor: number
   receivable_count: number
-  payable_total: number
+  payable_total_minor: number
   payable_count: number
-  deposits_held_total: number
-  deposits_to_refund_total: number
+  deposits_held_total_minor: number
+  deposits_to_refund_total_minor: number
   deposits_to_refund_count: number
 }
 
@@ -134,7 +134,7 @@ export type MovementPayload = {
   direction: MovementDirection
   category: MovementCategory
   status?: MovementStatus
-  amount: number
+  amount_minor: number
   concept: string
   detail?: string | null
   counterparty?: string | null

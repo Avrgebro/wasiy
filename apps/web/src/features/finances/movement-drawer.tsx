@@ -98,7 +98,7 @@ export function MovementDrawer({
           <>
             <div className="flex items-center gap-3">
               <span className={`text-[34px] font-semibold tracking-tight ${amountClassName(movement)}`}>
-                {formatMoney(movement.amount, { negative: movement.direction === 'expense' })}
+                {formatMoney(movement.amount_minor, { negative: movement.direction === 'expense' })}
               </span>
               <StatusPill color={statusColor(movement.status)}>
                 {statusLabel(movement, t)}

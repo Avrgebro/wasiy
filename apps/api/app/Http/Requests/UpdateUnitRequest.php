@@ -27,7 +27,7 @@ class UpdateUnitRequest extends StoreUnitRequest
             'floor' => ['sometimes', 'nullable', 'string', 'max:255'],
             'type' => ['sometimes', Rule::enum(UnitType::class)],
             'participation_share' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
-            'maintenance_fee' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000000'],
+            'maintenance_fee_minor' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000000'],
             'parking_spots' => ['sometimes', 'nullable', 'string', 'max:255'],
             'storage_rooms' => ['sometimes', 'nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'required', Rule::enum(RegistryStatus::class)],

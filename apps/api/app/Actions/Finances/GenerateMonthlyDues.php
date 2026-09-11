@@ -39,7 +39,7 @@ class GenerateMonthlyDues
             $units = Unit::query()
                 ->where('location_id', $location->id)
                 ->where('status', RegistryStatus::Active->value)
-                ->where('maintenance_fee', '>', 0)
+                ->where('maintenance_fee_minor', '>', 0)
                 ->orderByBuilding()->orderBy('unit_number')
                 ->get();
 
@@ -59,7 +59,7 @@ class GenerateMonthlyDues
                 $this->record->handle($location, $actor, [
                     'direction' => MovementDirection::Income,
                     'category' => MovementCategory::MaintenanceDues,
-                    'amount' => $unit->maintenance_fee,
+                    'amount_minor' => $unit->maintenance_fee_minor,
                     'concept' => "Cuota de mantenimiento · {$label}",
                     'detail' => 'Emitida el '.$firstDay->locale('es')->isoFormat('DD MMM').' · '.$unit->label(),
                     'unit_id' => $unit->id,

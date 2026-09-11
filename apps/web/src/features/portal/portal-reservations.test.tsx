@@ -30,8 +30,8 @@ const { PortalBookingPage } = await import('./portal-booking-page')
 
 const originalAdapter = apiClient.defaults.adapter
 
-const amenity = { id: 'am_1', name: 'Salón de eventos', description: 'Ambiente cerrado con cocina y sonido.', booking_mode: 'approval', slot_minutes: 120, fee_amount: 150, deposit_amount: 300, photos: [], cover_photo_url: null }
-const reservation = { id: 'rv_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_402', unit_number: '402', resident_name: 'Carlos Mendoza', starts_at: '2026-09-07T00:00:00Z', ends_at: '2026-09-07T02:00:00Z', status: 'pending', is_completed: false, status_note: null, fee_snapshot: 150, deposit_snapshot: 300, created_by_name: 'Carlos Mendoza', decided_by_name: null, decided_at: null, created_at: '2026-09-04T13:40:00Z' }
+const amenity = { id: 'am_1', name: 'Salón de eventos', description: 'Ambiente cerrado con cocina y sonido.', booking_mode: 'approval', slot_minutes: 120, fee_amount_minor: 15000, deposit_amount_minor: 30000, photos: [], cover_photo_url: null }
+const reservation = { id: 'rv_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_402', unit_number: '402', resident_name: 'Carlos Mendoza', starts_at: '2026-09-07T00:00:00Z', ends_at: '2026-09-07T02:00:00Z', status: 'pending', is_completed: false, status_note: null, fee_snapshot_minor: 15000, deposit_snapshot_minor: 30000, created_by_name: 'Carlos Mendoza', decided_by_name: null, decided_at: null, created_at: '2026-09-04T13:40:00Z' }
 
 function install(onWrite?: (url: string, body: unknown) => void) {
   apiClient.defaults.adapter = vi.fn<AxiosAdapter>((config) => {
@@ -48,7 +48,7 @@ function install(onWrite?: (url: string, body: unknown) => void) {
     if (url.startsWith('/api/portal/reservations/rv_1')) return Promise.resolve(axiosResponse(config, { data: reservation, history: [{ id: 'al_1', event_type: 'reservation.created', status: 'pending', note: null, actor_name: 'Carlos Mendoza', created_at: '2026-09-04T13:40:00Z' }], can_cancel: true }))
     if (url.includes('/portal/amenities?')) return Promise.resolve(axiosResponse(config, { data: [amenity] }))
     if (url.includes('/availability?')) {
-      return Promise.resolve(axiosResponse(config, { date: url.match(/date=([\d-]+)/)?.[1], slot_minutes: 120, booking_mode: 'approval', fee_amount: 150, deposit_amount: 300, slots: [{ start: '09:00', end: '11:00', available: true, reason: null }, { start: '12:00', end: '14:00', available: false, reason: 'past' }, { start: '19:00', end: '21:00', available: true, reason: null }] }))
+      return Promise.resolve(axiosResponse(config, { date: url.match(/date=([\d-]+)/)?.[1], slot_minutes: 120, booking_mode: 'approval', fee_amount_minor: 15000, deposit_amount_minor: 30000, slots: [{ start: '09:00', end: '11:00', available: true, reason: null }, { start: '12:00', end: '14:00', available: false, reason: 'past' }, { start: '19:00', end: '21:00', available: true, reason: null }] }))
     }
     return Promise.reject(new Error(`Unexpected request: ${url}`))
   })

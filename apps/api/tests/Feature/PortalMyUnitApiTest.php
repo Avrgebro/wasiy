@@ -125,27 +125,27 @@ test('the ledger is the primary contact\'s: balance, pending scope, refunds nega
     $mk = fn (array $attrs) => FinancialMovement::factory()->for($location)->create([
         'account_id' => $location->account_id, 'unit_id' => $unit->id, 'direction' => MovementDirection::Income, 'category' => MovementCategory::MaintenanceDues, 'concept' => 'Cuota de mantenimiento', ...$attrs,
     ]);
-    $mk(['amount' => 250, 'status' => MovementStatus::Pending, 'occurred_on' => '2026-09-01', 'period' => '2026-09']);
-    $mk(['amount' => 70, 'status' => MovementStatus::Pending, 'occurred_on' => '2026-09-04', 'category' => MovementCategory::ReservationFee, 'concept' => 'Reserva · Salón de eventos']);
-    $mk(['amount' => 250, 'status' => MovementStatus::Paid, 'occurred_on' => '2026-08-01', 'period' => '2026-08']);
-    $mk(['amount' => 100, 'status' => MovementStatus::Refunded, 'occurred_on' => '2026-08-18', 'category' => MovementCategory::ReservationDeposit, 'concept' => 'Depósito · Parrilla']);
-    $mk(['amount' => 999, 'status' => MovementStatus::Voided, 'occurred_on' => '2026-08-20']);
-    FinancialMovement::factory()->for($location)->create(['account_id' => $location->account_id, 'unit_id' => null, 'direction' => MovementDirection::Expense, 'amount' => 500]);
+    $mk(['amount_minor' => 250, 'status' => MovementStatus::Pending, 'occurred_on' => '2026-09-01', 'period' => '2026-09']);
+    $mk(['amount_minor' => 70, 'status' => MovementStatus::Pending, 'occurred_on' => '2026-09-04', 'category' => MovementCategory::ReservationFee, 'concept' => 'Reserva · Salón de eventos']);
+    $mk(['amount_minor' => 250, 'status' => MovementStatus::Paid, 'occurred_on' => '2026-08-01', 'period' => '2026-08']);
+    $mk(['amount_minor' => 100, 'status' => MovementStatus::Refunded, 'occurred_on' => '2026-08-18', 'category' => MovementCategory::ReservationDeposit, 'concept' => 'Depósito · Parrilla']);
+    $mk(['amount_minor' => 999, 'status' => MovementStatus::Voided, 'occurred_on' => '2026-08-20']);
+    FinancialMovement::factory()->for($location)->create(['account_id' => $location->account_id, 'unit_id' => null, 'direction' => MovementDirection::Expense, 'amount_minor' => 500]);
 
     $this->actingAs($luciaUser)->getJson("/api/portal/ledger?unit_id={$unit->id}")->assertForbidden();
 
     $all = $this->actingAs($carlosUser)->getJson("/api/portal/ledger?unit_id={$unit->id}")
         ->assertOk()
-        ->assertJsonPath('balance', 320)
+        ->assertJsonPath('balance_minor', 320)
         ->assertJsonPath('pending_count', 2)
         ->assertJsonPath('last_dues.period', '2026-09')
-        ->assertJsonPath('last_dues.amount', 250)
+        ->assertJsonPath('last_dues.amount_minor', 250)
         ->assertJsonPath('last_dues.settled', false)
         ->assertJsonCount(4, 'data')
         ->json('data');
     expect($all[0]['concept'])->toBe('Reserva · Salón de eventos')
         ->and($all[0]['state'])->toBe('pending')
-        ->and(collect($all)->firstWhere('concept', 'Depósito devuelto'))->toMatchArray(['amount' => -100, 'state' => 'paid']);
+        ->and(collect($all)->firstWhere('concept', 'Depósito devuelto'))->toMatchArray(['amount_minor' => -100, 'state' => 'paid']);
 
     $this->actingAs($carlosUser)->getJson("/api/portal/ledger?unit_id={$unit->id}&scope=pending")->assertOk()->assertJsonCount(2, 'data');
 });

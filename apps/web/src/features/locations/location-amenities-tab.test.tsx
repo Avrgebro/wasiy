@@ -36,8 +36,8 @@ function amenity(overrides: Partial<AmenitySummary> = {}): AmenitySummary {
       sunday: [{ start: '09:00', end: '22:00' }],
     },
     slot_minutes: 120,
-    fee_amount: 150,
-    deposit_amount: 300,
+    fee_amount_minor: 15000,
+    deposit_amount_minor: 30000,
     status: 'active',
     deactivated_at: null,
     photos: [],
@@ -116,11 +116,11 @@ describe('LocationAmenitiesTab', () => {
         id: 'amn_2',
         name: 'Lobby / recepción',
         is_reservable: false,
-        fee_amount: null,
-        deposit_amount: null,
+        fee_amount_minor: null,
+        deposit_amount_minor: null,
         availability: {},
       }),
-      amenity({ id: 'amn_3', name: 'Cancha de squash', status: 'deactivated', fee_amount: null, deposit_amount: null }),
+      amenity({ id: 'amn_3', name: 'Cancha de squash', status: 'deactivated', fee_amount_minor: null, deposit_amount_minor: null }),
     ])
     renderTab()
 
@@ -200,7 +200,7 @@ describe('LocationAmenitiesTab', () => {
     expect(screen.queryByRole('button', { name: 'Abrir y agregar horario' })).not.toBeInTheDocument()
   })
 
-  it('creating posts the slot length (default one hour) and integer fees, no policy fields', async () => {
+  it('creating posts the slot length (default one hour) and fees in cents, no policy fields', async () => {
     let posted: Record<string, unknown> | null = null
     installAdapter([], (payload) => {
       posted = payload as Record<string, unknown>
@@ -224,8 +224,8 @@ describe('LocationAmenitiesTab', () => {
       is_reservable: true,
       booking_mode: 'instant',
       slot_minutes: 120,
-      fee_amount: 50,
-      deposit_amount: null,
+      fee_amount_minor: 5000,
+      deposit_amount_minor: null,
       availability: { monday: [{ start: '09:00', end: '22:00' }] },
     })
     for (const gone of ['capacity', 'max_advance_days', 'max_concurrent_per_unit', 'cancellation_window_hours', 'max_duration_minutes']) {

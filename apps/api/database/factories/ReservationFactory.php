@@ -36,8 +36,8 @@ class ReservationFactory extends Factory
             'starts_at' => now()->addDay()->setTime(10, 0),
             'ends_at' => now()->addDay()->setTime(11, 0),
             'status' => ReservationStatus::Approved,
-            'fee_snapshot' => null,
-            'deposit_snapshot' => null,
+            'fee_snapshot_minor' => null,
+            'deposit_snapshot_minor' => null,
             'created_by' => User::factory(),
         ];
     }

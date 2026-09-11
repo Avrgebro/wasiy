@@ -74,10 +74,12 @@ export const EXPENSE_CATEGORIES = [
 export const movementFormSchema = z.object({
   direction: z.enum(['income', 'expense']),
   category: z.string().min(1, 'validation.categoryRequired'),
-  amount: z
-    .union([z.number().int().positive(), z.literal('')])
-    // Not written as a type guard on purpose: the form keeps '' while empty.
-    .refine((value) => Number(value) > 0, 'validation.amountRequired'),
+  /** Integer cents; the field holds null while empty. */
+  amount_minor: z
+    .number()
+    .int()
+    .nullable()
+    .refine((value) => value !== null && value > 0, 'validation.amountRequired'),
   concept: z.string().trim().min(1, 'validation.conceptRequired').max(120, 'validation.conceptTooLong'),
   detail: z.string().max(255, 'validation.detailTooLong'),
   counterparty: z.string().max(120, 'validation.counterpartyTooLong'),

@@ -303,7 +303,8 @@
         "staff": "administración"
       },
       "slotLength": "Duración por turno",
-      "cancelUntilStart": "Puedes cancelar hasta la hora de inicio."
+      "cancelUntilStart": "Puedes cancelar hasta la hora de inicio.",
+      "duration": "Duración"
     },
     "alerts": {
       "title": "Alertas",
@@ -865,8 +866,8 @@
       "receivedToday": "Recibida hoy",
       "waiting_one": "En espera desde hace {{count}} día",
       "waiting_other": "En espera desde hace {{count}} días",
-      "fee": "cuota S/ {{amount}}",
-      "deposit": "depósito S/ {{amount}}",
+      "fee": "cuota {{amount}}",
+      "deposit": "depósito {{amount}}",
       "free": "sin costo",
       "showAll": "Ver las {{count}} pendientes →",
       "showFewer": "Ver menos"
@@ -904,7 +905,8 @@
       "submit": "Registrar reserva",
       "startSlot": "Horario",
       "dateOutOfRange": "Elige una fecha entre hoy y {{days}} días adelante.",
-      "fullyBooked": "No quedan turnos disponibles hoy: todos ya pasaron."
+      "fullyBooked": "No quedan turnos disponibles hoy: todos ya pasaron.",
+      "duration": "Duración"
     },
     "detail": {
       "fee": "Cuota",
@@ -1039,7 +1041,7 @@
       "approvalHint": "Si se desactiva, la reserva se confirma al instante.",
       "fee": "Cuota de uso",
       "deposit": "Depósito reembolsable",
-      "feesHint": "Montos en soles, sin decimales. El depósito se registra manualmente al confirmar la reserva.",
+      "feesHint": "Montos en soles. El depósito se registra manualmente al confirmar la reserva.",
       "photosAfterCreate": "Podrás agregar fotos al editar la amenidad una vez creada.",
       "slotLength": "Duración de cada turno",
       "slotLengthHint": "Los residentes reservan uno o más turnos seguidos dentro del horario.",

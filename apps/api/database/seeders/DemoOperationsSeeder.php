@@ -27,6 +27,7 @@ use App\Models\UnitMembership;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\Visit;
+use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -101,13 +102,13 @@ class DemoOperationsSeeder extends Seeder
         $specs = [];
         foreach (range(1, 6) as $floor) {
             foreach ([1, 2] as $side) {
-                $specs[] = ['Torre A', "{$floor}0{$side}", $floor, $side === 1 ? 118 : 76, $side === 1 ? 420 : 380];
+                $specs[] = ['Torre A', "{$floor}0{$side}", $floor, $side === 1 ? 118 : 76, $side === 1 ? 42000 : 38000];
             }
         }
         // Torre B numbers from floor 10 so unit numbers stay unique per location.
         foreach (range(10, 17) as $floor) {
             foreach ([1, 2] as $side) {
-                $specs[] = ['Torre B', "{$floor}0{$side}", $floor, $side === 1 ? 142 : 95, $side === 1 ? 520 : 440];
+                $specs[] = ['Torre B', "{$floor}0{$side}", $floor, $side === 1 ? 142 : 95, $side === 1 ? 52000 : 44000];
             }
         }
 
@@ -125,7 +126,7 @@ class DemoOperationsSeeder extends Seeder
                     'floor' => (string) $floor,
                     'type' => 'apartment',
                     'participation_share' => round($area / 100, 2),
-                    'maintenance_fee' => $fee,
+                    'maintenance_fee_minor' => $fee,
                     'parking_spots' => $floor % 2 === 0 ? 'E-'.(10 + $floor * 2 + ($number[-1] === '1' ? 0 : 1)) : null,
                     'storage_rooms' => $floor % 3 === 0 ? 'D-0'.$floor : null,
                     'status' => RegistryStatus::Active,
@@ -136,7 +137,7 @@ class DemoOperationsSeeder extends Seeder
 
         $units->put($this->key('Torre A', 'L-01'), Unit::query()->updateOrCreate(
             ['account_id' => $this->account->id, 'location_id' => $this->central->id, 'unit_number' => 'L-01'],
-            ['building_name' => 'Torre A', 'floor' => '1', 'type' => 'commercial', 'participation_share' => 0.64, 'maintenance_fee' => 350, 'status' => RegistryStatus::Active, 'notes' => 'Local comercial · farmacia.'],
+            ['building_name' => 'Torre A', 'floor' => '1', 'type' => 'commercial', 'participation_share' => 0.64, 'maintenance_fee_minor' => 35000, 'status' => RegistryStatus::Active, 'notes' => 'Local comercial · farmacia.'],
         ));
 
         return $units;
@@ -248,7 +249,7 @@ class DemoOperationsSeeder extends Seeder
         $index = 0;
         $created = 0;
         foreach ($this->units as $unit) {
-            if ($unit->status !== RegistryStatus::Active || ! $unit->maintenance_fee) {
+            if ($unit->status !== RegistryStatus::Active || ! $unit->maintenance_fee_minor) {
                 continue;
             }
             $index++;
@@ -261,7 +262,7 @@ class DemoOperationsSeeder extends Seeder
                     'location_id' => $this->central->id,
                     'direction' => MovementDirection::Income,
                     'status' => $paid ? MovementStatus::Paid : MovementStatus::Pending,
-                    'amount' => $unit->maintenance_fee,
+                    'amount_minor' => $unit->maintenance_fee_minor,
                     'concept' => "Cuota de mantenimiento · {$label}",
                     'detail' => 'Emitida el '.$firstDay->locale('es')->isoFormat('DD MMM').' · '.$unit->label(),
                     'counterparty' => null,
@@ -284,7 +285,7 @@ class DemoOperationsSeeder extends Seeder
                         'location_id' => $this->central->id,
                         'direction' => MovementDirection::Income,
                         'status' => MovementStatus::Pending,
-                        'amount' => $unit->maintenance_fee,
+                        'amount_minor' => $unit->maintenance_fee_minor,
                         'concept' => "Cuota de mantenimiento · {$previousLabel}",
                         'detail' => 'Emitida el '.$previous->startOfMonth()->locale('es')->isoFormat('DD MMM').' · '.$unit->label(),
                         'occurred_on' => $previous->startOfMonth()->toDateString(),
@@ -303,12 +304,12 @@ class DemoOperationsSeeder extends Seeder
     {
         $day = fn (int $day): string => $this->now->startOfMonth()->day(min($day, $this->now->daysInMonth))->toDateString();
         $rows = [
-            [MovementCategory::Security, MovementStatus::Paid, 4800, 'Vigilancia · turno completo', 'Factura F002-0918', 'Seguridad Andina SAC', $day(2)],
-            [MovementCategory::Staff, MovementStatus::Paid, 3200, 'Planilla · conserjería', 'Quincena 1', null, $day(15)],
-            [MovementCategory::Gardening, MovementStatus::Pending, 450, 'Jardinería · áreas verdes', 'Poda mensual', 'Verde Urbano', $day(18)],
-            [MovementCategory::Telecom, MovementStatus::Paid, 189, 'Internet · recepción', 'Recibo Movistar', 'Movistar', $day(9)],
-            [MovementCategory::Supplies, MovementStatus::Paid, 260, 'Insumos de limpieza', 'Boleta B001-4410', 'Makro', $day(7)],
-            [MovementCategory::InsuranceTaxes, MovementStatus::Pending, 1350, 'Seguro · áreas comunes', 'Cuota trimestral', 'Rímac Seguros', $day(25)],
+            [MovementCategory::Security, MovementStatus::Paid, 480000, 'Vigilancia · turno completo', 'Factura F002-0918', 'Seguridad Andina SAC', $day(2)],
+            [MovementCategory::Staff, MovementStatus::Paid, 320000, 'Planilla · conserjería', 'Quincena 1', null, $day(15)],
+            [MovementCategory::Gardening, MovementStatus::Pending, 45000, 'Jardinería · áreas verdes', 'Poda mensual', 'Verde Urbano', $day(18)],
+            [MovementCategory::Telecom, MovementStatus::Paid, 18900, 'Internet · recepción', 'Recibo Movistar', 'Movistar', $day(9)],
+            [MovementCategory::Supplies, MovementStatus::Paid, 26000, 'Insumos de limpieza', 'Boleta B001-4410', 'Makro', $day(7)],
+            [MovementCategory::InsuranceTaxes, MovementStatus::Pending, 135000, 'Seguro · áreas comunes', 'Cuota trimestral', 'Rímac Seguros', $day(25)],
         ];
 
         foreach ($rows as [$category, $status, $amount, $concept, $detail, $counterparty, $occurredOn]) {
@@ -319,7 +320,7 @@ class DemoOperationsSeeder extends Seeder
                     'direction' => MovementDirection::Expense,
                     'category' => $category,
                     'status' => $status,
-                    'amount' => $amount,
+                    'amount_minor' => $amount,
                     'counterparty' => $counterparty,
                     'created_by' => $this->admin->id,
                     'settled_by' => $status === MovementStatus::Paid ? $this->admin->id : null,
@@ -344,16 +345,16 @@ class DemoOperationsSeeder extends Seeder
 
         $rows = [
             // [amenity, unit key, day offset, start h, end h, status, fee, deposit]
-            [$eventRoom, 'Torre A-402', 0, 9, 11, ReservationStatus::Approved, 150, 300],
-            [$rooftop, 'Torre B-1601', 0, 12, 14, ReservationStatus::Pending, 50, null],
+            [$eventRoom, 'Torre A-402', 0, 9, 11, ReservationStatus::Approved, 15000, 30000],
+            [$rooftop, 'Torre B-1601', 0, 12, 14, ReservationStatus::Pending, 5000, null],
             [$gym, 'Torre A-202', 0, 16, 18, ReservationStatus::Approved, null, null],
-            [$eventRoom, 'Torre B-1401', 0, 19, 21, ReservationStatus::Approved, 150, 300],
+            [$eventRoom, 'Torre B-1401', 0, 19, 21, ReservationStatus::Approved, 15000, 30000],
             [$squash, 'Torre B-1001', 1, 7, 8, ReservationStatus::Approved, null, null],
-            [$eventRoom, 'Torre A-501', 2, 18, 22, ReservationStatus::Pending, 150, 300],
-            [$rooftop, 'Torre B-1202', 3, 13, 15, ReservationStatus::Observed, 50, null],
-            [$eventRoom, 'Torre B-1501', -3, 17, 22, ReservationStatus::Approved, 150, 300],
-            [$rooftop, 'Torre A-302', -6, 12, 15, ReservationStatus::Approved, 50, null],
-            [$eventRoom, 'Torre A-601', -9, 17, 22, ReservationStatus::Cancelled, 150, 300],
+            [$eventRoom, 'Torre A-501', 2, 18, 22, ReservationStatus::Pending, 15000, 30000],
+            [$rooftop, 'Torre B-1202', 3, 13, 15, ReservationStatus::Observed, 5000, null],
+            [$eventRoom, 'Torre B-1501', -3, 17, 22, ReservationStatus::Approved, 15000, 30000],
+            [$rooftop, 'Torre A-302', -6, 12, 15, ReservationStatus::Approved, 5000, null],
+            [$eventRoom, 'Torre A-601', -9, 17, 22, ReservationStatus::Cancelled, 15000, 30000],
             [$gym, 'Torre B-201', -1, 6, 7, ReservationStatus::Rejected, null, null],
         ];
 
@@ -393,8 +394,8 @@ class DemoOperationsSeeder extends Seeder
                         ReservationStatus::Rejected => 'El gimnasio abre a las 7:00.',
                         default => null,
                     },
-                    'fee_snapshot' => $fee,
-                    'deposit_snapshot' => $deposit,
+                    'fee_snapshot_minor' => $fee,
+                    'deposit_snapshot_minor' => $deposit,
                     'created_by' => $resident?->user_id ?? $this->manager->id,
                     'decided_by' => $decided ? $this->manager->id : null,
                     'decided_at' => $decided ? $startsAt->subDays(2)->setTime(10, 15)->utc() : null,
@@ -552,7 +553,7 @@ class DemoOperationsSeeder extends Seeder
             return;
         }
         $recordedAt = $movement->occurred_on->setTimezone($this->central->timezone)->setTime(8, 30);
-        $this->activity(ActivityEventType::MovementRecorded, "Se registró un movimiento: {$movement->concept} (S/ {$movement->amount}).", $this->admin, $recordedAt, 'financial_movement', $movement->id, ['status' => MovementStatus::Pending->value, 'unit_id' => $movement->unit_id]);
+        $this->activity(ActivityEventType::MovementRecorded, "Se registró un movimiento: {$movement->concept} (".Money::soles($movement->amount_minor).').', $this->admin, $recordedAt, 'financial_movement', $movement->id, ['status' => MovementStatus::Pending->value, 'unit_id' => $movement->unit_id]);
         if ($paidAt) {
             $this->activity(ActivityEventType::MovementStatusChanged, "El movimiento {$movement->concept} pasó de pending a paid.", $this->manager, $paidAt->setTime(10, 0), 'financial_movement', $movement->id, ['status' => 'paid', 'previous_status' => 'pending', 'unit_id' => $movement->unit_id]);
         }

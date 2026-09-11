@@ -1,6 +1,7 @@
-import { ActionIcon, Button, Loader, Text } from '@mantine/core'
+import { ActionIcon, Button, Loader, Select, Text } from '@mantine/core'
 import { MiniCalendar } from '@mantine/dates'
 import { SlotGrid } from '../../components/ui/slot-grid'
+import { durationLabel, durationOptions } from '../../lib/slot-runs'
 import { AltArrowLeftIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi, useNavigate } from '@tanstack/react-router'
@@ -30,13 +31,14 @@ export function PortalBookingPage() {
   const today = localDateString(new Date(), timezone)
   const [date, setDate] = useState(today)
   const [slot, setSlot] = useState<AvailabilitySlot | null>(null)
+  const [end, setEnd] = useState<string | null>(null)
 
   const amenities = useQuery({ queryKey: ['portal', 'amenities', active?.unit_id], queryFn: () => getPortalAmenities(active!.unit_id), enabled: active !== null })
   const amenity = amenities.data?.data.find((item) => item.id === amenityId) ?? null
   const availability = useQuery({ queryKey: ['portal', 'availability', amenityId, active?.unit_id, date], queryFn: () => getAvailability(amenityId, active!.unit_id, date), enabled: active !== null })
 
   const request = useMutation({
-    mutationFn: () => requestReservation({ unit_id: active!.unit_id, amenity_id: amenityId, date, start: slot!.start, end: slot!.end }),
+    mutationFn: () => requestReservation({ unit_id: active!.unit_id, amenity_id: amenityId, date, start: slot!.start, end: end ?? slot!.end }),
     onSuccess: async ({ data }) => {
       await queryClient.invalidateQueries({ queryKey: ['portal', 'reservations'] })
       notifySuccess(t(data.status === 'approved' ? 'portal.reservations.booked' : 'portal.reservations.requested'))
@@ -48,8 +50,10 @@ export function PortalBookingPage() {
   if (!active) return null
 
   const mode = availability.data?.booking_mode ?? amenity?.booking_mode ?? 'approval'
-  const fee = availability.data?.fee_amount ?? amenity?.fee_amount ?? null
-  const deposit = availability.data?.deposit_amount ?? amenity?.deposit_amount ?? null
+  const fee = availability.data?.fee_amount_minor ?? amenity?.fee_amount_minor ?? null
+  const deposit = availability.data?.deposit_amount_minor ?? amenity?.deposit_amount_minor ?? null
+  const slotMinutes = availability.data?.slot_minutes ?? amenity?.slot_minutes ?? 60
+  const durations = slot ? durationOptions(availability.data?.slots ?? [], slot.start) : []
   const summary = [fee ? formatMoney(fee) : t('portal.reservations.free'), deposit ? t('portal.reservations.depositOf', { amount: formatMoney(deposit) }) : null].filter(Boolean).join(' + ')
 
   return (
@@ -73,6 +77,7 @@ export function PortalBookingPage() {
         onChange={(day) => {
           setDate(day)
           setSlot(null)
+          setEnd(null)
         }}
       />
 
@@ -98,15 +103,28 @@ export function PortalBookingPage() {
           size="md"
           slots={availability.data!.slots}
           value={slot?.start ?? ''}
-          onChange={(start) => setSlot(availability.data!.slots.find((item) => item.start === start) ?? null)}
+          onChange={(start) => {
+            setSlot(availability.data!.slots.find((item) => item.start === start) ?? null)
+            setEnd(null)
+          }}
         />
       )}
+
+      {slot && durations.length > 1 ? (
+        <Select
+          allowDeselect={false}
+          data={durations.map((option) => ({ value: option.end, label: `${durationLabel(option.slots * slotMinutes)} · ${slot.start}–${option.end}` }))}
+          label={t('portal.reservations.duration')}
+          value={end ?? slot.end}
+          onChange={(value) => setEnd(value)}
+        />
+      ) : null}
 
       <div className="mt-auto flex flex-col gap-3 pt-2">
         {slot ? (
           <div className="flex items-center justify-between gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-3.5 py-3 text-sm">
             <span>
-              <span className="font-semibold">{`${longDate(date)} · ${slot.start}–${slot.end}`}</span>
+              <span className="font-semibold">{`${longDate(date)} · ${slot.start}–${end ?? slot.end}`}</span>
               <span className="block text-xs text-[var(--mantine-color-dimmed)]">{summary}</span>
             </span>
             <StatusPill color={mode === 'instant' ? 'success' : 'warning'}>{t(`portal.reservations.status.${mode === 'instant' ? 'approved' : 'pending'}`)}</StatusPill>

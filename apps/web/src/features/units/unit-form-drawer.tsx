@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { MoneyInput } from '../../components/ui/money-input'
 import { DangerZone, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { ApiError } from '../../app/api-client'
@@ -25,7 +26,7 @@ function defaults(unit?: UnitSummary | null): UnitFormValues {
     building_id: unit?.building_id ?? '',
     floor: unit?.floor ?? '',
     participation_share: unit?.participation_share ?? '',
-    maintenance_fee: unit?.maintenance_fee ?? '',
+    maintenance_fee_minor: unit?.maintenance_fee_minor ?? null,
     parking_spots: unit?.parking_spots ?? [],
     storage_rooms: unit?.storage_rooms ?? [],
     notes: unit?.notes ?? '',
@@ -153,17 +154,15 @@ export function UnitFormDrawer({
           <div className="flex flex-col gap-5">
             <Controller
               control={form.control}
-              name="maintenance_fee"
+              name="maintenance_fee_minor"
               render={({ field, fieldState }) => (
-                <NumberInput
-                  {...field}
-                  allowDecimal={false}
-                  allowNegative={false}
+                <MoneyInput
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('units.detail.monthlyFee')}
-                  prefix="S/ "
-                  thousandSeparator=" "
-                  onChange={number(field)}
+                  name={field.name}
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  onChange={field.onChange}
                 />
               )}
             />

@@ -52,7 +52,7 @@ function expensePayload(array $overrides = []): array
     return [
         'direction' => 'expense',
         'category' => 'water',
-        'amount' => 600,
+        'amount_minor' => 600,
         'concept' => 'Agua · áreas comunes',
         'detail' => 'Recibo Sedapal · vence 20 ago',
         'counterparty' => 'Sedapal',
@@ -86,8 +86,8 @@ function pendingReservationWithCharges(Account $account, Location $location, Uni
         // The 10:00–12:00 booking below must be one slot on the grid for approve to re-validate.
         'availability' => ['monday' => [['start' => '10:00', 'end' => '22:00']]],
         'slot_minutes' => 120,
-        'fee_amount' => 150,
-        'deposit_amount' => 300,
+        'fee_amount_minor' => 150,
+        'deposit_amount_minor' => 300,
     ]);
     $monday = CarbonImmutable::now('America/Lima')->addWeek()->next('Monday');
     $reservation = Reservation::factory()->pending()->create([
@@ -97,8 +97,8 @@ function pendingReservationWithCharges(Account $account, Location $location, Uni
         'unit_id' => $unit->id,
         'starts_at' => $monday->setTime(10, 0)->utc(),
         'ends_at' => $monday->setTime(12, 0)->utc(),
-        'fee_snapshot' => 150,
-        'deposit_snapshot' => 300,
+        'fee_snapshot_minor' => 150,
+        'deposit_snapshot_minor' => 300,
         'created_by' => $creator->id,
     ]);
 
@@ -113,7 +113,7 @@ test('a manager records an expense as pending with an activity entry', function 
         ->assertCreated()
         ->assertJsonPath('data.direction', 'expense')
         ->assertJsonPath('data.status', 'pending')
-        ->assertJsonPath('data.amount', 600)
+        ->assertJsonPath('data.amount_minor', 600)
         ->assertJsonPath('data.counterparty', 'Sedapal')
         ->assertJsonPath('data.occurred_on', '2026-08-16')
         ->assertJsonPath('data.allowed_transitions', ['paid', 'voided'])
@@ -177,7 +177,7 @@ test('the category must belong to the direction', function () {
     $this->actingAs($admin)
         ->postJson(movementsBase($account, $location), expensePayload([
             'direction' => 'income', 'category' => 'fine', 'counterparty' => null, 'unit_id' => $unit->id,
-            'concept' => 'Multa · ruido fuera de horario', 'amount' => 80,
+            'concept' => 'Multa · ruido fuera de horario', 'amount_minor' => 80,
         ]))
         ->assertCreated()
         ->assertJsonPath('data.category', 'fine');
@@ -362,45 +362,45 @@ test('the summary totals the month and the outstanding balances', function () {
 
     $seed = fn (array $attrs) => seedMovement($location, $admin, $attrs);
     // Paid income in month (counts), pending income (receivable), deposits.
-    $seed(['direction' => 'income', 'category' => 'reservation_fee', 'status' => 'paid', 'amount' => 50, 'occurred_on' => '2026-08-14']);
-    $seed(['direction' => 'income', 'category' => 'reservation_fee', 'status' => 'paid', 'amount' => 50, 'occurred_on' => '2026-08-11']);
-    $seed(['direction' => 'income', 'category' => 'reservation_fee', 'status' => 'pending', 'amount' => 150, 'occurred_on' => '2026-08-15']);
-    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'pending', 'amount' => 300, 'occurred_on' => '2026-08-15']);
-    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'held', 'amount' => 300, 'occurred_on' => '2026-07-20']);
-    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'to_refund', 'amount' => 300, 'occurred_on' => '2026-08-12']);
+    $seed(['direction' => 'income', 'category' => 'reservation_fee', 'status' => 'paid', 'amount_minor' => 50, 'occurred_on' => '2026-08-14']);
+    $seed(['direction' => 'income', 'category' => 'reservation_fee', 'status' => 'paid', 'amount_minor' => 50, 'occurred_on' => '2026-08-11']);
+    $seed(['direction' => 'income', 'category' => 'reservation_fee', 'status' => 'pending', 'amount_minor' => 150, 'occurred_on' => '2026-08-15']);
+    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'pending', 'amount_minor' => 300, 'occurred_on' => '2026-08-15']);
+    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'held', 'amount_minor' => 300, 'occurred_on' => '2026-07-20']);
+    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'to_refund', 'amount_minor' => 300, 'occurred_on' => '2026-08-12']);
     // Expenses: paid in month, pending (payable), paid last month (ignored).
-    $seed(['direction' => 'expense', 'status' => 'paid', 'amount' => 1180, 'occurred_on' => '2026-08-14']);
-    $seed(['direction' => 'expense', 'status' => 'paid', 'amount' => 1400, 'occurred_on' => '2026-08-13']);
-    $seed(['direction' => 'expense', 'status' => 'pending', 'amount' => 600, 'occurred_on' => '2026-08-16']);
-    $seed(['direction' => 'expense', 'status' => 'paid', 'amount' => 999, 'occurred_on' => '2026-07-14']);
+    $seed(['direction' => 'expense', 'status' => 'paid', 'amount_minor' => 1180, 'occurred_on' => '2026-08-14']);
+    $seed(['direction' => 'expense', 'status' => 'paid', 'amount_minor' => 1400, 'occurred_on' => '2026-08-13']);
+    $seed(['direction' => 'expense', 'status' => 'pending', 'amount_minor' => 600, 'occurred_on' => '2026-08-16']);
+    $seed(['direction' => 'expense', 'status' => 'paid', 'amount_minor' => 999, 'occurred_on' => '2026-07-14']);
     // A voided row never counts.
-    $seed(['direction' => 'expense', 'status' => 'voided', 'amount' => 5000, 'occurred_on' => '2026-08-14']);
+    $seed(['direction' => 'expense', 'status' => 'voided', 'amount_minor' => 5000, 'occurred_on' => '2026-08-14']);
 
     $this->actingAs($admin)
         ->getJson("/api/accounts/{$account->id}/locations/{$location->id}/finances/summary?month=2026-08")
         ->assertOk()
         ->assertJson(['data' => [
             'month' => '2026-08',
-            'income_total' => 100,
+            'income_total_minor' => 100,
             'income_count' => 2,
-            'expense_total' => 2580,
+            'expense_total_minor' => 2580,
             'expense_count' => 2,
-            'balance' => -2480,
-            'receivable_total' => 450,
+            'balance_minor' => -2480,
+            'receivable_total_minor' => 450,
             'receivable_count' => 2,
-            'payable_total' => 600,
+            'payable_total_minor' => 600,
             'payable_count' => 1,
-            'deposits_held_total' => 300,
-            'deposits_to_refund_total' => 300,
+            'deposits_held_total_minor' => 300,
+            'deposits_to_refund_total_minor' => 300,
             'deposits_to_refund_count' => 1,
             'previous_month' => '2026-07',
             // July: no paid income, one paid expense of 999.
-            'previous_balance' => -999,
+            'previous_balance_minor' => -999,
             'income_by_category' => [
-                ['category' => 'reservation_fee', 'total' => 100, 'count' => 2],
+                ['category' => 'reservation_fee', 'total_minor' => 100, 'count' => 2],
             ],
             'expense_by_category' => [
-                ['category' => 'water', 'total' => 2580, 'count' => 2],
+                ['category' => 'water', 'total_minor' => 2580, 'count' => 2],
             ],
         ]]);
 });
@@ -453,14 +453,14 @@ test('approving a reservation opens a fee and a deposit row once', function () {
 
     $deposit = $rows->firstWhere('category.value', 'reservation_deposit');
     $fee = $rows->firstWhere('category.value', 'reservation_fee');
-    expect($deposit->amount)->toBe(300)
+    expect($deposit->amount_minor)->toBe(300)
         ->and($deposit->status)->toBe(MovementStatus::Pending)
         ->and($deposit->direction->value)->toBe('income')
         ->and($deposit->unit_id)->toBe($unit->id)
         ->and($deposit->concept)->toBe('Depósito · Salón de eventos')
         ->and($deposit->detail)->toStartWith('Reserva del lun')
         ->and($deposit->occurred_on->toDateString())->toBe(CarbonImmutable::now('America/Lima')->toDateString())
-        ->and($fee->amount)->toBe(150)
+        ->and($fee->amount_minor)->toBe(150)
         ->and($fee->concept)->toBe('Cuota · Salón de eventos');
 
     // Re-running the sync is a no-op thanks to the unique index guard.
@@ -493,7 +493,7 @@ test('a reservation show merges its own history with its movements', function ()
         ->assertJsonPath('history.0.subject', 'movement')
         ->assertJsonPath('history.0.event_type', 'movement.status_changed')
         ->assertJsonPath('history.0.category', 'reservation_fee')
-        ->assertJsonPath('history.0.amount', 150)
+        ->assertJsonPath('history.0.amount_minor', 150)
         ->assertJsonPath('history.4.event_type', 'reservation.created');
 
     // Approval and the two generated rows share a second; the approval
@@ -512,8 +512,8 @@ test('an instant booking opens its rows at creation and a rejection opens none',
         'account_id' => $account->id,
         'booking_mode' => BookingMode::Instant,
         'availability' => ['monday' => [['start' => '09:00', 'end' => '22:00']]],
-        'fee_amount' => 50,
-        'deposit_amount' => null,
+        'fee_amount_minor' => 50,
+        'deposit_amount_minor' => null,
     ]);
     $monday = CarbonImmutable::now('America/Lima')->addWeek()->next('Monday')->format('Y-m-d');
 
@@ -560,4 +560,24 @@ test('cancelling a reservation voids pending rows and flags a held deposit for r
         'reservation_deposit' => 'to_refund',
         'reservation_fee' => 'voided',
     ]);
+});
+
+test('amounts are stored and returned as integer minor units', function () {
+    [$account, $location, $unit, $admin] = financeWorld();
+
+    $this->actingAs($admin)
+        ->postJson(movementsBase($account, $location), expensePayload(['amount_minor' => 19950]))
+        ->assertCreated()
+        ->assertJsonPath('data.amount_minor', 19950);
+
+    $movement = FinancialMovement::query()->where('concept', 'Agua · áreas comunes')->firstOrFail();
+
+    expect($movement->amount_minor)->toBe(19950)
+        ->and(ActivityLog::query()->where('subject_type', 'financial_movement')->where('subject_id', $movement->id)->value('summary'))
+        ->toContain('S/ 199.50');
+
+    $this->actingAs($admin)
+        ->postJson(movementsBase($account, $location), expensePayload(['amount' => 600, 'amount_minor' => null]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['amount_minor']);
 });

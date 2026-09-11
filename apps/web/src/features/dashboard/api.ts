@@ -30,10 +30,10 @@ export type DashboardToday = {
 /** Present only for callers who can manage the registry; the API omits it otherwise. */
 export type DashboardManagement = {
   month: string
-  dues_issued_total: number
-  dues_collected_total: number
+  dues_issued_total_minor: number
+  dues_collected_total_minor: number
   units_with_balance_count: number
-  deposits_held_total: number
+  deposits_held_total_minor: number
   deposits_held_count: number
   residents_not_invited_count: number
   units_total: number

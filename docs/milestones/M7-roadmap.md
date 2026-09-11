@@ -123,3 +123,7 @@ Same day, two more cuts. A booking is exactly one slot (ADR 0041 revised): the d
 ## Revision (2026-09-11, evening) — no exclusivity
 
 The exclusive-slot rule went too. Nothing enforces overlap: any number of units may book the same slot (a gym), a salón collision shows on the board as two blocks in one row, and the approver observes, rejects or cancels. Availability marks a slot unavailable only when it is in the past. ADR 0041 amended; the validator is down to four rules.
+
+## Revision (2026-09-11, night) — variable length
+
+A booking is a run of whole slots inside one window (`end - start` a multiple of `slot_minutes`, `end` before the window closes). With no exclusivity the run has nothing to bridge, so this is a Duración select after the start slot on both surfaces, defaulting to one slot. `lib/slot-runs.ts` lists the options from the server's slot list.

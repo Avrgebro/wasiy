@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'building_name',
     'floor',
     'participation_share',
-    'maintenance_fee',
+    'maintenance_fee_minor',
     'parking_spots',
     'storage_rooms',
     'status',
@@ -122,7 +122,7 @@ class Unit extends Model
             'status' => RegistryStatus::class,
             'type' => UnitType::class,
             'participation_share' => 'decimal:3',
-            'maintenance_fee' => 'integer',
+            'maintenance_fee_minor' => 'integer',
         ];
     }
 

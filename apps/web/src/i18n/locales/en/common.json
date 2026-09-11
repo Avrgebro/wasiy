@@ -303,7 +303,8 @@
         "staff": "management"
       },
       "slotLength": "Slot length",
-      "cancelUntilStart": "You can cancel until the start time."
+      "cancelUntilStart": "You can cancel until the start time.",
+      "duration": "Duration"
     },
     "alerts": {
       "title": "Alerts",
@@ -865,8 +866,8 @@
       "receivedToday": "Received today",
       "waiting_one": "Waiting for {{count}} day",
       "waiting_other": "Waiting for {{count}} days",
-      "fee": "fee S/ {{amount}}",
-      "deposit": "deposit S/ {{amount}}",
+      "fee": "fee {{amount}}",
+      "deposit": "deposit {{amount}}",
       "free": "no charge",
       "showAll": "See all {{count}} pending →",
       "showFewer": "Show fewer"
@@ -904,7 +905,8 @@
       "submit": "Create reservation",
       "startSlot": "Time",
       "dateOutOfRange": "Pick a date between today and {{days}} days ahead.",
-      "fullyBooked": "No slots left today: they have all passed."
+      "fullyBooked": "No slots left today: they have all passed.",
+      "duration": "Duration"
     },
     "detail": {
       "fee": "Fee",
@@ -1039,7 +1041,7 @@
       "approvalHint": "If disabled, reservations confirm instantly.",
       "fee": "Usage fee",
       "deposit": "Refundable deposit",
-      "feesHint": "Amounts in soles, no decimals. The deposit is recorded manually when the reservation is confirmed.",
+      "feesHint": "Amounts in soles. The deposit is recorded manually when the reservation is confirmed.",
       "photosAfterCreate": "You can add photos by editing the amenity once created.",
       "slotLength": "Length of each slot",
       "slotLengthHint": "Residents book one or more consecutive slots inside the schedule.",

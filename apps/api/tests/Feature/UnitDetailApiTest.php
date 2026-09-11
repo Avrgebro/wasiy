@@ -44,7 +44,7 @@ function homeUnit(Location $location, array $attributes = []): Unit
         'floor' => '4',
         'type' => 'apartment',
         'participation_share' => 1.18,
-        'maintenance_fee' => 420,
+        'maintenance_fee_minor' => 420,
         'parking_spots' => 'E-23',
         'storage_rooms' => 'D-04',
         ...$attributes,
@@ -72,21 +72,21 @@ test('a unit is created and updated with the condo fields', function () {
     $id = $this->actingAs($admin)
         ->postJson("/api/locations/{$location->id}/units", [
             'unit_number' => '501', 'type' => 'apartment', 'building_name' => 'Torre A', 'floor' => '5',
-            'participation_share' => 1.42, 'maintenance_fee' => 520,
+            'participation_share' => 1.42, 'maintenance_fee_minor' => 520,
             'parking_spots' => 'E-12, E-13', 'storage_rooms' => 'D-04',
         ])
         ->assertCreated()
         ->assertJsonPath('data.type', 'apartment')
         ->assertJsonPath('data.participation_share', 1.42)
-        ->assertJsonPath('data.maintenance_fee', 520)
+        ->assertJsonPath('data.maintenance_fee_minor', 520)
         ->assertJsonPath('data.parking_spots', ['E-12', 'E-13'])
         ->assertJsonPath('data.storage_rooms', ['D-04'])
         ->json('data.id');
 
     $this->actingAs($admin)
-        ->patchJson("/api/units/{$id}", ['maintenance_fee' => null, 'type' => 'commercial'])
+        ->patchJson("/api/units/{$id}", ['maintenance_fee_minor' => null, 'type' => 'commercial'])
         ->assertOk()
-        ->assertJsonPath('data.maintenance_fee', null)
+        ->assertJsonPath('data.maintenance_fee_minor', null)
         ->assertJsonPath('data.type', 'commercial');
 
     $this->actingAs($admin)
@@ -102,7 +102,7 @@ test('occupancy and portal filters resolve from memberships, and search reaches 
     liveIn($occupied, ['first_name' => 'Carlos', 'last_name' => 'Mendoza', 'user_id' => User::factory()->create()->id], ['is_primary_contact' => true]);
     Vehicle::factory()->create(['account_id' => $account->id, 'location_id' => $location->id, 'unit_id' => $occupied->id, 'plate' => 'AXB-241']);
 
-    $attention = homeUnit($location, ['unit_number' => '305', 'building_name' => 'Torre B', 'maintenance_fee' => null]);
+    $attention = homeUnit($location, ['unit_number' => '305', 'building_name' => 'Torre B', 'maintenance_fee_minor' => null]);
     liveIn($attention, ['first_name' => 'Sofía', 'last_name' => 'Gutiérrez']);
 
     $vacant = homeUnit($location, ['unit_number' => '609', 'building_name' => 'Torre B']);
@@ -144,11 +144,11 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
     $month = CarbonImmutable::now('America/Lima')->format('Y-m');
     FinancialMovement::factory()->income()->for($location)->create([
         'account_id' => $account->id, 'created_by' => $admin->id, 'unit_id' => $unit->id,
-        'category' => 'maintenance_dues', 'status' => 'paid', 'amount' => 420, 'occurred_on' => "{$month}-01",
+        'category' => 'maintenance_dues', 'status' => 'paid', 'amount_minor' => 420, 'occurred_on' => "{$month}-01",
     ]);
     FinancialMovement::factory()->income()->for($location)->create([
         'account_id' => $account->id, 'created_by' => $admin->id, 'unit_id' => $unit->id,
-        'category' => 'fine', 'status' => 'pending', 'amount' => 80, 'occurred_on' => "{$month}-11",
+        'category' => 'fine', 'status' => 'pending', 'amount_minor' => 80, 'occurred_on' => "{$month}-11",
     ]);
 
     $this->actingAs($admin)
@@ -169,7 +169,7 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
         ->assertJsonCount(1, 'reservations')
         ->assertJsonCount(2, 'movements')
         ->assertJsonPath('movements_month', $month)
-        ->assertJsonPath('pending_balance', 80)
+        ->assertJsonPath('pending_balance_minor', 80)
         ->assertJsonCount(1, 'notes')
         ->assertJsonPath('notes.0.body', 'Autorizan visitas recurrentes de la Sra. Vargas.');
 
@@ -182,7 +182,7 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
         ->assertJsonCount(2, 'data.members')
         ->assertJsonMissingPath('movements')
         ->assertJsonMissingPath('movements_month')
-        ->assertJsonMissingPath('pending_balance');
+        ->assertJsonMissingPath('pending_balance_minor');
     $this->actingAs($frontDesk)->postJson("/api/units/{$unit->id}/notes", ['body' => 'x'])->assertForbidden();
 });
 
@@ -193,11 +193,11 @@ test('deactivating a unit ends memberships, parks vehicles and cancels future bo
     liveIn($unit);
     $vehicle = Vehicle::factory()->create(['account_id' => $account->id, 'location_id' => $location->id, 'unit_id' => $unit->id]);
 
-    $amenity = Amenity::factory()->for($location)->create(['account_id' => $account->id, 'availability' => ['monday' => [['start' => '09:00', 'end' => '22:00']]], 'fee_amount' => 50]);
+    $amenity = Amenity::factory()->for($location)->create(['account_id' => $account->id, 'availability' => ['monday' => [['start' => '09:00', 'end' => '22:00']]], 'fee_amount_minor' => 50]);
     $monday = CarbonImmutable::now('America/Lima')->addWeek()->next('Monday');
     $future = Reservation::factory()->create([
         'account_id' => $account->id, 'location_id' => $location->id, 'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
-        'starts_at' => $monday->setTime(10, 0)->utc(), 'ends_at' => $monday->setTime(12, 0)->utc(), 'fee_snapshot' => 50, 'created_by' => $admin->id,
+        'starts_at' => $monday->setTime(10, 0)->utc(), 'ends_at' => $monday->setTime(12, 0)->utc(), 'fee_snapshot_minor' => 50, 'created_by' => $admin->id,
     ]);
     $past = Reservation::factory()->create([
         'account_id' => $account->id, 'location_id' => $location->id, 'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
@@ -206,7 +206,7 @@ test('deactivating a unit ends memberships, parks vehicles and cancels future bo
     // A pending charge on the future booking should be voided by the cascade.
     $fee = FinancialMovement::factory()->income()->for($location)->create([
         'account_id' => $account->id, 'created_by' => $admin->id, 'unit_id' => $unit->id, 'reservation_id' => $future->id,
-        'category' => 'reservation_fee', 'status' => 'pending', 'amount' => 50,
+        'category' => 'reservation_fee', 'status' => 'pending', 'amount_minor' => 50,
     ]);
 
     $this->actingAs($admin)
@@ -234,10 +234,10 @@ test('deactivating a unit ends memberships, parks vehicles and cancels future bo
 
 test('monthly dues are generated once per unit and month', function () {
     [$account, $location, $admin] = unitWorld();
-    homeUnit($location, ['unit_number' => '402', 'maintenance_fee' => 420]);
-    homeUnit($location, ['unit_number' => '118', 'maintenance_fee' => 380]);
-    homeUnit($location, ['unit_number' => '609', 'maintenance_fee' => null]);
-    homeUnit($location, ['unit_number' => '999', 'maintenance_fee' => 300, 'status' => RegistryStatus::Inactive]);
+    homeUnit($location, ['unit_number' => '402', 'maintenance_fee_minor' => 420]);
+    homeUnit($location, ['unit_number' => '118', 'maintenance_fee_minor' => 380]);
+    homeUnit($location, ['unit_number' => '609', 'maintenance_fee_minor' => null]);
+    homeUnit($location, ['unit_number' => '999', 'maintenance_fee_minor' => 300, 'status' => RegistryStatus::Inactive]);
 
     $url = "/api/accounts/{$account->id}/locations/{$location->id}/finances/dues";
 
@@ -246,7 +246,7 @@ test('monthly dues are generated once per unit and month', function () {
 
     $dues = FinancialMovement::query()->where('category', 'maintenance_dues')->where('period', '2026-08')->get();
     expect($dues)->toHaveCount(2)
-        ->and($dues->sum('amount'))->toBe(800)
+        ->and($dues->sum('amount_minor'))->toBe(800)
         ->and($dues->first()->status->value)->toBe('pending')
         ->and($dues->first()->occurred_on->toDateString())->toBe('2026-08-01')
         ->and($dues->first()->concept)->toBe('Cuota de mantenimiento · agosto 2026')
@@ -255,7 +255,7 @@ test('monthly dues are generated once per unit and month', function () {
     // Second run: nothing new. A unit that gains a fee later fills its gap.
     $this->actingAs($admin)->postJson($url, ['month' => '2026-08'])
         ->assertOk()->assertJson(['data' => ['created' => 0, 'skipped' => 2]]);
-    Unit::query()->where('unit_number', '609')->update(['maintenance_fee' => 250]);
+    Unit::query()->where('unit_number', '609')->update(['maintenance_fee_minor' => 250]);
     $this->actingAs($admin)->postJson($url, ['month' => '2026-08'])
         ->assertOk()->assertJson(['data' => ['created' => 1, 'skipped' => 2]]);
 

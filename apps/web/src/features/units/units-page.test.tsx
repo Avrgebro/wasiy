@@ -58,7 +58,7 @@ function unit(overrides: Partial<UnitSummary> = {}): UnitSummary {
     building_name: 'Torre A',
     floor: '4',
     participation_share: 1.18,
-    maintenance_fee: 420,
+    maintenance_fee_minor: 42000,
     parking_spots: ['E-23'],
     storage_rooms: [],
     status: 'active',
@@ -109,7 +109,7 @@ describe('UnitsPage', () => {
   it('renders units grouped by building with derived states, and opens the detail on row click', async () => {
     const requests = installAdapter([
       unit(),
-      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', maintenance_fee: null, parking_spots: ['E-07'], resident_count: 1, lead_resident: 'Sofía Gutiérrez', primary_contact: null, vehicle_count: 0 }),
+      unit({ id: 'un_305', unit_number: '305', building_name: 'Torre B', floor: '3', maintenance_fee_minor: null, parking_spots: ['E-07'], resident_count: 1, lead_resident: 'Sofía Gutiérrez', primary_contact: null, vehicle_count: 0 }),
       unit({ id: 'un_609', unit_number: '609', building_name: 'Torre B', floor: '6', resident_count: 0, lead_resident: null, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
       unit({ id: 'un_701', unit_number: '701', building_name: 'Torre B', floor: '7', status: 'inactive', resident_count: 0, lead_resident: null, primary_contact: null, vehicle_count: 0, parking_spots: [] }),
     ])

@@ -35,13 +35,13 @@ const rosa: HouseholdMember = { membership_id: 'um_3', resident_id: 'rs_3', firs
 const yaris: PortalVehicle = { id: 'vh_1', unit_id: 'un_402', vehicle_type: 'car', plate: 'ABC-123', make: 'Toyota', model: 'Yaris', color: 'blanco', status: 'active' }
 const ledger: LedgerResponse = {
   data: [
-    { id: 'fm_1', concept: 'Cuota de mantenimiento', detail: null, category: 'maintenance_dues', occurred_on: '2026-09-01', period: '2026-09', amount: 250, state: 'pending' },
-    { id: 'fm_2', concept: 'Reserva · Salón de eventos', detail: null, category: 'reservation_fee', occurred_on: '2026-09-04', period: null, amount: 70, state: 'pending' },
-    { id: 'fm_3', concept: 'Depósito devuelto', detail: null, category: 'reservation_deposit', occurred_on: '2026-08-18', period: null, amount: -100, state: 'paid' },
+    { id: 'fm_1', concept: 'Cuota de mantenimiento', detail: null, category: 'maintenance_dues', occurred_on: '2026-09-01', period: '2026-09', amount_minor: 25000, state: 'pending' },
+    { id: 'fm_2', concept: 'Reserva · Salón de eventos', detail: null, category: 'reservation_fee', occurred_on: '2026-09-04', period: null, amount_minor: 7000, state: 'pending' },
+    { id: 'fm_3', concept: 'Depósito devuelto', detail: null, category: 'reservation_deposit', occurred_on: '2026-08-18', period: null, amount_minor: -10000, state: 'paid' },
   ],
-  balance: 320,
+  balance_minor: 32000,
   pending_count: 2,
-  last_dues: { period: '2026-09', amount: 250, settled: false },
+  last_dues: { period: '2026-09', amount_minor: 25000, settled: false },
 }
 
 function install(options: { canManage: boolean }, onWrite?: (method: string, url: string, body: unknown) => void) {

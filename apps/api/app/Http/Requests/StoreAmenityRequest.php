@@ -45,8 +45,8 @@ class StoreAmenityRequest extends FormRequest
             'availability.*.*.end' => ['required', 'date_format:H:i'],
             // Slot length (ADR 0041): whole half-hours between 30 minutes and 12 hours.
             'slot_minutes' => ['sometimes', 'integer', 'min:30', 'max:720', 'multiple_of:30'],
-            'fee_amount' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1000000'],
-            'deposit_amount' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:1000000'],
+            'fee_amount_minor' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000000'],
+            'deposit_amount_minor' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:100000000'],
         ];
     }
 }

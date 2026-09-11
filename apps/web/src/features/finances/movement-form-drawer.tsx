@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Alert, Button, NumberInput, SegmentedControl, Select, Textarea, TextInput } from '@mantine/core'
+import { Alert, Button, SegmentedControl, Select, Textarea, TextInput } from '@mantine/core'
 import { DateField } from '../../components/ui/date-field'
 import { DrawerRow } from '../../components/ui/detail-drawer-parts'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { MoneyInput } from '../../components/ui/money-input'
 import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
 import { useActiveUnitOptions } from '../units/use-active-unit-options'
@@ -23,7 +24,7 @@ function emptyValues(today: string): MovementFormValues {
   return {
     direction: 'expense',
     category: '',
-    amount: '',
+    amount_minor: null,
     concept: '',
     detail: '',
     counterparty: '',
@@ -89,7 +90,7 @@ export function MovementFormDrawer({
         direction: values.direction,
         category: values.category as MovementCategory,
         status: values.status,
-        amount: values.amount as number,
+        amount_minor: values.amount_minor as number,
         concept: values.concept.trim(),
         detail: values.detail.trim() || null,
         counterparty: values.direction === 'expense' ? values.counterparty.trim() || null : null,
@@ -161,18 +162,15 @@ export function MovementFormDrawer({
           />
           <Controller
             control={form.control}
-            name="amount"
+            name="amount_minor"
             render={({ field, fieldState }) => (
-              <NumberInput
-                {...field}
-                allowDecimal={false}
-                allowNegative={false}
+              <MoneyInput
                 error={fieldErrorMessage(fieldState.error)}
                 label={t('finances.form.amount')}
-                min={1}
-                prefix="S/ "
-                thousandSeparator=" "
-                onChange={(value) => field.onChange(value === '' ? '' : Number(value))}
+                name={field.name}
+                value={field.value}
+                onBlur={field.onBlur}
+                onChange={field.onChange}
               />
             )}
           />

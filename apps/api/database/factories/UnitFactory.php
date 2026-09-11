@@ -31,7 +31,7 @@ class UnitFactory extends Factory
             'floor' => fake()->optional()->numberBetween(1, 20),
             'status' => RegistryStatus::Active,
             'type' => UnitType::Apartment,
-            'maintenance_fee' => null,
+            'maintenance_fee_minor' => null,
             'notes' => null,
         ];
     }

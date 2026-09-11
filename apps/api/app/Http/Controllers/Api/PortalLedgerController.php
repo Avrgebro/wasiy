@@ -43,8 +43,8 @@ class PortalLedgerController extends Controller
             ->map(fn (FinancialMovement $movement): array => $this->row($movement))
             ->all();
 
-        $owed = (int) (clone $base)->where('status', MovementStatus::Pending->value)->sum('amount');
-        $toRefund = (int) (clone $base)->where('status', MovementStatus::ToRefund->value)->sum('amount');
+        $owed = (int) (clone $base)->where('status', MovementStatus::Pending->value)->sum('amount_minor');
+        $toRefund = (int) (clone $base)->where('status', MovementStatus::ToRefund->value)->sum('amount_minor');
 
         $lastDues = (clone $base)
             ->where('category', MovementCategory::MaintenanceDues->value)
@@ -53,9 +53,9 @@ class PortalLedgerController extends Controller
 
         return response()->json([
             'data' => $rows,
-            'balance' => $owed - $toRefund,
+            'balance_minor' => $owed - $toRefund,
             'pending_count' => (clone $base)->whereIn('status', [MovementStatus::Pending->value, MovementStatus::ToRefund->value])->count(),
-            'last_dues' => $lastDues ? ['period' => $lastDues->period, 'amount' => $lastDues->amount, 'settled' => $lastDues->status !== MovementStatus::Pending] : null,
+            'last_dues' => $lastDues ? ['period' => $lastDues->period, 'amount_minor' => $lastDues->amount_minor, 'settled' => $lastDues->status !== MovementStatus::Pending] : null,
         ]);
     }
 
@@ -76,7 +76,7 @@ class PortalLedgerController extends Controller
             'category' => $movement->category->value,
             'occurred_on' => $movement->occurred_on->toDateString(),
             'period' => $movement->period,
-            'amount' => $refund ? -$movement->amount : $movement->amount,
+            'amount_minor' => $refund ? -$movement->amount_minor : $movement->amount_minor,
             'state' => in_array($movement->status, [MovementStatus::Pending, MovementStatus::ToRefund], true) ? 'pending' : 'paid',
         ];
     }

@@ -24,8 +24,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'booking_mode',
     'availability',
     'slot_minutes',
-    'fee_amount',
-    'deposit_amount',
+    'fee_amount_minor',
+    'deposit_amount_minor',
 ])]
 class Amenity extends Model
 {

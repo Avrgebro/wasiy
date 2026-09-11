@@ -56,12 +56,12 @@ export function PortalLedgerPage() {
         {ledger.data ? (
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="m-0 font-display text-[30px] leading-none font-semibold">{formatMoney(ledger.data.balance)}</p>
+              <p className="m-0 font-display text-[30px] leading-none font-semibold">{formatMoney(ledger.data.balance_minor)}</p>
               <Text c="dimmed" mt={6} size="xs">
                 {t('portal.ledger.updatedToday')}
               </Text>
             </div>
-            <StatusPill color={ledger.data.balance > 0 ? 'warning' : 'success'}>{ledger.data.balance > 0 ? t('portal.ledger.pending') : t('portal.ledger.upToDate')}</StatusPill>
+            <StatusPill color={ledger.data.balance_minor > 0 ? 'warning' : 'success'}>{ledger.data.balance_minor > 0 ? t('portal.ledger.pending') : t('portal.ledger.upToDate')}</StatusPill>
           </div>
         ) : (
           <Loader aria-label={t('common.loading')} size="sm" />
@@ -103,7 +103,7 @@ export function PortalLedgerPage() {
                     <span className="text-xs text-[var(--mantine-color-dimmed)]">{shortDate(row.occurred_on)}</span>
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1">
-                    <span className={`text-sm font-semibold ${row.amount < 0 ? 'text-[var(--wa-success)]' : ''}`}>{formatMoney(row.amount)}</span>
+                    <span className={`text-sm font-semibold ${row.amount_minor < 0 ? 'text-[var(--wa-success)]' : ''}`}>{formatMoney(row.amount_minor)}</span>
                     <StatusPill color={row.state === 'pending' ? 'warning' : 'gray'}>{row.state === 'pending' ? t('portal.ledger.pending') : t('portal.ledger.paid')}</StatusPill>
                   </span>
                 </li>

@@ -25,8 +25,8 @@ class SaveAmenity
 {
     private const BOOKING_FIELDS = [
         'booking_mode',
-        'fee_amount',
-        'deposit_amount',
+        'fee_amount_minor',
+        'deposit_amount_minor',
     ];
 
     public function __construct(

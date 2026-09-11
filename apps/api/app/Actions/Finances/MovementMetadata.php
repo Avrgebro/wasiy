@@ -22,7 +22,7 @@ class MovementMetadata
             'category' => $movement->category->value,
             'status' => $movement->status->value,
             'previous_status' => $previousStatus,
-            'amount' => $movement->amount,
+            'amount_minor' => $movement->amount_minor,
             'concept' => $movement->concept,
             'counterparty' => $movement->counterparty,
             'unit_id' => $movement->unit_id,

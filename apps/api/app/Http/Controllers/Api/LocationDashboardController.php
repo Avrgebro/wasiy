@@ -129,7 +129,7 @@ class LocationDashboardController extends Controller
                     ->get(),
             )->resolve(),
             'reservations_today_count' => $reservations->clone()->count(),
-            'reservations_with_deposit_count' => $reservations->clone()->where('deposit_snapshot', '>', 0)->count(),
+            'reservations_with_deposit_count' => $reservations->clone()->where('deposit_snapshot_minor', '>', 0)->count(),
             'reservations_today' => ReservationResource::collection(
                 $reservations->clone()
                     ->with(['amenity', 'unit', 'resident'])
@@ -183,8 +183,8 @@ class LocationDashboardController extends Controller
 
         return [
             'month' => $month,
-            'dues_issued_total' => (int) $dues->clone()->sum('amount'),
-            'dues_collected_total' => (int) $dues->clone()->where('status', MovementStatus::Paid->value)->sum('amount'),
+            'dues_issued_total_minor' => (int) $dues->clone()->sum('amount_minor'),
+            'dues_collected_total_minor' => (int) $dues->clone()->where('status', MovementStatus::Paid->value)->sum('amount_minor'),
             'units_with_balance_count' => FinancialMovement::query()
                 ->where('location_id', $location->id)
                 ->where('direction', MovementDirection::Income->value)
@@ -192,7 +192,7 @@ class LocationDashboardController extends Controller
                 ->whereNotNull('unit_id')
                 ->distinct('unit_id')
                 ->count('unit_id'),
-            'deposits_held_total' => (int) $held->clone()->sum('amount'),
+            'deposits_held_total_minor' => (int) $held->clone()->sum('amount_minor'),
             'deposits_held_count' => $held->clone()->count(),
             'residents_not_invited_count' => Resident::query()
                 ->where('status', RegistryStatus::Active->value)

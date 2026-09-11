@@ -107,8 +107,8 @@ function reservation(overrides: Partial<ReservationSummary> = {}): ReservationSu
     status: 'approved',
     is_completed: false,
     status_note: null,
-    fee_snapshot: 50,
-    deposit_snapshot: null,
+    fee_snapshot_minor: 5000,
+    deposit_snapshot_minor: null,
     decided_at: null,
     created_at: new Date(Date.now() - 2 * 86_400_000).toISOString(),
     ...overrides,
@@ -135,8 +135,8 @@ function installAdapter(
           date: url.match(/date=([\d-]+)/)?.[1],
           slot_minutes: 60,
           booking_mode: 'approval',
-          fee_amount: null,
-          deposit_amount: null,
+          fee_amount_minor: null,
+          deposit_amount_minor: null,
           slots: [
             { start: '10:00', end: '11:00', available: true, reason: null },
             { start: '11:00', end: '12:00', available: true, reason: null },
@@ -203,8 +203,8 @@ function installAdapter(
         axiosResponse(config, {
           data: found,
           history: [
-            { id: 'al_2', subject: 'reservation', event_type: 'reservation.approved', status: 'approved', previous_status: 'pending', note: null, category: null, amount: null, actor_name: 'Alejandra Admin', created_at: '2026-08-09T22:45:00Z' },
-            { id: 'al_1', subject: 'reservation', event_type: 'reservation.created', status: 'pending', previous_status: null, note: null, category: null, amount: null, actor_name: 'A. Quispe', created_at: '2026-08-08T16:20:00Z' },
+            { id: 'al_2', subject: 'reservation', event_type: 'reservation.approved', status: 'approved', previous_status: 'pending', note: null, category: null, amount_minor: null, actor_name: 'Alejandra Admin', created_at: '2026-08-09T22:45:00Z' },
+            { id: 'al_1', subject: 'reservation', event_type: 'reservation.created', status: 'pending', previous_status: null, note: null, category: null, amount_minor: null, actor_name: 'A. Quispe', created_at: '2026-08-08T16:20:00Z' },
           ],
         }),
       )
@@ -254,8 +254,8 @@ describe('ReservationsPage', () => {
         unit_number: 'Depto. 501',
         resident_name: 'M. Paredes',
         status: 'pending',
-        fee_snapshot: 150,
-        deposit_snapshot: 300,
+        fee_snapshot_minor: 15000,
+        deposit_snapshot_minor: 30000,
         starts_at: tomorrowAt(18),
         ends_at: tomorrowAt(23),
       }),
@@ -363,6 +363,9 @@ describe('ReservationsPage', () => {
     // past 12:00 slot renders disabled (slots are never taken by others).
     expect(await within(drawer).findByRole('option', { name: '12:00–13:00' })).toBeDisabled()
     await user.click(within(drawer).getByRole('option', { name: '10:00–11:00' }))
+    // Duración lists whole slots up to the window end; pick two hours.
+    await user.click(within(drawer).getByRole('combobox', { name: 'Duración' }))
+    await user.click(await screen.findByRole('option', { name: '2 h · 10:00–12:00' }))
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))
 
     await waitFor(() => {
@@ -373,7 +376,7 @@ describe('ReservationsPage', () => {
           resident_id: null,
           date,
           start: '10:00',
-          end: '11:00',
+          end: '12:00',
         },
       ])
     })
@@ -456,8 +459,8 @@ describe('ReservationsPage', () => {
       reservation({
         starts_at: tomorrowAt(19),
         ends_at: tomorrowAt(21),
-        fee_snapshot: 50,
-        deposit_snapshot: 300,
+        fee_snapshot_minor: 5000,
+        deposit_snapshot_minor: 30000,
         movements: [
           {
             id: 'mv_fee',
@@ -467,7 +470,7 @@ describe('ReservationsPage', () => {
             category: 'reservation_fee',
             status: 'paid',
             allowed_transitions: ['pending'],
-            amount: 50,
+            amount_minor: 5000,
             concept: 'Cuota · Parrilla / terraza',
             detail: null,
             counterparty: null,
@@ -489,7 +492,7 @@ describe('ReservationsPage', () => {
             category: 'reservation_deposit',
             status: 'held',
             allowed_transitions: ['to_refund', 'retained', 'pending'],
-            amount: 300,
+            amount_minor: 30000,
             concept: 'Depósito · Parrilla / terraza',
             detail: null,
             counterparty: null,

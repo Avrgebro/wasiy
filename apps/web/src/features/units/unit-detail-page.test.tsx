@@ -44,7 +44,7 @@ function detail(): UnitDetailResponse {
   return {
     data: {
       id: 'un_402', account_id: 'acc_1', location_id: 'loc_1', unit_number: '402', type: 'apartment', building_id: 'bd_a', building_name: 'Torre A', building_code: 'TA', floor: '4',
-      participation_share: 1.18, maintenance_fee: 420, parking_spots: ['E-23'], storage_rooms: ['D-04'], status: 'active', notes: null,
+      participation_share: 1.18, maintenance_fee_minor: 42000, parking_spots: ['E-23'], storage_rooms: ['D-04'], status: 'active', notes: null,
       resident_count: 3, vehicle_count: 2, lead_resident: 'Carlos Mendoza', primary_contact: null,
       members: [
         { membership_id: 'um_1', resident_id: 'rs_1', name: 'Carlos Mendoza', email: 'carlos@x.pe', phone: '+51 987 654 321', is_primary_contact: true, started_at: null, portal_state: 'active' },
@@ -60,11 +60,11 @@ function detail(): UnitDetailResponse {
     visits: [],
     reservations: [],
     movements: [
-      { id: 'mv_1', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'maintenance_dues', status: 'paid', allowed_transitions: ['pending'], amount: 420, concept: 'Cuota de mantenimiento · agosto 2026', detail: 'Emitida el 01 ago · Torre A / 402', counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-01', due_on: null, note: null, created_by: 'usr_1', settled_by: 'usr_1', settled_at: null, created_at: null },
-      { id: 'mv_2', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'fine', status: 'pending', allowed_transitions: ['paid', 'voided'], amount: 80, concept: 'Multa · ruido fuera de horario', detail: null, counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-11', due_on: null, note: null, created_by: 'usr_1', settled_by: null, settled_at: null, created_at: null },
+      { id: 'mv_1', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'maintenance_dues', status: 'paid', allowed_transitions: ['pending'], amount_minor: 42000, concept: 'Cuota de mantenimiento · agosto 2026', detail: 'Emitida el 01 ago · Torre A / 402', counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-01', due_on: null, note: null, created_by: 'usr_1', settled_by: 'usr_1', settled_at: null, created_at: null },
+      { id: 'mv_2', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'fine', status: 'pending', allowed_transitions: ['paid', 'voided'], amount_minor: 8000, concept: 'Multa · ruido fuera de horario', detail: null, counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-11', due_on: null, note: null, created_by: 'usr_1', settled_by: null, settled_at: null, created_at: null },
     ],
     movements_month: '2026-08',
-    pending_balance: 80,
+    pending_balance_minor: 8000,
     notes: [{ id: 'al_1', body: 'Autorizan a la Sra. Elena Vargas como visita recurrente.', author_name: 'María Torres', created_at: '2026-06-02T15:00:00Z' }],
   }
 }
@@ -168,7 +168,7 @@ describe('UnitDetailPage', () => {
     await waitFor(() => expect(writes).toHaveLength(1))
     expect(writes[0].method).toBe('patch')
     expect(writes[0].url).toBe('/api/units/un_402')
-    expect(writes[0].body).toMatchObject({ unit_number: '402', type: 'apartment', building_id: 'bd_a', participation_share: 1.18, maintenance_fee: 450, parking_spots: 'E-23', storage_rooms: 'D-04' })
+    expect(writes[0].body).toMatchObject({ unit_number: '402', type: 'apartment', building_id: 'bd_a', participation_share: 1.18, maintenance_fee_minor: 45000, parking_spots: 'E-23', storage_rooms: 'D-04' })
   })
 
   it('adds a new person to the unit with role, primary contact and invitation', async () => {

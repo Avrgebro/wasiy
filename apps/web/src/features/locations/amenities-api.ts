@@ -19,8 +19,8 @@ export type AmenitySummary = {
   availability: Availability
   /** Length of one bookable slot (ADR 0041); a booking covers consecutive slots. */
   slot_minutes: number
-  fee_amount: number | null
-  deposit_amount: number | null
+  fee_amount_minor: number | null
+  deposit_amount_minor: number | null
   status: 'active' | 'deactivated'
   deactivated_at: string | null
   photos?: LocationPhoto[]
@@ -34,8 +34,8 @@ export type AmenityPayload = {
   booking_mode?: BookingModeValue
   availability?: Availability | null
   slot_minutes?: number
-  fee_amount?: number | null
-  deposit_amount?: number | null
+  fee_amount_minor?: number | null
+  deposit_amount_minor?: number | null
 }
 
 function amenitiesBase(accountId: string, locationId: string) {
@@ -125,8 +125,8 @@ export type AvailabilityResponse = {
   date: string
   slot_minutes: number
   booking_mode: BookingModeValue
-  fee_amount: number | null
-  deposit_amount: number | null
+  fee_amount_minor: number | null
+  deposit_amount_minor: number | null
   slots: AvailabilitySlot[]
 }
 

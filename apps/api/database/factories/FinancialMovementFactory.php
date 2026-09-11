@@ -27,7 +27,7 @@ class FinancialMovementFactory extends Factory
             'direction' => MovementDirection::Expense,
             'category' => MovementCategory::Water,
             'status' => MovementStatus::Pending,
-            'amount' => fake()->numberBetween(50, 2000),
+            'amount_minor' => fake()->numberBetween(5000, 200000),
             'concept' => 'Agua · áreas comunes',
             'detail' => null,
             'counterparty' => 'Sedapal',

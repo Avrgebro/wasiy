@@ -155,8 +155,8 @@ export type PortalAmenity = {
   description: string | null
   booking_mode: 'instant' | 'approval'
   slot_minutes: number
-  fee_amount: number | null
-  deposit_amount: number | null
+  fee_amount_minor: number | null
+  deposit_amount_minor: number | null
   photos: { id: string; url: string; is_cover: boolean }[]
   cover_photo_url: string | null
 }
@@ -171,8 +171,8 @@ export type AvailabilityResponse = {
   date: string
   slot_minutes: number
   booking_mode: 'instant' | 'approval'
-  fee_amount: number | null
-  deposit_amount: number | null
+  fee_amount_minor: number | null
+  deposit_amount_minor: number | null
   slots: AvailabilitySlot[]
 }
 
@@ -194,8 +194,8 @@ export type PortalReservation = {
   status: PortalReservationStatus
   is_completed: boolean
   status_note: string | null
-  fee_snapshot: number | null
-  deposit_snapshot: number | null
+  fee_snapshot_minor: number | null
+  deposit_snapshot_minor: number | null
   created_by_name?: string | null
   decided_by_name?: string | null
   decided_at: string | null
@@ -293,15 +293,15 @@ export type LedgerRow = {
   category: string
   occurred_on: string
   period: string | null
-  amount: number
+  amount_minor: number
   state: 'pending' | 'paid'
 }
 
 export type LedgerResponse = {
   data: LedgerRow[]
-  balance: number
+  balance_minor: number
   pending_count: number
-  last_dues: { period: string | null; amount: number; settled: boolean } | null
+  last_dues: { period: string | null; amount_minor: number; settled: boolean } | null
 }
 
 export function getPortalLedger(unitId: string, scope: 'pending' | 'all' = 'all') {

@@ -22,7 +22,7 @@ export type UnitSummary = {
   building_code: string | null
   floor: string | null
   participation_share: number | null
-  maintenance_fee: number | null
+  maintenance_fee_minor: number | null
   parking_spots: string[]
   storage_rooms: string[]
   status: 'active' | 'inactive'
@@ -126,7 +126,7 @@ export type UnitDetailResponse = {
   reservations: ReservationSummary[]
   movements: MovementSummary[]
   movements_month: string
-  pending_balance: number
+  pending_balance_minor: number
   notes: UnitNote[]
 }
 

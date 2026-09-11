@@ -25,7 +25,7 @@ class StoreFinancialMovementRequest extends FormRequest
             'direction' => ['required', Rule::enum(MovementDirection::class)],
             'category' => ['required', Rule::enum(MovementCategory::class)],
             'status' => ['sometimes', 'nullable', Rule::enum(MovementStatus::class)],
-            'amount' => ['required', 'integer', 'min:1', 'max:100000000'],
+            'amount_minor' => ['required', 'integer', 'min:1', 'max:10000000000'],
             'concept' => ['required', 'string', 'max:120'],
             'detail' => ['sometimes', 'nullable', 'string', 'max:255'],
             'counterparty' => ['sometimes', 'nullable', 'string', 'max:120'],

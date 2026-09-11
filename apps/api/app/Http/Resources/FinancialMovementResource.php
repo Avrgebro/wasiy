@@ -29,7 +29,7 @@ class FinancialMovementResource extends JsonResource
                 fn (MovementStatus $status): string => $status->value,
                 $this->allowedTransitions(),
             ),
-            'amount' => $this->amount,
+            'amount_minor' => $this->amount_minor,
             'concept' => $this->concept,
             'detail' => $this->detail,
             'counterparty' => $this->counterparty,

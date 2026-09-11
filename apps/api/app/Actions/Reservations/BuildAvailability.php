@@ -10,8 +10,10 @@ use Illuminate\Validation\ValidationException;
  * The slot list for one amenity and one local day, the only place slots are
  * computed (ADR 0041). Each availability window is cut into consecutive
  * slots of `slot_minutes` from its start; a tail shorter than a slot is not
- * offered. A booking is exactly one of these slots. Staff and portal read
- * the same list and post what it offered.
+ * offered. A booking is a run of one or more consecutive slots of one
+ * window; `max_slots` on each slot is the longest run that starts there and
+ * still ends by the window close, so clients need not compute it. Staff and
+ * portal read the same list and post what it offered.
  *
  * Slots are not exclusive, so existing bookings never mark a slot as taken:
  * the only reason a slot is unavailable is that it has already started.
@@ -23,9 +25,9 @@ class BuildAvailability
      *     date: string,
      *     slot_minutes: int,
      *     booking_mode: string,
-     *     fee_amount: int|null,
-     *     deposit_amount: int|null,
-     *     slots: list<array{start: string, end: string, available: bool, reason: 'past'|null}>
+     *     fee_amount_minor: int|null,
+     *     deposit_amount_minor: int|null,
+     *     slots: list<array{start: string, end: string, available: bool, reason: 'past'|null, max_slots: int}>
      * }
      */
     public function handle(Amenity $amenity, string $date): array
@@ -55,6 +57,7 @@ class BuildAvailability
                     $day->setTime(intdiv($minute, 60), $minute % 60),
                     $day->setTime(intdiv($minute + $slotMinutes, 60), ($minute + $slotMinutes) % 60),
                     $now,
+                    intdiv($close - $minute, $slotMinutes),
                 );
             }
         }
@@ -63,18 +66,18 @@ class BuildAvailability
             'date' => $date,
             'slot_minutes' => $slotMinutes,
             'booking_mode' => $amenity->booking_mode->value,
-            'fee_amount' => $amenity->fee_amount,
-            'deposit_amount' => $amenity->deposit_amount,
+            'fee_amount_minor' => $amenity->fee_amount_minor,
+            'deposit_amount_minor' => $amenity->deposit_amount_minor,
             'slots' => $slots,
         ];
     }
 
     /**
-     * @return array{start: string, end: string, available: bool, reason: 'past'|null}
+     * @return array{start: string, end: string, available: bool, reason: 'past'|null, max_slots: int}
      */
-    private function slot(CarbonImmutable $start, CarbonImmutable $end, CarbonImmutable $now): array
+    private function slot(CarbonImmutable $start, CarbonImmutable $end, CarbonImmutable $now, int $maxSlots): array
     {
-        $row = ['start' => $start->format('H:i'), 'end' => $end->format('H:i'), 'available' => true, 'reason' => null];
+        $row = ['start' => $start->format('H:i'), 'end' => $end->format('H:i'), 'available' => true, 'reason' => null, 'max_slots' => $maxSlots];
 
         return $start->lte($now) ? [...$row, 'available' => false, 'reason' => 'past'] : $row;
     }

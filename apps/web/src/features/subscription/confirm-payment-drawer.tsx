@@ -1,4 +1,4 @@
-import { ActionIcon, Button, NumberInput, Text, TextInput } from '@mantine/core'
+import { ActionIcon, Button, Text, TextInput } from '@mantine/core'
 import { Dropzone, IMAGE_MIME_TYPE, PDF_MIME_TYPE } from '@mantine/dropzone'
 import { CheckCircleIcon, CloseCircleIcon, CloudUploadIcon, DocumentIcon } from '@solar-icons/react/linear'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DateField } from '../../components/ui/date-field'
+import { MoneyInput } from '../../components/ui/money-input'
 import { getErrorMessage } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
 import { subscriptionPageQueryKey, uploadPaymentProof, type Invoice } from './api'
@@ -25,7 +26,7 @@ export function ConfirmPaymentDrawer({ invoice, onClose }: { invoice: Invoice | 
   const me = useMe().data
   const [file, setFile] = useState<File | null>(null)
   const [paidOn, setPaidOn] = useState('')
-  const [amount, setAmount] = useState<number | string>('')
+  const [amount, setAmount] = useState<number | null>(null)
   const [operation, setOperation] = useState('')
   const [error, setError] = useState('')
   const [sent, setSent] = useState(false)
@@ -34,7 +35,7 @@ export function ConfirmPaymentDrawer({ invoice, onClose }: { invoice: Invoice | 
     mutationFn: ({ invoiceId, file: proof }: { invoiceId: string; file: File }) =>
       uploadPaymentProof(invoiceId, proof, {
         paid_on: paidOn || undefined,
-        amount_minor: typeof amount === 'number' && amount > 0 ? Math.round(amount * 100) : undefined,
+        amount_minor: amount !== null && amount > 0 ? amount : undefined,
         operation_number: operation.trim() || undefined,
       }),
     onSuccess: async () => {
@@ -46,7 +47,7 @@ export function ConfirmPaymentDrawer({ invoice, onClose }: { invoice: Invoice | 
   })
 
   function reset() {
-    setFile(null); setPaidOn(''); setAmount(''); setOperation(''); setError(''); setSent(false)
+    setFile(null); setPaidOn(''); setAmount(null); setOperation(''); setError(''); setSent(false)
   }
   function close() {
     reset()
@@ -110,7 +111,7 @@ export function ConfirmPaymentDrawer({ invoice, onClose }: { invoice: Invoice | 
               <p className="m-0 mb-3 text-[10.5px] font-bold uppercase tracking-[0.08em] text-[var(--mantine-color-dimmed)]">{t('subscription.proof.detailsTitle')}</p>
               <div className="grid gap-4 sm:grid-cols-2">
                 <DateField label={t('subscription.proof.paidOn')} maxDate={new Date().toISOString().slice(0, 10)} value={paidOn} onChange={setPaidOn} />
-                <NumberInput allowNegative={false} decimalScale={2} label={t('subscription.proof.amount')} min={0} onChange={setAmount} prefix="S/ " thousandSeparator="," value={amount} />
+                <MoneyInput label={t('subscription.proof.amount')} onChange={setAmount} value={amount} />
               </div>
               <TextInput className="mt-4" label={t('subscription.proof.operation')} maxLength={60} onChange={(event) => setOperation(event.currentTarget.value)} placeholder={t('subscription.proof.operationPlaceholder')} value={operation} />
             </div>

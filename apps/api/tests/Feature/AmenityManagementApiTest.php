@@ -42,8 +42,8 @@ function validAmenityPayload(array $overrides = []): array
                 ['start' => '16:00', 'end' => '22:00'],
             ],
         ],
-        'fee_amount' => 150,
-        'deposit_amount' => 300,
+        'fee_amount_minor' => 150,
+        'deposit_amount_minor' => 300,
         ...$overrides,
     ];
 }
@@ -59,7 +59,7 @@ test('an admin can create an amenity with availability, fees, and approval mode'
         ->assertJsonPath('data.name', 'Salón de eventos')
         ->assertJsonPath('data.slug', 'salon-de-eventos')
         ->assertJsonPath('data.booking_mode', 'approval')
-        ->assertJsonPath('data.fee_amount', 150)
+        ->assertJsonPath('data.fee_amount_minor', 150)
         ->assertJsonPath('data.status', 'active')
         ->assertJsonPath('data.availability.wednesday.1.start', '16:00');
 
@@ -202,8 +202,8 @@ test('a non-reservable amenity stores instant mode and null fees', function () {
 
     $amenity = Amenity::query()->findOrFail($id);
 
-    expect($amenity->fee_amount)->toBeNull()
-        ->and($amenity->deposit_amount)->toBeNull()
+    expect($amenity->fee_amount_minor)->toBeNull()
+        ->and($amenity->deposit_amount_minor)->toBeNull()
         ->and($amenity->booking_mode)->toBe(BookingMode::Instant);
 });
 

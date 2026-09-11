@@ -74,7 +74,7 @@ class FinancialMovementController extends Controller
 
         SortParser::apply($movements, $validated['sort'] ?? null, [
             'occurred_on' => 'occurred_on',
-            'amount' => 'amount',
+            'amount_minor' => 'amount_minor',
             'status' => 'status',
             'created_at' => 'created_at',
         ], default: '-occurred_on,-created_at');
@@ -117,19 +117,19 @@ class FinancialMovementController extends Controller
         $held = $base()->where('status', MovementStatus::Held->value);
         $toRefund = $base()->where('status', MovementStatus::ToRefund->value);
 
-        $incomeTotal = (int) $income->clone()->sum('amount');
-        $expenseTotal = (int) $expense->clone()->sum('amount');
+        $incomeTotal = (int) $income->clone()->sum('amount_minor');
+        $expenseTotal = (int) $expense->clone()->sum('amount_minor');
 
         // Tiles are statistics only: breakdowns by category and a
         // month-over-month comparison, never interpretive copy.
         $byCategory = fn (Builder $query): array => $query->clone()
-            ->selectRaw('category, SUM(amount) AS total, COUNT(*) AS count')
+            ->selectRaw('category, SUM(amount_minor) AS total_minor, COUNT(*) AS count')
             ->groupBy('category')
-            ->orderByDesc('total')
+            ->orderByDesc('total_minor')
             ->get()
             ->map(fn ($row): array => [
                 'category' => $row->category->value,
-                'total' => (int) $row->total,
+                'total_minor' => (int) $row->total_minor,
                 'count' => (int) $row->count,
             ])
             ->all();
@@ -138,28 +138,28 @@ class FinancialMovementController extends Controller
         $previousIncome = (int) $base()->inMonth($previousMonth)
             ->where('direction', MovementDirection::Income->value)
             ->where('category', '!=', MovementCategory::ReservationDeposit->value)
-            ->where('status', MovementStatus::Paid->value)->sum('amount');
+            ->where('status', MovementStatus::Paid->value)->sum('amount_minor');
         $previousExpense = (int) $base()->inMonth($previousMonth)
             ->where('direction', MovementDirection::Expense->value)
-            ->where('status', MovementStatus::Paid->value)->sum('amount');
+            ->where('status', MovementStatus::Paid->value)->sum('amount_minor');
 
         return response()->json(['data' => [
             'month' => $month,
-            'income_total' => $incomeTotal,
+            'income_total_minor' => $incomeTotal,
             'income_count' => $income->count(),
             'income_by_category' => $byCategory($income),
-            'expense_total' => $expenseTotal,
+            'expense_total_minor' => $expenseTotal,
             'expense_count' => $expense->count(),
             'expense_by_category' => $byCategory($expense),
-            'balance' => $incomeTotal - $expenseTotal,
+            'balance_minor' => $incomeTotal - $expenseTotal,
             'previous_month' => $previousMonth,
-            'previous_balance' => $previousIncome - $previousExpense,
-            'receivable_total' => (int) $receivable->clone()->sum('amount'),
+            'previous_balance_minor' => $previousIncome - $previousExpense,
+            'receivable_total_minor' => (int) $receivable->clone()->sum('amount_minor'),
             'receivable_count' => $receivable->count(),
-            'payable_total' => (int) $payable->clone()->sum('amount'),
+            'payable_total_minor' => (int) $payable->clone()->sum('amount_minor'),
             'payable_count' => $payable->count(),
-            'deposits_held_total' => (int) $held->sum('amount'),
-            'deposits_to_refund_total' => (int) $toRefund->clone()->sum('amount'),
+            'deposits_held_total_minor' => (int) $held->sum('amount_minor'),
+            'deposits_to_refund_total_minor' => (int) $toRefund->clone()->sum('amount_minor'),
             'deposits_to_refund_count' => $toRefund->count(),
         ]]);
     }
