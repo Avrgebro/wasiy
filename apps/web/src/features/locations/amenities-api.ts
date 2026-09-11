@@ -119,7 +119,7 @@ export function setAmenityCoverPhoto(
 }
 
 /** One bookable slot as the server offers it; `reason` explains an unavailable one. */
-export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | 'taken' | null }
+export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | null }
 
 export type AvailabilityResponse = {
   date: string

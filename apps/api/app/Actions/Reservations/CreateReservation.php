@@ -25,8 +25,9 @@ class CreateReservation
 
     /**
      * Staff create on behalf of a unit. Instant amenities are approved on
-     * the spot; approval-mode ones enter the queue as pending. The Amenity
-     * row lock is the serialization point for the exclusive-slot check.
+     * the spot; approval-mode ones enter the queue as pending. Slots are not
+     * exclusive, so nothing is locked: the transaction only keeps the row,
+     * its activity entry and its movements together.
      */
     public function handle(
         Amenity $amenity,
@@ -37,8 +38,6 @@ class CreateReservation
         CarbonImmutable $endsAt,
     ): Reservation {
         return DB::transaction(function () use ($amenity, $unit, $resident, $actor, $startsAt, $endsAt): Reservation {
-            Amenity::query()->whereKey($amenity->id)->lockForUpdate()->first();
-
             $this->validator->validate($amenity, $unit, $startsAt, $endsAt);
 
             $instant = $amenity->booking_mode === BookingMode::Instant;

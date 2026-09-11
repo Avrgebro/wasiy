@@ -119,3 +119,7 @@ The slot-validity rules above (capacity, buffer, min/max duration, advance horiz
 ## Revision (2026-09-11, later) — day board and one slot per booking
 
 Same day, two more cuts. A booking is exactly one slot (ADR 0041 revised): the drawer's Fin select and the run logic are gone; an amenity needing longer bookings gets a longer `slot_minutes`. The Lista week view was replaced by `ReservationDayBoard` (`reservation-day-board.tsx`, Mantine `ResourcesDayView` in static mode): one row per reservable amenity, the day's bookings as status-coloured blocks, day pager on the URL `date` param, blocks open the drawer; search, status chips and the amenity filter went with the list. This differs from the Día view removed on 2026-09-01: that stacked every amenity in one column, this one gives each amenity a row so a conflict is two blocks side by side. `ResourcesDayView` needs `@mantine/schedule` ≥ 9.4, which moved every Mantine package to 9.6.1 in lockstep. Static mode disables pointer events on blocks; `index.css` re-enables them inside `.wa-day-board`.
+
+## Revision (2026-09-11, evening) — no exclusivity
+
+The exclusive-slot rule went too. Nothing enforces overlap: any number of units may book the same slot (a gym), a salón collision shows on the board as two blocks in one row, and the approver observes, rejects or cancels. Availability marks a slot unavailable only when it is in the past. ADR 0041 amended; the validator is down to four rules.

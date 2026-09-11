@@ -330,7 +330,7 @@ test('a booking is exactly one slot of the window it falls in', function () {
         ->assertJsonValidationErrors('starts_at');
 });
 
-test('only approved bookings hold the slot: pending never blocks, approving revalidates', function () {
+test('slots are not exclusive: several units may request the same slot and each may be approved', function () {
     [$account, $location, $amenity, $unit, $admin] = reservationWorld([
         'booking_mode' => BookingMode::Approval,
     ]);
@@ -351,23 +351,57 @@ test('only approved bookings hold the slot: pending never blocks, approving reva
         ->assertOk()
         ->assertJsonPath('data.status', 'approved');
 
-    // The slot is now held: the second request cannot be approved, and a new
-    // instant booking of the same slot is refused. Back-to-back still books.
+    // An approved booking holds nothing: the second request is still
+    // approvable, and a third unit may still book the slot instantly. The
+    // clash is the approver's to see and resolve.
     $this->actingAs($admin)
         ->postJson("/api/accounts/{$account->id}/reservations/{$second}/approve")
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
+        ->assertOk()
+        ->assertJsonPath('data.status', 'approved');
 
+    $thirdUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
     $amenity->forceFill(['booking_mode' => BookingMode::Instant])->save();
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $thirdUnit))
+        ->assertCreated()
+        ->assertJsonPath('data.status', 'approved');
+
+    // Approving still re-checks the amenity itself.
+    $late = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['start' => '11:00', 'end' => '12:00']))
+        ->assertCreated()
+        ->json('data.id');
+    $amenity->forceFill(['booking_mode' => BookingMode::Approval, 'is_reservable' => false])->save();
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit, [
-            'start' => '11:00', 'end' => '12:00',
-        ]))
-        ->assertCreated();
+        ->postJson("/api/accounts/{$account->id}/reservations/{$late}/approve")
+        ->assertUnprocessable();
+});
+
+test('two units book the same slot of an instant amenity and both end up approved', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
+        'booking_mode' => BookingMode::Instant,
+    ]);
+    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
+
+    $first = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
+        ->assertCreated()
+        ->assertJsonPath('data.status', 'approved')
+        ->json('data');
+    $second = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
+        ->assertCreated()
+        ->assertJsonPath('data.status', 'approved')
+        ->json('data');
+
+    expect($second['starts_at'])->toBe($first['starts_at'])
+        ->and($second['ends_at'])->toBe($first['ends_at'])
+        ->and($second['id'])->not->toBe($first['id']);
+
+    $this->actingAs($admin)
+        ->getJson(reservationsBase($account, $location).'?status=approved')
+        ->assertOk()
+        ->assertJsonCount(2, 'data');
 });
 
 test('a booking must start in the future and within the 90-day horizon, on the staff surface too', function () {
@@ -441,7 +475,8 @@ test('the staff availability endpoint lists the slots and drops a tail shorter t
         ->assertJsonCount(1, 'slots')
         ->assertJsonPath('slots.0', ['start' => '09:00', 'end' => '11:00', 'available' => true, 'reason' => null]);
 
-    // Monday 09:00–22:00 with an approved 13:00–15:00 booking: six slots, one taken.
+    // Monday 09:00–22:00 with an approved 13:00–15:00 booking: six slots, all
+    // still offered, since a booking holds nothing.
     $monday = nextMonday();
     $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['start' => '13:00', 'end' => '15:00']))
@@ -453,7 +488,7 @@ test('the staff availability endpoint lists the slots and drops a tail shorter t
         ->assertJsonCount(6, 'slots')
         ->json('slots'))->keyBy('start');
 
-    expect($slots['13:00']['reason'])->toBe('taken')
+    expect($slots['13:00'])->toBe(['start' => '13:00', 'end' => '15:00', 'available' => true, 'reason' => null])
         ->and($slots['11:00']['available'])->toBeTrue()
         ->and($slots['19:00']['end'])->toBe('21:00');
 
@@ -504,11 +539,23 @@ test('slots and bookings keep wall-clock labels across a daylight-saving transit
     expect($response->json('data.starts_at'))->toBe(CarbonImmutable::parse('2026-10-25 03:00', 'UTC')->toJSON())
         ->and($response->json('data.ends_at'))->toBe(CarbonImmutable::parse('2026-10-25 04:00', 'UTC')->toJSON());
 
-    // The taken slot carries the same label; its neighbours stay free.
+    // The list keeps the same labels after the booking, and the booked slot
+    // stays offered: bookings do not mark slots.
     $after = collect($this->actingAs($admin)
         ->getJson("/api/amenities/{$amenity->id}/availability?date=2026-10-25")
         ->json('slots'))->keyBy('start');
-    expect($after['04:00']['reason'])->toBe('taken')
+    expect($after->keys()->all())->toBe(['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'])
+        ->and($after['04:00'])->toBe(['start' => '04:00', 'end' => '05:00', 'available' => true, 'reason' => null])
         ->and($after['05:00']['available'])->toBeTrue()
         ->and($after['03:00']['available'])->toBeTrue();
+
+    // A second unit books the very same post-transition slot.
+    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), [
+            'amenity_id' => $amenity->id, 'unit_id' => $secondUnit->id,
+            'date' => '2026-10-25', 'start' => '04:00', 'end' => '05:00',
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.starts_at', CarbonImmutable::parse('2026-10-25 03:00', 'UTC')->toJSON());
 });

@@ -3,9 +3,7 @@
 namespace App\Actions\Reservations;
 
 use App\Models\Amenity;
-use App\Models\Reservation;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -14,6 +12,9 @@ use Illuminate\Validation\ValidationException;
  * slots of `slot_minutes` from its start; a tail shorter than a slot is not
  * offered. A booking is exactly one of these slots. Staff and portal read
  * the same list and post what it offered.
+ *
+ * Slots are not exclusive, so existing bookings never mark a slot as taken:
+ * the only reason a slot is unavailable is that it has already started.
  */
 class BuildAvailability
 {
@@ -24,7 +25,7 @@ class BuildAvailability
      *     booking_mode: string,
      *     fee_amount: int|null,
      *     deposit_amount: int|null,
-     *     slots: list<array{start: string, end: string, available: bool, reason: 'past'|'taken'|null}>
+     *     slots: list<array{start: string, end: string, available: bool, reason: 'past'|null}>
      * }
      */
     public function handle(Amenity $amenity, string $date): array
@@ -42,13 +43,6 @@ class BuildAvailability
 
         $slotMinutes = $amenity->slotMinutes();
 
-        // One query for the day; the overlap test per slot is then in memory.
-        $approved = Reservation::query()
-            ->where('amenity_id', $amenity->id)
-            ->holdingCapacity()
-            ->overlapping($day->utc(), $day->addDay()->utc())
-            ->get(['starts_at', 'ends_at']);
-
         // Step in wall-clock minutes, not elapsed time: on a daylight-saving
         // day adding 60 real minutes would repeat or skip a label.
         $slots = [];
@@ -61,7 +55,6 @@ class BuildAvailability
                     $day->setTime(intdiv($minute, 60), $minute % 60),
                     $day->setTime(intdiv($minute + $slotMinutes, 60), ($minute + $slotMinutes) % 60),
                     $now,
-                    $approved,
                 );
             }
         }
@@ -77,21 +70,12 @@ class BuildAvailability
     }
 
     /**
-     * @param  Collection<int, Reservation>  $approved
-     * @return array{start: string, end: string, available: bool, reason: 'past'|'taken'|null}
+     * @return array{start: string, end: string, available: bool, reason: 'past'|null}
      */
-    private function slot(CarbonImmutable $start, CarbonImmutable $end, CarbonImmutable $now, $approved): array
+    private function slot(CarbonImmutable $start, CarbonImmutable $end, CarbonImmutable $now): array
     {
         $row = ['start' => $start->format('H:i'), 'end' => $end->format('H:i'), 'available' => true, 'reason' => null];
 
-        if ($start->lte($now)) {
-            return [...$row, 'available' => false, 'reason' => 'past'];
-        }
-
-        $taken = $approved->contains(
-            fn (Reservation $reservation): bool => $reservation->starts_at < $end && $reservation->ends_at > $start,
-        );
-
-        return $taken ? [...$row, 'available' => false, 'reason' => 'taken'] : $row;
+        return $start->lte($now) ? [...$row, 'available' => false, 'reason' => 'past'] : $row;
     }
 }

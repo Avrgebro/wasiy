@@ -2,6 +2,7 @@
 
 use App\Enums\BookingMode;
 use App\Enums\RegistryStatus;
+use App\Enums\ReservationStatus;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\Reservation;
@@ -58,16 +59,10 @@ test('a resident browses reservable amenities of their location and reads their 
     $this->actingAs($stranger)->getJson("/api/portal/amenities?unit_id={$unit->id}")->assertForbidden();
 });
 
-test('availability lays slots on the windows and marks taken and past ones', function () {
+test('availability lays slots on the windows and marks only past ones', function () {
     [$location, $amenity, $unit, $user] = portalReservationWorld();
     $monday = nextMondayLima();
-    // Someone already holds 12:00–14:00 that day.
-    Reservation::factory()->create([
-        'account_id' => $location->account_id, 'location_id' => $location->id, 'amenity_id' => $amenity->id,
-        'unit_id' => Unit::factory()->for($location->account)->for($location)->create()->id,
-        'starts_at' => CarbonImmutable::parse("{$monday} 12:00", 'America/Lima')->utc(),
-        'ends_at' => CarbonImmutable::parse("{$monday} 14:00", 'America/Lima')->utc(),
-    ]);
+    $this->travelTo(CarbonImmutable::parse("{$monday} 12:30", 'America/Lima')->utc());
 
     $response = $this->actingAs($user)->getJson("/api/portal/amenities/{$amenity->id}/availability?unit_id={$unit->id}&date={$monday}")
         ->assertOk()
@@ -76,9 +71,9 @@ test('availability lays slots on the windows and marks taken and past ones', fun
         ->assertJsonCount(6, 'slots');
 
     $slots = collect($response->json('slots'))->keyBy('start');
-    expect($slots['09:00']['available'])->toBeTrue()
-        ->and($slots['11:00']['available'])->toBeFalse() // 11–13 overlaps the 12–14 booking
-        ->and($slots['13:00']['available'])->toBeFalse()
+    expect($slots['09:00'])->toBe(['start' => '09:00', 'end' => '11:00', 'available' => false, 'reason' => 'past'])
+        ->and($slots['11:00']['reason'])->toBe('past') // started at 11:00, it is 12:30
+        ->and($slots['13:00'])->toBe(['start' => '13:00', 'end' => '15:00', 'available' => true, 'reason' => null])
         ->and($slots['15:00']['available'])->toBeTrue()
         ->and($slots['19:00']['end'])->toBe('21:00');
 
@@ -89,6 +84,33 @@ test('availability lays slots on the windows and marks taken and past ones', fun
         ->assertUnprocessable()->assertJsonValidationErrors('date');
     $this->actingAs($user)->getJson("/api/portal/amenities/{$amenity->id}/availability?unit_id={$unit->id}&date=".now('America/Lima')->addDays(91)->toDateString())
         ->assertUnprocessable()->assertJsonValidationErrors('date');
+});
+
+test('a slot another unit holds approved is still offered and bookable in the portal', function () {
+    [$location, $amenity, $unit, $user] = portalReservationWorld();
+    $monday = nextMondayLima();
+    // Another unit already holds 11:00–13:00 that day, approved.
+    Reservation::factory()->create([
+        'account_id' => $location->account_id, 'location_id' => $location->id, 'amenity_id' => $amenity->id,
+        'unit_id' => Unit::factory()->for($location->account)->for($location)->create()->id,
+        'starts_at' => CarbonImmutable::parse("{$monday} 11:00", 'America/Lima')->utc(),
+        'ends_at' => CarbonImmutable::parse("{$monday} 13:00", 'America/Lima')->utc(),
+        'status' => ReservationStatus::Approved,
+    ]);
+
+    $slots = collect($this->actingAs($user)
+        ->getJson("/api/portal/amenities/{$amenity->id}/availability?unit_id={$unit->id}&date={$monday}")
+        ->assertOk()
+        ->assertJsonCount(6, 'slots')
+        ->json('slots'))->keyBy('start');
+
+    expect($slots['11:00'])->toBe(['start' => '11:00', 'end' => '13:00', 'available' => true, 'reason' => null])
+        ->and($slots->pluck('reason')->unique()->all())->toBe([null]);
+
+    // And the resident's request for that same slot enters the queue.
+    $this->actingAs($user)
+        ->postJson('/api/portal/reservations', ['unit_id' => $unit->id, 'amenity_id' => $amenity->id, 'date' => $monday, 'start' => '11:00', 'end' => '13:00'])
+        ->assertCreated()->assertJsonPath('data.status', 'pending');
 });
 
 test('a resident requests a booking that enters the queue, sees it upcoming, and cancels it', function () {

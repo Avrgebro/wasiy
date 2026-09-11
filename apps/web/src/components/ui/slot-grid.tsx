@@ -5,7 +5,8 @@ export type SlotGridSlot = { start: string; end: string; available: boolean }
 
 /**
  * The portal's slot picker: the server's slot list rendered as a TimeGrid,
- * taken and past slots disabled, one tap picks one slot. Each button shows
+ * past slots disabled (slots are never exclusive; conflicts are the
+ * approver's call), one tap picks one slot. Each button shows
  * its start time; the full "start–end" range is the accessible name.
  */
 export function SlotGrid({

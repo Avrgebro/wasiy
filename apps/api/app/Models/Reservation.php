@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\ReservationStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -39,25 +38,6 @@ class Reservation extends Model
             'ends_at' => 'immutable_datetime',
             'decided_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @param  Builder<Reservation>  $query
-     */
-    public function scopeHoldingCapacity(Builder $query): void
-    {
-        $query->where('status', ReservationStatus::Approved->value);
-    }
-
-    /**
-     * Overlap uses half-open intervals: a booking ending 10:00 does not
-     * collide with one starting 10:00.
-     *
-     * @param  Builder<Reservation>  $query
-     */
-    public function scopeOverlapping(Builder $query, \DateTimeInterface $startsAt, \DateTimeInterface $endsAt): void
-    {
-        $query->where('starts_at', '<', $endsAt)->where('ends_at', '>', $startsAt);
     }
 
     /**

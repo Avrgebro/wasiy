@@ -11,12 +11,12 @@ use Illuminate\Validation\ValidationException;
 /**
  * The booking rule (ADR 0041), shared by create and approve so both paths
  * agree: the amenity accepts bookings, the unit lives there, the interval is
- * exactly one slot of one availability window of that local weekday, it
- * starts in the future and within the horizon (new bookings only), and no
- * approved reservation of the amenity overlaps it. Pending and observed
- * requests never block; the approver resolves contention.
+ * exactly one slot of one availability window of that local weekday, and it
+ * starts in the future and within the horizon (new bookings only).
  *
- * The caller runs this inside the transaction that locks the Amenity row.
+ * Slots are not exclusive: any number of units may hold the same slot in
+ * any status. Overlap is never checked here; the approver sees the clash on
+ * the day board and resolves it by observing, rejecting or cancelling.
  */
 class ValidateReservationSlot
 {
@@ -47,7 +47,7 @@ class ValidateReservationSlot
         }
 
         // Re-validating an existing request on approve skips the clock rules:
-        // the slot itself is what must still be free.
+        // only the amenity and the slot grid must still hold.
         if ($ignore === null) {
             $now = CarbonImmutable::now($timezone);
 
@@ -61,7 +61,6 @@ class ValidateReservationSlot
         }
 
         $this->validateSlotGrid($amenity, $localStart, $localEnd);
-        $this->validateExclusive($amenity, $startsAt, $endsAt, $ignore);
     }
 
     /**
@@ -101,25 +100,6 @@ class ValidateReservationSlot
         }
 
         $this->fail('starts_at', __('The requested time falls outside the amenity availability.'));
-    }
-
-    /** Only approved bookings hold the amenity; back-to-back bookings do not collide. */
-    private function validateExclusive(
-        Amenity $amenity,
-        CarbonImmutable $startsAt,
-        CarbonImmutable $endsAt,
-        ?Reservation $ignore,
-    ): void {
-        $taken = Reservation::query()
-            ->where('amenity_id', $amenity->id)
-            ->holdingCapacity()
-            ->overlapping($startsAt, $endsAt)
-            ->when($ignore, fn ($query) => $query->whereKeyNot($ignore->id))
-            ->exists();
-
-        if ($taken) {
-            $this->fail('starts_at', __('The amenity is already booked for this time.'));
-        }
     }
 
     public static function minutes(string $time): int

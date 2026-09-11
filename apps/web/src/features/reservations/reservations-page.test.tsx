@@ -140,7 +140,7 @@ function installAdapter(
           slots: [
             { start: '10:00', end: '11:00', available: true, reason: null },
             { start: '11:00', end: '12:00', available: true, reason: null },
-            { start: '12:00', end: '13:00', available: false, reason: 'taken' },
+            { start: '12:00', end: '13:00', available: false, reason: 'past' },
             { start: '13:00', end: '14:00', available: true, reason: null },
           ],
         }),
@@ -357,10 +357,10 @@ describe('ReservationsPage', () => {
     const date = nextWeekDate()
     await pickDate(user, within(drawer).getByRole('button', { name: /Fecha/ }), date)
     // Start = a free slot the server offered, on the grid; end = that slot's
-    // end or the end of a consecutive free run (12:00 is taken, so 14:00 is
+    // end or the end of a consecutive free run (12:00 is past, so 14:00 is
     // unreachable).
     // One slot per booking on the grid: picking a slot fixes the end; the
-    // taken 12:00 slot renders disabled.
+    // past 12:00 slot renders disabled (slots are never taken by others).
     expect(await within(drawer).findByRole('option', { name: '12:00–13:00' })).toBeDisabled()
     await user.click(within(drawer).getByRole('option', { name: '10:00–11:00' }))
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))

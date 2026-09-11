@@ -904,7 +904,7 @@
       "submit": "Registrar reserva",
       "startSlot": "Horario",
       "dateOutOfRange": "Elige una fecha entre hoy y {{days}} días adelante.",
-      "fullyBooked": "No quedan turnos libres ese día."
+      "fullyBooked": "No quedan turnos disponibles hoy: todos ya pasaron."
     },
     "detail": {
       "fee": "Cuota",

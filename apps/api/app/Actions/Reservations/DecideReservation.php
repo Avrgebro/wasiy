@@ -6,7 +6,6 @@ use App\Actions\Finances\SyncReservationMovements;
 use App\Enums\ActivityEventType;
 use App\Enums\ReservationStatus;
 use App\Enums\ResidentAlertKind;
-use App\Models\Amenity;
 use App\Models\Reservation;
 use App\Models\User;
 use App\Services\ActivityLogger;
@@ -15,9 +14,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Every status transition in one place: approve re-runs the booking rule
- * under the same Amenity lock creation uses, so an approval can never land
- * on a slot that was taken while the request waited.
+ * Every status transition in one place: approve re-runs the booking rule so
+ * an approval never lands on an amenity that stopped accepting bookings or
+ * on a slot its schedule no longer offers. Slots are not exclusive; two
+ * approved bookings of the same slot are the approver's call, not an error.
  */
 class DecideReservation
 {
@@ -33,8 +33,6 @@ class DecideReservation
         $this->assertOpen($reservation);
 
         return DB::transaction(function () use ($reservation, $actor): Reservation {
-            Amenity::query()->whereKey($reservation->amenity_id)->lockForUpdate()->first();
-
             $this->validator->validate(
                 $reservation->amenity,
                 $reservation->unit,

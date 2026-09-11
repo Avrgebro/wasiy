@@ -37,7 +37,7 @@ class PortalAmenityController extends Controller
         return AmenityResource::collection($amenities);
     }
 
-    /** Free and taken slots for one day, in the location's timezone (ADR 0041). */
+    /** The slots of one day, in the location's timezone; only past ones are unavailable (ADR 0041). */
     public function availability(Request $request, Amenity $amenity, BuildAvailability $availability): JsonResponse
     {
         $validated = $request->validate([

@@ -165,7 +165,7 @@ export function getPortalAmenities(unitId: string) {
   return apiRequest<{ data: PortalAmenity[] }>(`/api/portal/amenities?${buildParams({ unit_id: unitId }).toString()}`)
 }
 
-export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | 'taken' | null }
+export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | null }
 
 export type AvailabilityResponse = {
   date: string

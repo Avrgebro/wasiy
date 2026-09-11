@@ -904,7 +904,7 @@
       "submit": "Create reservation",
       "startSlot": "Time",
       "dateOutOfRange": "Pick a date between today and {{days}} days ahead.",
-      "fullyBooked": "No free slots left that day."
+      "fullyBooked": "No slots left today: they have all passed."
     },
     "detail": {
       "fee": "Fee",

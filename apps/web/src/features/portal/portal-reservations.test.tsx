@@ -48,7 +48,7 @@ function install(onWrite?: (url: string, body: unknown) => void) {
     if (url.startsWith('/api/portal/reservations/rv_1')) return Promise.resolve(axiosResponse(config, { data: reservation, history: [{ id: 'al_1', event_type: 'reservation.created', status: 'pending', note: null, actor_name: 'Carlos Mendoza', created_at: '2026-09-04T13:40:00Z' }], can_cancel: true }))
     if (url.includes('/portal/amenities?')) return Promise.resolve(axiosResponse(config, { data: [amenity] }))
     if (url.includes('/availability?')) {
-      return Promise.resolve(axiosResponse(config, { date: url.match(/date=([\d-]+)/)?.[1], slot_minutes: 120, booking_mode: 'approval', fee_amount: 150, deposit_amount: 300, slots: [{ start: '09:00', end: '11:00', available: true, reason: null }, { start: '12:00', end: '14:00', available: false, reason: 'taken' }, { start: '19:00', end: '21:00', available: true, reason: null }] }))
+      return Promise.resolve(axiosResponse(config, { date: url.match(/date=([\d-]+)/)?.[1], slot_minutes: 120, booking_mode: 'approval', fee_amount: 150, deposit_amount: 300, slots: [{ start: '09:00', end: '11:00', available: true, reason: null }, { start: '12:00', end: '14:00', available: false, reason: 'past' }, { start: '19:00', end: '21:00', available: true, reason: null }] }))
     }
     return Promise.reject(new Error(`Unexpected request: ${url}`))
   })
