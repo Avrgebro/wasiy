@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\AmenityType;
 use App\Enums\BookingMode;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -37,7 +36,6 @@ class StoreAmenityRequest extends FormRequest
     public static function sharedRules(): array
     {
         return [
-            'type' => ['sometimes', 'required', Rule::enum(AmenityType::class)],
             'description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'is_reservable' => ['sometimes', 'boolean'],
             'capacity' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:100000'],

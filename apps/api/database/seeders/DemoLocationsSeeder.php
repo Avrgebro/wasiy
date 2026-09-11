@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Enums\AmenityType;
 use App\Enums\BookingMode;
 use App\Models\Account;
 use App\Models\Amenity;
@@ -49,7 +48,6 @@ class DemoLocationsSeeder extends Seeder
 
         $this->amenity($central, 'salon-de-eventos', [
             'name' => 'Salón de eventos',
-            'type' => AmenityType::EventRoom,
             'description' => 'Salón con cocina de apoyo, proyector y capacidad para 80 personas sentadas.',
             'capacity' => 80,
             'is_reservable' => true,
@@ -63,7 +61,6 @@ class DemoLocationsSeeder extends Seeder
 
         $this->amenity($central, 'gimnasio', [
             'name' => 'Gimnasio',
-            'type' => AmenityType::Gym,
             'capacity' => 15,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
@@ -72,7 +69,6 @@ class DemoLocationsSeeder extends Seeder
 
         $this->amenity($central, 'parrilla-terraza', [
             'name' => 'Parrilla / terraza',
-            'type' => AmenityType::Rooftop,
             'capacity' => 25,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
@@ -86,13 +82,11 @@ class DemoLocationsSeeder extends Seeder
 
         $this->amenity($central, 'lobby-recepcion', [
             'name' => 'Lobby / recepción',
-            'type' => AmenityType::Other,
             'is_reservable' => false,
         ]);
 
         $squash = $this->amenity($central, 'cancha-de-squash', [
             'name' => 'Cancha de squash',
-            'type' => AmenityType::Court,
             'capacity' => 4,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,

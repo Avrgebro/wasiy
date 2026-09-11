@@ -23,7 +23,6 @@ function amenity(overrides: Partial<AmenitySummary> = {}): AmenitySummary {
     location_id: 'loc_1',
     name: 'Salón de eventos',
     slug: 'salon-de-eventos',
-    type: 'event_room',
     description: null,
     is_reservable: true,
     capacity: 80,
@@ -126,14 +125,13 @@ describe('LocationAmenitiesTab', () => {
       amenity({
         id: 'amn_2',
         name: 'Lobby / recepción',
-        type: 'other',
         is_reservable: false,
         capacity: null,
         fee_amount: null,
         deposit_amount: null,
         availability: {},
       }),
-      amenity({ id: 'amn_3', name: 'Cancha de squash', type: 'court', status: 'deactivated', fee_amount: null, deposit_amount: null }),
+      amenity({ id: 'amn_3', name: 'Cancha de squash', status: 'deactivated', fee_amount: null, deposit_amount: null }),
     ])
     renderTab()
 
@@ -163,8 +161,9 @@ describe('LocationAmenitiesTab', () => {
 
     await screen.findByText('Salón de eventos')
     expect(screen.queryByRole('button', { name: 'Agregar amenidad' })).not.toBeInTheDocument()
-    expect(screen.queryByText('Editar')).not.toBeInTheDocument()
     expect(screen.queryByText('Desactivar')).not.toBeInTheDocument()
+    expect(screen.getByText('Salón de eventos').closest('tr')).not.toHaveClass('cursor-pointer')
+    expect(screen.queryByText('›')).not.toBeInTheDocument()
   })
 
   it('the availability editor blocks an overlapping window and names the range', async () => {

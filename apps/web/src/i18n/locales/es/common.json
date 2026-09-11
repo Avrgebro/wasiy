@@ -1043,6 +1043,7 @@
     "pausedFootnote": "Las amenidades inactivas no aparecen en el portal del residente. Los cambios quedan en el registro de actividad.",
     "deactivateConfirmTitle": "¿Desactivar {{name}}?",
     "deactivateHint": "La amenidad se oculta del portal y no acepta reservas nuevas. Su historial y sus cuotas registradas se conservan.",
+    "reactivateHint": "La amenidad vuelve a aparecer en el portal y acepta reservas de nuevo.",
     "statuses": {
       "reservable": "Reservable",
       "common": "Común",
@@ -1055,15 +1056,6 @@
       "fee": "Cuota / depósito",
       "approval": "Aprobación",
       "actions": "Acciones"
-    },
-    "types": {
-      "pool": "piscina",
-      "gym": "gimnasio",
-      "event_room": "salón de eventos",
-      "meeting_room": "sala de reuniones",
-      "court": "cancha",
-      "rooftop": "azotea",
-      "other": "otro"
     },
     "empty": {
       "title": "Sin amenidades registradas",
@@ -1078,7 +1070,6 @@
     "form": {
       "name": "Nombre",
       "namePlaceholder": "ej. Salón de eventos",
-      "type": "Tipo",
       "capacity": "Aforo",
       "people": "personas",
       "description": "Descripción",

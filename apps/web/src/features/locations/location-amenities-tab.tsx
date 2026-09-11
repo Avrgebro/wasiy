@@ -1,11 +1,13 @@
-import { TableEmptyState } from '../../components/table/table-empty-state'
-import { Alert, Button, Group, Modal, Skeleton, Stack, Table, Text } from '@mantine/core'
+import { Alert, Button, Group, Modal, Stack, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { notifySuccess, notifyError } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import type { ColumnDef } from '@tanstack/react-table'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AccessChip, StatusPill } from '../../components/ui/chips'
+import { DataTable } from '../../components/table/data-table'
+import { openRowColumn } from '../../components/table/open-row-column'
+import { StatusPill } from '../../components/ui/chips'
 import { getErrorMessage } from '../../lib/errors'
 import {
   deactivateAmenity,
@@ -15,6 +17,8 @@ import {
 } from './amenities-api'
 import { AmenityFormDrawer } from './amenity-form-drawer'
 import { summarizeAvailability } from './amenity-schedule'
+
+const DETAIL = 'text-sm text-[var(--mantine-color-dimmed)]'
 
 function feeCell(t: (key: string, options?: Record<string, unknown>) => string, amenity: AmenitySummary) {
   if (!amenity.is_reservable) {
@@ -35,7 +39,8 @@ function feeCell(t: (key: string, options?: Record<string, unknown>) => string, 
 /**
  * The Amenidades tab (mockup 04): a table — amenities carry a policy
  * summary that reads fine in columns here, unlike the photo-led location
- * tiles. Actions are inline text links, matching the design.
+ * tiles. Rows follow the shared table contract: the whole row opens the
+ * edit drawer, which carries deactivate/reactivate in its danger zone.
  */
 export function LocationAmenitiesTab({
   accountId,
@@ -76,30 +81,105 @@ export function LocationAmenitiesTab({
     mutationFn: (amenity: AmenitySummary) => deactivateAmenity(accountId, locationId, amenity.id),
     onSuccess: async () => {
       setDeactivating(null)
+      setDrawerOpened(false)
       await invalidate()
       notifySuccess(t('amenities.deactivated'))
     },
     onError: (error) => notifyError(getErrorMessage(error)),
   })
 
-  if (listQuery.isLoading) {
-    return <Skeleton height={260} radius="lg" />
-  }
-
-  if (listQuery.isError) {
-    return (
-      <Alert color="error" title={t('errors.loadFailed')}>
-        {getErrorMessage(listQuery.error)}
-      </Alert>
-    )
-  }
-
   const amenities = listQuery.data?.data ?? []
+  // Reflect list refreshes (reactivate) in the open drawer.
+  const current = editing ? (amenities.find((amenity) => amenity.id === editing.id) ?? editing) : null
 
   function openCreate() {
     setEditing(null)
     setDrawerOpened(true)
   }
+
+  function openEdit(amenity: AmenitySummary) {
+    setEditing(amenity)
+    setDrawerOpened(true)
+  }
+
+  const columns = useMemo<ColumnDef<AmenitySummary>[]>(() => {
+    const base: ColumnDef<AmenitySummary>[] = [
+      {
+        accessorKey: 'name',
+        header: t('amenities.columns.amenity'),
+        cell: ({ row }) => (
+          <div className="flex min-w-44 items-center gap-3">
+            <span className="relative h-8 w-10 shrink-0 overflow-hidden rounded-md bg-[var(--wa-surface-2)]">
+              {row.original.cover_photo_url ? (
+                <img alt="" className="absolute inset-0 size-full object-cover" src={row.original.cover_photo_url} />
+              ) : null}
+            </span>
+            <div className="min-w-0">
+              <Text fw={600} size="sm" truncate>
+                {row.original.name}
+              </Text>
+            </div>
+          </div>
+        ),
+      },
+      // Secondary columns: plain spans, not Text (its text-wrap: wrap undoes
+      // the table's single-line cells), and hidden on phones — the drawer
+      // shows the full policy; the row only needs name and status there.
+      {
+        id: 'schedule',
+        header: t('amenities.columns.schedule'),
+        meta: { hideBelow: 'lg' },
+        cell: ({ row }) => {
+          const schedule = summarizeAvailability(row.original.availability)
+          return <span className={DETAIL}>{schedule === 'variable' ? t('amenities.variableSchedule') : schedule ?? '—'}</span>
+        },
+      },
+      {
+        accessorKey: 'capacity',
+        header: t('amenities.columns.capacity'),
+        meta: { hideBelow: 'md' },
+        cell: ({ row }) => <span className={DETAIL}>{row.original.capacity ?? '—'}</span>,
+      },
+      {
+        id: 'fee',
+        header: t('amenities.columns.fee'),
+        meta: { hideBelow: 'lg' },
+        cell: ({ row }) => <span className={DETAIL}>{feeCell(t, row.original)}</span>,
+      },
+      {
+        id: 'approval',
+        header: t('amenities.columns.approval'),
+        meta: { hideBelow: 'lg' },
+        cell: ({ row }) => (
+          <span className={DETAIL}>
+            {row.original.is_reservable
+              ? row.original.booking_mode === 'approval'
+                ? t('amenities.approval')
+                : t('amenities.instant')
+              : '—'}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: t('registry.status'),
+        cell: ({ row }) => {
+          const deactivated = row.original.status === 'deactivated'
+          return (
+            <StatusPill color={deactivated ? 'gray' : row.original.is_reservable ? 'success' : 'teal'}>
+              {deactivated
+                ? t('amenities.statuses.deactivated')
+                : row.original.is_reservable
+                  ? t('amenities.statuses.reservable')
+                  : t('amenities.statuses.common')}
+            </StatusPill>
+          )
+        },
+      },
+    ]
+
+    return readOnly ? base : [...base, openRowColumn()]
+  }, [readOnly, t])
 
   return (
     <div className="flex flex-col gap-4">
@@ -117,131 +197,27 @@ export function LocationAmenitiesTab({
         )}
       </div>
 
-      {amenities.length === 0 ? (
-        <div className="rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
-          <TableEmptyState>
-            {readOnly ? null : (
-              <Button color="accent" leftSection={<AddIcon size={18} />} mt="sm" onClick={openCreate}>
-                {t('amenities.add')}
-              </Button>
-            )}
-          </TableEmptyState>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
-          <Table verticalSpacing="sm">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>{t('amenities.columns.amenity')}</Table.Th>
-                <Table.Th>{t('amenities.columns.schedule')}</Table.Th>
-                <Table.Th>{t('amenities.columns.capacity')}</Table.Th>
-                <Table.Th>{t('amenities.columns.fee')}</Table.Th>
-                <Table.Th>{t('amenities.columns.approval')}</Table.Th>
-                <Table.Th>{t('registry.status')}</Table.Th>
-                <Table.Th className="text-right">{t('amenities.columns.actions')}</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {amenities.map((amenity) => {
-                const deactivated = amenity.status === 'deactivated'
-                const schedule = summarizeAvailability(amenity.availability)
+      {listQuery.isError ? (
+        <Alert color="error" title={t('errors.loadFailed')}>
+          {getErrorMessage(listQuery.error)}
+        </Alert>
+      ) : null}
 
-                return (
-                  <Table.Tr key={amenity.id} className={deactivated ? 'opacity-60' : ''}>
-                    <Table.Td>
-                      <div className="flex min-w-44 items-center gap-3">
-                        <span className="relative h-8 w-10 shrink-0 overflow-hidden rounded-md bg-[var(--wa-surface-2)]">
-                          {amenity.cover_photo_url ? (
-                            <img alt="" className="absolute inset-0 size-full object-cover" src={amenity.cover_photo_url} />
-                          ) : null}
-                        </span>
-                        <div className="min-w-0">
-                          <Text fw={600} size="sm" truncate>
-                            {amenity.name}
-                          </Text>
-                          <div className="mt-1">
-                            <AccessChip>{t(`amenities.types.${amenity.type}`)}</AccessChip>
-                          </div>
-                        </div>
-                      </div>
-                    </Table.Td>
-                    <Table.Td className="whitespace-nowrap">
-                      <Text c="dimmed" size="sm">
-                        {schedule === 'variable'
-                          ? t('amenities.variableSchedule')
-                          : schedule ?? '—'}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text c="dimmed" size="sm">
-                        {amenity.capacity ?? '—'}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td className="whitespace-nowrap">
-                      <Text c="dimmed" size="sm">
-                        {feeCell(t, amenity)}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td className="whitespace-nowrap">
-                      <Text c="dimmed" size="sm">
-                        {amenity.is_reservable
-                          ? amenity.booking_mode === 'approval'
-                            ? t('amenities.approval')
-                            : t('amenities.instant')
-                          : '—'}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <StatusPill color={deactivated ? 'gray' : amenity.is_reservable ? 'success' : 'teal'}>
-                        {deactivated
-                          ? t('amenities.statuses.deactivated')
-                          : amenity.is_reservable
-                            ? t('amenities.statuses.reservable')
-                            : t('amenities.statuses.common')}
-                      </StatusPill>
-                    </Table.Td>
-                    <Table.Td className="whitespace-nowrap">
-                      {readOnly ? null : (
-                        <div className="flex justify-end gap-3 text-xs font-medium">
-                          {deactivated ? (
-                            <button
-                              className="cursor-pointer border-0 bg-transparent p-0 text-xs font-medium text-[var(--wa-interactive)]"
-                              type="button"
-                              onClick={() => reactivateMutation.mutate(amenity)}
-                            >
-                              {t('locations.reactivate')}
-                            </button>
-                          ) : (
-                            <>
-                              <button
-                                className="cursor-pointer border-0 bg-transparent p-0 text-xs font-medium text-[var(--wa-interactive)]"
-                                type="button"
-                                onClick={() => {
-                                  setEditing(amenity)
-                                  setDrawerOpened(true)
-                                }}
-                              >
-                                {t('actions.edit')}
-                              </button>
-                              <button
-                                className="cursor-pointer border-0 bg-transparent p-0 text-xs font-medium text-[var(--mantine-color-dimmed)]"
-                                type="button"
-                                onClick={() => setDeactivating(amenity)}
-                              >
-                                {t('locations.deactivate')}
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </Table.Td>
-                  </Table.Tr>
-                )
-              })}
-            </Table.Tbody>
-          </Table>
-        </div>
-      )}
+      <DataTable
+        columns={columns}
+        data={amenities}
+        emptyActions={
+          readOnly ? undefined : (
+            <Button color="accent" leftSection={<AddIcon size={18} />} mt="sm" onClick={openCreate}>
+              {t('amenities.add')}
+            </Button>
+          )
+        }
+        loading={listQuery.isLoading}
+        rowClassName={(amenity) => (amenity.status === 'deactivated' ? 'opacity-60' : undefined)}
+        selectedId={drawerOpened ? current?.id : null}
+        onRowClick={readOnly ? undefined : openEdit}
+      />
 
       <Text c="dimmed" size="xs">
         {t('amenities.pausedFootnote')}
@@ -249,11 +225,14 @@ export function LocationAmenitiesTab({
 
       <AmenityFormDrawer
         accountId={accountId}
-        editing={editing}
+        editing={current}
         locationId={locationId}
         opened={drawerOpened}
+        reactivating={reactivateMutation.isPending}
         timezone={timezone}
         onClose={() => setDrawerOpened(false)}
+        onDeactivate={current ? () => setDeactivating(current) : undefined}
+        onReactivate={current ? () => reactivateMutation.mutate(current) : undefined}
       />
 
       <Modal

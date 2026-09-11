@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\AccountRole;
-use App\Enums\AmenityType;
 use App\Enums\BookingMode;
 use App\Enums\LocationType;
 use App\Models\Account;
@@ -77,7 +76,6 @@ test('the full m6 location and amenity path works end to end', function () {
     $amenityId = $this->actingAs($admin)
         ->postJson("{$base}/locations/{$locationId}/amenities", [
             'name' => 'Salón de eventos',
-            'type' => AmenityType::EventRoom->value,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Approval->value,
             'capacity' => 80,

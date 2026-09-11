@@ -1043,6 +1043,7 @@
     "pausedFootnote": "Inactive amenities do not appear in the resident portal. Changes are recorded in the activity log.",
     "deactivateConfirmTitle": "Deactivate {{name}}?",
     "deactivateHint": "The amenity is hidden from the portal and accepts no new reservations. Its history and recorded fees are kept.",
+    "reactivateHint": "The amenity shows in the portal again and accepts new bookings.",
     "statuses": {
       "reservable": "Reservable",
       "common": "Common",
@@ -1055,15 +1056,6 @@
       "fee": "Fee / deposit",
       "approval": "Approval",
       "actions": "Actions"
-    },
-    "types": {
-      "pool": "pool",
-      "gym": "gym",
-      "event_room": "event room",
-      "meeting_room": "meeting room",
-      "court": "court",
-      "rooftop": "rooftop",
-      "other": "other"
     },
     "empty": {
       "title": "No amenities yet",
@@ -1078,7 +1070,6 @@
     "form": {
       "name": "Name",
       "namePlaceholder": "e.g. Event room",
-      "type": "Type",
       "capacity": "Capacity",
       "people": "people",
       "description": "Description",

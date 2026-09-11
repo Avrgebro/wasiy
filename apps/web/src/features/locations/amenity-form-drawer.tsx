@@ -1,9 +1,10 @@
-import { Alert, Button, NumberInput, Select, Switch, Text, Textarea, TextInput } from '@mantine/core'
+import { Alert, Button, NumberInput, Switch, Text, Textarea, TextInput } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
+import { DangerZone } from '../../components/ui/detail-drawer-parts'
 import { DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { ApiError } from '../../app/api-client'
 import { getErrorMessage } from '../../lib/errors'
@@ -13,25 +14,13 @@ import {
   updateAmenity,
   type AmenityPayload,
   type AmenitySummary,
-  type AmenityTypeValue,
   type Availability,
 } from './amenities-api'
 import { AmenityAvailabilityEditor } from './amenity-availability-editor'
 import { availabilityHasConflicts, WEEKDAYS } from './amenity-schedule'
 
-const AMENITY_TYPES: AmenityTypeValue[] = [
-  'pool',
-  'gym',
-  'event_room',
-  'meeting_room',
-  'court',
-  'rooftop',
-  'other',
-]
-
 type FormState = {
   name: string
-  type: AmenityTypeValue
   description: string
   capacity: number | ''
   is_reservable: boolean
@@ -48,7 +37,6 @@ type FormState = {
 function amenityDefaults(amenity?: AmenitySummary | null): FormState {
   return {
     name: amenity?.name ?? '',
-    type: amenity?.type ?? 'other',
     description: amenity?.description ?? '',
     capacity: amenity?.capacity ?? '',
     is_reservable: amenity?.is_reservable ?? true,
@@ -73,7 +61,6 @@ function toPayload(form: FormState): AmenityPayload {
 
   return {
     name: form.name.trim(),
-    type: form.type,
     description: form.description.trim() === '' ? null : form.description.trim(),
     capacity: form.capacity === '' ? null : form.capacity,
     is_reservable: form.is_reservable,
@@ -103,14 +90,21 @@ export function AmenityFormDrawer({
   editing,
   locationId,
   onClose,
+  onDeactivate,
+  onReactivate,
   opened,
+  reactivating = false,
   timezone,
 }: {
   accountId: string
   editing: AmenitySummary | null
   locationId: string
   onClose: () => void
+  /** Opens the deactivate confirmation; the row has no actions column, the drawer carries it. */
+  onDeactivate?: () => void
+  onReactivate?: () => void
   opened: boolean
+  reactivating?: boolean
   timezone: string
 }) {
   const { t } = useTranslation('common')
@@ -131,8 +125,11 @@ export function AmenityFormDrawer({
         editing={editing}
         locationId={locationId}
         opened={opened}
+        reactivating={reactivating}
         timezone={timezone}
         onClose={onClose}
+        onDeactivate={onDeactivate}
+        onReactivate={onReactivate}
       />
     </AppDrawer>
   )
@@ -143,14 +140,20 @@ function AmenityForm({
   editing,
   locationId,
   onClose,
+  onDeactivate,
+  onReactivate,
   opened,
+  reactivating,
   timezone,
 }: {
   accountId: string
   editing: AmenitySummary | null
   locationId: string
   onClose: () => void
+  onDeactivate?: () => void
+  onReactivate?: () => void
   opened: boolean
+  reactivating: boolean
   timezone: string
 }) {
   const { t } = useTranslation('common')
@@ -210,11 +213,6 @@ function AmenityForm({
       : t('amenities.policy.overrideHint', { value: inherited, unit })
   }
 
-  const typeOptions = AMENITY_TYPES.map((value) => ({
-    label: t(`amenities.types.${value}`),
-    value,
-  }))
-
   return (
     <form
       className="flex min-h-0 flex-1 flex-col"
@@ -238,13 +236,6 @@ function AmenityForm({
             onChange={(event) => set('name', event.currentTarget.value)}
           />
           <DrawerRow>
-            <Select
-              allowDeselect={false}
-              data={typeOptions}
-              label={t('amenities.form.type')}
-              value={form.type}
-              onChange={(value) => value && set('type', value as AmenityTypeValue)}
-            />
             <NumberInput
               allowNegative={false}
               label={t('amenities.form.capacity')}
@@ -365,6 +356,27 @@ function AmenityForm({
               {t('amenities.form.photosAfterCreate')}
             </Text>
           )}
+          {editing && editing.status === 'deactivated' && onReactivate ? (
+            <DangerZone
+              action={
+                <Button className="w-full" loading={reactivating} variant="default" onClick={onReactivate}>
+                  {t('locations.reactivate')}
+                </Button>
+              }
+              description={t('amenities.reactivateHint')}
+              title={t('units.form.sensitiveZone')}
+            />
+          ) : editing && editing.status !== 'deactivated' && onDeactivate ? (
+            <DangerZone
+              action={
+                <Button className="w-full" color="error" variant="light" onClick={onDeactivate}>
+                  {t('locations.deactivate')}
+                </Button>
+              }
+              description={t('amenities.deactivateHint')}
+              title={t('units.form.sensitiveZone')}
+            />
+          ) : null}
       </AppDrawerBody>
       <AppDrawerFooter>
         <Button variant="default" onClick={onClose}>

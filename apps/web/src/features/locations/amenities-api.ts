@@ -1,15 +1,6 @@
 import { apiRequest } from '../../app/api-client'
 import type { LocationPhoto } from './api'
 
-export type AmenityTypeValue =
-  | 'pool'
-  | 'gym'
-  | 'event_room'
-  | 'meeting_room'
-  | 'court'
-  | 'rooftop'
-  | 'other'
-
 export type BookingModeValue = 'instant' | 'approval'
 
 export type AvailabilityWindow = { start: string; end: string }
@@ -24,7 +15,6 @@ export type AmenitySummary = {
   location_id: string
   name: string
   slug: string
-  type: AmenityTypeValue
   description: string | null
   is_reservable: boolean
   capacity: number | null
@@ -47,7 +37,6 @@ export type AmenitySummary = {
 
 export type AmenityPayload = {
   name?: string
-  type?: AmenityTypeValue
   description?: string | null
   is_reservable?: boolean
   capacity?: number | null

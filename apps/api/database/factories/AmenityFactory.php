@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\AmenityType;
 use App\Enums\BookingMode;
 use App\Models\Amenity;
 use App\Models\Location;
@@ -27,7 +26,6 @@ class AmenityFactory extends Factory
             'location_id' => Location::factory(),
             'name' => $name,
             'slug' => Str::slug($name).'-'.fake()->unique()->bothify('####'),
-            'type' => AmenityType::Other,
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
             'availability' => [

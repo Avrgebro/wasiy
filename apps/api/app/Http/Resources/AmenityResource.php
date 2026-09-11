@@ -23,7 +23,6 @@ class AmenityResource extends JsonResource
             'location_id' => $this->location_id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'type' => $this->type->value,
             'description' => $this->description,
             'is_reservable' => $this->is_reservable,
             'capacity' => $this->capacity,

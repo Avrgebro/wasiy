@@ -2,7 +2,6 @@
 
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
-use App\Enums\AmenityType;
 use App\Enums\BookingMode;
 use App\Enums\LocationRole;
 use App\Models\Account;
@@ -34,7 +33,6 @@ function validAmenityPayload(array $overrides = []): array
 {
     return [
         'name' => 'Salón de eventos',
-        'type' => AmenityType::EventRoom->value,
         'is_reservable' => true,
         'booking_mode' => BookingMode::Approval->value,
         'capacity' => 80,

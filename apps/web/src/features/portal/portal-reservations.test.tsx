@@ -30,7 +30,7 @@ const { PortalBookingPage } = await import('./portal-booking-page')
 
 const originalAdapter = apiClient.defaults.adapter
 
-const amenity = { id: 'am_1', name: 'Salón de eventos', type: 'event_room', description: 'Ambiente cerrado con cocina y sonido.', capacity: 40, booking_mode: 'approval', max_duration_minutes: 240, min_duration_minutes: 120, effective_booking_policy: { max_advance_days: { value: 30, source: 'location' }, max_concurrent_per_unit: { value: 2, source: 'location' }, cancellation_window_hours: { value: 24, source: 'location' } }, fee_amount: 150, deposit_amount: 300, photos: [], cover_photo_url: null }
+const amenity = { id: 'am_1', name: 'Salón de eventos', description: 'Ambiente cerrado con cocina y sonido.', capacity: 40, booking_mode: 'approval', max_duration_minutes: 240, min_duration_minutes: 120, effective_booking_policy: { max_advance_days: { value: 30, source: 'location' }, max_concurrent_per_unit: { value: 2, source: 'location' }, cancellation_window_hours: { value: 24, source: 'location' } }, fee_amount: 150, deposit_amount: 300, photos: [], cover_photo_url: null }
 const reservation = { id: 'rv_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_402', unit_number: '402', resident_name: 'Carlos Mendoza', starts_at: '2026-09-07T00:00:00Z', ends_at: '2026-09-07T02:00:00Z', status: 'pending', is_completed: false, status_note: null, fee_snapshot: 150, deposit_snapshot: 300, created_by_name: 'Carlos Mendoza', decided_by_name: null, decided_at: null, created_at: '2026-09-04T13:40:00Z' }
 
 function install(onWrite?: (url: string, body: unknown) => void) {

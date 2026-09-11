@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Data\AmenityAvailability;
-use App\Enums\AmenityType;
 use App\Enums\BookingMode;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,7 +19,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'location_id',
     'name',
     'slug',
-    'type',
     'description',
     'is_reservable',
     'capacity',
@@ -50,7 +48,6 @@ class Amenity extends Model
     protected function casts(): array
     {
         return [
-            'type' => AmenityType::class,
             'booking_mode' => BookingMode::class,
             'is_reservable' => 'boolean',
             'availability' => 'array',
