@@ -13,26 +13,13 @@ import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { createLocation, updateLocation, type LocationPayload, type LocationSummary } from './api'
 import { locationFormSchema, locationTypeValues, type LocationFormValues } from './schemas'
 
-const DEFAULT_TIMEZONE = 'America/Lima'
-
-// A curated list keeps the select usable; the API accepts any PHP
-// identifier, so widening later costs nothing.
-const TIMEZONES = [
-  'America/Lima',
-  'America/Bogota',
-  'America/Mexico_City',
-  'America/Santiago',
-  'America/Argentina/Buenos_Aires',
-  'America/Guayaquil',
-  'America/La_Paz',
-  'America/Panama',
-]
-
+// The timezone is not asked: Peru has one and the API sets it from the
+// country (the column defaults to America/Lima). When a second country with
+// several zones lands, the field returns only for that country.
 function locationDefaults(location?: LocationSummary | null): LocationFormValues {
   return {
     name: location?.name ?? '',
     type: location?.type ?? 'multifamily_building',
-    timezone: location?.timezone ?? DEFAULT_TIMEZONE,
     address_line1: location?.address_line1 ?? '',
     address_line2: location?.address_line2 ?? '',
     district: location?.district ?? '',
@@ -52,7 +39,6 @@ function toPayload(values: LocationFormValues): LocationPayload {
   return {
     name: values.name.trim(),
     type: values.type,
-    timezone: values.timezone,
     address_line1: values.address_line1.trim(),
     address_line2: nullable(values.address_line2),
     district: nullable(values.district),
@@ -149,22 +135,6 @@ export function LocationFormDrawer({
                   data={typeOptions}
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('locations.form.type')}
-                  value={field.value}
-                  onBlur={field.onBlur}
-                  onChange={(value) => field.onChange(value)}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="timezone"
-              render={({ field, fieldState }) => (
-                <Select
-                  allowDeselect={false}
-                  data={TIMEZONES}
-                  error={fieldErrorMessage(fieldState.error)}
-                  label={t('locations.form.timezone')}
-                  searchable
                   value={field.value}
                   onBlur={field.onBlur}
                   onChange={(value) => field.onChange(value)}

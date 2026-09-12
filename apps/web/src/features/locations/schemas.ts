@@ -31,7 +31,6 @@ export const locationTypeValues = [
 export const locationFormSchema = z.object({
   name: z.string().trim().min(1, 'validation.nameRequired'),
   type: z.enum(locationTypeValues, { message: 'validation.typeRequired' }),
-  timezone: z.string().min(1),
   address_line1: z.string().trim().min(1, 'validation.addressLine1Required'),
   address_line2: z.string(),
   district: z.string(),
