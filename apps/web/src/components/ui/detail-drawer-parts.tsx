@@ -1,6 +1,7 @@
-import { Button, Modal, Text } from '@mantine/core'
+import { Text } from '@mantine/core'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ConfirmModal } from './confirm-modal'
 
 /**
  * The pieces every detail drawer shares (mockups 08 and 10): an uppercase
@@ -131,6 +132,7 @@ export function DrawerTimeline({ items }: { items: TimelineItem[] }) {
   )
 }
 
+/** A plain yes/no on top of ConfirmModal: string body, Confirmar in tinted red. */
 export function ConfirmDialog({
   body,
   loading = false,
@@ -150,16 +152,14 @@ export function ConfirmDialog({
   const { t } = useTranslation('common')
 
   return (
-    <Modal centered closeOnClickOutside={!loading} closeOnEscape={!loading} opened={opened} radius="lg" title={title} withCloseButton={!loading} onClose={onCancel}>
-      <Text size="sm">{body}</Text>
-      <div className="mt-4 flex justify-end gap-2">
-        <Button disabled={loading} variant="default" onClick={onCancel}>
-          {t('actions.cancel')}
-        </Button>
-        <Button color="error" loading={loading} onClick={onConfirm}>
-          {t('actions.confirm')}
-        </Button>
-      </div>
-    </Modal>
+    <ConfirmModal
+      body={body}
+      confirmLabel={t('actions.confirm')}
+      loading={loading}
+      opened={opened}
+      title={title}
+      onClose={onCancel}
+      onConfirm={onConfirm}
+    />
   )
 }

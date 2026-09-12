@@ -1,12 +1,12 @@
-import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { ConfirmModal } from '../../components/ui/confirm-modal'
+import { notifySuccess } from '../../lib/notify'
 import { deactivateStaff, type StaffSummary } from './api'
 
 /**
- * Confirmation for the destructive half of suspension; reactivation is
- * reversible-by-definition and needs no modal.
+ * Confirmation for the destructive half of suspension (mockup 06d card);
+ * reactivation is reversible-by-definition and needs no modal.
  */
 export function StaffDeactivateModal({
   accountId,
@@ -30,28 +30,14 @@ export function StaffDeactivateModal({
   })
 
   return (
-    <Modal
+    <ConfirmModal
+      body={t('staff.deactivateHint')}
+      confirmLabel={t('staff.deactivate')}
+      loading={mutation.isPending}
       opened={staff !== null}
       title={t('staff.deactivateConfirmTitle', { name: staff?.name ?? '' })}
       onClose={onClose}
-    >
-      <Stack gap="md">
-        <Text c="dimmed" size="sm">
-          {t('staff.deactivateHint')}
-        </Text>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={onClose}>
-            {t('actions.cancel')}
-          </Button>
-          <Button
-            color="error"
-            loading={mutation.isPending}
-            onClick={() => staff && mutation.mutate(staff.id)}
-          >
-            {t('staff.deactivate')}
-          </Button>
-        </Group>
-      </Stack>
-    </Modal>
+      onConfirm={() => staff && mutation.mutate(staff.id)}
+    />
   )
 }

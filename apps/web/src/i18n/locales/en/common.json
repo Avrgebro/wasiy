@@ -725,6 +725,7 @@
     "deactivateConfirmTitle": "Deactivate {{name}}?",
     "deactivateHint": "The location disappears from the resident portal and stops accepting new visits and reservations. History is kept.",
     "deactivateReversible": "You can reactivate it at any time without reloading the registry.",
+    "deactivateConfirm": "Deactivate location",
     "statuses": {
       "active": "Active",
       "deactivated": "Inactive"

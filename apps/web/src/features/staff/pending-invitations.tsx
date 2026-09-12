@@ -1,8 +1,9 @@
-import { Button, Group, Modal, Stack, Text } from '@mantine/core'
+import { Button, Group, Text } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ConfirmModal } from '../../components/ui/confirm-modal'
 import { getRoleLabelKey } from '../auth/access'
 import {
   resendStaffInvitation,
@@ -175,29 +176,15 @@ export function PendingInvitations({
           </div>
         )
       })}
-      <Modal
+      <ConfirmModal
+        body={t('staff.pending.revokeBody')}
+        confirmLabel={t('staff.pending.revokeConfirm')}
+        loading={revokeMutation.isPending}
         opened={revoking !== null}
         title={t('staff.pending.revokeTitle', { email: revoking?.email ?? '' })}
         onClose={() => setRevoking(null)}
-      >
-        <Stack gap="md">
-          <Text c="dimmed" size="sm">
-            {t('staff.pending.revokeBody')}
-          </Text>
-          <Group justify="flex-end">
-            <Button variant="default" onClick={() => setRevoking(null)}>
-              {t('actions.cancel')}
-            </Button>
-            <Button
-              color="error"
-              loading={revokeMutation.isPending}
-              onClick={() => revoking && revokeMutation.mutate(revoking.id)}
-            >
-              {t('staff.pending.revokeConfirm')}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+        onConfirm={() => revoking && revokeMutation.mutate(revoking.id)}
+      />
     </section>
   )
 }

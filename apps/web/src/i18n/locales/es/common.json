@@ -725,6 +725,7 @@
     "deactivateConfirmTitle": "¿Desactivar {{name}}?",
     "deactivateHint": "La ubicación deja de aparecer en el portal del residente y no admite nuevas visitas ni reservas. El historial se conserva.",
     "deactivateReversible": "Puedes reactivarla en cualquier momento sin volver a cargar el registro.",
+    "deactivateConfirm": "Desactivar ubicación",
     "statuses": {
       "active": "Activa",
       "deactivated": "Inactiva"

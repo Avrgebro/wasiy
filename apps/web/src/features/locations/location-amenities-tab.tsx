@@ -1,10 +1,11 @@
-import { Alert, Button, Group, Modal, Stack, Text } from '@mantine/core'
+import { Alert, Button, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ConfirmModal } from '../../components/ui/confirm-modal'
 import { DataTable } from '../../components/table/data-table'
 import { openRowColumn } from '../../components/table/open-row-column'
 import { StatusPill } from '../../components/ui/chips'
@@ -232,29 +233,15 @@ export function LocationAmenitiesTab({
         onReactivate={current ? () => reactivateMutation.mutate(current) : undefined}
       />
 
-      <Modal
+      <ConfirmModal
+        body={t('amenities.deactivateHint')}
+        confirmLabel={t('locations.deactivate')}
+        loading={deactivateMutation.isPending}
         opened={deactivating !== null}
         title={t('amenities.deactivateConfirmTitle', { name: deactivating?.name ?? '' })}
         onClose={() => setDeactivating(null)}
-      >
-        <Stack gap="md">
-          <Text c="dimmed" size="sm">
-            {t('amenities.deactivateHint')}
-          </Text>
-          <Group justify="flex-end">
-            <Button variant="default" onClick={() => setDeactivating(null)}>
-              {t('actions.cancel')}
-            </Button>
-            <Button
-              color="error"
-              loading={deactivateMutation.isPending}
-              onClick={() => deactivating && deactivateMutation.mutate(deactivating)}
-            >
-              {t('locations.deactivate')}
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+        onConfirm={() => deactivating && deactivateMutation.mutate(deactivating)}
+      />
     </div>
   )
 }

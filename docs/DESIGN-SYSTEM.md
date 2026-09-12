@@ -429,6 +429,7 @@ What exists today, and where:
 | `TintChip`, `AccessChip` | `components/ui/chips.tsx` | non-truncating status and access pills |
 | `FormTextInput`, `FormPasswordInput`, `NullableTextInput` | `components/ui/form-fields.tsx`, `features/registry/` | react-hook-form wired inputs |
 | Toasts (`notifySuccess`, `notifyError`, `notifyWarning`) | `lib/notify.tsx` + `.wa-toast` in `index.css` | card chrome, tinted icon chip |
+| Confirmations (`ConfirmModal`, `ConfirmDialog`) | `components/ui/confirm-modal.tsx` | mockup 06d: no header, tinted icon chip, display title, facts panel, warning callout, footer bar with Cancelar as text and a tinted-red confirm |
 | `PagePlaceholder` | `components/ui/page-placeholder.tsx` | route stubs |
 
 Not built, and not currently planned: breadcrumbs, a date range picker, a time-based schedule grid (`@mantine/schedule` was removed twice; the reservations view is the week board, a plain table of amenity rows by day).
