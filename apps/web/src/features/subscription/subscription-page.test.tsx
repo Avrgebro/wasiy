@@ -12,7 +12,7 @@ import { SubscriptionPage } from './subscription-page'
 const mocks = vi.hoisted(() => ({ getSubscriptionPage: vi.fn() }))
 vi.mock('./api', async (importOriginal) => ({ ...(await importOriginal<typeof import('./api')>()), getSubscriptionPage: mocks.getSubscriptionPage }))
 
-const account = { id: 'acc_1', name: 'Administradora Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, subscription: null, access: { account_role: 'account_admin' as const, locations: [] } }
+const account = { id: 'acc_1', name: 'Administradora Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, active_locations_count: 1, subscription: null, access: { account_role: 'account_admin' as const, locations: [] } }
 const me: MeResponse = {
   user: { id: 'u1', first_name: 'Ana', last_name: 'Torres', name: 'Ana Torres', email: 'ana@wasiy.pe' },
   accounts: [account], active_account: account, active_location: null,

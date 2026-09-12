@@ -15,7 +15,7 @@ vi.mock('./api', async (importOriginal) => ({ ...(await importOriginal<typeof im
 vi.mock('@mantine/hooks', async (importOriginal) => ({ ...(await importOriginal<typeof import('@mantine/hooks')>()), useMediaQuery: () => true }))
 
 const invoice: Invoice = { id: 'inv_1', number: 'F-2026-0042', period_starts_on: '2026-09-05', period_ends_on: '2026-10-04', amount_minor: 26000, currency: 'PEN', status: 'pending', due_on: '2026-09-05', paid_at: null, payment_method: null, rejection_reason: null, latest_proof: null }
-const account = { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, subscription: null, access: { account_role: 'account_admin' as const, locations: [] } }
+const account = { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, active_locations_count: 1, subscription: null, access: { account_role: 'account_admin' as const, locations: [] } }
 const me: MeResponse = { user: { id: 'u1', first_name: 'Ana', last_name: 'Torres', name: 'Ana Torres', email: 'ana.torres@wasiy.pe' }, accounts: [account], active_account: account, active_location: null, roles: { account: [], location: [] }, accessible_locations: [], resident_memberships: [] }
 
 function renderDrawer(onClose = vi.fn()) {

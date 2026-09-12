@@ -6,20 +6,26 @@ import { deactivateLocation, type LocationSummary } from './api'
 
 /**
  * Names what deactivation touches before asking for it (mockup 06d). The
- * last-active-location guard lives on the server; its validation message
- * surfaces here as the error notification.
+ * last-active-location guard lives on the server; the dialog mirrors it so
+ * the button is never a dead end.
  */
 export function LocationDeactivateModal({
+  account,
   accountId,
   location,
   onClose,
 }: {
+  /** Name and location counts from /me, for the blocked variant. */
+  account: { name: string; locations_count: number; active_locations_count: number }
   accountId: string
   location: LocationSummary | null
   onClose: () => void
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
+  // The server refuses to retire the last active location; the dialog says
+  // so up front instead of letting the request fail (mockup 06d, "Bloqueada").
+  const blocked = location?.status === 'active' && account.active_locations_count <= 1
 
   const mutation = useMutation({
     mutationFn: (locationId: string) => deactivateLocation(accountId, locationId),
@@ -31,6 +37,27 @@ export function LocationDeactivateModal({
       notifySuccess(t('locations.deactivated'))
     },
   })
+
+  if (blocked) {
+    return (
+      <ConfirmModal
+        body={t('locations.deactivateBlockedBody', { name: location?.name ?? '', account: account.name })}
+        cancelLabel={t('actions.close')}
+        confirmDisabled
+        confirmLabel={t('locations.deactivateConfirm')}
+        facts={[
+          { label: t('locations.affected.activeLocations'), value: account.active_locations_count },
+          { label: t('locations.affected.inactiveLocations'), value: account.locations_count - account.active_locations_count },
+        ]}
+        footnote={t('locations.deactivateBlockedHint')}
+        opened={location !== null}
+        title={t('locations.deactivateBlockedTitle')}
+        tone="error"
+        onClose={onClose}
+        onConfirm={() => undefined}
+      />
+    )
+  }
 
   return (
     <ConfirmModal

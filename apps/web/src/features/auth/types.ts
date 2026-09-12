@@ -54,6 +54,8 @@ export type AccountSummary = {
   slug: string
   timezone: string
   locations_count: number
+  /** Active locations; the deactivation dialog explains the last-active guard with it. */
+  active_locations_count: number
   /** Null for accounts created by hand; those are never gated. */
   subscription: SubscriptionSummary | null
   /** What the user holds in this account, for "Cuentas y accesos". */

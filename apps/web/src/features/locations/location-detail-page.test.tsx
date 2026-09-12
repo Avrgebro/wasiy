@@ -36,11 +36,12 @@ function axiosResponse(config: AxiosResponse['config'], data: unknown, status = 
   return { config, data, headers: {}, status, statusText: 'OK' }
 }
 
-function meResponse() {
+function meResponse(activeLocations = 3) {
+  const account = { id: 'acc_1', name: 'Administradora Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 4, active_locations_count: activeLocations }
   return {
     user: { id: 'usr_1', first_name: 'Alejandra', last_name: 'Admin', name: 'Alejandra Admin', email: 'admin@wasiy.test' },
-    accounts: [{ id: 'acc_1', name: 'Administradora Horizonte', slug: 'horizonte', timezone: 'America/Lima' }],
-    active_account: { id: 'acc_1', name: 'Administradora Horizonte', slug: 'horizonte', timezone: 'America/Lima' },
+    accounts: [account],
+    active_account: account,
     active_location: null,
     roles: { account: [{ account_id: 'acc_1', role: 'account_admin' }], location: [] },
     accessible_locations: [],
@@ -82,10 +83,10 @@ function locationDetail(overrides: Partial<LocationSummary> = {}): LocationSumma
   }
 }
 
-function installAdapter(location: LocationSummary | null, staff: unknown[] = []) {
+function installAdapter(location: LocationSummary | null, staff: unknown[] = [], activeLocations = 3) {
   apiClient.defaults.adapter = vi.fn<AxiosAdapter>((config) => {
     if (config.url === '/api/me') {
-      return Promise.resolve(axiosResponse(config, meResponse()))
+      return Promise.resolve(axiosResponse(config, meResponse(activeLocations)))
     }
     if (config.url === `/api/accounts/acc_1/locations/${currentParams.locationId}`) {
       if (!location) {
@@ -221,6 +222,23 @@ describe('LocationDetailPage', () => {
     const modal = screen.getByRole('dialog')
     expect(within(modal).getByText('Unidades afectadas')).toBeInTheDocument()
     expect(within(modal).getByText('214')).toBeInTheDocument()
+  })
+
+  it('the last active location shows the blocked dialog instead of the counts', async () => {
+    installAdapter(locationDetail(), [], 1)
+    renderPage()
+    await screen.findAllByText('Edificio Central')
+
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: 'Editar ubicación' }))
+    await user.click(await screen.findByRole('button', { name: 'Desactivar' }))
+
+    expect(await screen.findByText('No se puede desactivar')).toBeInTheDocument()
+    const modal = screen.getByRole('dialog')
+    expect(within(modal).getByText('Ubicaciones activas')).toBeInTheDocument()
+    expect(within(modal).getByText('Ubicaciones inactivas')).toBeInTheDocument()
+    expect(within(modal).getByRole('button', { name: 'Desactivar ubicación' })).toBeDisabled()
+    expect(within(modal).queryByText('Unidades afectadas')).not.toBeInTheDocument()
   })
 
   it('an unknown location renders the not-found state', async () => {

@@ -11,6 +11,7 @@ import { ApiError } from '../../app/api-client'
 import { WasiyLogo } from '../../components/layout/shared/wasiy-logo'
 import { getErrorMessage } from '../../lib/errors'
 import { useMe } from '../auth/hooks'
+import type { AccountSummary } from '../auth/types'
 import {
   getLocation,
   getLocationSettings,
@@ -43,10 +44,10 @@ export function LocationDetailPage() {
     )
   }
 
-  return <LocationDetailContent accountId={account.id} />
+  return <LocationDetailContent account={account} accountId={account.id} />
 }
 
-function LocationDetailContent({ accountId }: { accountId: string }) {
+function LocationDetailContent({ account, accountId }: { account: AccountSummary; accountId: string }) {
   const { t } = useTranslation('common')
   const navigate = routeApi.useNavigate()
   const { locationId } = routeApi.useParams()
@@ -296,6 +297,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
         }
       />
       <LocationDeactivateModal
+        account={account}
         accountId={accountId}
         location={deactivating}
         onClose={() => setDeactivating(null)}

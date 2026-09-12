@@ -23,7 +23,7 @@ const subscription: SubscriptionSummary = {
 }
 
 function makeMe(overrides: Partial<SubscriptionSummary> | null, admin = true): MeResponse {
-  const account = { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, subscription: overrides === null ? null : { ...subscription, ...overrides }, access: { account_role: null, locations: [] } }
+  const account = { id: 'acc_1', name: 'Horizonte', slug: 'horizonte', timezone: 'America/Lima', locations_count: 1, active_locations_count: 1, subscription: overrides === null ? null : { ...subscription, ...overrides }, access: { account_role: null, locations: [] } }
   return {
     user: { id: 'usr_1', first_name: 'Ana', last_name: 'Salas', name: 'Ana Salas', email: 'ana@wasiy.test' },
     accounts: [account],

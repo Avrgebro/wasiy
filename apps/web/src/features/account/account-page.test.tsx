@@ -21,7 +21,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ to, children, ...props }: { to: string; children: ReactNode; [key: string]: unknown }) => <a href={to} {...props}>{children}</a>,
 }))
 
-const account = { id: 'acc_1', name: 'Administradora Sur SAC', slug: 'sur', timezone: 'America/Lima', locations_count: 2, subscription: null, access: { account_role: null, locations: [{ location_id: 'loc_1', location_name: 'Edificio Central', role: 'location_manager' as const }, { location_id: 'loc_2', location_name: 'Torre Norte', role: 'front_desk' as const }] } }
+const account = { id: 'acc_1', name: 'Administradora Sur SAC', slug: 'sur', timezone: 'America/Lima', locations_count: 2, active_locations_count: 2, subscription: null, access: { account_role: null, locations: [{ location_id: 'loc_1', location_name: 'Edificio Central', role: 'location_manager' as const }, { location_id: 'loc_2', location_name: 'Torre Norte', role: 'front_desk' as const }] } }
 const me: MeResponse = {
   user: { id: 'usr_1', first_name: 'Ana', last_name: 'Torres', name: 'Ana Torres', email: 'ana.torres@wasiy.pe' },
   accounts: [account, { ...account, id: 'acc_2', name: 'Condominio Las Palmas', access: { account_role: 'account_admin' as const, locations: [] } }],

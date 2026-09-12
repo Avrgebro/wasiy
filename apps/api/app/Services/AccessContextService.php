@@ -278,6 +278,8 @@ class AccessContextService
             // Loaded via withCount() in buildContext; the fallback covers
             // Account instances that arrive without it.
             'locations_count' => (int) ($account->locations_count ?? $account->locations()->count()),
+            // The deactivation dialog explains the last-active guard with this number.
+            'active_locations_count' => $account->locations()->active()->count(),
             // What this user holds in the account, for "Cuentas y accesos"
             // (mockup 21): the account role, and one row per Location role.
             'access' => $this->accessSummary($account, $user),
