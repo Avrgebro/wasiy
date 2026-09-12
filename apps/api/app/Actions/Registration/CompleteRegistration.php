@@ -12,6 +12,7 @@ use App\Models\StaffMembership;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Support\PendingRegistration;
+use App\Support\Timezones;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -23,8 +24,6 @@ class CompleteRegistration
      * here and deriving timezone and currency from the chosen one.
      */
     public const COUNTRIES = ['PE'];
-
-    public const TIMEZONE = 'America/Lima';
 
     public const TRIAL_DAYS = 14;
 
@@ -50,12 +49,12 @@ class CompleteRegistration
             'password' => $pending->passwordHash,
         ]);
         $user->forceFill(['email_verified_at' => $pending->verifiedAt])->save();
-        $account = Account::create(['name' => $data['name'], 'slug' => Str::slug($data['name']).'-'.Str::lower((string) Str::ulid()), 'timezone' => self::TIMEZONE]);
+        $account = Account::create(['name' => $data['name'], 'slug' => Str::slug($data['name']).'-'.Str::lower((string) Str::ulid()), 'timezone' => Timezones::forCountry($data['country'])]);
         StaffMembership::create(['account_id' => $account->id, 'user_id' => $user->id, 'account_role' => AccountRole::AccountAdmin]);
         $this->createLocation->handle($account, $user, [
             'name' => $data['name'], 'type' => LocationType::MultifamilyBuilding,
             'address_line1' => $data['address'], 'district' => $data['district'], 'city' => $data['city'],
-            'country' => $data['country'], 'timezone' => self::TIMEZONE,
+            'country' => $data['country'], 'timezone' => Timezones::forCountry($data['country']),
         ]);
         Subscription::create([
             'account_id' => $account->id, 'plan_id' => $plan->id, 'status' => SubscriptionStatus::Trialing,

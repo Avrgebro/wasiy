@@ -7,6 +7,7 @@ use App\Models\Account;
 use App\Models\Location;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use App\Support\Timezones;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -31,6 +32,8 @@ class CreateLocation
         return DB::transaction(function () use ($account, $actor, $attributes): Location {
             $location = $account->locations()->create([
                 ...$attributes,
+                // Derived from the country unless a client sent one (ADR 0037 era API contract).
+                'timezone' => $attributes['timezone'] ?? Timezones::forCountry($attributes['country'] ?? null),
                 'slug' => $this->availableSlug($account, $attributes['name']),
             ]);
 

@@ -44,6 +44,8 @@ test('an account admin can create a location, active and immediately accessible'
         ->assertJsonPath('data.slug', 'torre-mirador')
         ->assertJsonPath('data.status', 'active')
         ->assertJsonPath('data.country', 'PE')
+        // Not asked on the form: derived from the country.
+        ->assertJsonPath('data.timezone', 'America/Lima')
         ->assertJsonPath('data.units_count', 0);
 
     $this->actingAs($admin)->postJson('/api/context/account', ['account_id' => $account->id]);
