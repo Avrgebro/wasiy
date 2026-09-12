@@ -51,14 +51,3 @@ export function bareAgeLabel(iso: string, now: Date, timezone: string, t: TFunct
   return t('dashboard.age.days', { count: days })
 }
 
-/** "T1-1203" when the building is known, "1203" otherwise. */
-export function unitChipLabel(unitNumber: string | null | undefined, buildingName: string | null | undefined): string {
-  if (!unitNumber) return ''
-  if (!buildingName) return unitNumber
-  const initials = buildingName
-    .split(/\s+/)
-    .map((word) => (/^\d+$/.test(word) ? word : word[0]?.toUpperCase() ?? ''))
-    .join('')
-
-  return `${initials}-${unitNumber}`
-}

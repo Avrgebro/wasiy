@@ -12,6 +12,7 @@ import { shortDateTime } from '../finances/month'
 import { checkOutVisit, type VisitSummary } from './api'
 import { checkInLabel, durationLabel, visitStatusColor } from './visit-presentation'
 import { StatusPill } from '../../components/ui/chips'
+import { formatUnitLabel } from '../units/unit-label'
 
 /** Mockup 16 drawer: time inside (live), facts, timeline, Marcar salida. */
 export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void; timezone: string; visit: VisitSummary | null }) {
@@ -53,9 +54,9 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
       subtitle={
         visit
           ? inside
-            ? t('visits.detail.insideSince', { unit: visit.unit_number ?? '', time: checkInLabel(visit.checked_in_at, timezone, now) })
+            ? t('visits.detail.insideSince', { unit: formatUnitLabel(visit), time: checkInLabel(visit.checked_in_at, timezone, now) })
             : t('visits.detail.range', {
-                unit: visit.unit_number ?? '',
+                unit: formatUnitLabel(visit),
                 from: checkInLabel(visit.checked_in_at, timezone, now),
                 to: visit.checked_out_at ? checkInLabel(visit.checked_out_at, timezone, now) : '—',
               })
@@ -82,7 +83,7 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
                 label={t('packages.columns.unit')}
                 value={
                   <Link className="text-[var(--wa-interactive)] no-underline hover:underline" params={{ unitId: visit.unit_id }} to="/admin/units/$unitId">
-                    {[visit.unit_number, visit.building_name].filter(Boolean).join(' · ')} →
+                    {formatUnitLabel(visit)} →
                   </Link>
                 }
               />
@@ -102,7 +103,7 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
                       ) : null}
                     </>
                   ) : (
-                    t('visits.unitOnly', { unit: visit.unit_number ?? '' })
+                    t('visits.unitOnly', { unit: formatUnitLabel(visit) })
                   )
                 }
               />

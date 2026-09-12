@@ -23,6 +23,7 @@ import { RegisterVisitDrawer } from './register-visit-drawer'
 import { VISIT_CHIPS, VISIT_CONFIRMATIONS, type VisitsSearchValues } from './schemas'
 import { checkInLabel, visitStatusColor } from './visit-presentation'
 import { VisitDrawer } from './visit-drawer'
+import { formatUnitLabel } from '../units/unit-label'
 
 const routeApi = getRouteApi('/_authenticated/admin/visitors')
 
@@ -116,8 +117,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
       meta: { className: 'whitespace-nowrap' },
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
-          {row.original.building_name ? <span className="text-[11.5px] text-[var(--wa-text-3)]">{row.original.building_name}</span> : null}
+          <span className="font-display text-sm font-semibold">{formatUnitLabel(row.original)}</span>
         </div>
       ),
     },
@@ -130,7 +130,7 @@ function VisitsContent({ accountId, locationId, locationName, timezone }: { acco
           <Text size="sm">{row.original.resident_name}</Text>
         ) : (
           <Text c="dimmed" size="sm">
-            {t('visits.unitOnly', { unit: row.original.unit_number ?? '' })}
+            {t('visits.unitOnly', { unit: formatUnitLabel(row.original) })}
           </Text>
         ),
     },

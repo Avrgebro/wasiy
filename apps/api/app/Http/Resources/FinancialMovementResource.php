@@ -35,6 +35,7 @@ class FinancialMovementResource extends JsonResource
             'counterparty' => $this->counterparty,
             'unit_id' => $this->unit_id,
             'unit_number' => $this->whenLoaded('unit', fn () => $this->unit?->unit_number),
+            'building_name' => $this->whenLoaded('unit', fn () => $this->unit?->building_name),
             'reservation_id' => $this->reservation_id,
             'reservation' => $this->whenLoaded('reservation', fn () => $this->reservation === null ? null : [
                 'id' => $this->reservation->id,

@@ -7,6 +7,7 @@ import type { ReservationSummary } from './api'
 import { ReservationDayBand, ReservationField } from './reservation-modal-parts'
 import { useReservationDecisions } from './use-reservation-decisions'
 import { localDateString, shortDayLabel } from './week'
+import { formatUnitLabel } from '../units/unit-label'
 
 type NoteAction = { kind: 'reject' | 'observe'; reservation: ReservationSummary }
 
@@ -103,7 +104,7 @@ export function ApprovalQueue({
                   </Text>
                 </div>
                 <Text c="dimmed" mt={3} size="xs">
-                  {[request.unit_number, request.resident_name, feeLine(request, t)]
+                  {[formatUnitLabel(request), request.resident_name, feeLine(request, t)]
                     .filter(Boolean)
                     .join(' · ')}
                 </Text>
@@ -184,7 +185,7 @@ export function ApprovalQueue({
                 />
                 <ReservationField
                   label={t('reservations.columns.unit')}
-                  value={noteAction.reservation.unit_number ?? '—'}
+                  value={formatUnitLabel(noteAction.reservation) || '—'}
                 />
               </div>
             </>

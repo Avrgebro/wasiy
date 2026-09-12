@@ -16,6 +16,7 @@ import { deactivatePerson, getResident, invitePerson, reactivatePerson, type Res
 import { inviteSchema } from './schemas'
 import { residentStatusColor } from './presentation'
 import { StatusPill } from '../../components/ui/chips'
+import { formatUnitLabel } from '../units/unit-label'
 
 /**
  * Mockup 15 drawer: contact facts, the units the person lives in (managed
@@ -161,7 +162,7 @@ export function PersonDrawer({
                     const content = (
                       <>
                         <span className="font-display font-semibold">
-                          {[membership.unit?.unit_number, membership.unit?.building_name].filter(Boolean).join(' · ')}
+                          {formatUnitLabel(membership.unit)}
                         </span>
                         <span className="min-w-0 flex-1 truncate text-[var(--mantine-color-dimmed)]">
                           {[membership.is_primary_contact ? t('units.detail.primaryContact') : null, membership.status === 'inactive' ? t('registry.statuses.inactive') : null]

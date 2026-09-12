@@ -24,6 +24,7 @@ class ReservationResource extends JsonResource
             'amenity_name' => $this->whenLoaded('amenity', fn () => $this->amenity->name),
             'unit_id' => $this->unit_id,
             'unit_number' => $this->whenLoaded('unit', fn () => $this->unit->unit_number),
+            'building_name' => $this->whenLoaded('unit', fn () => $this->unit->building_name),
             'resident_id' => $this->resident_id,
             'resident_name' => $this->whenLoaded('resident', fn () => $this->resident?->name),
             'resident_phone' => $this->whenLoaded('resident', fn () => $this->resident?->phone),

@@ -24,6 +24,7 @@ import {
 import { memberSchema, type MemberFormValues } from './schemas'
 import { portalColor } from './unit-presentation'
 import { StatusPill } from '../../components/ui/chips'
+import { formatUnitLabel } from './unit-label'
 
 const EMPTY: MemberFormValues = {
   mode: 'existing',
@@ -176,7 +177,7 @@ export function MemberDrawer({
   return (
     <AppDrawer
       opened={opened}
-      subtitle={member ? `${member.name} · ${unit.unit_number}` : unit.unit_number}
+      subtitle={member ? `${member.name} · ${formatUnitLabel(unit)}` : formatUnitLabel(unit)}
       title={t(member ? 'units.member.manageTitle' : 'units.member.addTitle')}
       onClose={close}
     >
@@ -301,7 +302,7 @@ export function MemberDrawer({
                 </div>
               </DrawerField>
 
-              <DangerZone action={<Button className="w-full" color="error" variant="light" onClick={() => setConfirmingRemove(true)}> {t('units.member.remove')} </Button>} description={t('units.member.removeHint', { unit: unit.unit_number })} title={t('units.form.sensitiveZone')} />
+              <DangerZone action={<Button className="w-full" color="error" variant="light" onClick={() => setConfirmingRemove(true)}> {t('units.member.remove')} </Button>} description={t('units.member.removeHint', { unit: formatUnitLabel(unit) })} title={t('units.form.sensitiveZone')} />
               <ConfirmDialog
                 body={t('units.member.confirmRemoveBody')}
                 opened={confirmingRemove}

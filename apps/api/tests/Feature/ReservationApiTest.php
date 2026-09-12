@@ -75,6 +75,7 @@ test('an instant amenity books as approved with fee snapshots and an activity en
         ->assertJsonPath('data.fee_snapshot_minor', 150)
         ->assertJsonPath('data.deposit_snapshot_minor', 300)
         ->assertJsonPath('data.unit_number', $unit->unit_number)
+        ->assertJsonPath('data.building_name', $unit->building_name)
         ->assertJsonMissingPath('data.starts_at')
         ->assertJsonMissingPath('data.ends_at');
 

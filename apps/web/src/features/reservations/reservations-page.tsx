@@ -22,6 +22,7 @@ import { ReservationFormDrawer } from './reservation-form-drawer'
 import { ReservationWeekList } from './reservation-week-list'
 import type { ReservationsSearchValues } from './schemas'
 import { addDays, localDateString, startOfWeek, weekRangeLabel } from './week'
+import { formatUnitLabel } from '../units/unit-label'
 
 const routeApi = getRouteApi('/_authenticated/admin/reservations')
 
@@ -132,7 +133,7 @@ function ReservationsContent({
   const weekReservations = (weekQuery.data?.data ?? []).filter(
     (reservation) =>
       matchesChip(reservation, chip) &&
-      (!searchText || [reservation.unit_number, reservation.resident_name].some((value) => normalizeSearch(value ?? '').includes(searchText))) &&
+      (!searchText || [formatUnitLabel(reservation), reservation.resident_name].some((value) => normalizeSearch(value ?? '').includes(searchText))) &&
       (!search.amenity_id || reservation.amenity_id === search.amenity_id),
   )
   const futureReservations = queueQuery.data?.data ?? []

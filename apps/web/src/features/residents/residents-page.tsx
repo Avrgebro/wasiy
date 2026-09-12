@@ -24,6 +24,7 @@ import { PersonDrawer } from './person-drawer'
 import { PersonFormDrawer } from './person-form-drawer'
 import type { ResidentsSearchValues } from './schemas'
 import { residentStatusColor } from './presentation'
+import { formatUnitLabel } from '../units/unit-label'
 
 const routeApi = getRouteApi('/_authenticated/admin/residents')
 
@@ -285,8 +286,7 @@ function UnitsCell({ locationId, person }: { locationId: string; person: Residen
           title={membership.is_primary_contact ? t('units.detail.primaryContact') : undefined}
         >
           {membership.is_primary_contact ? <span aria-hidden className="size-1.5 rounded-full bg-[var(--wa-accent)]" /> : null}
-          <span className="font-semibold text-[var(--mantine-color-text)]">{membership.unit?.unit_number}</span>
-          {membership.unit?.building_name}
+          <span className="font-semibold text-[var(--mantine-color-text)]">{formatUnitLabel(membership.unit)}</span>
         </span>
       ))}
     </div>

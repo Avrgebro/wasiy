@@ -10,6 +10,7 @@ import { shortDate, shortDateTime } from '../finances/month'
 import { deliverPackage, type PackageSummary } from './api'
 import { packageStatusColor } from './presentation'
 import { StatusPill } from '../../components/ui/chips'
+import { formatUnitLabel } from '../units/unit-label'
 
 /** Mockup 14 drawer: the facts and the one action, Marcar entregado. */
 export function PackageDrawer({
@@ -54,7 +55,7 @@ export function PackageDrawer({
             : t('packages.detail.deliveredOn', { date: pkg.delivered_at ? shortDate(pkg.delivered_at.slice(0, 10)) : '—' })
           : undefined
       }
-      title={pkg ? t('packages.detail.title', { unit: pkg.unit_number ?? '' }) : ''}
+      title={pkg ? t('packages.detail.title', { unit: formatUnitLabel(pkg) }) : ''}
       onClose={close}
     >
       <AppDrawerBody>
@@ -68,7 +69,7 @@ export function PackageDrawer({
                 label={t('packages.columns.unit')}
                 value={
                   <Link className="text-[var(--wa-interactive)] no-underline hover:underline" params={{ unitId: pkg.unit_id }} to="/admin/units/$unitId">
-                    {[pkg.unit_number, pkg.building_name].filter(Boolean).join(' · ')} →
+                    {formatUnitLabel(pkg)} →
                   </Link>
                 }
               />

@@ -16,9 +16,10 @@ import { reservationStatusColor, reservationStatusKey } from '../reservations/re
 import { RegisterVisitDrawer } from '../visits/register-visit-drawer'
 import { durationLabel } from '../visits/visit-presentation'
 import { getLocationDashboard, type DashboardManagement, type DashboardToday } from './api'
-import { bareAgeLabel, packageAgeLabel, relativeLabel, unitChipLabel } from './dashboard-presentation'
+import { bareAgeLabel, packageAgeLabel, relativeLabel } from './dashboard-presentation'
 import { locationDashboardQueryKey } from './query-options'
 import { StatusPill } from '../../components/ui/chips'
+import { formatUnitLabel } from '../units/unit-label'
 
 export function DashboardPage() {
   const { t } = useTranslation('common')
@@ -230,7 +231,7 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
                 <InnerRow key={visit.id}>
                   <span aria-label={visit.is_overdue ? t('dashboard.overdue') : undefined} className={`size-1.5 shrink-0 rounded-full ${visit.is_overdue ? 'bg-[var(--wa-accent)]' : ''}`} />
                   <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold">{visit.visitor_name}</span>
-                  <UnitChip label={unitChipLabel(visit.unit_number, visit.building_name)} />
+                  <UnitChip label={formatUnitLabel(visit)} />
                   <span className="w-[86px] shrink-0 text-right font-mono text-[12.5px] text-[var(--mantine-color-dimmed)]">{durationLabel(visit, now, t)}</span>
                 </InnerRow>
               ))}
@@ -253,7 +254,7 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
             <ul className="m-0 flex list-none flex-col gap-2 p-4">
               {today.packages_pending.map((pkg) => (
                 <InnerRow key={pkg.id}>
-                  <UnitChip label={unitChipLabel(pkg.unit_number, pkg.building_name)} />
+                  <UnitChip label={formatUnitLabel(pkg)} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[13.5px] font-semibold">{pkg.resident_name ?? t('dashboard.primaryContact')}</span>
                     {pkg.notes ? <span className="block truncate text-xs text-[var(--mantine-color-dimmed)]">{pkg.notes}</span> : null}
@@ -287,7 +288,7 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
                   return (
                     <Table.Tr key={reservation.id}>
                       <Table.Td>{reservation.amenity_name}</Table.Td>
-                      <Table.Td className="font-mono text-[12.5px]">{reservation.unit_number}</Table.Td>
+                      <Table.Td className="font-mono text-[12.5px]">{formatUnitLabel(reservation)}</Table.Td>
                       <Table.Td className="hidden md:table-cell">{reservation.resident_name ?? '—'}</Table.Td>
                       <Table.Td>
                         <StatusPill color={reservationStatusColor(statusKey)}>

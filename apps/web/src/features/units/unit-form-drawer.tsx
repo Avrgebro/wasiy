@@ -16,6 +16,7 @@ import { notifySuccess } from '../../lib/notify'
 import { buildingsQueryKey, getBuildings } from '../buildings/api'
 import { createUnit, updateUnit, type UnitSummary } from './api'
 import { toUnitPayload, unitSchema, type UnitFormValues } from './schemas'
+import { formatUnitLabel } from './unit-label'
 
 const TYPES = ['apartment', 'house', 'commercial', 'office'] as const
 
@@ -97,7 +98,7 @@ export function UnitFormDrawer({
   return (
     <AppDrawer
       opened={opened}
-      subtitle={editing ? [editing.building_name, editing.unit_number].filter(Boolean).join(' · ') : locationName}
+      subtitle={editing ? formatUnitLabel(editing) : locationName}
       title={t(editing ? 'units.form.editTitle' : 'units.form.createTitle')}
       onClose={close}
     >

@@ -132,7 +132,7 @@ describe('DashboardPage', () => {
     // Visitors: overdue dot on the long stay, unit chip with building initials.
     expect(screen.getByText('Jorge Peña')).toBeInTheDocument()
     expect(screen.getByLabelText('Salida por confirmar')).toBeInTheDocument()
-    expect(screen.getByText('T1-1203')).toBeInTheDocument()
+    expect(screen.getByText('Torre 1 / 1203')).toBeInTheDocument()
     expect(screen.getByText('hace 5 días')).toBeInTheDocument()
     expect(screen.getByText('Salón de eventos')).toBeInTheDocument()
 

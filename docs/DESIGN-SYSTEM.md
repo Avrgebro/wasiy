@@ -430,6 +430,7 @@ What exists today, and where:
 | `FormTextInput`, `FormPasswordInput`, `NullableTextInput` | `components/ui/form-fields.tsx`, `features/registry/` | react-hook-form wired inputs |
 | Toasts (`notifySuccess`, `notifyError`, `notifyWarning`) | `lib/notify.tsx` + `.wa-toast` in `index.css` | card chrome, tinted icon chip |
 | Confirmations (`ConfirmModal`, `ConfirmDialog`) | `components/ui/confirm-modal.tsx` | mockup 06d: no header, tinted icon chip, display title, facts panel, warning callout, footer bar with Cancelar as text and a tinted-red confirm |
+| Unit label (`formatUnitLabel`) | `features/units/unit-label.ts` | the one way a unit is written inline: "Torre A / 402", or "402" for a single unnamed tower; matches `Unit::label()` on the API. Tables, chips, drawers and subtitles all go through it; the Unidades page groups by tower instead |
 | `PagePlaceholder` | `components/ui/page-placeholder.tsx` | route stubs |
 
 Not built, and not currently planned: breadcrumbs, a date range picker, a time-based schedule grid (`@mantine/schedule` was removed twice; the reservations view is the week board, a plain table of amenity rows by day).

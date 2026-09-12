@@ -7,6 +7,7 @@ import { openRowColumn } from '../../components/table/open-row-column'
 import type { ReservationSummary } from './api'
 import { ReservationStatusBadge } from './reservation-status-badge'
 import { addDays, dayHeading } from './week'
+import { formatUnitLabel } from '../units/unit-label'
 
 /**
  * Amenity accent bar colors cycle through the Puerto roles so neighboring
@@ -70,7 +71,7 @@ export function ReservationWeekList({
       {
         accessorKey: 'unit_number',
         header: t('reservations.columns.unit'),
-        cell: ({ row }) => <span className="text-sm text-[var(--mantine-color-dimmed)]">{row.original.unit_number}</span>,
+        cell: ({ row }) => <span className="text-sm text-[var(--mantine-color-dimmed)]">{formatUnitLabel(row.original)}</span>,
       },
       {
         accessorKey: 'resident_name',

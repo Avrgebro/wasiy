@@ -17,6 +17,7 @@ export type ReservationSummary = {
   amenity_name?: string
   unit_id: string
   unit_number?: string
+  building_name?: string | null
   resident_id: string | null
   resident_name?: string | null
   resident_phone?: string | null

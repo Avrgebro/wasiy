@@ -349,7 +349,8 @@ test('the month list filters by month, direction, status, category and search', 
     $this->actingAs($admin)
         ->getJson(movementsBase($account, $location).'?month=2026-08&category=reservation_fee,reservation_deposit')
         ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.unit_number', $unit->unit_number);
+        ->assertJsonPath('data.0.unit_number', $unit->unit_number)
+        ->assertJsonPath('data.0.building_name', $unit->building_name);
 
     $this->actingAs($admin)
         ->getJson(movementsBase($account, $location).'?month=2026-08&search=agua')

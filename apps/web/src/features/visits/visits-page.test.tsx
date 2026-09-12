@@ -103,7 +103,7 @@ describe('VisitsPage', () => {
     expect(await screen.findByText('Elena Vargas')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dentro 2' })).toBeInTheDocument()
     expect(screen.getByText('DNI 45872213')).toBeInTheDocument()
-    expect(screen.getByText('Unidad 402')).toBeInTheDocument()
+    expect(screen.getByText('Unidad Torre A / 402')).toBeInTheDocument()
     expect(screen.getByText('Intercom')).toBeInTheDocument()
 
     await user.click(screen.getByText('Elena Vargas'))

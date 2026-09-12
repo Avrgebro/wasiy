@@ -117,8 +117,8 @@ describe('ResidentsPage', () => {
     expect(screen.getByText('carlos.mendoza@gmail.com')).toBeInTheDocument()
     // Stored E.164, shown nationally because the viewer is in Peru.
     expect(screen.getByRole('link', { name: '987 654 321' })).toHaveAttribute('href', 'tel:+51987654321')
-    expect(screen.getByText('402')).toBeInTheDocument()
-    expect(screen.getByText('118')).toBeInTheDocument()
+    expect(screen.getByText('Torre A / 402')).toBeInTheDocument()
+    expect(screen.getByText('Torre A / 118')).toBeInTheDocument()
     expect(screen.queryByText('En el portal')).not.toBeInTheDocument()
     expect(screen.getAllByText('Sin unidad').length).toBeGreaterThan(0)
     expect(requests.some((url) => url.includes('/api/accounts/acc_1/residents?location_id=loc_1'))).toBe(true)
@@ -144,7 +144,7 @@ describe('ResidentsPage', () => {
     await user.click(await screen.findByText('Carlos Mendoza'))
     const drawer = await screen.findByRole('dialog')
     expect(await within(drawer).findByText(/Paquete recibido/)).toBeInTheDocument()
-    expect(within(drawer).getByRole('link', { name: /402 · Torre A/ })).toHaveAttribute('href', '/admin/units/$unitId')
+    expect(within(drawer).getByRole('link', { name: /Torre A \/ 402/ })).toHaveAttribute('href', '/admin/units/$unitId')
     expect(within(drawer).getByRole('button', { name: 'Desactivar persona' })).toBeDisabled()
 
     await user.click(within(drawer).getByRole('button', { name: 'Invitar al portal' }))
@@ -187,7 +187,7 @@ describe('ResidentsPage', () => {
     expect(within(drawer).queryByRole('button', { name: 'Editar datos' })).not.toBeInTheDocument()
     expect(within(drawer).queryByRole('button', { name: 'Invitar al portal' })).not.toBeInTheDocument()
     // The unit page needs registry.manage, so the desk sees units as text, not links.
-    expect(within(drawer).getByText('402 · Torre A')).toBeInTheDocument()
+    expect(within(drawer).getByText('Torre A / 402')).toBeInTheDocument()
     expect(within(drawer).queryByRole('link', { name: /402/ })).not.toBeInTheDocument()
   })
 })

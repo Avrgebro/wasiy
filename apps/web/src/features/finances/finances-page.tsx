@@ -25,6 +25,7 @@ import { MovementDrawer } from './movement-drawer'
 import { MovementFormDrawer } from './movement-form-drawer'
 import { amountClassName, statusColor, statusLabel } from './movement-presentation'
 import { chipParams, type FinancesSearchValues } from './schemas'
+import { formatUnitLabel } from '../units/unit-label'
 
 const routeApi = getRouteApi('/_authenticated/admin/finances')
 
@@ -176,7 +177,7 @@ function FinancesContent({
       meta: { hideBelow: 'md' },
       cell: ({ row }) => (
         <Text c="dimmed" size="sm">
-          {row.original.unit_number ?? row.original.counterparty ?? '—'}
+          {formatUnitLabel(row.original) || row.original.counterparty || '—'}
         </Text>
       ),
     },

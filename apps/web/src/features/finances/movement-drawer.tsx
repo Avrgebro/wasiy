@@ -26,6 +26,7 @@ import {
   undoTransition,
 } from './movement-presentation'
 import { StatusPill } from '../../components/ui/chips'
+import { formatUnitLabel } from '../units/unit-label'
 
 /** The two moves people regret ask once; the rest are one click. */
 const CONFIRMED: MovementStatus[] = ['voided', 'retained']
@@ -121,7 +122,7 @@ export function MovementDrawer({
                       params={{ unitId: movement.unit_id }}
                       to="/admin/units/$unitId"
                     >
-                      {movement.unit_number} →
+                      {formatUnitLabel(movement)} →
                     </Link>
                   ) : (
                     (movement.counterparty ?? '—')

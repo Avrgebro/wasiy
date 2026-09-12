@@ -37,6 +37,7 @@ export type MovementSummary = {
   counterparty: string | null
   unit_id: string | null
   unit_number?: string | null
+  building_name?: string | null
   reservation_id: string | null
   /** Present on the show endpoint when the row was opened by a booking. */
   reservation?: {

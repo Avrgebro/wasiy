@@ -31,6 +31,7 @@ import { ReservationDayBand } from './reservation-modal-parts'
 import { shortDayLabel } from './week'
 import { StatusPill } from '../../components/ui/chips'
 import { useReservationDecisions, type Decision } from './use-reservation-decisions'
+import { formatUnitLabel } from '../units/unit-label'
 
 /**
  * The booking's home (mockup 08 drawer): day and status, facts, Cobros
@@ -94,7 +95,7 @@ export function ReservationDrawer({
       opened={reservationId !== null}
       subtitle={
         reservation
-          ? [t('reservations.detail.kind'), reservation.unit_number, reservation.resident_name]
+          ? [t('reservations.detail.kind'), formatUnitLabel(reservation), reservation.resident_name]
               .filter(Boolean)
               .join(' · ')
           : undefined
@@ -121,7 +122,7 @@ export function ReservationDrawer({
                       params={{ unitId: reservation.unit_id }}
                       to="/admin/units/$unitId"
                     >
-                      {reservation.unit_number} →
+                      {formatUnitLabel(reservation)} →
                     </Link>
                   ) : (
                     '—'

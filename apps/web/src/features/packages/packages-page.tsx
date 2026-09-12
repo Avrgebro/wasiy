@@ -21,6 +21,7 @@ import { PackageDrawer } from './package-drawer'
 import { RegisterPackageDrawer } from './register-package-drawer'
 import { PACKAGE_CHIPS, type PackagesSearchValues } from './schemas'
 import { packageStatusColor } from './presentation'
+import { formatUnitLabel } from '../units/unit-label'
 
 const routeApi = getRouteApi('/_authenticated/admin/packages')
 
@@ -94,8 +95,7 @@ function PackagesContent({ accountId, locationId, locationName, timezone }: { ac
       meta: { className: 'whitespace-nowrap' },
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-display text-sm font-semibold">{row.original.unit_number}</span>
-          {row.original.building_name ? <span className="text-[11.5px] text-[var(--wa-text-3)]">{row.original.building_name}</span> : null}
+          <span className="font-display text-sm font-semibold">{formatUnitLabel(row.original)}</span>
         </div>
       ),
     },
