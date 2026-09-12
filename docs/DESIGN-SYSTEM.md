@@ -633,6 +633,7 @@ Use toasts for short-lived feedback after actions. Do not use toasts as the only
 
 Patterns:
 
+- Every toast has a title (mockup 07). `notifySuccess('Torre guardada')` shows that as the title; pass a second argument to add a dimmed detail line under it. Mantine hides its stock left bar when an icon is present and ships no progress bar, so the mockup's bar and progress are a deliberate omission.
 - Success and info toasts may auto-dismiss (Mantine default, 4 s).
 - Errors stay 8 s (`ERROR_TOAST_AUTO_CLOSE` in `app/query-client.ts`).
 - **One error toaster.** A failed mutation is toasted by the query client's mutation cache, titled "No se pudo completar la acción". Feature code never calls `notifyError` from a mutation's `onError`: the cache handler runs as well and the failure shows twice. A form that renders the error inline opts out with `meta: { suppressErrorNotification: true }`. Success toasts stay local, since only the caller knows what happened.

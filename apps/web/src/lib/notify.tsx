@@ -8,6 +8,8 @@ type NotifyOptions = Omit<NotificationData, 'message' | 'title' | 'color' | 'ico
  * The app's only door to toasts: every variant carries its Puerto role color
  * and Solar icon, styled by the .wa-toast classes in index.css. Feature code
  * never calls showNotification directly — variant look lives here, once.
+ * Every toast has a title (mockup 07): a call with only a message shows it
+ * as the title; a call with both shows the message as the dimmed second line.
  */
 function notify(
   roleColor: string,
@@ -16,6 +18,9 @@ function notify(
   title?: ReactNode,
   options?: NotifyOptions,
 ) {
+  const headline = title ?? message
+  const detail = title ? message : undefined
+
   showNotification({
     ...options,
     classNames: {
@@ -26,9 +31,9 @@ function notify(
       closeButton: 'wa-toast__close',
     },
     icon,
-    message,
+    message: detail,
     style: { '--wa-toast-color': roleColor } as CSSProperties,
-    title,
+    title: headline,
   })
 }
 
