@@ -726,6 +726,9 @@
     "deactivateHint": "La ubicación deja de aparecer en el portal del residente y no admite nuevas visitas ni reservas. El historial se conserva.",
     "deactivateReversible": "Puedes reactivarla en cualquier momento sin volver a cargar el registro.",
     "deactivateConfirm": "Desactivar ubicación",
+    "deactivateBlockedTitle": "No se puede desactivar",
+    "deactivateBlockedBody": "{{name}} es la única ubicación activa de la cuenta {{account}}. Una cuenta necesita al menos una ubicación activa para que el portal y la recepción sigan funcionando.",
+    "deactivateBlockedHint": "Crea o reactiva otra ubicación y vuelve a intentarlo.",
     "statuses": {
       "active": "Activa",
       "deactivated": "Inactiva"
@@ -746,7 +749,9 @@
     "affected": {
       "units": "Unidades afectadas",
       "residents": "Residentes con acceso",
-      "staff": "Personal asignado"
+      "staff": "Personal asignado",
+      "activeLocations": "Ubicaciones activas",
+      "inactiveLocations": "Ubicaciones inactivas"
     },
     "empty": {
       "title": "Aún no hay ubicaciones",
@@ -913,7 +918,7 @@
       "noteHint": "Visible para el residente.",
       "noteRequiredHint": "Requerida para observar o rechazar.",
       "confirmCancel": "¿Cancelar la reserva?",
-      "confirmCancelBody": "El espacio queda libre y los cobros pendientes se anulan; un depósito en garantía sigue en garantía hasta que lo devuelvas o lo retengas. Esta acción no se puede deshacer.",
+      "confirmCancelBody": "El espacio queda libre y los cobros pendientes se anulan; un depósito en garantía sigue en garantía hasta que lo devuelvas o lo retengas. Una cuota ya pagada se mantiene: si la devuelves, anúlala desde Finanzas. Esta acción no se puede deshacer.",
       "decidedLabel": {
         "approved": "Aprobada por",
         "rejected": "Rechazada por",

@@ -726,6 +726,9 @@
     "deactivateHint": "The location disappears from the resident portal and stops accepting new visits and reservations. History is kept.",
     "deactivateReversible": "You can reactivate it at any time without reloading the registry.",
     "deactivateConfirm": "Deactivate location",
+    "deactivateBlockedTitle": "Cannot deactivate",
+    "deactivateBlockedBody": "{{name}} is the only active location in {{account}}. An account needs at least one active location so the portal and the front desk keep working.",
+    "deactivateBlockedHint": "Create or reactivate another location and try again.",
     "statuses": {
       "active": "Active",
       "deactivated": "Inactive"
@@ -746,7 +749,9 @@
     "affected": {
       "units": "Affected units",
       "residents": "Residents with access",
-      "staff": "Assigned staff"
+      "staff": "Assigned staff",
+      "activeLocations": "Active locations",
+      "inactiveLocations": "Inactive locations"
     },
     "empty": {
       "title": "No locations yet",
@@ -913,7 +918,7 @@
       "noteHint": "Visible to the resident.",
       "noteRequiredHint": "Required to observe or reject.",
       "confirmCancel": "Cancel the reservation?",
-      "confirmCancelBody": "The slot is released and pending charges are voided; a held deposit stays held until you refund or retain it. This cannot be undone.",
+      "confirmCancelBody": "The slot is released and pending charges are voided; a held deposit stays held until you refund or retain it. A fee already paid stays: if you refund it, void it from Finanzas. This cannot be undone.",
       "decidedLabel": {
         "approved": "Approved by",
         "rejected": "Rejected by",
