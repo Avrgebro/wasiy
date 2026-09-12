@@ -281,7 +281,6 @@ export function MovementFormDrawer({
                 {...field}
                 error={fieldErrorMessage(fieldState.error)}
                 label={t('finances.form.note')}
-                rows={3}
               />
             )}
           />

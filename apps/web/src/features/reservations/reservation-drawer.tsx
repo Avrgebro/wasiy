@@ -361,7 +361,6 @@ function Decisions({
       <Textarea
         description={t(open ? 'reservations.detail.noteRequiredHint' : 'reservations.detail.noteHint')}
         label={t('finances.detail.actionNote')}
-        rows={3}
         value={note}
         onChange={(event) => onNote(event.currentTarget.value)}
       />

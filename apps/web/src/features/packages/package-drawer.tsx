@@ -87,7 +87,6 @@ export function PackageDrawer({
                 <Textarea
                   label={t('packages.detail.deliveryNotesLabel')}
                   placeholder={t('packages.detail.deliveryNotesPlaceholder')}
-                  rows={3}
                   value={deliveryNotes}
                   onChange={(event) => setDeliveryNotes(event.currentTarget.value)}
                 />

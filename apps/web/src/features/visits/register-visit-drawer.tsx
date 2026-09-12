@@ -235,7 +235,7 @@ export function RegisterVisitDrawer({
           <Controller
             control={form.control}
             name="notes"
-            render={({ field, fieldState }) => <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} rows={3} />}
+            render={({ field, fieldState }) => <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} />}
           />
         </AppDrawerBody>
         <AppDrawerFooter>

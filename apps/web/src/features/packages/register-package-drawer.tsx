@@ -114,7 +114,7 @@ export function RegisterPackageDrawer({
             control={form.control}
             name="notes"
             render={({ field, fieldState }) => (
-              <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} placeholder={t('packages.form.notesPlaceholder')} rows={3} />
+              <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} placeholder={t('packages.form.notesPlaceholder')} />
             )}
           />
         </AppDrawerBody>

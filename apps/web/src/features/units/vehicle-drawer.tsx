@@ -119,7 +119,7 @@ export function VehicleDrawer({
             control={form.control}
             name="notes"
             render={({ field, fieldState }) => (
-              <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} rows={3} />
+              <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('registry.notes')} />
             )}
           />
           {editing ? (

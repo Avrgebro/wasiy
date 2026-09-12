@@ -215,7 +215,6 @@ export function LocationFormDrawer({
                   error={fieldErrorMessage(fieldState.error)}
                   label={t('locations.form.accessNotes')}
                   placeholder={t('locations.form.accessNotesPlaceholder')}
-                  rows={3}
                 />
               )}
             />

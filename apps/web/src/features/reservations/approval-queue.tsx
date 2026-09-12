@@ -194,7 +194,6 @@ export function ApprovalQueue({
             data-autofocus
             description={t(`reservations.noteModal.${noteAction?.kind ?? 'observe'}Hint`)}
             label={t('reservations.noteModal.noteLabel')}
-            rows={3}
             value={note}
             onChange={(event) => setNote(event.currentTarget.value)}
           />

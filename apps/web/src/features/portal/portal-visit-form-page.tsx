@@ -120,7 +120,7 @@ export function PortalVisitFormPage() {
         control={form.control}
         name="notes"
         render={({ field, fieldState }) => (
-          <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('portal.visits.form.noteOptional')} placeholder={t('portal.visits.form.notePlaceholder')} rows={3} />
+          <Textarea {...field} error={fieldErrorMessage(fieldState.error)} label={t('portal.visits.form.noteOptional')} placeholder={t('portal.visits.form.notePlaceholder')} />
         )}
       />
 

@@ -1,4 +1,4 @@
-import { Badge, Container, createTheme, Drawer, Input, Modal, rem, SegmentedControl, Select } from "@mantine/core";
+import { Badge, Container, createTheme, Drawer, Input, Modal, rem, SegmentedControl, Select, Textarea } from "@mantine/core";
 import type {
   CSSVariablesResolver,
   MantineColorsTuple,
@@ -254,6 +254,9 @@ export const mantineTheme: MantineThemeOverride = createTheme({
             }
           : { root: {} },
     }),
+    // One height for every multiline field: four rows, and a vertical grip so
+    // a long note can be pulled taller. Callers do not pass rows.
+    Textarea: Textarea.extend({ defaultProps: { rows: 4, resize: "vertical" } }),
     Input: Input.extend({
       defaultProps: { size: "md" },
     }),

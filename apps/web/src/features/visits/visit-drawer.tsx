@@ -120,7 +120,7 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
             <DrawerSection label={t('finances.detail.actions')} />
             {inside ? (
               <>
-                <Textarea label={t('visits.detail.checkoutNotes')} placeholder={t('visits.detail.checkoutNotesPlaceholder')} rows={3} value={notes} onChange={(event) => setNotes(event.currentTarget.value)} />
+                <Textarea label={t('visits.detail.checkoutNotes')} placeholder={t('visits.detail.checkoutNotesPlaceholder')} value={notes} onChange={(event) => setNotes(event.currentTarget.value)} />
                 <Button color="accent" fullWidth loading={checkOut.isPending} onClick={() => checkOut.mutate()}>
                   {t('visits.markOut')}
                 </Button>

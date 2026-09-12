@@ -181,7 +181,6 @@ function AmenityForm({
           />
           <Textarea
             label={t('amenities.form.description')}
-            rows={2}
             value={form.description}
             onChange={(event) => set('description', event.currentTarget.value)}
           />

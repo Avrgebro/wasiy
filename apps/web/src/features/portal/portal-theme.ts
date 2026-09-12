@@ -23,7 +23,7 @@ export const portalTheme = createTheme({
     InputWrapper: Input.Wrapper.extend({ styles: FIELD_LABEL }),
     TextInput: TextInput.extend({ styles: FIELD_LABEL }),
     PasswordInput: PasswordInput.extend({ styles: FIELD_LABEL }),
-    Textarea: Textarea.extend({ styles: FIELD_LABEL }),
+    Textarea: Textarea.extend({ defaultProps: { rows: 4, resize: 'vertical' }, styles: FIELD_LABEL }),
     Select: Select.extend({ styles: FIELD_LABEL }),
     Button: Button.extend({
       defaultProps: { size: 'md', radius: rem(10) },

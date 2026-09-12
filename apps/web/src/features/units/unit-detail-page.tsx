@@ -634,7 +634,6 @@ function NotesSection({ canManage, notes, unitId }: { canManage: boolean; notes:
             aria-label={t('units.detail.notes')}
             autoFocus
             placeholder={t('units.detail.notePlaceholder')}
-            rows={3}
             value={body}
             onChange={(event) => setBody(event.currentTarget.value)}
           />
