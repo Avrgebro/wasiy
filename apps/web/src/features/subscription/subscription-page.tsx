@@ -305,8 +305,12 @@ function InvoiceRow({ invoice, onConfirmPayment }: { invoice: Invoice; onConfirm
       {canConfirm ? (
         <Button className="w-full sm:w-auto" color="accent" onClick={() => onConfirmPayment?.(invoice)} size="sm">{t('subscription.invoices.confirmPayment')}</Button>
       ) : null}
+      {/* No rel="noreferrer" on the proof link: the API serves the file on the
+          session, and Sanctum only treats a request as the SPA's when it
+          carries a Referer or Origin. A new tab opened without a referrer got
+          "Unauthenticated". target="_blank" already implies noopener. */}
       {invoice.status === 'under_review' && invoice.latest_proof ? (
-        <Button className="w-full sm:w-auto" component="a" href={paymentProofUrl(invoice.id, invoice.latest_proof.id)} rel="noreferrer" size="sm" target="_blank" variant="default">{t('subscription.invoices.viewProof')}</Button>
+        <Button className="w-full sm:w-auto" component="a" href={paymentProofUrl(invoice.id, invoice.latest_proof.id)} size="sm" target="_blank" variant="default">{t('subscription.invoices.viewProof')}</Button>
       ) : null}
     </li>
   )
