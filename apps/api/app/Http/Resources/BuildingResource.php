@@ -18,7 +18,6 @@ class BuildingResource extends JsonResource
             'id' => $this->id,
             'location_id' => $this->location_id,
             'name' => $this->name,
-            'code' => $this->code,
             'sort_order' => $this->sort_order,
             'units_count' => (int) ($this->units_count ?? $this->units()->count()),
         ];

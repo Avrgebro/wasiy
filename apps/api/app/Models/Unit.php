@@ -100,7 +100,7 @@ class Unit extends Model
     {
         $query->where(fn (Builder $group) => $group
             ->searchLike(['unit_number'], $search)
-            ->orWhereHas('building', fn (Builder $building) => $building->searchLike(['name', 'code'], $search)));
+            ->orWhereHas('building', fn (Builder $building) => $building->searchLike(['name'], $search)));
     }
 
     /**

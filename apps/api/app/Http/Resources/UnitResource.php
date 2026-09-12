@@ -33,7 +33,6 @@ class UnitResource extends JsonResource
             'type' => $this->type?->value ?? UnitType::Apartment->value,
             'building_id' => $this->building_id,
             'building_name' => $this->building_name,
-            'building_code' => $this->building?->code,
             'floor' => $this->floor,
             'participation_share' => $this->participation_share === null ? null : (float) $this->participation_share,
             'maintenance_fee_minor' => $this->maintenance_fee_minor,

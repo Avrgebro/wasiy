@@ -6,7 +6,7 @@ Free text let a typo fork a tower: "Torre A" and "Torre  A" were two buildings t
 
 ## Decisions
 
-- `buildings`: id, account_id, location_id, name (nullable, unique per location case-insensitively when present), code (short prefix such as "T1"), sort_order. `units.building_id` is NOT NULL with a restrict-on-delete foreign key. Unit numbers are unique per building per location.
+- `buildings`: id, account_id, location_id, name (nullable, unique per location case-insensitively when present), sort_order. A short `code` prefix shipped with this ADR and was dropped on 2026-09-11: nothing rendered it, and one way to write a tower is enough. `units.building_id` is NOT NULL with a restrict-on-delete foreign key. Unit numbers are unique per building per location.
 - One row from birth: `CreateLocation` and the Location factory create the unnamed default. The migration backfills one Building per distinct name in use plus an unnamed default per Location, then drops the default where every unit already had a tower.
 - Growth path: a single-building Location adds a second tower by naming the first and adding the next. Existing units are already attached, so nothing needs reassigning.
 - Deleting the last Building is refused; deleting a Building with units is refused with the count. Renaming is one update; units follow by reference.

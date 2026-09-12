@@ -22,7 +22,6 @@ class BuildingFactory extends Factory
             'account_id' => $location->account_id,
             'location_id' => $location->id,
             'name' => 'Torre '.fake()->unique()->randomLetter(),
-            'code' => null,
             'sort_order' => 1,
         ];
     }

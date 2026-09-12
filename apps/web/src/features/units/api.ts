@@ -19,7 +19,6 @@ export type UnitSummary = {
   type: UnitType
   building_id: string
   building_name: string | null
-  building_code: string | null
   floor: string | null
   participation_share: number | null
   maintenance_fee_minor: number | null

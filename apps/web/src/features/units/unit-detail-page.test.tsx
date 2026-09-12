@@ -43,7 +43,7 @@ function meResponse() {
 function detail(): UnitDetailResponse {
   return {
     data: {
-      id: 'un_402', account_id: 'acc_1', location_id: 'loc_1', unit_number: '402', type: 'apartment', building_id: 'bd_a', building_name: 'Torre A', building_code: 'TA', floor: '4',
+      id: 'un_402', account_id: 'acc_1', location_id: 'loc_1', unit_number: '402', type: 'apartment', building_id: 'bd_a', building_name: 'Torre A', floor: '4',
       participation_share: 1.18, maintenance_fee_minor: 42000, parking_spots: ['E-23'], storage_rooms: ['D-04'], status: 'active', notes: null,
       resident_count: 3, vehicle_count: 2, lead_resident: 'Carlos Mendoza', primary_contact: null,
       members: [
@@ -86,7 +86,7 @@ function installAdapter(onNote?: (body: unknown) => void, onWrite?: (method: str
       return Promise.resolve(axiosResponse(config, { data: { id: 'al_2', body: 'x', author_name: 'Alejandra Admin', created_at: null } }, 201))
     }
     if (url === '/api/units/un_402') return Promise.resolve(axiosResponse(config, detail()))
-    if (url === '/api/locations/loc_1/buildings') return Promise.resolve(axiosResponse(config, { data: [{ id: 'bd_a', location_id: 'loc_1', name: 'Torre A', code: 'TA', sort_order: 1, units_count: 3 }, { id: 'bd_b', location_id: 'loc_1', name: 'Torre B', code: null, sort_order: 2, units_count: 0 }] }))
+    if (url === '/api/locations/loc_1/buildings') return Promise.resolve(axiosResponse(config, { data: [{ id: 'bd_a', location_id: 'loc_1', name: 'Torre A', sort_order: 1, units_count: 3 }, { id: 'bd_b', location_id: 'loc_1', name: 'Torre B', sort_order: 2, units_count: 0 }] }))
     return Promise.reject(new Error(`Unexpected request: ${url}`))
   })
 }

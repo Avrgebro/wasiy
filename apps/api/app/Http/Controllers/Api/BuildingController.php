@@ -44,7 +44,6 @@ class BuildingController extends Controller
         $building = $location->buildings()->create([
             'account_id' => $location->account_id,
             'name' => $validated['name'],
-            'code' => $validated['code'] ?? null,
             'sort_order' => $validated['sort_order'] ?? ((int) $location->buildings()->max('sort_order')) + 1,
         ]);
 
@@ -60,7 +59,7 @@ class BuildingController extends Controller
         $validated = $request->validate($this->rules($location, $building));
 
         $before = $building->name;
-        $building->fill(collect($validated)->only(['name', 'code', 'sort_order'])->all())->save();
+        $building->fill(collect($validated)->only(['name', 'sort_order'])->all())->save();
 
         if ($before !== $building->name) {
             $this->log($location, $request->user(), 'Se renombró la torre '.($before ?? '(principal)')." a {$building->name}.", $building);
@@ -110,7 +109,6 @@ class BuildingController extends Controller
                     }
                 },
             ],
-            'code' => ['sometimes', 'nullable', 'string', 'max:8'],
             'sort_order' => ['sometimes', 'integer', 'min:0', 'max:999'],
         ];
     }

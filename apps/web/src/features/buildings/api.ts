@@ -5,12 +5,11 @@ export type BuildingSummary = {
   id: string
   location_id: string
   name: string | null
-  code: string | null
   sort_order: number
   units_count: number
 }
 
-export type BuildingPayload = { name: string | null; code?: string | null; sort_order?: number }
+export type BuildingPayload = { name: string | null; sort_order?: number }
 
 export function buildingsQueryKey(locationId: string) {
   return ['locations', locationId, 'buildings'] as const

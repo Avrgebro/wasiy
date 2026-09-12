@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * what hides the tower everywhere in the UI. Units point here, so renaming
  * a tower is one row and a typo can never fork it.
  */
-#[Fillable(['account_id', 'location_id', 'name', 'code', 'sort_order'])]
+#[Fillable(['account_id', 'location_id', 'name', 'sort_order'])]
 class Building extends Model
 {
     /** @use HasFactory<BuildingFactory> */

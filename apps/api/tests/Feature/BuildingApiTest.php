@@ -47,14 +47,13 @@ test('towers are added, renamed in one place, and protected from deletion while 
     $this->actingAs($manager)->postJson("/api/locations/{$location->id}/buildings", ['name' => ''])->assertUnprocessable();
 
     $torreB = $this->actingAs($manager)
-        ->postJson("/api/locations/{$location->id}/buildings", ['name' => 'Torre B', 'code' => 'T2'])
+        ->postJson("/api/locations/{$location->id}/buildings", ['name' => 'Torre B'])
         ->assertCreated()
-        ->assertJsonPath('data.code', 'T2')
         ->json('data');
 
     // With two buildings the first one needs a name too; a blank is refused.
     $this->actingAs($manager)->patchJson("/api/buildings/{$default->id}", ['name' => null])->assertUnprocessable();
-    $this->actingAs($manager)->patchJson("/api/buildings/{$default->id}", ['name' => 'Torre A', 'code' => 'T1'])->assertOk();
+    $this->actingAs($manager)->patchJson("/api/buildings/{$default->id}", ['name' => 'Torre A'])->assertOk();
     // Names are unique per location, accents and case aside.
     $this->actingAs($manager)->postJson("/api/locations/{$location->id}/buildings", ['name' => 'torre b'])->assertUnprocessable();
 
