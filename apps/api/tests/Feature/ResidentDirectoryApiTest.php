@@ -34,7 +34,9 @@ function directoryWorld(): array
 
 function person(Location $location, string $first, string $last, array $attributes = []): Resident
 {
-    return Resident::factory()->create(['account_id' => $location->account_id, 'first_name' => $first, 'last_name' => $last, ...$attributes]);
+    // No random phone or email: the search box matches both, and a factory
+    // phone that happens to contain a unit number makes the search tests flaky.
+    return Resident::factory()->create(['account_id' => $location->account_id, 'first_name' => $first, 'last_name' => $last, 'phone' => null, 'email' => null, ...$attributes]);
 }
 
 function livesIn(Resident $resident, Unit $unit, bool $active = true, bool $primary = false): UnitMembership
