@@ -61,7 +61,7 @@ export function PackageDrawer({
       <AppDrawerBody>
         {pkg ? (
           <>
-            <StatusPill className="self-start" color={packageStatusColor(pkg.status)}>
+            <StatusPill color={packageStatusColor(pkg.status)}>
               {t(`packages.statuses.${pkg.status}`)}
             </StatusPill>
             <DrawerFacts>

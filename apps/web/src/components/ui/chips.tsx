@@ -2,7 +2,7 @@ import { forwardRef } from 'react'
 import type { HTMLAttributes, ReactNode } from 'react'
 
 const CHIP_CLASS =
-  'inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-2.5 py-1 text-xs font-medium'
+  'inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-full border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-body)] px-2.5 py-1 text-xs font-medium'
 
 /**
  * The outlined pill the design uses for location·role access chips —
