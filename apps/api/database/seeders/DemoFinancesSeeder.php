@@ -59,7 +59,7 @@ class DemoFinancesSeeder extends Seeder
                 'Cuota · Salón de eventos', 'Reserva del sáb, 18:00', null, '102', $day(15), null],
             [MovementDirection::Income, MovementCategory::ReservationDeposit, MovementStatus::Pending, 30000,
                 'Depósito · Salón de eventos', 'Reserva del sáb, 18:00', null, '102', $day(15), null],
-            [MovementDirection::Income, MovementCategory::ReservationDeposit, MovementStatus::ToRefund, 30000,
+            [MovementDirection::Income, MovementCategory::ReservationDeposit, MovementStatus::Held, 30000,
                 'Depósito · Salón de eventos', 'Evento del dom · sin incidencias', null, '301', $day(12), null],
             [MovementDirection::Income, MovementCategory::ReservationDeposit, MovementStatus::Held, 30000,
                 'Depósito · Salón de eventos', 'Evento del sáb · retenido durante el evento', null, '201', $day(8), null],
@@ -110,7 +110,7 @@ class DemoFinancesSeeder extends Seeder
 
         $path = match ($movement->status) {
             MovementStatus::Pending => [],
-            MovementStatus::ToRefund, MovementStatus::Refunded, MovementStatus::Retained => [MovementStatus::Held, $movement->status],
+            MovementStatus::Refunded, MovementStatus::Retained => [MovementStatus::Held, $movement->status],
             default => [$movement->status],
         };
         $previous = MovementStatus::Pending;

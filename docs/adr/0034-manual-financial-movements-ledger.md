@@ -8,8 +8,8 @@ The PRD scoped v1 finance to marking reservation fees and deposits paid or unpai
 
 - One table for income and expenses. Separate `payments` and `expenses` tables would need a union for every list, filter and total the mockup shows. A `direction` column carries the sign; amounts are always positive.
 - Reservation-linked rows are created when a reservation is approved (or instant-booked), one per fee and one per deposit, from the snapshots. Pending requests never appear in the ledger. A unique `(reservation_id, category)` index makes generation idempotent.
-- Deposits are not income. They have their own status path (`held`, `to_refund`, `refunded`, `retained`) and are excluded from the income total; they appear as an outstanding balance instead.
-- Status is manual and reversible where a mistake is likely (`paid` back to `pending`). Terminal states are `refunded`, `retained` and `voided`.
+- Deposits are not income. They have their own status path (`held`, then `refunded` or `retained`) and are excluded from the income total; they appear as an outstanding balance instead.
+- Status is manual and moves forward. Each settled, non-terminal status keeps exactly one undo (`paid` → `pending`, `held` → `pending`, `retained` → `held`); everything else is fixed by voiding and recording again. Void is available from `pending`, `paid` and `held`. Terminal states are `refunded` and `voided`.
 - Amounts stay whole integer soles with an implicit PEN currency, matching amenities and reservations. Minor units and multi-currency are deferred together.
 - Finances are visible only to Location Managers and Account Admins. Front desk sees reservation amounts on the booking, never the ledger.
 - No invoices, receipts, partial payments, unit balances, budgets or accounting exports. CSV export of movements is deferred to the exports work.
@@ -17,3 +17,17 @@ The PRD scoped v1 finance to marking reservation fees and deposits paid or unpai
 ## Consequences
 
 The reservations module gains a side effect on approval and cancellation, contained in one action so the booking rule stays untouched. The ledger is append-mostly and fully audited through the activity log, so a future accounting module can import it. The cost is a widening of v1 beyond the PRD's finance line; the PRD's non-goals remain in force for everything else in the finance backlog.
+
+## Revision 2026-09-11: the smallest machine
+
+The first cut had thirteen transitions, a `to_refund` state between `held` and `refunded`, and three reverts. Talking through the flow with Jose: staff record the transfer once, not the decision and then the transfer, so `to_refund` was the state rows got stuck in; and a ledger row should not change meaning after it settled, so reverts were cut to the one step back a wrong click needs. Pure forward-only was rejected because reservation and dues rows cannot be recorded again once voided (unique per reservation and category, one per unit and month), so a mis-click on those needs an undo. Result: eight transitions.
+
+| From | Forward | Undo |
+| --- | --- | --- |
+| pending (fee, expense) | paid, voided | |
+| paid | voided | pending |
+| pending (deposit) | held, voided | |
+| held | refunded, retained, voided | pending |
+| retained | | held |
+
+Cancelling a reservation voids its pending rows and leaves a held deposit held; the held tile is the queue of money to return or keep. The migration moved existing `to_refund` rows back to `held`; the activity log keeps the flag. The drawer shows one primary button, the confirmed moves (Anular, No devolver), and a single Deshacer link naming the state it returns to, each with its own loading state.

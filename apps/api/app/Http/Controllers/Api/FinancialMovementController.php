@@ -115,7 +115,6 @@ class FinancialMovementController extends Controller
             ->where('direction', MovementDirection::Expense->value)
             ->where('status', MovementStatus::Pending->value);
         $held = $base()->where('status', MovementStatus::Held->value);
-        $toRefund = $base()->where('status', MovementStatus::ToRefund->value);
 
         $incomeTotal = (int) $income->clone()->sum('amount_minor');
         $expenseTotal = (int) $expense->clone()->sum('amount_minor');
@@ -159,8 +158,6 @@ class FinancialMovementController extends Controller
             'payable_total_minor' => (int) $payable->clone()->sum('amount_minor'),
             'payable_count' => $payable->count(),
             'deposits_held_total_minor' => (int) $held->sum('amount_minor'),
-            'deposits_to_refund_total_minor' => (int) $toRefund->clone()->sum('amount_minor'),
-            'deposits_to_refund_count' => $toRefund->count(),
         ]]);
     }
 

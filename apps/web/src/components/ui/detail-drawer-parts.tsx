@@ -133,12 +133,15 @@ export function DrawerTimeline({ items }: { items: TimelineItem[] }) {
 
 export function ConfirmDialog({
   body,
+  loading = false,
   onCancel,
   onConfirm,
   opened,
   title,
 }: {
   body: string
+  /** Keeps the dialog open with the confirm button spinning while the action runs. */
+  loading?: boolean
   onCancel: () => void
   onConfirm: () => void
   opened: boolean
@@ -147,13 +150,13 @@ export function ConfirmDialog({
   const { t } = useTranslation('common')
 
   return (
-    <Modal centered opened={opened} radius="lg" title={title} onClose={onCancel}>
+    <Modal centered closeOnClickOutside={!loading} closeOnEscape={!loading} opened={opened} radius="lg" title={title} withCloseButton={!loading} onClose={onCancel}>
       <Text size="sm">{body}</Text>
       <div className="mt-4 flex justify-end gap-2">
-        <Button variant="default" onClick={onCancel}>
+        <Button disabled={loading} variant="default" onClick={onCancel}>
           {t('actions.cancel')}
         </Button>
-        <Button color="error" onClick={onConfirm}>
+        <Button color="error" loading={loading} onClick={onConfirm}>
           {t('actions.confirm')}
         </Button>
       </div>

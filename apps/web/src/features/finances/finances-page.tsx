@@ -340,11 +340,8 @@ function SummaryTiles({ summary }: { summary: FinanceSummary }) {
       />
       <StatCard
         aside={t('finances.tiles.heldAside', { amount: formatMoney(summary.deposits_held_total_minor) })}
-        detail={t('finances.tiles.receivableDetail', {
-          pending: summary.receivable_count,
-          refunds: summary.deposits_to_refund_count,
-        })}
-        highlighted={summary.receivable_count + summary.deposits_to_refund_count > 0}
+        detail={t('finances.tiles.receivableDetail', { count: summary.receivable_count })}
+        highlighted={summary.receivable_count > 0}
         label={t('finances.tiles.receivable')}
         tone="accent"
         value={formatMoney(summary.receivable_total_minor)}

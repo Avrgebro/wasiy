@@ -130,7 +130,7 @@ test('a movement recorded as already paid is settled by the actor', function () 
         ->assertCreated()
         ->assertJsonPath('data.status', 'paid')
         ->assertJsonPath('data.settled_by', $admin->id)
-        ->assertJsonPath('data.allowed_transitions', ['pending']);
+        ->assertJsonPath('data.allowed_transitions', ['voided', 'pending']);
 });
 
 test('the initial status must fit the category', function () {
@@ -232,7 +232,7 @@ test('a location manager of the location can record and settle movements', funct
         ->assertJsonPath('data.status', 'paid');
 });
 
-test('fees and expenses flip between pending and paid and never elsewhere', function () {
+test('fees and expenses go pending to paid, undo once, and void until voided', function () {
     [$account, $location, $unit, $admin] = financeWorld();
     $movement = seedMovement($location, $admin);
 
@@ -245,13 +245,16 @@ test('fees and expenses flip between pending and paid and never elsewhere', func
         ->postJson(statusUrl($account, $movement), ['status' => 'paid'])
         ->assertOk()
         ->assertJsonPath('data.status', 'paid')
-        ->assertJsonPath('data.settled_by_name', $admin->name);
+        ->assertJsonPath('data.settled_by_name', $admin->name)
+        ->assertJsonPath('data.allowed_transitions', ['voided', 'pending']);
 
     $this->actingAs($admin)
         ->postJson(statusUrl($account, $movement), ['status' => 'pending'])
         ->assertOk()
         ->assertJsonPath('data.status', 'pending');
 
+    // A paid row can be voided directly: void plus re-record is the fix for a wrong row.
+    $this->actingAs($admin)->postJson(statusUrl($account, $movement), ['status' => 'paid'])->assertOk();
     $this->actingAs($admin)
         ->postJson(statusUrl($account, $movement), ['status' => 'voided', 'note' => 'Duplicado'])
         ->assertOk()
@@ -266,10 +269,10 @@ test('fees and expenses flip between pending and paid and never elsewhere', func
     expect(ActivityLog::query()
         ->where('event_type', ActivityEventType::MovementStatusChanged->value)
         ->where('subject_id', $movement->id)
-        ->count())->toBe(3);
+        ->count())->toBe(4);
 });
 
-test('deposits follow their own lifecycle', function () {
+test('deposits go pending, held, then refunded or retained', function () {
     [$account, $location, $unit, $admin] = financeWorld();
     $deposit = seedMovement($location, $admin, [
         'direction' => 'income',
@@ -280,18 +283,23 @@ test('deposits follow their own lifecycle', function () {
     ]);
 
     $this->actingAs($admin)->postJson(statusUrl($account, $deposit), ['status' => 'paid'])->assertUnprocessable();
+    $this->actingAs($admin)->postJson(statusUrl($account, $deposit), ['status' => 'refunded'])->assertUnprocessable();
 
-    foreach (['held', 'to_refund', 'refunded'] as $next) {
-        $this->actingAs($admin)
-            ->postJson(statusUrl($account, $deposit), ['status' => $next])
-            ->assertOk()
-            ->assertJsonPath('data.status', $next);
-    }
+    $this->actingAs($admin)
+        ->postJson(statusUrl($account, $deposit), ['status' => 'held'])
+        ->assertOk()
+        ->assertJsonPath('data.allowed_transitions', ['refunded', 'retained', 'voided', 'pending']);
+
+    $this->actingAs($admin)
+        ->postJson(statusUrl($account, $deposit), ['status' => 'refunded'])
+        ->assertOk()
+        ->assertJsonPath('data.status', 'refunded')
+        ->assertJsonPath('data.allowed_transitions', []);
 
     $this->actingAs($admin)->postJson(statusUrl($account, $deposit), ['status' => 'held'])->assertUnprocessable();
 });
 
-test('a retained deposit can go back to held, refunded cannot', function () {
+test('a retained deposit can go back to held, refunded cannot, and to_refund no longer exists', function () {
     [$account, $location, $unit, $admin] = financeWorld();
     $deposit = seedMovement($location, $admin, [
         'direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'retained', 'counterparty' => null, 'unit_id' => $unit->id,
@@ -301,7 +309,9 @@ test('a retained deposit can go back to held, refunded cannot', function () {
         ->postJson(statusUrl($account, $deposit), ['status' => 'held'])
         ->assertOk()
         ->assertJsonPath('data.status', 'held')
-        ->assertJsonPath('data.allowed_transitions', ['to_refund', 'retained', 'pending']);
+        ->assertJsonPath('data.allowed_transitions', ['refunded', 'retained', 'voided', 'pending']);
+
+    $this->actingAs($admin)->postJson(statusUrl($account, $deposit), ['status' => 'to_refund'])->assertUnprocessable();
 
     $refunded = seedMovement($location, $admin, [
         'direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'refunded', 'counterparty' => null, 'unit_id' => $unit->id,
@@ -364,7 +374,7 @@ test('the summary totals the month and the outstanding balances', function () {
     $seed(['direction' => 'income', 'category' => 'reservation_fee', 'status' => 'pending', 'amount_minor' => 150, 'occurred_on' => '2026-08-15']);
     $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'pending', 'amount_minor' => 300, 'occurred_on' => '2026-08-15']);
     $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'held', 'amount_minor' => 300, 'occurred_on' => '2026-07-20']);
-    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'to_refund', 'amount_minor' => 300, 'occurred_on' => '2026-08-12']);
+    $seed(['direction' => 'income', 'category' => 'reservation_deposit', 'status' => 'held', 'amount_minor' => 300, 'occurred_on' => '2026-08-12']);
     // Expenses: paid in month, pending (payable), paid last month (ignored).
     $seed(['direction' => 'expense', 'status' => 'paid', 'amount_minor' => 1180, 'occurred_on' => '2026-08-14']);
     $seed(['direction' => 'expense', 'status' => 'paid', 'amount_minor' => 1400, 'occurred_on' => '2026-08-13']);
@@ -387,9 +397,7 @@ test('the summary totals the month and the outstanding balances', function () {
             'receivable_count' => 2,
             'payable_total_minor' => 600,
             'payable_count' => 1,
-            'deposits_held_total_minor' => 300,
-            'deposits_to_refund_total_minor' => 300,
-            'deposits_to_refund_count' => 1,
+            'deposits_held_total_minor' => 600,
             'previous_month' => '2026-07',
             // July: no paid income, one paid expense of 999.
             'previous_balance_minor' => -999,
@@ -532,7 +540,7 @@ test('an instant booking opens its rows at creation and a rejection opens none',
     expect(FinancialMovement::query()->where('reservation_id', $pending->id)->count())->toBe(0);
 });
 
-test('cancelling a reservation voids pending rows and flags a held deposit for refund', function () {
+test('cancelling a reservation voids pending rows and leaves a held deposit held', function () {
     [$account, $location, $unit, $admin] = financeWorld();
     [, $reservation] = pendingReservationWithCharges($account, $location, $unit, $admin);
 
@@ -554,7 +562,7 @@ test('cancelling a reservation voids pending rows and flags a held deposit for r
         ->sortKeys();
 
     expect($byCategory->all())->toBe([
-        'reservation_deposit' => 'to_refund',
+        'reservation_deposit' => 'held',
         'reservation_fee' => 'voided',
     ]);
 });

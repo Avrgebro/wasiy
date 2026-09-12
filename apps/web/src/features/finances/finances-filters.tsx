@@ -26,7 +26,7 @@ export function FinancesFilters({
     { key: 'all' as const, label: t('finances.chips.all') },
     ...FINANCE_CHIPS.map((key) => ({ key, label: t(`finances.chips.${key}`), count: key === 'pending' && pendingCount > 0 ? pendingCount : undefined })),
   ]
-  const statusOptions = (['pending', 'payable', 'paid', 'held', 'to_refund', 'refunded', 'retained', 'voided'] as const).map((value) => ({ value, label: t(`finances.statuses.${value}`) }))
+  const statusOptions = (['pending', 'payable', 'paid', 'held', 'refunded', 'retained', 'voided'] as const).map((value) => ({ value, label: t(`finances.statuses.${value}`) }))
   const selected = search.category ? search.category.split(',').filter(Boolean) : []
   const label = (value: string) => t(`finances.categories.${value}`)
 

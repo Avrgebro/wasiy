@@ -486,7 +486,7 @@ describe('ReservationsPage', () => {
             direction: 'income',
             category: 'reservation_deposit',
             status: 'held',
-            allowed_transitions: ['to_refund', 'retained', 'pending'],
+            allowed_transitions: ['refunded', 'retained', 'voided', 'pending'],
             amount_minor: 30000,
             concept: 'Depósito · Parrilla / terraza',
             detail: null,
@@ -518,6 +518,6 @@ describe('ReservationsPage', () => {
       'href',
       '/admin/finances?month=2026-09&movement=mv_fee&page=1',
     )
-    expect(within(drawer).getByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Marcar devuelto' })).toBeInTheDocument()
   })
 })

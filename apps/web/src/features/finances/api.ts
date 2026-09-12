@@ -28,7 +28,6 @@ export type MovementStatus =
   | 'pending'
   | 'paid'
   | 'held'
-  | 'to_refund'
   | 'refunded'
   | 'retained'
   | 'voided'
@@ -85,8 +84,6 @@ export type FinanceSummary = {
   payable_total_minor: number
   payable_count: number
   deposits_held_total_minor: number
-  deposits_to_refund_total_minor: number
-  deposits_to_refund_count: number
 }
 
 export type MovementsSearch = {

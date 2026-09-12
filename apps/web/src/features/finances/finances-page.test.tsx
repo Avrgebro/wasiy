@@ -79,8 +79,6 @@ function summary(overrides: Partial<FinanceSummary> = {}): FinanceSummary {
     payable_total_minor: 60000,
     payable_count: 1,
     deposits_held_total_minor: 90000,
-    deposits_to_refund_total_minor: 30000,
-    deposits_to_refund_count: 1,
     ...overrides,
   }
 }
@@ -243,8 +241,8 @@ describe('FinancesPage', () => {
         id: 'mv_2',
         direction: 'income',
         category: 'reservation_deposit',
-        status: 'to_refund',
-        allowed_transitions: ['refunded', 'retained', 'held'],
+        status: 'held',
+        allowed_transitions: ['refunded', 'retained', 'voided', 'pending'],
         amount_minor: 30000,
         concept: 'Depósito · Salón de eventos',
         detail: 'Evento del dom 10 · sin incidencias · J. Ríos',
@@ -319,8 +317,8 @@ describe('FinancesPage', () => {
           id: 'mv_dep',
           direction: 'income',
           category: 'reservation_deposit',
-          status: 'to_refund',
-          allowed_transitions: ['refunded', 'retained', 'held'],
+          status: 'held',
+          allowed_transitions: ['refunded', 'retained', 'voided', 'pending'],
           amount_minor: 30000,
           concept: 'Depósito · Salón de eventos',
           detail: 'Evento del dom 10 · sin incidencias · J. Ríos',
@@ -349,12 +347,13 @@ describe('FinancesPage', () => {
       '/admin/reservations?date=2026-08-10&reservation=res_9',
     )
     // History newest first, generated row attributed to the system.
-    expect(await within(drawer).findByText('Marcado por devolver')).toBeInTheDocument()
+    expect(await within(drawer).findByText('Depósito recibido (en garantía)')).toBeInTheDocument()
     expect(within(drawer).getByText('Generado al aprobar la reserva')).toBeInTheDocument()
     expect(within(drawer).getByText('Sistema')).toBeInTheDocument()
-    // Forward as primary, retain as secondary, revert as a text link.
+    // Forward as primary, retain and void behind a confirmation, one undo as a text link.
     expect(within(drawer).getByRole('button', { name: 'No devolver' })).toBeInTheDocument()
-    expect(within(drawer).getByRole('button', { name: 'Marcar recibido' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Anular' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Deshacer · volver a Pendiente' })).toBeInTheDocument()
 
     await user.type(within(drawer).getByLabelText('Nota (opcional)'), 'Devuelto en efectivo')
     await user.click(within(drawer).getByRole('button', { name: 'Marcar devuelto' }))
@@ -469,7 +468,7 @@ describe('FinancesPage', () => {
     expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ category: 'fine' })
   })
 
-  it('offers every allowed move for a held deposit: release, retain, and revert', async () => {
+  it('offers every allowed move for a held deposit: refund, retain, void, and one undo', async () => {
     currentSearch.month = '2026-08'
     installAdapter([
       movement({
@@ -477,7 +476,7 @@ describe('FinancesPage', () => {
         direction: 'income',
         category: 'reservation_deposit',
         status: 'held',
-        allowed_transitions: ['to_refund', 'retained', 'pending'],
+        allowed_transitions: ['refunded', 'retained', 'voided', 'pending'],
         amount_minor: 30000,
         concept: 'Depósito · Salón de eventos',
         counterparty: null,
@@ -491,9 +490,11 @@ describe('FinancesPage', () => {
     await user.click(await screen.findByText('Depósito · Salón de eventos'))
     const drawer = await screen.findByRole('dialog')
 
-    expect(await within(drawer).findByRole('button', { name: 'Liberar depósito' })).toBeInTheDocument()
+    expect(await within(drawer).findByRole('button', { name: 'Marcar devuelto' })).toBeInTheDocument()
     expect(within(drawer).getByRole('button', { name: 'No devolver' })).toBeInTheDocument()
-    expect(within(drawer).getByRole('button', { name: 'Marcar pendiente' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Anular' })).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: 'Deshacer · volver a Pendiente' })).toBeInTheDocument()
+    expect(within(drawer).queryByRole('button', { name: 'Liberar depósito' })).not.toBeInTheDocument()
   })
 
   it('asks before retaining a deposit and lets a retained one go back to held', async () => {
@@ -506,7 +507,7 @@ describe('FinancesPage', () => {
           direction: 'income',
           category: 'reservation_deposit',
           status: 'held',
-          allowed_transitions: ['to_refund', 'retained', 'pending'],
+          allowed_transitions: ['refunded', 'retained', 'voided', 'pending'],
           amount_minor: 30000,
           concept: 'Depósito · Salón de eventos',
           counterparty: null,
@@ -546,7 +547,7 @@ describe('FinancesPage', () => {
     drawer = await screen.findByRole('dialog')
     // Badge and history both carry the label.
     expect(await within(drawer).findAllByText('Retenido por daños')).not.toHaveLength(0)
-    await user.click(within(drawer).getByRole('button', { name: 'Marcar recibido' }))
+    await user.click(within(drawer).getByRole('button', { name: 'Deshacer · volver a En garantía' }))
     await waitFor(() => expect(transitions).toHaveLength(2))
     expect(transitions[1].body).toEqual({ status: 'held' })
   })

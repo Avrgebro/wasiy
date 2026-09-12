@@ -912,7 +912,7 @@
       "noteHint": "Visible para el residente.",
       "noteRequiredHint": "Requerida para observar o rechazar.",
       "confirmCancel": "¿Cancelar la reserva?",
-      "confirmCancelBody": "El espacio queda libre y los cobros pendientes se anulan; un depósito en garantía pasa a por devolver. Esta acción no se puede deshacer.",
+      "confirmCancelBody": "El espacio queda libre y los cobros pendientes se anulan; un depósito en garantía sigue en garantía hasta que lo devuelvas o lo retengas. Esta acción no se puede deshacer.",
       "decidedLabel": {
         "approved": "Aprobada por",
         "rejected": "Rechazada por",
@@ -1100,7 +1100,8 @@
       "balance": "Balance del mes",
       "receivable": "Por cobrar · depósitos retenidos",
       "heldAside": "· {{amount}} en garantía",
-      "receivableDetail": "{{pending}} pendientes · {{refunds}} por devolver",
+      "receivableDetail_one": "{{count}} pendiente",
+      "receivableDetail_other": "{{count}} pendientes",
       "none": "Sin movimientos",
       "balanceVsPrevious": "vs. {{month}}: {{delta}}"
     },
@@ -1118,7 +1119,6 @@
       "payable": "Por pagar",
       "paid": "Pagado",
       "held": "En garantía",
-      "to_refund": "Por devolver",
       "refunded": "Devuelto",
       "retained": "Retenido por daños",
       "voided": "Anulado"
@@ -1127,7 +1127,6 @@
       "pending": "Marcar pendiente",
       "paid": "Marcar pagado",
       "held": "Marcar recibido",
-      "to_refund": "Liberar depósito",
       "refunded": "Marcar devuelto",
       "retained": "No devolver",
       "voided": "Anular"
@@ -1163,12 +1162,13 @@
       "recordedBySystem": "Sistema · al aprobar la reserva",
       "actions": "Acciones",
       "actionNote": "Nota (opcional)",
+      "undo": "Deshacer · volver a {{state}}",
       "actionNoteHint": "Motivo de la devolución o retención, visible para el residente.",
       "close": "Cerrar",
       "confirmRetain": "¿Retener el depósito?",
       "confirmRetainBody": "El depósito no se devolverá al residente por daños o incumplimiento. Puedes revertirlo después desde este mismo panel.",
       "confirmVoid": "¿Anular el movimiento?",
-      "confirmVoidBody": "El movimiento dejará de contar en los totales. Esta acción no se puede deshacer.",
+      "confirmVoidBody": "El movimiento dejará de contar en los totales. Esta acción no se puede deshacer; si fue un error, regístralo de nuevo.",
       "confirm": "Confirmar"
     },
     "record": "Registrar movimiento",
@@ -1216,7 +1216,6 @@
       "paid": "Marcado pagado",
       "pending": "Vuelto a pendiente",
       "held": "Depósito recibido (en garantía)",
-      "to_refund": "Marcado por devolver",
       "refunded": "Marcado devuelto",
       "retained": "Retenido por daños",
       "voided": "Anulado"

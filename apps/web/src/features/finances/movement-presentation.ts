@@ -17,7 +17,6 @@ const STATUS_COLORS: Record<MovementStatus, string> = {
   pending: 'warning',
   paid: 'success',
   held: 'info',
-  to_refund: 'info',
   refunded: 'success',
   retained: 'gray',
   voided: 'gray',
@@ -39,8 +38,7 @@ export function amountClassName(movement: Pick<MovementSummary, 'status' | 'dire
     case 'pending':
       return 'text-[var(--wa-accent)]'
     case 'held':
-    case 'to_refund':
-      // Deposits in motion use the mockup's teal (interactive), not info blue.
+      // Deposits in hand use the mockup's teal (interactive), not info blue.
       return 'text-[var(--wa-interactive)]'
     default:
       return 'text-[var(--wa-success)]'
@@ -48,15 +46,14 @@ export function amountClassName(movement: Pick<MovementSummary, 'status' | 'dire
 }
 
 /**
- * The one transition a row offers inline. Everything else (void, retain,
- * revert) lives in the detail modal, where a wrong click is less likely.
+ * The one forward move a row offers inline (ADR 0034, revised): pending goes
+ * to paid or held, a held deposit to refunded. Void and undo stay behind the
+ * drawer, where a wrong click is less likely.
  */
 export function primaryTransition(movement: MovementSummary): MovementStatus | null {
-  // Only forward moves qualify; reverts stay behind the modal.
   const forward: Record<MovementStatus, MovementStatus[]> = {
     pending: ['paid', 'held'],
-    held: ['to_refund'],
-    to_refund: ['refunded'],
+    held: ['refunded'],
     paid: [],
     refunded: [],
     retained: [],
@@ -64,6 +61,14 @@ export function primaryTransition(movement: MovementSummary): MovementStatus | n
   }
 
   return forward[movement.status].find((status) => movement.allowed_transitions.includes(status)) ?? null
+}
+
+/** The single step back a settled row offers: paid or held → pending, retained → held. */
+export function undoTransition(movement: MovementSummary): MovementStatus | null {
+  const back: Partial<Record<MovementStatus, MovementStatus>> = { paid: 'pending', held: 'pending', retained: 'held' }
+  const target = back[movement.status]
+
+  return target && movement.allowed_transitions.includes(target) ? target : null
 }
 
 export function transitionLabel(status: MovementStatus, t: TFunction): string {

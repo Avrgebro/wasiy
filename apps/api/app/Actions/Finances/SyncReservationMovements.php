@@ -13,7 +13,8 @@ use Carbon\CarbonImmutable;
 /**
  * The reservations module's only touch on the ledger. Approval opens one
  * row per fee and per deposit from the snapshots; cancellation voids what
- * is still pending and flags a held deposit for refund. Idempotent through
+ * is still pending. A held deposit stays held: it is money in hand until
+ * staff mark it refunded or retained. Idempotent through
  * the (reservation_id, category) unique index.
  */
 class SyncReservationMovements
@@ -66,8 +67,6 @@ class SyncReservationMovements
         foreach ($movements as $movement) {
             if ($movement->status === MovementStatus::Pending) {
                 $this->transition->handle($movement, $actor, MovementStatus::Voided);
-            } elseif ($movement->status === MovementStatus::Held) {
-                $this->transition->handle($movement, $actor, MovementStatus::ToRefund);
             }
         }
     }

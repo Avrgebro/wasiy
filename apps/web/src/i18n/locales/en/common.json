@@ -912,7 +912,7 @@
       "noteHint": "Visible to the resident.",
       "noteRequiredHint": "Required to observe or reject.",
       "confirmCancel": "Cancel the reservation?",
-      "confirmCancelBody": "The slot is released and pending charges are voided; a held deposit becomes due for refund. This cannot be undone.",
+      "confirmCancelBody": "The slot is released and pending charges are voided; a held deposit stays held until you refund or retain it. This cannot be undone.",
       "decidedLabel": {
         "approved": "Approved by",
         "rejected": "Rejected by",
@@ -1100,7 +1100,8 @@
       "balance": "Balance this month",
       "receivable": "Receivable · deposits held",
       "heldAside": "· {{amount}} held",
-      "receivableDetail": "{{pending}} pending · {{refunds}} to refund",
+      "receivableDetail_one": "{{count}} pending",
+      "receivableDetail_other": "{{count}} pending",
       "none": "No movements",
       "balanceVsPrevious": "vs. {{month}}: {{delta}}"
     },
@@ -1118,7 +1119,6 @@
       "payable": "To pay",
       "paid": "Paid",
       "held": "Held",
-      "to_refund": "To refund",
       "refunded": "Refunded",
       "retained": "Retained for damages",
       "voided": "Voided"
@@ -1127,7 +1127,6 @@
       "pending": "Mark pending",
       "paid": "Mark paid",
       "held": "Mark received",
-      "to_refund": "Release deposit",
       "refunded": "Mark refunded",
       "retained": "Do not refund",
       "voided": "Void"
@@ -1163,6 +1162,7 @@
       "recordedBySystem": "System · on reservation approval",
       "actions": "Actions",
       "actionNote": "Note (optional)",
+      "undo": "Undo · back to {{state}}",
       "actionNoteHint": "Reason for the refund or retention, visible to the resident.",
       "close": "Close",
       "confirmRetain": "Retain the deposit?",
@@ -1216,7 +1216,6 @@
       "paid": "Marked paid",
       "pending": "Back to pending",
       "held": "Deposit received (held)",
-      "to_refund": "Marked to refund",
       "refunded": "Marked refunded",
       "retained": "Retained for damages",
       "voided": "Voided"

@@ -36,7 +36,7 @@ class PortalLedgerController extends Controller
             ->where('status', '!=', MovementStatus::Voided->value);
 
         $rows = (clone $base)
-            ->when(($validated['scope'] ?? 'all') === 'pending', fn (Builder $query) => $query->whereIn('status', [MovementStatus::Pending->value, MovementStatus::ToRefund->value]))
+            ->when(($validated['scope'] ?? 'all') === 'pending', fn (Builder $query) => $query->where('status', MovementStatus::Pending->value))
             ->orderByDesc('occurred_on')->orderByDesc('created_at')
             ->limit(200)
             ->get()
@@ -44,7 +44,6 @@ class PortalLedgerController extends Controller
             ->all();
 
         $owed = (int) (clone $base)->where('status', MovementStatus::Pending->value)->sum('amount_minor');
-        $toRefund = (int) (clone $base)->where('status', MovementStatus::ToRefund->value)->sum('amount_minor');
 
         $lastDues = (clone $base)
             ->where('category', MovementCategory::MaintenanceDues->value)
@@ -53,21 +52,22 @@ class PortalLedgerController extends Controller
 
         return response()->json([
             'data' => $rows,
-            'balance_minor' => $owed - $toRefund,
-            'pending_count' => (clone $base)->whereIn('status', [MovementStatus::Pending->value, MovementStatus::ToRefund->value])->count(),
+            'balance_minor' => $owed,
+            'pending_count' => (clone $base)->where('status', MovementStatus::Pending->value)->count(),
             'last_dues' => $lastDues ? ['period' => $lastDues->period, 'amount_minor' => $lastDues->amount_minor, 'settled' => $lastDues->status !== MovementStatus::Pending] : null,
         ]);
     }
 
     /**
-     * Pending and to-refund read as "Pendiente"; everything else the unit
-     * already settled reads as "Pagado". Money coming back is negative.
+     * Pending reads as "Pendiente"; everything else the unit already
+     * settled reads as "Pagado". A refunded deposit is money coming back,
+     * shown negative.
      *
      * @return array<string, mixed>
      */
     private function row(FinancialMovement $movement): array
     {
-        $refund = in_array($movement->status, [MovementStatus::Refunded, MovementStatus::ToRefund], true);
+        $refund = $movement->status === MovementStatus::Refunded;
 
         return [
             'id' => $movement->id,
@@ -77,7 +77,7 @@ class PortalLedgerController extends Controller
             'occurred_on' => $movement->occurred_on->toDateString(),
             'period' => $movement->period,
             'amount_minor' => $refund ? -$movement->amount_minor : $movement->amount_minor,
-            'state' => in_array($movement->status, [MovementStatus::Pending, MovementStatus::ToRefund], true) ? 'pending' : 'paid',
+            'state' => $movement->status === MovementStatus::Pending ? 'pending' : 'paid',
         ];
     }
 }

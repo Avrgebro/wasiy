@@ -7,17 +7,19 @@ enum MovementStatus: string
     case Pending = 'pending';
     case Paid = 'paid';
     case Held = 'held';
-    case ToRefund = 'to_refund';
     case Refunded = 'refunded';
     case Retained = 'retained';
     case Voided = 'voided';
 
     /**
-     * The whole status machine in one place. Fees and expenses go
-     * pending → paid (reversible for mistakes); deposits go
-     * pending → held → to_refund → refunded, with retained (kept for
-     * damages) reachable once the money is in hand and reversible back to
-     * held. Any pending row can be voided.
+     * The whole status machine in one place (ADR 0034, revised 2026-09-11).
+     * Statuses move forward and the only fix for a mistake is one step back:
+     * fees and expenses go pending → paid; deposits go pending → held and
+     * then refunded or retained. Void is available until money leaves
+     * (pending, paid, held). Refunded and voided are terminal. Each settled,
+     * non-terminal status keeps exactly one undo (paid → pending,
+     * held → pending, retained → held) because reservation and dues rows
+     * cannot be recorded again once voided.
      *
      * @return list<self>
      */
@@ -26,11 +28,7 @@ enum MovementStatus: string
         if ($category->isDeposit()) {
             return match ($this) {
                 self::Pending => [self::Held, self::Voided],
-                self::Held => [self::ToRefund, self::Retained, self::Pending],
-                self::ToRefund => [self::Refunded, self::Retained, self::Held],
-                // Kept for damages is a judgment call, so it stays reversible;
-                // refunded and voided are not, because money moved or the row
-                // never counted.
+                self::Held => [self::Refunded, self::Retained, self::Voided, self::Pending],
                 self::Retained => [self::Held],
                 default => [],
             };
@@ -38,8 +36,18 @@ enum MovementStatus: string
 
         return match ($this) {
             self::Pending => [self::Paid, self::Voided],
-            self::Paid => [self::Pending],
+            self::Paid => [self::Voided, self::Pending],
             default => [],
+        };
+    }
+
+    /** The single step back a status offers, if any. */
+    public function undo(MovementCategory $category): ?self
+    {
+        return match ($this) {
+            self::Paid, self::Held => self::Pending,
+            self::Retained => $category->isDeposit() ? self::Held : null,
+            default => null,
         };
     }
 

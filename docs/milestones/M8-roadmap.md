@@ -21,8 +21,8 @@ Missing entirely: any finance table, model, policy, controller, action, resource
 
 - **One table, `financial_movements`**, not separate payments and expenses. The mockup lists, filters and totals them together; one table keeps the summary query and the eventual CSV trivial. `direction` (`income` | `expense`) carries the sign; `amount` is always positive.
 - **Reservation rows are created on approval**, never on request. Instant amenities approve at creation, so they generate rows at creation. Rejected requests never touch the ledger. One row per (reservation, category) — a unique index makes generation idempotent.
-- **Cancelling a reservation** voids its pending rows and moves a held deposit to `to_refund`. A fee already paid stays paid; refunding it is a manual decision outside v1.
-- **Deposits have their own lifecycle**: `pending → held → to_refund → refunded`, with `retained` (kept for damages) reachable from `held` and `to_refund`. Fees and expenses use `pending → paid`, reversible to `pending` for mistakes. Any pending row can be `voided`.
+- **Cancelling a reservation** voids its pending rows and leaves a held deposit held (revised 2026-09-11; it used to move to `to_refund`). A fee already paid stays paid; refunding it is a manual decision outside v1.
+- **Deposits have their own lifecycle**: `pending → held → refunded | retained`. Fees and expenses use `pending → paid`. Void is available from pending, paid and held; each settled non-terminal status has one undo. See the 2026-09-11 revision in ADR 0034 (`to_refund` and two of the reverts were removed).
 - **Month is the unit of navigation** (`month=YYYY-MM`, interpreted in the location timezone). Income and expense tiles are month-bound by `occurred_on`; receivables and held deposits are outstanding balances and ignore the month.
 - **Money stays whole integer soles**, matching amenities and reservations. A shared `formatMoney` helper renders `S/ 1 240` with thin-space grouping and a leading minus for expenses.
 - **Front desk does not see finances.** View and mutate both require `canManageRegistry` (managers and admins).
@@ -39,7 +39,7 @@ One table, `financial_movements`:
 | `account_id`, `location_id` | ulid FKs | composite FK to `locations (id, account_id)` like reservations |
 | `direction` | string enum | `income` / `expense` |
 | `category` | string enum | `reservation_fee` / `reservation_deposit` / `utility` / `cleaning` / `maintenance` / `other` |
-| `status` | string enum | `pending` / `paid` / `held` / `to_refund` / `refunded` / `retained` / `voided` |
+| `status` | string enum | `pending` / `paid` / `held` / `refunded` / `retained` / `voided` |
 | `amount` | unsigned integer | whole soles, always positive |
 | `concept` | string | first line of the Concepto column ("Cuota · Salón de eventos", "Agua · áreas comunes") |
 | `detail` | string, nullable | second line ("Recibo Sedapal · vence 20 ago") |
@@ -59,7 +59,7 @@ Indexes: `(location_id, occurred_on)` for the month list, `(account_id, status)`
 All under the existing `accounts/{account}` group, `Gate`-checked by `FinancialMovementPolicy`:
 
 - `GET /locations/{location}/finances/movements?month=&direction=&status=&category=&search=&sort=&page=&per_page=` — paginated (ADR 0011); `status` and `category` accept comma-separated sets; default sort `occurred_on desc, created_at desc`.
-- `GET /locations/{location}/finances/summary?month=` — the four tiles: `income_total/count` (paid, non-deposit income in month), `expense_total/count` (paid expenses in month), `balance`, `receivable_total/count` (pending income, all time), `payable_total/count` (pending expenses, all time), `deposits_held_total`, `deposits_to_refund_total/count`.
+- `GET /locations/{location}/finances/summary?month=` — the four tiles: `income_total/count` (paid, non-deposit income in month), `expense_total/count` (paid expenses in month), `balance`, `receivable_total/count` (pending income, all time), `payable_total/count` (pending expenses, all time), `deposits_held_total`.
 - `POST /locations/{location}/finances/movements` — manual record; `status` may be `pending` (default), `paid` (non-deposit) or `held` (deposit).
 - `POST /finances/movements/{movement}/status` — `{ status, note? }`, validated against the allowed transitions for the row's category and current status.
 
@@ -77,7 +77,7 @@ New `features/finances/` following the units registry shape: `api.ts`, `schemas.
 
 ## Slices
 
-1. **Backend foundation** — migration, enums, model, policy, actions, endpoints, activity events, reservation hooks (approve → rows, cancel → void/to_refund), Pest tests. *Deliverable: API green in tests, nothing visible.*
+1. **Backend foundation** — migration, enums, model, policy, actions, endpoints, activity events, reservation hooks (approve → rows, cancel → void pending), Pest tests. *Deliverable: API green in tests, nothing visible.*
 2. **Page** — URL contract, tiles from the summary endpoint, chips, month navigator, `DataTable` with row actions, shared `formatMoney`.
 3. **Registrar movimiento drawer** + detail modal.
 4. **Reservation detail modal** shows the linked movements' status instead of only the snapshot amounts.

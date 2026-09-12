@@ -23,16 +23,19 @@ import {
   statusColor,
   statusLabel,
   transitionLabel,
+  undoTransition,
 } from './movement-presentation'
 import { StatusPill } from '../../components/ui/chips'
 
-const DESTRUCTIVE: MovementStatus[] = ['voided', 'retained']
+/** The two moves people regret ask once; the rest are one click. */
+const CONFIRMED: MovementStatus[] = ['voided', 'retained']
 
 /**
  * The row's home (mockup 10 drawer): amount and status, the facts the table
- * omits, the history from the activity log, and every allowed transition —
- * forward move as primary, void/retain as secondary, reverts as a text link.
- * One optional note applies to whichever action is pressed.
+ * omits, the history from the activity log, and the allowed transitions —
+ * the forward move as primary, void and retain as secondary behind a
+ * confirmation, the single undo as a text link. One optional note applies
+ * to whichever action is pressed.
  */
 export function MovementDrawer({
   accountId,
@@ -172,11 +175,11 @@ export function MovementDrawer({
 
             {movement.allowed_transitions.length > 0 ? (
               <Actions
-                loading={mutation.isPending}
+                inFlight={mutation.isPending ? mutation.variables : null}
                 movement={movement}
                 note={note}
                 onNote={setNote}
-                onTransition={(status) => mutation.mutate(status)}
+                onTransition={(status) => mutation.mutateAsync(status).then(() => undefined, () => undefined)}
               />
             ) : null}
           </>
@@ -200,43 +203,43 @@ function historyLabel(entry: MovementHistoryEntry, fromReservation: boolean, t: 
 }
 
 function Actions({
-  loading,
+  inFlight,
   movement,
   note,
   onNote,
   onTransition,
 }: {
-  loading: boolean
+  /** The status being requested right now, so only that button spins. */
+  inFlight: MovementStatus | null
   movement: MovementSummary
   note: string
   onNote: (value: string) => void
-  onTransition: (status: MovementStatus) => void
+  /** Resolves when the request settles, success or failure, so the dialog knows when to close. */
+  onTransition: (status: MovementStatus) => Promise<void>
 }) {
   const { t } = useTranslation('common')
   const [confirming, setConfirming] = useState<MovementStatus | null>(null)
+  const busy = inFlight !== null
   const primary = primaryTransition(movement)
-  const destructive = movement.allowed_transitions.filter((status) => DESTRUCTIVE.includes(status))
-  const reverts = movement.allowed_transitions.filter(
-    (status) => status !== primary && !DESTRUCTIVE.includes(status),
-  )
+  const undo = undoTransition(movement)
+  const confirmed = movement.allowed_transitions.filter((status) => CONFIRMED.includes(status))
 
   return (
     <>
-      {/* The two moves people regret ask once; paid/refunded stay one click. */}
       <ConfirmDialog
         body={t(confirming === 'voided' ? 'finances.detail.confirmVoidBody' : 'finances.detail.confirmRetainBody')}
+        loading={confirming !== null && inFlight === confirming}
         opened={confirming !== null}
         title={t(confirming === 'voided' ? 'finances.detail.confirmVoid' : 'finances.detail.confirmRetain')}
         onCancel={() => setConfirming(null)}
         onConfirm={() => {
-          if (confirming) {
-            onTransition(confirming)
-          }
-          setConfirming(null)
+          // The dialog stays open, spinning, until the request settles.
+          if (confirming) void onTransition(confirming).finally(() => setConfirming(null))
         }}
       />
       <DrawerSection label={t('finances.detail.actions')} />
       <Textarea
+        disabled={busy}
         label={t('finances.detail.actionNote')}
         placeholder={t('finances.detail.actionNoteHint')}
         value={note}
@@ -245,34 +248,34 @@ function Actions({
       <div className="flex flex-col items-start gap-2.5">
         <div className="flex w-full gap-2.5">
           {primary ? (
-            <Button className="flex-1" color="accent" loading={loading} onClick={() => onTransition(primary)}>
+            <Button
+              className="flex-1"
+              color="accent"
+              disabled={busy && inFlight !== primary}
+              loading={inFlight === primary}
+              onClick={() => void onTransition(primary)}
+            >
               {transitionLabel(primary, t)}
             </Button>
           ) : null}
-          {destructive.map((status) => (
-            <Button
-              key={status}
-              className="flex-1"
-              disabled={loading}
-              variant="default"
-              onClick={() => setConfirming(status)}
-            >
+          {confirmed.map((status) => (
+            <Button key={status} className="flex-1" disabled={busy} variant="default" onClick={() => setConfirming(status)}>
               {transitionLabel(status, t)}
             </Button>
           ))}
         </div>
-        {reverts.map((status) => (
+        {undo ? (
           <Button
-            key={status}
             c="dimmed"
-            disabled={loading}
+            disabled={busy && inFlight !== undo}
+            loading={inFlight === undo}
             size="sm"
             variant="subtle"
-            onClick={() => onTransition(status)}
+            onClick={() => void onTransition(undo)}
           >
-            {transitionLabel(status, t)}
+            {t('finances.detail.undo', { state: statusLabel({ status: undo, direction: movement.direction }, t) })}
           </Button>
-        ))}
+        ) : null}
       </div>
     </>
   )
