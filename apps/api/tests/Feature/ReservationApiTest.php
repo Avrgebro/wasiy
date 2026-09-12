@@ -1,10 +1,11 @@
 <?php
 
-use App\Actions\Reservations\ValidateReservationSlot;
+use App\Actions\Reservations\ValidateReservationDay;
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\BookingMode;
 use App\Enums\LocationRole;
+use App\Enums\Weekday;
 use App\Models\Account;
 use App\Models\ActivityLog;
 use App\Models\Amenity;
@@ -22,15 +23,11 @@ uses(RefreshDatabase::class);
 function reservationWorld(array $amenityOverrides = []): array
 {
     $account = Account::factory()->create();
-    // America/Lima (UTC−5) so a UTC-boundary bug shows up in wall-clock
-    // assertions.
+    // America/Lima (UTC−5) so a UTC-boundary bug shows up in the day rules.
     $location = Location::factory()->for($account)->create(['timezone' => 'America/Lima']);
     $amenity = Amenity::factory()->for($location)->create([
         'account_id' => $account->id,
-        'availability' => [
-            'monday' => [['start' => '09:00', 'end' => '22:00']],
-            'tuesday' => [['start' => '09:00', 'end' => '12:00']],
-        ],
+        'open_days' => ['monday', 'tuesday'],
         'fee_amount_minor' => 150,
         'deposit_amount_minor' => 300,
         ...$amenityOverrides,
@@ -48,7 +45,7 @@ function reservationsBase(Account $account, Location $location): string
     return "/api/accounts/{$account->id}/locations/{$location->id}/reservations";
 }
 
-/** The next Monday strictly in the future, as a local Lima date string. */
+/** The Monday of next week, as a local Lima date string. */
 function nextMonday(): string
 {
     return CarbonImmutable::now('America/Lima')->addWeek()->next('Monday')->format('Y-m-d');
@@ -60,8 +57,6 @@ function reservationPayload(Amenity $amenity, Unit $unit, array $overrides = [])
         'amenity_id' => $amenity->id,
         'unit_id' => $unit->id,
         'date' => nextMonday(),
-        'start' => '10:00',
-        'end' => '11:00',
         ...$overrides,
     ];
 }
@@ -75,19 +70,18 @@ test('an instant amenity books as approved with fee snapshots and an activity en
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
         ->assertCreated()
         ->assertJsonPath('data.status', 'approved')
+        ->assertJsonPath('data.reserved_on', nextMonday())
+        ->assertJsonPath('data.is_completed', false)
         ->assertJsonPath('data.fee_snapshot_minor', 150)
         ->assertJsonPath('data.deposit_snapshot_minor', 300)
-        ->assertJsonPath('data.unit_number', $unit->unit_number);
-
-    // 10:00 in Lima is 15:00 UTC — stored UTC, validated wall-clock.
-    expect($response->json('data.starts_at'))->toBe(
-        CarbonImmutable::parse(nextMonday().' 10:00', 'America/Lima')->utc()->toJSON(),
-    );
+        ->assertJsonPath('data.unit_number', $unit->unit_number)
+        ->assertJsonMissingPath('data.starts_at')
+        ->assertJsonMissingPath('data.ends_at');
 
     expect(ActivityLog::query()
         ->where('event_type', ActivityEventType::ReservationCreated->value)
         ->where('subject_id', $response->json('data.id'))
-        ->exists())->toBeTrue();
+        ->value('metadata'))->toMatchArray(['reserved_on' => nextMonday()]);
 });
 
 test('an approval amenity books as pending', function () {
@@ -101,30 +95,24 @@ test('an approval amenity books as pending', function () {
         ->assertJsonPath('data.status', 'pending');
 });
 
-test('a slot outside the availability windows is rejected', function () {
+test('a closed weekday is rejected', function () {
     [$account, $location, $amenity, $unit, $admin] = reservationWorld();
 
-    // Tuesday closes at 12:00.
-    $tuesday = CarbonImmutable::parse(nextMonday())->addDay()->format('Y-m-d');
-
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => $tuesday,
-            'start' => '11:00',
-            'end' => '13:00',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-
-    // Wednesday is closed entirely.
+    // Wednesday is not an open day.
     $wednesday = CarbonImmutable::parse(nextMonday())->addDays(2)->format('Y-m-d');
 
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => $wednesday,
-        ]))
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => $wednesday]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
+        ->assertJsonValidationErrors('reserved_on');
+
+    // Tuesday is.
+    $tuesday = CarbonImmutable::parse(nextMonday())->addDay()->format('Y-m-d');
+
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => $tuesday]))
+        ->assertCreated()
+        ->assertJsonPath('data.reserved_on', $tuesday);
 });
 
 test('reject and observe require a note; observed requests stay decidable', function () {
@@ -169,9 +157,7 @@ test('an approved reservation can be cancelled; a rejected one cannot', function
         ->assertJsonPath('data.status', 'cancelled');
 
     $rejected = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '13:00', 'end' => '14:00',
-        ]))
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
         ->json('data.id');
     $this->actingAs($admin)->postJson("/api/accounts/{$account->id}/reservations/{$rejected}/reject", ['note' => 'No procede.']);
     $this->actingAs($admin)
@@ -179,23 +165,27 @@ test('an approved reservation can be cancelled; a rejected one cannot', function
         ->assertUnprocessable();
 });
 
-test('the list filters by local date range and status set', function () {
+test('the list filters by an inclusive day range on reserved_on and by status set', function () {
     [$account, $location, $amenity, $unit, $admin] = reservationWorld();
 
     $monday = nextMonday();
     $tuesday = CarbonImmutable::parse($monday)->addDay()->format('Y-m-d');
 
-    $this->actingAs($admin)->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-        'date' => $monday, 'start' => '09:00', 'end' => '10:00',
-    ]))->assertCreated();
-    $this->actingAs($admin)->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-        'date' => $tuesday, 'start' => '09:00', 'end' => '10:00',
-    ]))->assertCreated();
+    $this->actingAs($admin)->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => $monday]))->assertCreated();
+    $this->actingAs($admin)->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => $tuesday]))->assertCreated();
 
     $this->actingAs($admin)
         ->getJson(reservationsBase($account, $location)."?from={$monday}&to={$monday}")
         ->assertOk()
-        ->assertJsonCount(1, 'data');
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.reserved_on', $monday);
+
+    $this->actingAs($admin)
+        ->getJson(reservationsBase($account, $location)."?from={$monday}&to={$tuesday}")
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonPath('data.0.reserved_on', $monday)
+        ->assertJsonPath('data.1.reserved_on', $tuesday);
 
     $this->actingAs($admin)
         ->getJson(reservationsBase($account, $location).'?status=pending,observed')
@@ -275,194 +265,139 @@ test('a staff member of another location cannot list or create', function () {
         ->assertForbidden();
 });
 
-function everyDayOpen(): array
-{
-    return collect(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
-        ->mapWithKeys(fn (string $day) => [$day => [['start' => '00:00', 'end' => '23:30']]])
-        ->all();
-}
+test('a booking is today or later and within the 90-day horizon, on the staff surface too', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['open_days' => Weekday::keys()]);
 
-test('a booking is a run of whole slots inside the window it falls in', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['slot_minutes' => 60]);
+    $this->travelTo(CarbonImmutable::parse('2026-10-05 15:00', 'America/Lima')->utc());
 
-    // Off the grid: the window opens at 09:00, so 10:30 is half a slot in.
+    // Yesterday.
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:30', 'end' => '11:30',
-        ]))
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => '2026-10-04']))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
+        ->assertJsonValidationErrors('reserved_on');
 
-    // Shorter than a slot.
+    // Today books, whatever the hour.
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '10:30',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-
-    // Not a whole number of slots: 90 minutes on a 60-minute grid.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '11:30',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-
-    // Two consecutive slots are one booking.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '12:00',
-        ]))
-        ->assertCreated();
-
-    // So are three.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '14:00', 'end' => '17:00',
-        ]))
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => '2026-10-05']))
         ->assertCreated()
-        ->assertJsonPath('data.starts_at', CarbonImmutable::parse(nextMonday().' 14:00', 'America/Lima')->utc()->toJSON())
-        ->assertJsonPath('data.ends_at', CarbonImmutable::parse(nextMonday().' 17:00', 'America/Lima')->utc()->toJSON());
+        ->assertJsonPath('data.reserved_on', '2026-10-05');
 
-    // A run that crosses the window close (22:00) is refused, even though it starts on the grid.
+    $horizon = CarbonImmutable::parse('2026-10-05', 'America/Lima')->addDays(ValidateReservationDay::MAX_ADVANCE_DAYS);
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '20:00', 'end' => '23:00',
-        ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
-
-    // The same start as a single slot books.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '10:00', 'end' => '11:00',
-        ]))
-        ->assertCreated();
-
-    // The last slot ends exactly at the window close; a slot starting there does not exist.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '21:00', 'end' => '22:00',
-        ]))
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => $horizon->format('Y-m-d')]))
         ->assertCreated();
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'start' => '22:00', 'end' => '23:00',
-        ]))
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => $horizon->addDay()->format('Y-m-d')]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
+        ->assertJsonValidationErrors('reserved_on');
 });
 
-test('slots are not exclusive: several units may request the same slot and each may be approved', function () {
+test('today is the location\'s today, not UTC\'s', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['open_days' => Weekday::keys()]);
+
+    // 23:30 in Lima on the 5th is already 04:30 UTC on the 6th.
+    $this->travelTo(CarbonImmutable::parse('2026-10-05 23:30', 'America/Lima')->utc());
+    expect(now()->toDateString())->toBe('2026-10-06');
+
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => '2026-10-05']))
+        ->assertCreated()
+        ->assertJsonPath('data.reserved_on', '2026-10-05')
+        ->assertJsonPath('data.is_completed', false);
+
+    $days = collect($this->actingAs($admin)
+        ->getJson("/api/amenities/{$amenity->id}/availability?from=2026-10-04&to=2026-10-06")
+        ->assertOk()
+        ->json('days'))->keyBy('date');
+    expect($days['2026-10-04']['reason'])->toBe('past')
+        ->and($days['2026-10-05']['available'])->toBeTrue()
+        ->and($days['2026-10-06']['available'])->toBeTrue();
+
+    // The other way round: 00:30 in Lima on the 6th is 05:30 UTC the same day, and the 5th has passed.
+    $this->travelTo(CarbonImmutable::parse('2026-10-06 00:30', 'America/Lima')->utc());
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => '2026-10-05']))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('reserved_on');
+});
+
+test('staff are never blocked by the daily capacity, on creation or approval', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
+        'booking_mode' => BookingMode::Instant,
+        'daily_capacity' => 1,
+    ]);
+    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
+    $thirdUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
+
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
+        ->assertCreated()
+        ->assertJsonPath('data.status', 'approved');
+    // The salón is full for the day; staff book it anyway.
+    $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
+        ->assertCreated()
+        ->assertJsonPath('data.status', 'approved');
+
+    // A pending request on a full day may still be approved: the count is the approver's call.
+    $amenity->forceFill(['booking_mode' => BookingMode::Approval])->save();
+    $pending = $this->actingAs($admin)
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $thirdUnit))
+        ->assertCreated()
+        ->assertJsonPath('data.status', 'pending')
+        ->json('data.id');
+    $this->actingAs($admin)
+        ->postJson("/api/accounts/{$account->id}/reservations/{$pending}/approve")
+        ->assertOk()
+        ->assertJsonPath('data.status', 'approved');
+
+    $monday = nextMonday();
+    $this->actingAs($admin)
+        ->getJson("/api/amenities/{$amenity->id}/availability?from={$monday}&to={$monday}")
+        ->assertOk()
+        ->assertJsonPath('daily_capacity', 1)
+        ->assertJsonPath('days.0', ['date' => $monday, 'available' => false, 'reason' => 'full', 'approved_count' => 3]);
+});
+
+test('approve re-validates the amenity and the open day', function () {
     [$account, $location, $amenity, $unit, $admin] = reservationWorld([
         'booking_mode' => BookingMode::Approval,
     ]);
     $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
 
-    $first = $this->actingAs($admin)
+    $onMonday = $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
         ->assertCreated()
         ->json('data.id');
-    // Same slot, second request: accepted as pending.
-    $second = $this->actingAs($admin)
+    $another = $this->actingAs($admin)
         ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
         ->assertCreated()
         ->json('data.id');
 
+    // The amenity stops opening on Mondays before the decision.
+    $amenity->forceFill(['open_days' => ['tuesday']])->save();
     $this->actingAs($admin)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$first}/approve")
-        ->assertOk()
-        ->assertJsonPath('data.status', 'approved');
-
-    // An approved booking holds nothing: the second request is still
-    // approvable, and a third unit may still book the slot instantly. The
-    // clash is the approver's to see and resolve.
-    $this->actingAs($admin)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$second}/approve")
-        ->assertOk()
-        ->assertJsonPath('data.status', 'approved');
-
-    $thirdUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-    $amenity->forceFill(['booking_mode' => BookingMode::Instant])->save();
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $thirdUnit))
-        ->assertCreated()
-        ->assertJsonPath('data.status', 'approved');
-
-    // Approving still re-checks the amenity itself.
-    $late = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['start' => '11:00', 'end' => '12:00']))
-        ->assertCreated()
-        ->json('data.id');
-    $amenity->forceFill(['booking_mode' => BookingMode::Approval, 'is_reservable' => false])->save();
-    $this->actingAs($admin)
-        ->postJson("/api/accounts/{$account->id}/reservations/{$late}/approve")
-        ->assertUnprocessable();
-});
-
-test('two units book the same slot of an instant amenity and both end up approved', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
-        'booking_mode' => BookingMode::Instant,
-    ]);
-    $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-
-    $first = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit))
-        ->assertCreated()
-        ->assertJsonPath('data.status', 'approved')
-        ->json('data');
-    $second = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $secondUnit))
-        ->assertCreated()
-        ->assertJsonPath('data.status', 'approved')
-        ->json('data');
-
-    expect($second['starts_at'])->toBe($first['starts_at'])
-        ->and($second['ends_at'])->toBe($first['ends_at'])
-        ->and($second['id'])->not->toBe($first['id']);
-
-    $this->actingAs($admin)
-        ->getJson(reservationsBase($account, $location).'?status=approved')
-        ->assertOk()
-        ->assertJsonCount(2, 'data');
-});
-
-test('a booking must start in the future and within the 90-day horizon, on the staff surface too', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['availability' => everyDayOpen()]);
-
-    $this->travelTo(CarbonImmutable::parse('2026-10-05 15:00', 'America/Lima')->utc());
-
-    // Earlier today.
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => '2026-10-05', 'start' => '10:00', 'end' => '11:00',
-        ]))
+        ->postJson("/api/accounts/{$account->id}/reservations/{$onMonday}/approve")
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
+        ->assertJsonValidationErrors('reserved_on');
 
-    // Later today books.
+    // Reopened, the request is approvable even though its day is now within a week (no clock rules on approve).
+    $amenity->forceFill(['open_days' => ['monday']])->save();
+    $this->travelTo(CarbonImmutable::parse(nextMonday(), 'America/Lima')->subDay()->setTime(12, 0)->utc());
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => '2026-10-05', 'start' => '16:00', 'end' => '17:00',
-        ]))
-        ->assertCreated();
+        ->postJson("/api/accounts/{$account->id}/reservations/{$onMonday}/approve")
+        ->assertOk()
+        ->assertJsonPath('data.status', 'approved');
 
-    $horizon = CarbonImmutable::parse('2026-10-05', 'America/Lima')->addDays(ValidateReservationSlot::MAX_ADVANCE_DAYS);
+    // An amenity that no longer takes bookings refuses the approval.
+    $amenity->forceFill(['is_reservable' => false])->save();
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => $horizon->format('Y-m-d'), 'start' => '10:00', 'end' => '11:00',
-        ]))
-        ->assertCreated();
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, [
-            'date' => $horizon->addDay()->format('Y-m-d'), 'start' => '10:00', 'end' => '11:00',
-        ]))
+        ->postJson("/api/accounts/{$account->id}/reservations/{$another}/approve")
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('starts_at');
+        ->assertJsonValidationErrors('amenity_id');
 });
 
-test('staff may cancel a booking after it has started', function () {
+test('staff may cancel a booking on its day and after it', function () {
     [$account, $location, $amenity, $unit, $admin] = reservationWorld([
         'booking_mode' => BookingMode::Instant,
     ]);
@@ -475,7 +410,12 @@ test('staff may cancel a booking after it has started', function () {
         ->assertCreated()
         ->json('data.id');
 
-    $this->travelTo(CarbonImmutable::parse("{$monday} 10:30", 'America/Lima')->utc());
+    $this->travelTo(CarbonImmutable::parse("{$monday} 10:30", 'America/Lima')->addDays(2)->utc());
+
+    $this->actingAs($manager)
+        ->getJson("/api/accounts/{$account->id}/reservations/{$id}")
+        ->assertOk()
+        ->assertJsonPath('data.is_completed', true);
 
     $this->actingAs($manager)
         ->postJson("/api/accounts/{$account->id}/reservations/{$id}/cancel")
@@ -483,107 +423,61 @@ test('staff may cancel a booking after it has started', function () {
         ->assertJsonPath('data.status', 'cancelled');
 });
 
-test('the staff availability endpoint lists the slots and drops a tail shorter than a slot', function () {
-    [$account, $location, $amenity, $unit, $admin] = reservationWorld(['slot_minutes' => 120]);
+test('the staff availability endpoint lists the days of a range with their reasons and approved counts', function () {
+    [$account, $location, $amenity, $unit, $admin] = reservationWorld([
+        'booking_mode' => BookingMode::Instant,
+        'daily_capacity' => 2,
+    ]);
     $frontDesk = User::factory()->create();
     grantLocationRole($account, $location, $frontDesk, LocationRole::FrontDesk);
 
-    // Tuesday runs 09:00–12:00: one two-hour slot fits, the last hour is not offered.
-    $tuesday = CarbonImmutable::parse(nextMonday())->addDay()->format('Y-m-d');
-
-    $this->actingAs($frontDesk)
-        ->getJson("/api/amenities/{$amenity->id}/availability?date={$tuesday}")
-        ->assertOk()
-        ->assertJsonPath('slot_minutes', 120)
-        ->assertJsonPath('fee_amount_minor', 150)
-        ->assertJsonCount(1, 'slots')
-        ->assertJsonPath('slots.0', ['start' => '09:00', 'end' => '11:00', 'available' => true, 'reason' => null, 'max_slots' => 1]);
-
-    // Monday 09:00–22:00 with an approved 13:00–15:00 booking: six slots, all
-    // still offered, since a booking holds nothing.
+    // A Wednesday at noon: Monday and Tuesday of that week have passed.
     $monday = nextMonday();
-    $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['start' => '13:00', 'end' => '15:00']))
-        ->assertCreated();
+    $this->travelTo(CarbonImmutable::parse("{$monday} 12:00", 'America/Lima')->addDays(2)->utc());
 
-    $slots = collect($this->actingAs($admin)
-        ->getJson("/api/amenities/{$amenity->id}/availability?date={$monday}&unit_id={$unit->id}")
-        ->assertOk()
-        ->assertJsonCount(6, 'slots')
-        ->json('slots'))->keyBy('start');
-
-    // max_slots counts the run from each slot to the 22:00 close: 13:00 has
-    // four two-hour slots ahead of it, the last slot has one.
-    expect($slots['13:00'])->toBe(['start' => '13:00', 'end' => '15:00', 'available' => true, 'reason' => null, 'max_slots' => 4])
-        ->and($slots['09:00']['max_slots'])->toBe(6)
-        ->and($slots['19:00']['max_slots'])->toBe(1)
-        ->and($slots['11:00']['available'])->toBeTrue()
-        ->and($slots['19:00']['end'])->toBe('21:00');
-
-    // Outsiders and past days are refused.
-    $outsider = User::factory()->create();
-    $this->actingAs($outsider)->getJson("/api/amenities/{$amenity->id}/availability?date={$monday}")->assertForbidden();
-    $this->actingAs($admin)
-        ->getJson("/api/amenities/{$amenity->id}/availability?date=".CarbonImmutable::now('America/Lima')->subDay()->toDateString())
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('date');
-});
-
-test('slots and bookings keep wall-clock labels across a daylight-saving transition', function () {
-    // Madrid falls back on 2026-10-25: 03:00 CEST becomes 02:00 CET, a 25-hour day.
-    // travelTo takes UTC instances: a zoned mock leaks its offset into how
-    // Eloquent parses stored timestamps.
-    $account = Account::factory()->create();
-    $location = Location::factory()->for($account)->create(['timezone' => 'Europe/Madrid']);
-    $amenity = Amenity::factory()->for($location)->create([
-        'account_id' => $account->id,
-        'booking_mode' => BookingMode::Instant,
-        'availability' => ['sunday' => [['start' => '00:00', 'end' => '06:00']]],
-        'slot_minutes' => 60,
-    ]);
-    $unit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
-    $admin = User::factory()->create();
-    createStaffMembership($account, $admin, AccountRole::AccountAdmin);
-
-    $this->travelTo(CarbonImmutable::parse('2026-10-20 12:00', 'Europe/Madrid')->utc());
-
-    $slots = $this->actingAs($admin)
-        ->getJson("/api/amenities/{$amenity->id}/availability?date=2026-10-25")
-        ->assertOk()
-        ->assertJsonCount(6, 'slots')
-        ->json('slots');
-
-    expect(array_column($slots, 'start'))->toBe(['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'])
-        ->and($slots[5]['end'])->toBe('06:00');
-
-    // 04:00–05:00 local is after the fall-back: 03:00–04:00 UTC.
-    $response = $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), [
-            'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
-            'date' => '2026-10-25', 'start' => '04:00', 'end' => '05:00',
-        ])
-        ->assertCreated();
-
-    expect($response->json('data.starts_at'))->toBe(CarbonImmutable::parse('2026-10-25 03:00', 'UTC')->toJSON())
-        ->and($response->json('data.ends_at'))->toBe(CarbonImmutable::parse('2026-10-25 04:00', 'UTC')->toJSON());
-
-    // The list keeps the same labels after the booking, and the booked slot
-    // stays offered: bookings do not mark slots.
-    $after = collect($this->actingAs($admin)
-        ->getJson("/api/amenities/{$amenity->id}/availability?date=2026-10-25")
-        ->json('slots'))->keyBy('start');
-    expect($after->keys()->all())->toBe(['00:00', '01:00', '02:00', '03:00', '04:00', '05:00'])
-        ->and($after['04:00'])->toBe(['start' => '04:00', 'end' => '05:00', 'available' => true, 'reason' => null, 'max_slots' => 2])
-        ->and($after['05:00']['available'])->toBeTrue()
-        ->and($after['03:00']['available'])->toBeTrue();
-
-    // A second unit books the very same post-transition slot.
+    $followingMonday = CarbonImmutable::parse($monday)->addWeek()->format('Y-m-d');
+    $followingTuesday = CarbonImmutable::parse($monday)->addWeek()->addDay()->format('Y-m-d');
     $secondUnit = Unit::factory()->create(['account_id' => $account->id, 'location_id' => $location->id]);
+    foreach ([$unit, $secondUnit] as $booker) {
+        $this->actingAs($admin)
+            ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $booker, ['date' => $followingMonday]))
+            ->assertCreated();
+    }
+    // A pending request never counts.
+    $amenity->forceFill(['booking_mode' => BookingMode::Approval])->save();
     $this->actingAs($admin)
-        ->postJson(reservationsBase($account, $location), [
-            'amenity_id' => $amenity->id, 'unit_id' => $secondUnit->id,
-            'date' => '2026-10-25', 'start' => '04:00', 'end' => '05:00',
-        ])
+        ->postJson(reservationsBase($account, $location), reservationPayload($amenity, $unit, ['date' => $followingTuesday]))
         ->assertCreated()
-        ->assertJsonPath('data.starts_at', CarbonImmutable::parse('2026-10-25 03:00', 'UTC')->toJSON());
+        ->assertJsonPath('data.status', 'pending');
+
+    $response = $this->actingAs($frontDesk)
+        ->getJson("/api/amenities/{$amenity->id}/availability?from={$monday}&to={$followingTuesday}")
+        ->assertOk()
+        ->assertJsonPath('daily_capacity', 2)
+        ->assertJsonPath('booking_mode', 'approval')
+        ->assertJsonPath('fee_amount_minor', 150)
+        ->assertJsonPath('deposit_amount_minor', 300)
+        ->assertJsonCount(9, 'days')
+        ->assertJsonMissingPath('slots');
+
+    $days = collect($response->json('days'))->keyBy('date');
+    expect($days[$monday])->toBe(['date' => $monday, 'available' => false, 'reason' => 'past', 'approved_count' => 0])
+        ->and($days[CarbonImmutable::parse($monday)->addDay()->format('Y-m-d')]['reason'])->toBe('past')
+        ->and($days[CarbonImmutable::parse($monday)->addDays(2)->format('Y-m-d')]['reason'])->toBe('closed') // today, but a Wednesday
+        ->and($days[CarbonImmutable::parse($monday)->addDays(6)->format('Y-m-d')]['reason'])->toBe('closed')
+        ->and($days[$followingMonday])->toBe(['date' => $followingMonday, 'available' => false, 'reason' => 'full', 'approved_count' => 2])
+        ->and($days[$followingTuesday])->toBe(['date' => $followingTuesday, 'available' => true, 'reason' => null, 'approved_count' => 0]);
+
+    // Both bounds are required, the range runs forward and covers at most 90 days.
+    $this->actingAs($admin)->getJson("/api/amenities/{$amenity->id}/availability?from={$monday}")
+        ->assertUnprocessable()->assertJsonValidationErrors('to');
+    $this->actingAs($admin)->getJson("/api/amenities/{$amenity->id}/availability?from={$followingMonday}&to={$monday}")
+        ->assertUnprocessable()->assertJsonValidationErrors('to');
+    $this->actingAs($admin)->getJson("/api/amenities/{$amenity->id}/availability?from={$monday}&to=".CarbonImmutable::parse($monday)->addDays(91)->format('Y-m-d'))
+        ->assertUnprocessable()->assertJsonValidationErrors('to');
+    $this->actingAs($admin)->getJson("/api/amenities/{$amenity->id}/availability?from={$monday}&to=".CarbonImmutable::parse($monday)->addDays(90)->format('Y-m-d'))
+        ->assertOk()->assertJsonCount(91, 'days');
+
+    $outsider = User::factory()->create();
+    $this->actingAs($outsider)->getJson("/api/amenities/{$amenity->id}/availability?from={$monday}&to={$monday}")->assertForbidden();
 });

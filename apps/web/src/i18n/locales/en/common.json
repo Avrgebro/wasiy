@@ -134,7 +134,6 @@
       "activity": "No activity in this location yet."
     },
     "columns": {
-      "schedule": "Schedule",
       "amenity": "Amenity",
       "unit": "Unit",
       "resident": "Resident",
@@ -277,22 +276,18 @@
       },
       "free": "Free",
       "depositOf": "deposit {{amount}}",
-      "hours_one": "{{count}} hour",
-      "hours_other": "{{count}} hours",
-      "minutes": "{{count}} min",
       "fee": "Fee",
       "deposit": "Deposit",
       "cancellation": "Cancellation",
       "amenityMissing": "This amenity is no longer available.",
       "pickDay": "Pick a day",
-      "pickSlot": "Pick a time",
       "closedThatDay": "The amenity is closed that day.",
       "requestedBy": "Requested by",
       "staffNote": "Note from management",
       "cancel": "Cancel booking",
       "cancelClosed": "The cancellation window has closed.",
       "cancelTitle": "Cancel the {{amenity}} booking?",
-      "cancelBody": "The slot frees up for other units. If a charge existed, management will void it.",
+      "cancelBody": "The day frees up for other units. If a charge was recorded, management will void it.",
       "timeline": {
         "created": "Requested",
         "approved": "Approved",
@@ -302,9 +297,12 @@
         "updated": "Updated",
         "staff": "management"
       },
-      "slotLength": "Slot length",
-      "cancelUntilStart": "You can cancel until the start time.",
-      "duration": "Duration"
+      "cancelUntilStart": "You can cancel up to and including the booked day.",
+      "openDays": "Days",
+      "capacity": "Daily capacity",
+      "noLimit": "No limit",
+      "perDay": "{{count}} bookings",
+      "dayFull": "Fully booked"
     },
     "alerts": {
       "title": "Alerts",
@@ -573,9 +571,6 @@
     "cityRequired": "Enter the city.",
     "amenityRequired": "Select an amenity.",
     "dateRequired": "Select a date.",
-    "startRequired": "Set a start time.",
-    "endRequired": "Set an end time.",
-    "endAfterStart": "The end time must be after the start.",
     "categoryRequired": "Select a category.",
     "amountRequired": "Enter an amount greater than zero.",
     "conceptRequired": "Enter the concept.",
@@ -841,16 +836,16 @@
       "observed": "Needs clarification.",
       "rejected": "Request rejected.",
       "cancelled": "Reservation cancelled.",
-      "completed": "The reservation time has ended."
+      "completed": "The booked day has passed."
     },
     "title": "Reservations",
     "subtitle": "{{location}} amenities",
     "noLocation": "Select a location to see its reservations.",
-    "today": "Today",
     "columns": {
       "amenity": "Amenity",
       "unit": "Unit",
-      "resident": "Resident"
+      "resident": "Resident",
+      "status": "Status"
     },
     "statuses": {
       "pending": "Pending",
@@ -900,13 +895,8 @@
       "resident": "Resident (optional)",
       "date": "Date",
       "datePlaceholder": "Pick a date",
-      "pickAmenityAndDay": "Pick an amenity and a day to see the available slots.",
-      "closedThatDay": "The amenity is closed that day.",
       "submit": "Create reservation",
-      "startSlot": "Time",
-      "dateOutOfRange": "Pick a date between today and {{days}} days ahead.",
-      "fullyBooked": "No slots left today: they have all passed.",
-      "duration": "Duration"
+      "capacityHint": "{{count}} of {{capacity}} approved bookings that day"
     },
     "detail": {
       "fee": "Fee",
@@ -940,12 +930,28 @@
       "updated": "Reservation updated",
       "chargeGenerated": "Charge generated: {{charge}}",
       "completed": "Reservation completed",
-      "derived": "derived from the schedule"
+      "derived": "derived from the date"
     },
-    "previousDay": "Previous day",
-    "nextDay": "Next day",
     "board": {
       "noAmenities": "This location has no reservable amenities."
+    },
+    "availability": {
+      "closed": "Closed",
+      "past": "Already past",
+      "full": "Full"
+    },
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "thisWeek": "This week",
+    "searchPlaceholder": "Search by unit or resident…",
+    "allAmenities": "All amenities",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "chips": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Confirmed",
+      "completed": "Completed"
     }
   },
   "settings": {
@@ -1004,7 +1010,6 @@
     "feeWithDeposit": "{{fee}} + deposit {{deposit}}",
     "instant": "Instant",
     "approval": "Requires approval",
-    "variableSchedule": "Variable schedule",
     "pausedFootnote": "Inactive amenities do not appear in the resident portal. Changes are recorded in the activity log.",
     "deactivateConfirmTitle": "Deactivate {{name}}?",
     "deactivateHint": "The amenity is hidden from the portal and accepts no new reservations. Its history and recorded fees are kept.",
@@ -1016,10 +1021,11 @@
     },
     "columns": {
       "amenity": "Amenity",
-      "schedule": "Schedule",
       "fee": "Fee / deposit",
       "approval": "Approval",
-      "actions": "Actions"
+      "actions": "Actions",
+      "openDays": "Days",
+      "capacity": "Capacity"
     },
     "empty": {
       "title": "No amenities yet",
@@ -1027,7 +1033,6 @@
     },
     "sections": {
       "basics": "Basics",
-      "availability": "Availability",
       "fees": "Fees",
       "booking": "Booking"
     },
@@ -1043,26 +1048,11 @@
       "deposit": "Refundable deposit",
       "feesHint": "Amounts in soles. The deposit is recorded manually when the reservation is confirmed.",
       "photosAfterCreate": "You can add photos by editing the amenity once created.",
-      "slotLength": "Length of each slot",
-      "slotLengthHint": "Residents book one or more consecutive slots inside the schedule.",
-      "slotMinutes": "{{count}} min",
-      "slotHours_one": "{{count}} hour",
-      "slotHours_other": "{{count}} hours",
-      "slotHoursDecimal": "{{hours}} hours"
-    },
-    "availability": {
-      "columns": "Day · open · windows",
-      "timezoneNote": "Location local time ({{timezone}})",
-      "closed": "Closed",
-      "openDay": "Open and add a window",
-      "addWindow": "Add window",
-      "copyToAll": "Copy to all days",
-      "removeWindow": "Remove window from {{day}}",
-      "startFor": "Start {{n}} for {{day}}",
-      "endFor": "End {{n}} for {{day}}",
-      "to": "to",
-      "overlap": "Windows overlap between {{start}} and {{end}}. Adjust one of them to save.",
-      "inverted": "The window closes before it opens."
+      "openDays": "Open days",
+      "openDaysRequired": "Pick at least one day.",
+      "capacity": "Daily capacity",
+      "capacityHint": "Approved bookings per day. Empty = no limit.",
+      "capacityPlaceholder": "No limit"
     },
     "weekdays": {
       "monday": "Monday",
@@ -1072,6 +1062,16 @@
       "friday": "Friday",
       "saturday": "Saturday",
       "sunday": "Sunday"
+    },
+    "allDays": "Every day",
+    "weekdaysShort": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
     }
   },
   "finances": {

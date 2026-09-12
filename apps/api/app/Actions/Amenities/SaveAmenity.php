@@ -2,8 +2,8 @@
 
 namespace App\Actions\Amenities;
 
-use App\Data\AmenityAvailability;
 use App\Enums\ActivityEventType;
+use App\Enums\Weekday;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\User;
@@ -11,20 +11,21 @@ use App\Services\ActivityLogger;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use InvalidArgumentException;
 
 /**
  * Create and update share one writer so normalization cannot drift: the
- * availability json is validated through AmenityAvailability, and a
- * non-reservable Amenity stores instant mode and null fees — a common space
- * has no booking to configure, and stale values must not resurface when it
- * later becomes reservable. The slot length keeps its value: it is a
- * property of the space, not a policy.
+ * open days are stored in calendar order without duplicates and a
+ * reservable Amenity must open at least one day (ADR 0043); a
+ * non-reservable Amenity stores instant mode, null fees and no capacity — a
+ * common space has no booking to configure, and stale values must not
+ * resurface when it later becomes reservable. Its open days are kept: they
+ * describe the space, not a policy.
  */
 class SaveAmenity
 {
     private const BOOKING_FIELDS = [
         'booking_mode',
+        'daily_capacity',
         'fee_amount_minor',
         'deposit_amount_minor',
     ];
@@ -82,21 +83,18 @@ class SaveAmenity
      */
     private function normalize(array $attributes, ?Amenity $existing = null): array
     {
-        if (array_key_exists('availability', $attributes)) {
-            try {
-                $attributes['availability'] = $attributes['availability'] === null
-                    ? null
-                    : AmenityAvailability::fromArray($attributes['availability'])->toArray();
-            } catch (InvalidArgumentException $exception) {
-                // Window semantics (overlap, order) are the value object's
-                // rules; surface them as field errors, not server faults.
-                throw ValidationException::withMessages([
-                    'availability' => $exception->getMessage(),
-                ]);
-            }
+        if (array_key_exists('open_days', $attributes)) {
+            $attributes['open_days'] = array_values(array_intersect(Weekday::keys(), $attributes['open_days'] ?? []));
         }
 
         $reservable = $attributes['is_reservable'] ?? $existing?->is_reservable ?? true;
+        $openDays = $attributes['open_days'] ?? $existing?->openDays() ?? [];
+
+        if ($reservable && $openDays === []) {
+            throw ValidationException::withMessages([
+                'open_days' => __('A reservable amenity opens at least one day of the week.'),
+            ]);
+        }
 
         if (! $reservable) {
             foreach (self::BOOKING_FIELDS as $field) {

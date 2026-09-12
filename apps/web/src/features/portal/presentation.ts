@@ -68,20 +68,6 @@ export function ageLabel(iso: string, now: Date, timezone: string, t: TFunction)
   return t('portal.age.days', { count: days })
 }
 
-/** "sáb 6 · 19:00–21:00" for a booking, in the location's clock. */
-export function reservationRange(startsAt: string, endsAt: string, timezone: string) {
-  const day = shortDay(dayKey(new Date(startsAt), timezone))
-
-  return `${day} · ${time(startsAt, timezone)}–${time(endsAt, timezone)}`
-}
-
-/** "sábado 6 de septiembre · 19:00–21:00" for the detail sheet. */
-export function reservationLongRange(startsAt: string, endsAt: string, timezone: string) {
-  const day = new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: timezone }).format(new Date(startsAt))
-
-  return `${day} · ${time(startsAt, timezone)}–${time(endsAt, timezone)}`
-}
-
 /** Status pill color for a booking; completed approved ones read as neutral history. */
 export function reservationTone(status: string, completed = false): 'success' | 'warning' | 'info' | 'error' | 'gray' {
   if (completed) return 'gray'
@@ -99,7 +85,7 @@ export function reservationTone(status: string, completed = false): 'success' | 
   }
 }
 
-/** "lunes 5 de octubre": the chosen day above the slots and in the summary band. */
+/** "lunes 5 de octubre": a booking's day, in rows, the sheet and the booking page. */
 export function longDate(date: string) {
   const [year, month, day] = date.split('-').map(Number)
 

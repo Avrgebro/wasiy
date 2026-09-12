@@ -10,8 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * Staff view of the slot list (ADR 0041): the Nueva reserva drawer reads the
- * same slots the portal does instead of recomputing them in the browser.
+ * Staff view of the day list (ADR 0043): the Nueva reserva drawer and the
+ * week board read the same days the portal does instead of recomputing
+ * them in the browser.
  */
 class AmenityAvailabilityController extends Controller
 {
@@ -20,11 +21,12 @@ class AmenityAvailabilityController extends Controller
         Gate::authorize('viewAny', [Amenity::class, $amenity->location]);
 
         $validated = $request->validate([
-            'date' => ['required', 'date_format:Y-m-d'],
-            // Accepted for symmetry with the portal call; slots are per amenity.
+            'from' => ['required', 'date_format:Y-m-d'],
+            'to' => ['required', 'date_format:Y-m-d'],
+            // Accepted for symmetry with the portal call; days are per amenity.
             'unit_id' => ['sometimes', 'nullable', 'string', 'ulid'],
         ]);
 
-        return response()->json($availability->handle($amenity, $validated['date']));
+        return response()->json($availability->handle($amenity, $validated['from'], $validated['to']));
     }
 }

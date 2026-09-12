@@ -13,7 +13,7 @@ import { useMe } from '../auth/hooks'
 import { useActiveUnit } from './active-unit-context'
 import { cancelPortalReservation, getPortalAmenities, getPortalReservation, getPortalReservations, type PortalAmenity, type PortalReservation } from './api'
 import { PortalRow, StatusPill } from './portal-cards'
-import { reservationLongRange, reservationRange, reservationTone } from './presentation'
+import { longDate, reservationTone } from './presentation'
 
 const routeApi = getRouteApi('/_authenticated/portal/reservas')
 
@@ -113,7 +113,7 @@ export function PortalReservationsPage() {
             ) : (
               <ul className="m-0 flex list-none flex-col gap-2 p-0">
                 {upcomingRows.map((reservation) => (
-                  <PortalRow key={reservation.id} pill={<StatusPill color={reservationTone(reservation.status)}>{statusLabel(reservation)}</StatusPill>} primary={reservation.amenity_name ?? ''} secondary={reservationRange(reservation.starts_at, reservation.ends_at, timezone)} onClick={() => setSelectedId(reservation.id)} />
+                  <PortalRow key={reservation.id} pill={<StatusPill color={reservationTone(reservation.status)}>{statusLabel(reservation)}</StatusPill>} primary={reservation.amenity_name ?? ''} secondary={longDate(reservation.reserved_on)} onClick={() => setSelectedId(reservation.id)} />
                 ))}
               </ul>
             )}
@@ -122,7 +122,7 @@ export function PortalReservationsPage() {
                 <h2 className="m-0 text-[11px] font-bold uppercase tracking-widest text-[var(--wa-text-3)]">{t('portal.reservations.past')}</h2>
                 <ul className="m-0 flex list-none flex-col gap-2 p-0">
                   {pastRows.map((reservation) => (
-                    <PortalRow key={reservation.id} pill={<StatusPill color={reservationTone(reservation.status, reservation.is_completed)}>{statusLabel(reservation)}</StatusPill>} primary={reservation.amenity_name ?? ''} secondary={reservationRange(reservation.starts_at, reservation.ends_at, timezone)} onClick={() => setSelectedId(reservation.id)} />
+                    <PortalRow key={reservation.id} pill={<StatusPill color={reservationTone(reservation.status, reservation.is_completed)}>{statusLabel(reservation)}</StatusPill>} primary={reservation.amenity_name ?? ''} secondary={longDate(reservation.reserved_on)} onClick={() => setSelectedId(reservation.id)} />
                   ))}
                 </ul>
               </div>
@@ -164,7 +164,7 @@ export function PortalReservationsPage() {
             </SheetAction>
           ) : undefined
         }
-        lines={selected ? [reservationLongRange(selected.starts_at, selected.ends_at, timezone), active.unit_label] : []}
+        lines={selected ? [longDate(selected.reserved_on), active.unit_label] : []}
         footerDivider
         opened={selectedId !== null}
         pill={selected ? <StatusPill color={reservationTone(selected.status, selected.is_completed)}>{statusLabel(selected)}</StatusPill> : undefined}

@@ -39,7 +39,7 @@ class FinancialMovementResource extends JsonResource
             'reservation' => $this->whenLoaded('reservation', fn () => $this->reservation === null ? null : [
                 'id' => $this->reservation->id,
                 'amenity_name' => $this->reservation->amenity?->name,
-                'starts_at' => $this->reservation->starts_at->toJSON(),
+                'reserved_on' => $this->reservation->reserved_on->toDateString(),
                 'status' => $this->reservation->status->value,
             ]),
             'occurred_on' => $this->occurred_on->toDateString(),

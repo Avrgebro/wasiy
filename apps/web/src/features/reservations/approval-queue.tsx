@@ -4,9 +4,9 @@ import { formatMoney } from '../../lib/money'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReservationSummary } from './api'
-import { ReservationField, ReservationSlotBand } from './reservation-modal-parts'
+import { ReservationDayBand, ReservationField } from './reservation-modal-parts'
 import { useReservationDecisions } from './use-reservation-decisions'
-import { formatTimeRange, localDateString, shortDayLabel } from './week'
+import { localDateString, shortDayLabel } from './week'
 
 type NoteAction = { kind: 'reject' | 'observe'; reservation: ReservationSummary }
 
@@ -99,8 +99,7 @@ export function ApprovalQueue({
                     {request.amenity_name}
                   </Text>
                   <Text c="dimmed" className="shrink-0" size="xs">
-                    {shortDayLabel(localDateString(new Date(request.starts_at), timezone))},{' '}
-                    {formatTimeRange(request, timezone)}
+                    {shortDayLabel(request.reserved_on)}
                   </Text>
                 </div>
                 <Text c="dimmed" mt={3} size="xs">
@@ -177,7 +176,7 @@ export function ApprovalQueue({
         <Stack gap="md">
           {noteAction ? (
             <>
-              <ReservationSlotBand reservation={noteAction.reservation} timezone={timezone} />
+              <ReservationDayBand reservation={noteAction.reservation} />
               <div className="grid grid-cols-2 gap-x-4 gap-y-3.5">
                 <ReservationField
                   label={t('reservations.columns.amenity')}

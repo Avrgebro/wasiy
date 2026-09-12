@@ -26,16 +26,8 @@ function amenity(overrides: Partial<AmenitySummary> = {}): AmenitySummary {
     description: null,
     is_reservable: true,
     booking_mode: 'approval',
-    availability: {
-      monday: [{ start: '09:00', end: '22:00' }],
-      tuesday: [{ start: '09:00', end: '22:00' }],
-      wednesday: [{ start: '09:00', end: '22:00' }],
-      thursday: [{ start: '09:00', end: '22:00' }],
-      friday: [{ start: '09:00', end: '22:00' }],
-      saturday: [{ start: '09:00', end: '22:00' }],
-      sunday: [{ start: '09:00', end: '22:00' }],
-    },
-    slot_minutes: 120,
+    open_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+    daily_capacity: null,
     fee_amount_minor: 15000,
     deposit_amount_minor: 30000,
     status: 'active',
@@ -95,7 +87,6 @@ function renderTab(readOnly = false) {
           accountId="acc_1"
           locationId="loc_1"
           readOnly={readOnly}
-          timezone="America/Lima"
         />
       </QueryClientProvider>
     </MantineProvider>,
@@ -109,7 +100,7 @@ describe('LocationAmenitiesTab', () => {
     vi.restoreAllMocks()
   })
 
-  it('renders the table with schedule summary, fees, and dashes for a common space', async () => {
+  it('renders the table with open days, capacity, fees, and dashes for a common space', async () => {
     installAdapter([
       amenity(),
       amenity({
@@ -118,14 +109,16 @@ describe('LocationAmenitiesTab', () => {
         is_reservable: false,
         fee_amount_minor: null,
         deposit_amount_minor: null,
-        availability: {},
+        open_days: [],
       }),
-      amenity({ id: 'amn_3', name: 'Cancha de squash', status: 'deactivated', fee_amount_minor: null, deposit_amount_minor: null }),
+      amenity({ id: 'amn_3', name: 'Cancha de squash', status: 'deactivated', fee_amount_minor: null, deposit_amount_minor: null, open_days: ['monday', 'wednesday', 'friday'], daily_capacity: 2 }),
     ])
     renderTab()
 
     expect(await screen.findByText('Salón de eventos')).toBeInTheDocument()
-    expect(screen.getAllByText('L–D · 9:00–22:00').length).toBeGreaterThan(0)
+    expect(screen.getByText('Todos')).toBeInTheDocument()
+    expect(screen.getByText('L, Mi, V')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
     expect(screen.getByText('S/ 150 + depósito S/ 300')).toBeInTheDocument()
     expect(screen.getAllByText('Requiere aprobación').length).toBeGreaterThan(0)
     expect(screen.getByText('Común')).toBeInTheDocument()
@@ -133,7 +126,7 @@ describe('LocationAmenitiesTab', () => {
     expect(screen.getByText('3 amenidades · 1 reservables')).toBeInTheDocument()
 
     const commonRow = screen.getByText('Lobby / recepción').closest('tr')!
-    expect(within(commonRow).getAllByText('—').length).toBeGreaterThanOrEqual(3)
+    expect(within(commonRow).getAllByText('—').length).toBeGreaterThanOrEqual(4)
   })
 
   it('renders the empty state with the add action', async () => {
@@ -155,7 +148,7 @@ describe('LocationAmenitiesTab', () => {
     expect(screen.queryByText('›')).not.toBeInTheDocument()
   })
 
-  it('the availability editor blocks an overlapping window and names the range', async () => {
+  it('a reservable amenity needs at least one open day', async () => {
     installAdapter([])
     renderTab()
     await screen.findByText('No hay resultados')
@@ -164,43 +157,18 @@ describe('LocationAmenitiesTab', () => {
     await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])
     await user.type(await screen.findByLabelText(/Nombre/), 'Piscina')
 
-    // Open Monday with the default window, add a second overlapping one.
-    await user.click(screen.getAllByRole('button', { name: 'Abrir y agregar horario' })[0])
-    await user.click(screen.getByRole('button', { name: 'Agregar horario' }))
-
-    const start2 = screen.getByLabelText('Inicio 2 de Lunes')
-    const end2 = screen.getByLabelText('Fin 2 de Lunes')
-    await user.type(start2, '21:00')
-    await user.type(end2, '23:00')
-
-    expect(
-      await screen.findByText('Los horarios se superponen entre 21:00 y 22:00. Ajusta uno de los dos para guardar.'),
-    ).toBeInTheDocument()
+    // Every day starts checked; clearing them all blocks saving.
+    for (const day of ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']) {
+      await user.click(screen.getByRole('checkbox', { name: day }))
+    }
+    expect(await screen.findByText('Elige al menos un día.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Crear amenidad' })).toBeDisabled()
 
-    // Resolving the overlap re-enables saving.
-    await user.clear(start2)
-    await user.type(start2, '22:00')
+    await user.click(screen.getByRole('checkbox', { name: 'Lunes' }))
     expect(screen.getByRole('button', { name: 'Crear amenidad' })).toBeEnabled()
   })
 
-  it('copiar a todos los días replicates one day across the week', async () => {
-    installAdapter([])
-    renderTab()
-    await screen.findByText('No hay resultados')
-
-    const user = userEvent.setup()
-    await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])
-    await screen.findByLabelText(/Nombre/)
-
-    await user.click(screen.getAllByRole('button', { name: 'Abrir y agregar horario' })[0])
-    await user.click(screen.getByRole('button', { name: 'Copiar a todos los días' }))
-
-    expect(screen.getByLabelText('Inicio 1 de Domingo')).toHaveValue('09:00')
-    expect(screen.queryByRole('button', { name: 'Abrir y agregar horario' })).not.toBeInTheDocument()
-  })
-
-  it('creating posts the slot length (default one hour) and fees in cents, no policy fields', async () => {
+  it('creating posts the open days, the daily capacity and fees in cents', async () => {
     let posted: Record<string, unknown> | null = null
     installAdapter([], (payload) => {
       posted = payload as Record<string, unknown>
@@ -211,26 +179,39 @@ describe('LocationAmenitiesTab', () => {
     const user = userEvent.setup()
     await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])
     await user.type(await screen.findByLabelText(/Nombre/), 'Piscina')
-    await user.click(screen.getAllByRole('button', { name: 'Abrir y agregar horario' })[0])
-    expect(screen.getByRole('combobox', { name: 'Duración de cada turno' })).toHaveValue('1 hora')
-    await user.click(screen.getByRole('combobox', { name: 'Duración de cada turno' }))
-    await user.click(await screen.findByRole('option', { name: '2 horas' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Sábado' }))
+    await user.click(screen.getByRole('checkbox', { name: 'Domingo' }))
+    await user.type(screen.getByLabelText('Cupo por día'), '3')
     await user.type(screen.getByLabelText('Cuota de uso'), '50')
     await user.click(screen.getByRole('button', { name: 'Crear amenidad' }))
 
     await waitFor(() => expect(posted).not.toBeNull())
-    expect(posted).toMatchObject({
+    expect(posted).toEqual({
       name: 'Piscina',
+      description: null,
       is_reservable: true,
       booking_mode: 'instant',
-      slot_minutes: 120,
+      open_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+      daily_capacity: 3,
       fee_amount_minor: 5000,
       deposit_amount_minor: null,
-      availability: { monday: [{ start: '09:00', end: '22:00' }] },
     })
-    for (const gone of ['capacity', 'max_advance_days', 'max_concurrent_per_unit', 'cancellation_window_hours', 'max_duration_minutes']) {
-      expect(posted).not.toHaveProperty(gone)
-    }
-    expect(Object.keys((posted as unknown as Record<string, unknown>).availability as object)).toEqual(['monday'])
+  })
+
+  it('an empty capacity posts null', async () => {
+    let posted: Record<string, unknown> | null = null
+    installAdapter([], (payload) => {
+      posted = payload as Record<string, unknown>
+    })
+    renderTab()
+    await screen.findByText('No hay resultados')
+
+    const user = userEvent.setup()
+    await user.click(screen.getAllByRole('button', { name: 'Agregar amenidad' })[0])
+    await user.type(await screen.findByLabelText(/Nombre/), 'Gimnasio')
+    await user.click(screen.getByRole('button', { name: 'Crear amenidad' }))
+
+    await waitFor(() => expect(posted).not.toBeNull())
+    expect(posted).toMatchObject({ name: 'Gimnasio', daily_capacity: null, open_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] })
   })
 })

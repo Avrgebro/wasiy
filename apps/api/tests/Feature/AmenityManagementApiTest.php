@@ -9,6 +9,7 @@ use App\Models\ActivityLog;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -34,21 +35,15 @@ function validAmenityPayload(array $overrides = []): array
         'name' => 'Salón de eventos',
         'is_reservable' => true,
         'booking_mode' => BookingMode::Approval->value,
-        'slot_minutes' => 120,
-        'availability' => [
-            'monday' => [['start' => '09:00', 'end' => '22:00']],
-            'wednesday' => [
-                ['start' => '09:00', 'end' => '13:00'],
-                ['start' => '16:00', 'end' => '22:00'],
-            ],
-        ],
+        'open_days' => ['monday', 'wednesday'],
+        'daily_capacity' => 1,
         'fee_amount_minor' => 150,
         'deposit_amount_minor' => 300,
         ...$overrides,
     ];
 }
 
-test('an admin can create an amenity with availability, fees, and approval mode', function () {
+test('an admin can create an amenity with open days, capacity, fees, and approval mode', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
     $admin = amenityAdmin($account);
@@ -61,7 +56,10 @@ test('an admin can create an amenity with availability, fees, and approval mode'
         ->assertJsonPath('data.booking_mode', 'approval')
         ->assertJsonPath('data.fee_amount_minor', 150)
         ->assertJsonPath('data.status', 'active')
-        ->assertJsonPath('data.availability.wednesday.1.start', '16:00');
+        ->assertJsonPath('data.open_days', ['monday', 'wednesday'])
+        ->assertJsonPath('data.daily_capacity', 1)
+        ->assertJsonMissingPath('data.availability')
+        ->assertJsonMissingPath('data.slot_minutes');
 
     expect(ActivityLog::query()->where('event_type', ActivityEventType::AmenityCreated->value)->count())->toBe(1);
 });
@@ -113,78 +111,94 @@ test('an amenity cannot be created under a location in another account', functio
         ->assertNotFound();
 });
 
-test('overlapping windows and inverted ranges are rejected as validation errors', function () {
+test('unknown or repeated weekdays and an empty week on a reservable amenity are rejected as validation errors', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
     $admin = amenityAdmin($account);
 
     $this->actingAs($admin)
-        ->postJson(amenityBase($account, $location), validAmenityPayload([
-            'availability' => [
-                'thursday' => [
-                    ['start' => '13:00', 'end' => '18:00'],
-                    ['start' => '17:00', 'end' => '22:00'],
-                ],
-            ],
-        ]))
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['open_days' => ['monday', 'funday']]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['availability']);
+        ->assertJsonValidationErrors(['open_days.1']);
 
     $this->actingAs($admin)
-        ->postJson(amenityBase($account, $location), validAmenityPayload([
-            'availability' => ['friday' => [['start' => '20:00', 'end' => '08:00']]],
-        ]))
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['open_days' => ['monday', 'monday']]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['availability']);
+        ->assertJsonValidationErrors(['open_days.0']);
+
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['open_days' => []]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['open_days']);
+
+    // Absent altogether on a reservable amenity is the same as empty.
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), collect(validAmenityPayload())->except('open_days')->all())
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['open_days']);
+
+    // A common space needs no open days.
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['name' => 'Lobby', 'is_reservable' => false, 'open_days' => []]))
+        ->assertCreated()
+        ->assertJsonPath('data.open_days', []);
 });
 
-test('a day with zero windows persists as closed', function () {
+test('open days persist in calendar order and an update cannot close every day of a reservable amenity', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
     $admin = amenityAdmin($account);
 
     $id = $this->actingAs($admin)
-        ->postJson(amenityBase($account, $location), validAmenityPayload([
-            'availability' => ['monday' => [['start' => '09:00', 'end' => '22:00']], 'sunday' => []],
-        ]))
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['open_days' => ['sunday', 'monday', 'friday']]))
+        ->assertCreated()
+        ->assertJsonPath('data.open_days', ['monday', 'friday', 'sunday'])
         ->json('data.id');
 
-    $amenity = Amenity::query()->findOrFail($id);
+    $this->actingAs($admin)
+        ->patchJson(amenityBase($account, $location)."/{$id}", ['open_days' => []])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['open_days']);
 
-    expect($amenity->availabilitySchedule->isOpenOn('monday'))->toBeTrue()
-        ->and($amenity->availabilitySchedule->isOpenOn('sunday'))->toBeFalse()
-        ->and($amenity->availability)->not->toHaveKey('sunday');
+    $this->actingAs($admin)
+        ->patchJson(amenityBase($account, $location)."/{$id}", ['open_days' => ['saturday']])
+        ->assertOk()
+        ->assertJsonPath('data.open_days', ['saturday']);
+
+    expect(Amenity::query()->findOrFail($id)->isOpenOn(CarbonImmutable::parse('2026-09-12')))->toBeTrue() // a Saturday
+        ->and(Amenity::query()->findOrFail($id)->isOpenOn(CarbonImmutable::parse('2026-09-14')))->toBeFalse();
 });
 
-test('the slot length is a whole number of half hours within a day', function () {
+test('the daily capacity is a positive whole number up to 1000, or none', function () {
     $account = Account::factory()->create();
     $location = Location::factory()->for($account)->create();
     $admin = amenityAdmin($account);
 
     $this->actingAs($admin)
-        ->postJson(amenityBase($account, $location), validAmenityPayload(['slot_minutes' => 45]))
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['daily_capacity' => 0]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('slot_minutes');
+        ->assertJsonValidationErrors('daily_capacity');
     $this->actingAs($admin)
-        ->postJson(amenityBase($account, $location), validAmenityPayload(['slot_minutes' => 900]))
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['daily_capacity' => 1001]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors('slot_minutes');
+        ->assertJsonValidationErrors('daily_capacity');
 
-    $id = $this->actingAs($admin)
-        ->postJson(amenityBase($account, $location), validAmenityPayload(['slot_minutes' => 360]))
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['daily_capacity' => 4]))
         ->assertCreated()
-        ->assertJsonPath('data.slot_minutes', 360)
+        ->assertJsonPath('data.daily_capacity', 4)
         ->assertJsonMissingPath('data.capacity')
-        ->assertJsonMissingPath('data.effective_booking_policy')
-        ->json('data.id');
+        ->assertJsonMissingPath('data.effective_booking_policy');
 
-    // Absent in the payload, it defaults to an hour.
+    // Absent or null in the payload means no limit.
     $this->actingAs($admin)
-        ->postJson(amenityBase($account, $location), collect(validAmenityPayload(['name' => 'Parrilla']))->except('slot_minutes')->all())
+        ->postJson(amenityBase($account, $location), collect(validAmenityPayload(['name' => 'Parrilla']))->except('daily_capacity')->all())
         ->assertCreated()
-        ->assertJsonPath('data.slot_minutes', 60);
-
-    expect(Amenity::query()->findOrFail($id)->slotMinutes())->toBe(360);
+        ->assertJsonPath('data.daily_capacity', null);
+    $this->actingAs($admin)
+        ->postJson(amenityBase($account, $location), validAmenityPayload(['name' => 'Gimnasio', 'daily_capacity' => null]))
+        ->assertCreated()
+        ->assertJsonPath('data.daily_capacity', null);
 });
 
 test('a non-reservable amenity stores instant mode and null fees', function () {

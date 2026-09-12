@@ -10,6 +10,7 @@ import { openRowColumn } from '../../components/table/open-row-column'
 import { StatusPill } from '../../components/ui/chips'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
+import { openDaysLabel } from '../../lib/open-days'
 import {
   deactivateAmenity,
   getAmenities,
@@ -17,7 +18,6 @@ import {
   type AmenitySummary,
 } from './amenities-api'
 import { AmenityFormDrawer } from './amenity-form-drawer'
-import { summarizeAvailability } from './amenity-schedule'
 
 const DETAIL = 'text-sm text-[var(--mantine-color-dimmed)]'
 
@@ -47,12 +47,10 @@ export function LocationAmenitiesTab({
   accountId,
   locationId,
   readOnly,
-  timezone,
 }: {
   accountId: string
   locationId: string
   readOnly: boolean
-  timezone: string
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -127,13 +125,20 @@ export function LocationAmenitiesTab({
       // the table's single-line cells), and hidden on phones — the drawer
       // shows the full policy; the row only needs name and status there.
       {
-        id: 'schedule',
-        header: t('amenities.columns.schedule'),
+        id: 'openDays',
+        header: t('amenities.columns.openDays'),
         meta: { hideBelow: 'lg' },
-        cell: ({ row }) => {
-          const schedule = summarizeAvailability(row.original.availability)
-          return <span className={DETAIL}>{schedule === 'variable' ? t('amenities.variableSchedule') : schedule ?? '—'}</span>
-        },
+        cell: ({ row }) => (
+          <span className={DETAIL}>{row.original.is_reservable ? openDaysLabel(row.original.open_days, t) : '—'}</span>
+        ),
+      },
+      {
+        id: 'capacity',
+        header: t('amenities.columns.capacity'),
+        meta: { hideBelow: 'lg' },
+        cell: ({ row }) => (
+          <span className={DETAIL}>{row.original.is_reservable && row.original.daily_capacity !== null ? row.original.daily_capacity : '—'}</span>
+        ),
       },
       {
         id: 'fee',
@@ -224,7 +229,6 @@ export function LocationAmenitiesTab({
         locationId={locationId}
         opened={drawerOpened}
         reactivating={reactivateMutation.isPending}
-        timezone={timezone}
         onClose={() => setDrawerOpened(false)}
         onDeactivate={current ? () => setDeactivating(current) : undefined}
         onReactivate={current ? () => reactivateMutation.mutate(current) : undefined}

@@ -17,13 +17,13 @@ use Illuminate\Validation\ValidationException;
 /**
  * Every status transition in one place: approve re-runs the booking rule so
  * an approval never lands on an amenity that stopped accepting bookings or
- * on a slot its schedule no longer offers. Slots are not exclusive; two
- * approved bookings of the same slot are the approver's call, not an error.
+ * on a weekday it no longer opens. Capacity never blocks an approval: the
+ * count is the approver's to weigh (ADR 0043).
  */
 class DecideReservation
 {
     public function __construct(
-        private readonly ValidateReservationSlot $validator,
+        private readonly ValidateReservationDay $validator,
         private readonly ActivityLogger $activityLogger,
         private readonly SyncReservationMovements $movements,
         private readonly ResidentAlerts $alerts,
@@ -34,13 +34,7 @@ class DecideReservation
         $this->assertOpen($reservation);
 
         return DB::transaction(function () use ($reservation, $actor): Reservation {
-            $this->validator->validate(
-                $reservation->amenity,
-                $reservation->unit,
-                $reservation->starts_at,
-                $reservation->ends_at,
-                ignore: $reservation,
-            );
+            $this->validator->validate($reservation->amenity, $reservation->unit, $reservation->reserved_on, creating: false);
 
             $approved = $this->transition($reservation, $actor, ReservationStatus::Approved, null, ActivityEventType::ReservationApproved,
                 "Se aprobó la reserva de {$reservation->amenity->name} para la unidad {$reservation->unit->unit_number}.");
@@ -82,8 +76,8 @@ class DecideReservation
 
     /**
      * Pending, observed, and approved reservations can be cancelled. Staff
-     * may cancel at any time; a resident ($asResident) only while the
-     * booking has not started (ADR 0041).
+     * may cancel at any time; a resident ($asResident) only until the start
+     * of the booked day in the Location's timezone (ADR 0043).
      */
     public function cancel(Reservation $reservation, User $actor, ?string $note = null, bool $asResident = false): Reservation
     {
@@ -93,9 +87,9 @@ class DecideReservation
             ]);
         }
 
-        if ($asResident && $reservation->starts_at->lte(now())) {
+        if ($asResident && ! $reservation->isTodayOrLater()) {
             throw ValidationException::withMessages([
-                'status' => __('A reservation that has started can no longer be cancelled.'),
+                'status' => __('A reservation whose day has arrived can no longer be cancelled.'),
             ]);
         }
 
@@ -113,21 +107,18 @@ class DecideReservation
     /** Decisions reach the unit's residents in the portal and, if they kept the switch on, by email (P3). */
     private function alert(Reservation $reservation, ResidentAlertKind $kind, string $title, ?string $note): void
     {
-        $reservation->loadMissing(['amenity', 'unit.location']);
-        $timezone = $reservation->unit->location->timezone;
-        $starts = $reservation->starts_at->setTimezone($timezone)->locale('es');
-        $ends = $reservation->ends_at->setTimezone($timezone);
+        $reservation->loadMissing(['amenity', 'unit']);
+        $day = $reservation->reserved_on->locale('es');
 
         $this->alerts->send(
             unit: $reservation->unit,
             kind: $kind,
             title: $title,
-            body: $reservation->amenity->name.' · '.$starts->isoFormat('ddd D MMM, HH:mm').'–'.$ends->format('H:i').($note ? " · {$note}" : ''),
+            body: $reservation->amenity->name.' · '.$day->isoFormat('ddd D MMM').($note ? " · {$note}" : ''),
             subject: $reservation,
             facts: array_values(array_filter([
                 ['label' => 'Amenidad', 'value' => $reservation->amenity->name],
-                ['label' => 'Fecha', 'value' => ucfirst($starts->isoFormat('dddd D [de] MMMM'))],
-                ['label' => 'Horario', 'value' => $starts->format('H:i').' – '.$ends->format('H:i')],
+                ['label' => 'Fecha', 'value' => ucfirst($day->isoFormat('dddd D [de] MMMM'))],
                 ['label' => 'Unidad', 'value' => $reservation->unit->label()],
                 $reservation->fee_snapshot_minor ? ['label' => 'Costo', 'value' => Money::soles($reservation->fee_snapshot_minor)] : null,
                 $reservation->deposit_snapshot_minor ? ['label' => 'Depósito', 'value' => Money::soles($reservation->deposit_snapshot_minor)] : null,

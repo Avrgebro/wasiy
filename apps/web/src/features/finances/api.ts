@@ -52,7 +52,8 @@ export type MovementSummary = {
   reservation?: {
     id: string
     amenity_name: string | null
-    starts_at: string
+    /** Y-m-d in the location's calendar (ADR 0043). */
+    reserved_on: string
     status: string
   } | null
   occurred_on: string

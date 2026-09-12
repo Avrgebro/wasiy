@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
-use App\Data\AmenityAvailability;
 use App\Enums\BookingMode;
+use App\Enums\ReservationStatus;
+use App\Enums\Weekday;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,8 +24,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'description',
     'is_reservable',
     'booking_mode',
-    'availability',
-    'slot_minutes',
+    'open_days',
+    'daily_capacity',
     'fee_amount_minor',
     'deposit_amount_minor',
 ])]
@@ -44,27 +46,37 @@ class Amenity extends Model
         return [
             'booking_mode' => BookingMode::class,
             'is_reservable' => 'boolean',
-            'availability' => 'array',
+            'open_days' => 'array',
+            'daily_capacity' => 'integer',
             'deactivated_at' => 'datetime',
         ];
     }
 
     /**
-     * @return Attribute<AmenityAvailability, never>
+     * The weekdays this amenity takes bookings on (ADR 0043).
+     *
+     * @return list<string>
      */
-    protected function availabilitySchedule(): Attribute
+    public function openDays(): array
     {
-        return Attribute::make(
-            get: fn (): AmenityAvailability => $this->availability === null
-                ? AmenityAvailability::alwaysClosed()
-                : AmenityAvailability::fromArray($this->availability),
-        );
+        return array_values($this->open_days ?? []);
     }
 
-    /** Slot length in minutes (ADR 0041); the column default is 60. */
-    public function slotMinutes(): int
+    public function isOpenOn(CarbonInterface $day): bool
     {
-        return (int) ($this->slot_minutes ?? 60);
+        return in_array(Weekday::of($day)->value, $this->openDays(), true);
+    }
+
+    /**
+     * Approved bookings on one local day: the number capacity is measured
+     * against. Only approved rows count (ADR 0043).
+     */
+    public function approvedCountOn(string $date): int
+    {
+        return $this->reservations()
+            ->where('status', ReservationStatus::Approved->value)
+            ->whereDate('reserved_on', $date)
+            ->count();
     }
 
     public function isDeactivated(): bool
@@ -104,6 +116,14 @@ class Amenity extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * @return HasMany<Reservation, $this>
+     */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 
     /**

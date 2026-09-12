@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { addDays, localDateString } from '../../lib/calendar'
 import '../../i18n'
 
 const navigateSpy = vi.fn()
@@ -30,8 +31,8 @@ const { PortalBookingPage } = await import('./portal-booking-page')
 
 const originalAdapter = apiClient.defaults.adapter
 
-const amenity = { id: 'am_1', name: 'Salón de eventos', description: 'Ambiente cerrado con cocina y sonido.', booking_mode: 'approval', slot_minutes: 120, fee_amount_minor: 15000, deposit_amount_minor: 30000, photos: [], cover_photo_url: null }
-const reservation = { id: 'rv_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_402', unit_number: '402', resident_name: 'Carlos Mendoza', starts_at: '2026-09-07T00:00:00Z', ends_at: '2026-09-07T02:00:00Z', status: 'pending', is_completed: false, status_note: null, fee_snapshot_minor: 15000, deposit_snapshot_minor: 30000, created_by_name: 'Carlos Mendoza', decided_by_name: null, decided_at: null, created_at: '2026-09-04T13:40:00Z' }
+const amenity = { id: 'am_1', name: 'Salón de eventos', description: 'Ambiente cerrado con cocina y sonido.', booking_mode: 'approval', open_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], daily_capacity: 1, fee_amount_minor: 15000, deposit_amount_minor: 30000, photos: [], cover_photo_url: null }
+const reservation = { id: 'rv_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_402', unit_number: '402', resident_name: 'Carlos Mendoza', reserved_on: '2026-09-06', status: 'pending', is_completed: false, status_note: null, fee_snapshot_minor: 15000, deposit_snapshot_minor: 30000, created_by_name: 'Carlos Mendoza', decided_by_name: null, decided_at: null, created_at: '2026-09-04T13:40:00Z' }
 
 function install(onWrite?: (url: string, body: unknown) => void) {
   apiClient.defaults.adapter = vi.fn<AxiosAdapter>((config) => {
@@ -48,7 +49,14 @@ function install(onWrite?: (url: string, body: unknown) => void) {
     if (url.startsWith('/api/portal/reservations/rv_1')) return Promise.resolve(axiosResponse(config, { data: reservation, history: [{ id: 'al_1', event_type: 'reservation.created', status: 'pending', note: null, actor_name: 'Carlos Mendoza', created_at: '2026-09-04T13:40:00Z' }], can_cancel: true }))
     if (url.includes('/portal/amenities?')) return Promise.resolve(axiosResponse(config, { data: [amenity] }))
     if (url.includes('/availability?')) {
-      return Promise.resolve(axiosResponse(config, { date: url.match(/date=([\d-]+)/)?.[1], slot_minutes: 120, booking_mode: 'approval', fee_amount_minor: 15000, deposit_amount_minor: 30000, slots: [{ start: '09:00', end: '11:00', available: true, reason: null }, { start: '12:00', end: '14:00', available: false, reason: 'past' }, { start: '19:00', end: '21:00', available: true, reason: null }] }))
+      // The whole horizon at once (ADR 0043): today is full, every other day is free.
+      const from = url.match(/from=([\d-]+)/)![1]
+      const to = url.match(/to=([\d-]+)/)![1]
+      const days = []
+      for (let day = from; day <= to; day = addDays(day, 1)) {
+        days.push(day === from ? { date: day, available: false, reason: 'full', approved_count: 1 } : { date: day, available: true, reason: null, approved_count: 0 })
+      }
+      return Promise.resolve(axiosResponse(config, { days, daily_capacity: 1, booking_mode: 'approval', fee_amount_minor: 15000, deposit_amount_minor: 30000 }))
     }
     return Promise.reject(new Error(`Unexpected request: ${url}`))
   })
@@ -72,7 +80,8 @@ describe('portal reservations', () => {
     expect(await screen.findByRole('tab', { name: 'Mis reservas · 1' })).toBeInTheDocument()
     await user.click(await screen.findByText('Salón de eventos'))
     const sheet = await screen.findByRole('dialog')
-    expect(await within(sheet).findByText('Puedes cancelar hasta la hora de inicio.')).toBeInTheDocument()
+    expect(await within(sheet).findByText('Puedes cancelar hasta el mismo día de la reserva.')).toBeInTheDocument()
+    expect(within(sheet).getByText(/domingo, 6 de setiembre/)).toBeInTheDocument()
     expect(within(sheet).getByText('S/ 150')).toBeInTheDocument()
     expect(within(sheet).getByText('Solicitada')).toBeInTheDocument()
 
@@ -93,20 +102,26 @@ describe('portal reservations', () => {
     expect(screen.getByText('S/ 150 · depósito S/ 300')).toBeInTheDocument()
   })
 
-  it('books a free slot for the selected day and sends the request', async () => {
+  it('marks a full day, lets me pick a free one and sends the request with the date only', async () => {
     const writes: { url: string; body: unknown }[] = []
     install((url, body) => writes.push({ url, body }))
     renderPortal(<PortalBookingPage />)
     const user = userEvent.setup()
+    const today = localDateString(new Date(), 'America/Lima')
+    const tomorrow = addDays(today, 1)
 
-    expect(await screen.findByRole('option', { name: /12:00–14:00/ })).toBeDisabled()
-    await user.click(screen.getByRole('option', { name: '19:00–21:00' }))
+    // Today is full: disabled on the strip, named under it, no request possible.
+    expect(await screen.findByText('Cupo lleno')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: today })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Solicitar reserva' })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: tomorrow }))
     expect(screen.getByText('S/ 150 + depósito S/ 300')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Solicitar reserva' }))
 
     await waitFor(() => expect(writes).toHaveLength(1))
     expect(writes[0].url).toBe('/api/portal/reservations')
-    expect(writes[0].body).toMatchObject({ unit_id: 'un_402', amenity_id: 'am_1', start: '19:00', end: '21:00' })
+    expect(writes[0].body).toEqual({ unit_id: 'un_402', amenity_id: 'am_1', date: tomorrow })
     expect(navigateSpy).toHaveBeenCalledWith({ to: '/portal/reservas', search: { chip: 'mine' } })
   })
 })

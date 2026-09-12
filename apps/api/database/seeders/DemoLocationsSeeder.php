@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\BookingMode;
+use App\Enums\Weekday;
 use App\Models\Account;
 use App\Models\Amenity;
 use App\Models\Location;
@@ -50,9 +51,9 @@ class DemoLocationsSeeder extends Seeder
             'description' => 'Salón con cocina de apoyo, proyector y capacidad para 80 personas sentadas.',
             'is_reservable' => true,
             'booking_mode' => BookingMode::Approval,
-            'availability' => $this->everyDay('09:00', '22:00'),
-            // Events are booked in half-day blocks.
-            'slot_minutes' => 360,
+            'open_days' => $this->everyDay(),
+            // One party per day in the salón.
+            'daily_capacity' => 1,
             'fee_amount_minor' => 15000,
             'deposit_amount_minor' => 30000,
         ]);
@@ -61,19 +62,15 @@ class DemoLocationsSeeder extends Seeder
             'name' => 'Gimnasio',
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
-            'availability' => $this->everyDay('05:00', '23:00'),
+            'open_days' => $this->everyDay(),
         ]);
 
         $this->amenity($central, 'parrilla-terraza', [
             'name' => 'Parrilla / terraza',
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
-            'slot_minutes' => 120,
-            'availability' => [
-                'friday' => [['start' => '12:00', 'end' => '22:00']],
-                'saturday' => [['start' => '12:00', 'end' => '22:00']],
-                'sunday' => [['start' => '12:00', 'end' => '22:00']],
-            ],
+            'open_days' => ['friday', 'saturday', 'sunday'],
+            'daily_capacity' => 2,
             'fee_amount_minor' => 5000,
         ]);
 
@@ -86,7 +83,7 @@ class DemoLocationsSeeder extends Seeder
             'name' => 'Cancha de squash',
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
-            'availability' => $this->everyDay('06:00', '21:00'),
+            'open_days' => $this->everyDay(),
         ]);
 
         if (! $squash->isDeactivated()) {
@@ -101,13 +98,11 @@ class DemoLocationsSeeder extends Seeder
     }
 
     /**
-     * @return array<string, array<int, array{start: string, end: string}>>
+     * @return list<string>
      */
-    private function everyDay(string $start, string $end): array
+    private function everyDay(): array
     {
-        return collect(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'])
-            ->mapWithKeys(fn (string $day) => [$day => [['start' => $start, 'end' => $end]]])
-            ->all();
+        return Weekday::keys();
     }
 
     /**

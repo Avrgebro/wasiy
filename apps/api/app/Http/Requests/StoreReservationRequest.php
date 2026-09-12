@@ -13,9 +13,8 @@ class StoreReservationRequest extends FormRequest
     }
 
     /**
-     * Times arrive as wall-clock in the Location's timezone (date + HH:MM)
-     * so the client never converts; ValidateReservationSlot owns every
-     * semantic rule beyond shape.
+     * The day arrives as a local date in the Location's calendar (ADR
+     * 0043); ValidateReservationDay owns every semantic rule beyond shape.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -26,8 +25,6 @@ class StoreReservationRequest extends FormRequest
             'unit_id' => ['required', 'string', 'ulid'],
             'resident_id' => ['sometimes', 'nullable', 'string', 'ulid'],
             'date' => ['required', 'date_format:Y-m-d'],
-            'start' => ['required', 'date_format:H:i'],
-            'end' => ['required', 'date_format:H:i'],
         ];
     }
 }

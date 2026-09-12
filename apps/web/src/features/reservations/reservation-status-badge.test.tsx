@@ -28,5 +28,5 @@ it('explains the status on hover, focus and tap without activating its row', asy
 it('explains completed as an ended reservation', async () => {
   render(<MantineProvider env="test"><ReservationStatusBadge reservation={{ status: 'approved', is_completed: true }} /></MantineProvider>)
   await userEvent.click(screen.getByRole('button', { name: 'Completada' }))
-  expect(screen.getByRole('tooltip')).toHaveTextContent('El horario de la reserva ya terminó.')
+  expect(screen.getByRole('tooltip')).toHaveTextContent('El día de la reserva ya pasó.')
 })

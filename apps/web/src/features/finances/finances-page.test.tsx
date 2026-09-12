@@ -328,7 +328,7 @@ describe('FinancesPage', () => {
           unit_id: 'un_1',
           unit_number: 'Depto. 302',
           reservation_id: 'res_9',
-          reservation: { id: 'res_9', amenity_name: 'Salón de eventos', starts_at: '2026-08-10T23:00:00Z', status: 'approved' },
+          reservation: { id: 'res_9', amenity_name: 'Salón de eventos', reserved_on: '2026-08-10', status: 'approved' },
           occurred_on: '2026-08-12',
           note: 'Sin incidencias durante el evento',
         }),

@@ -2,83 +2,73 @@
 
 namespace App\Actions\Reservations;
 
+use App\Enums\ReservationStatus;
 use App\Models\Amenity;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
 
 /**
- * The slot list for one amenity and one local day, the only place slots are
- * computed (ADR 0041). Each availability window is cut into consecutive
- * slots of `slot_minutes` from its start; a tail shorter than a slot is not
- * offered. A booking is a run of one or more consecutive slots of one
- * window; `max_slots` on each slot is the longest run that starts there and
- * still ends by the window close, so clients need not compute it. Staff and
- * portal read the same list and post what it offered.
- *
- * Slots are not exclusive, so existing bookings never mark a slot as taken:
- * the only reason a slot is unavailable is that it has already started.
+ * The day list for one amenity over a date range (ADR 0043), read by the
+ * staff drawer and the portal day strip alike. A day is unavailable when it
+ * has passed (`past`, in the Location's calendar), when the amenity does not
+ * open on that weekday (`closed`), or when the approved bookings have
+ * reached `daily_capacity` (`full`). `full` is reported on both surfaces;
+ * only the portal enforces it.
  */
 class BuildAvailability
 {
     /**
      * @return array{
-     *     date: string,
-     *     slot_minutes: int,
+     *     days: list<array{date: string, available: bool, reason: 'closed'|'past'|'full'|null, approved_count: int}>,
+     *     daily_capacity: int|null,
      *     booking_mode: string,
      *     fee_amount_minor: int|null,
-     *     deposit_amount_minor: int|null,
-     *     slots: list<array{start: string, end: string, available: bool, reason: 'past'|null, max_slots: int}>
+     *     deposit_amount_minor: int|null
      * }
      */
-    public function handle(Amenity $amenity, string $date): array
+    public function handle(Amenity $amenity, string $from, string $to): array
     {
         $timezone = $amenity->location->timezone;
-        $now = CarbonImmutable::now($timezone);
-        $day = CarbonImmutable::createFromFormat('Y-m-d', $date, $timezone)->startOfDay();
+        $today = CarbonImmutable::now($timezone)->startOfDay();
+        $start = CarbonImmutable::createFromFormat('Y-m-d', $from, $timezone)->startOfDay();
+        $end = CarbonImmutable::createFromFormat('Y-m-d', $to, $timezone)->startOfDay();
 
-        if ($day->lt($now->startOfDay())) {
-            throw ValidationException::withMessages(['date' => __('That day has passed.')]);
+        if ($end->lt($start)) {
+            throw ValidationException::withMessages(['to' => __('The range must end on or after the day it starts.')]);
         }
-        if ($day->gt($now->startOfDay()->addDays(ValidateReservationSlot::MAX_ADVANCE_DAYS))) {
-            throw ValidationException::withMessages(['date' => __('Bookings open up to :days days ahead.', ['days' => ValidateReservationSlot::MAX_ADVANCE_DAYS])]);
+        if ($start->diffInDays($end) > ValidateReservationDay::MAX_ADVANCE_DAYS) {
+            throw ValidationException::withMessages(['to' => __('The range covers at most :days days.', ['days' => ValidateReservationDay::MAX_ADVANCE_DAYS])]);
         }
 
-        $slotMinutes = $amenity->slotMinutes();
+        $approved = $amenity->reservations()
+            ->where('status', ReservationStatus::Approved->value)
+            ->whereBetween('reserved_on', [$start->toDateString(), $end->toDateString()])
+            ->selectRaw('reserved_on, count(*) as total')
+            ->groupBy('reserved_on')
+            ->pluck('total', 'reserved_on')
+            ->mapWithKeys(fn (mixed $total, mixed $date): array => [substr((string) $date, 0, 10) => (int) $total]);
 
-        // Step in wall-clock minutes, not elapsed time: on a daylight-saving
-        // day adding 60 real minutes would repeat or skip a label.
-        $slots = [];
-        foreach ($amenity->availability_schedule->windowsFor(strtolower($day->englishDayOfWeek)) as $window) {
-            $open = ValidateReservationSlot::minutes($window['start']);
-            $close = ValidateReservationSlot::minutes($window['end']);
+        $days = [];
+        for ($day = $start; $day->lte($end); $day = $day->addDay()) {
+            $date = $day->toDateString();
+            $count = $approved->get($date, 0);
 
-            for ($minute = $open; $minute + $slotMinutes <= $close; $minute += $slotMinutes) {
-                $slots[] = $this->slot(
-                    $day->setTime(intdiv($minute, 60), $minute % 60),
-                    $day->setTime(intdiv($minute + $slotMinutes, 60), ($minute + $slotMinutes) % 60),
-                    $now,
-                    intdiv($close - $minute, $slotMinutes),
-                );
-            }
+            $reason = match (true) {
+                $day->lt($today) => 'past',
+                ! $amenity->isOpenOn($day) => 'closed',
+                $amenity->daily_capacity !== null && $count >= $amenity->daily_capacity => 'full',
+                default => null,
+            };
+
+            $days[] = ['date' => $date, 'available' => $reason === null, 'reason' => $reason, 'approved_count' => $count];
         }
 
         return [
-            'date' => $date,
-            'slot_minutes' => $slotMinutes,
+            'days' => $days,
+            'daily_capacity' => $amenity->daily_capacity,
             'booking_mode' => $amenity->booking_mode->value,
             'fee_amount_minor' => $amenity->fee_amount_minor,
             'deposit_amount_minor' => $amenity->deposit_amount_minor,
-            'slots' => $slots,
         ];
-    }
-
-    /**
-     * @return array{start: string, end: string, available: bool, reason: 'past'|null, max_slots: int}
-     */
-    private function slot(CarbonImmutable $start, CarbonImmutable $end, CarbonImmutable $now, int $maxSlots): array
-    {
-        $row = ['start' => $start->format('H:i'), 'end' => $end->format('H:i'), 'available' => true, 'reason' => null, 'max_slots' => $maxSlots];
-
-        return $start->lte($now) ? [...$row, 'available' => false, 'reason' => 'past'] : $row;
     }
 }

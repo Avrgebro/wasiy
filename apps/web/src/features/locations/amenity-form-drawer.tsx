@@ -1,4 +1,4 @@
-import { Alert, Button, Select, Switch, Text, Textarea, TextInput } from '@mantine/core'
+import { Alert, Button, Checkbox, NumberInput, Switch, Text, Textarea, TextInput } from '@mantine/core'
 import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
@@ -9,30 +9,25 @@ import { MoneyInput } from '../../components/ui/money-input'
 import { DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { ApiError } from '../../app/api-client'
 import { getErrorMessage } from '../../lib/errors'
+import { WEEKDAYS, type Weekday } from '../../lib/open-days'
 import {
   createAmenity,
   updateAmenity,
   type AmenityPayload,
   type AmenitySummary,
-  type Availability,
 } from './amenities-api'
-import { AmenityAvailabilityEditor } from './amenity-availability-editor'
-import { availabilityHasConflicts, WEEKDAYS } from './amenity-schedule'
-import { SLOT_MINUTES_OPTIONS, slotLengthLabel } from './amenity-slots'
 
 type FormState = {
   name: string
   description: string
   is_reservable: boolean
   requires_approval: boolean
-  availability: Availability
-  slot_minutes: number
+  open_days: Weekday[]
+  daily_capacity: number | null
   /** Cents, like the API. */
   fee_amount_minor: number | null
   deposit_amount_minor: number | null
 }
-
-
 
 function amenityDefaults(amenity?: AmenitySummary | null): FormState {
   return {
@@ -40,37 +35,31 @@ function amenityDefaults(amenity?: AmenitySummary | null): FormState {
     description: amenity?.description ?? '',
     is_reservable: amenity?.is_reservable ?? true,
     requires_approval: amenity?.booking_mode === 'approval',
-    availability: amenity?.availability ?? {},
-    slot_minutes: amenity?.slot_minutes ?? 60,
+    // A new amenity opens every day; closing some is the exception.
+    open_days: amenity ? WEEKDAYS.filter((day) => amenity.open_days.includes(day)) : [...WEEKDAYS],
+    daily_capacity: amenity?.daily_capacity ?? null,
     fee_amount_minor: amenity?.fee_amount_minor ?? null,
     deposit_amount_minor: amenity?.deposit_amount_minor ?? null,
   }
 }
 
 function toPayload(form: FormState): AmenityPayload {
-  const availability = Object.fromEntries(
-    WEEKDAYS.map((day) => [
-      day,
-      (form.availability[day] ?? []).filter((window) => window.start && window.end),
-    ]).filter(([, windows]) => (windows as unknown[]).length > 0),
-  )
-
   return {
     name: form.name.trim(),
     description: form.description.trim() === '' ? null : form.description.trim(),
     is_reservable: form.is_reservable,
     booking_mode: form.requires_approval ? 'approval' : 'instant',
-    availability,
-    slot_minutes: form.slot_minutes,
+    open_days: WEEKDAYS.filter((day) => form.open_days.includes(day)),
+    daily_capacity: form.daily_capacity,
     fee_amount_minor: form.fee_amount_minor,
     deposit_amount_minor: form.deposit_amount_minor,
   }
 }
 
 /**
- * The 06c drawer, after ADR 0041: básicos, disponibilidad, reserva (slot
- * length and approval), cuotas. No booking policy — a reservation is an
- * exclusive run of slots inside the schedule, nothing else to configure.
+ * The 06c drawer, after ADR 0043: básicos, then — when reservable — the
+ * open weekdays, an optional daily capacity, the approval switch and the
+ * two fees. A reservation is a day, so there is no schedule to edit.
  * Photos are managed from the edit flow once the amenity exists.
  */
 export function AmenityFormDrawer({
@@ -82,7 +71,6 @@ export function AmenityFormDrawer({
   onReactivate,
   opened,
   reactivating = false,
-  timezone,
 }: {
   accountId: string
   editing: AmenitySummary | null
@@ -93,7 +81,6 @@ export function AmenityFormDrawer({
   onReactivate?: () => void
   opened: boolean
   reactivating?: boolean
-  timezone: string
 }) {
   const { t } = useTranslation('common')
 
@@ -113,7 +100,6 @@ export function AmenityFormDrawer({
         editing={editing}
         locationId={locationId}
         reactivating={reactivating}
-        timezone={timezone}
         onClose={onClose}
         onDeactivate={onDeactivate}
         onReactivate={onReactivate}
@@ -130,7 +116,6 @@ function AmenityForm({
   onDeactivate,
   onReactivate,
   reactivating,
-  timezone,
 }: {
   accountId: string
   editing: AmenitySummary | null
@@ -139,7 +124,6 @@ function AmenityForm({
   onDeactivate?: () => void
   onReactivate?: () => void
   reactivating: boolean
-  timezone: string
 }) {
   const { t } = useTranslation('common')
   const queryClient = useQueryClient()
@@ -169,8 +153,9 @@ function AmenityForm({
     setForm((current) => ({ ...current, [key]: value }))
   }
 
-  const conflicts = availabilityHasConflicts(form.availability)
   const nameMissing = form.name.trim() === ''
+  // Mirror of the API rule: a reservable amenity opens on at least one day.
+  const noOpenDays = form.is_reservable && form.open_days.length === 0
 
   return (
     <form
@@ -178,7 +163,7 @@ function AmenityForm({
       onSubmit={(event) => {
         event.preventDefault()
 
-        if (!conflicts && !nameMissing) {
+        if (!nameMissing && !noOpenDays) {
           mutation.mutate(toPayload(form))
         }
       }}
@@ -207,24 +192,30 @@ function AmenityForm({
             onChange={(event) => set('is_reservable', event.currentTarget.checked)}
           />
 
-          <DrawerSection label={t('amenities.sections.availability')} />
-          <AmenityAvailabilityEditor
-            readOnly={false}
-            timezone={timezone}
-            value={form.availability}
-            onChange={(availability) => set('availability', availability)}
-          />
-
           {form.is_reservable ? (
             <>
               <DrawerSection label={t('amenities.sections.booking')} />
-              <Select
-                allowDeselect={false}
-                data={SLOT_MINUTES_OPTIONS.map((minutes) => ({ value: String(minutes), label: slotLengthLabel(minutes, t) }))}
-                description={t('amenities.form.slotLengthHint')}
-                label={t('amenities.form.slotLength')}
-                value={String(form.slot_minutes)}
-                onChange={(value) => value && set('slot_minutes', Number(value))}
+              <Checkbox.Group
+                error={noOpenDays ? t('amenities.form.openDaysRequired') : undefined}
+                label={t('amenities.form.openDays')}
+                value={form.open_days}
+                onChange={(value) => set('open_days', value as Weekday[])}
+              >
+                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-2.5">
+                  {WEEKDAYS.map((day) => (
+                    <Checkbox key={day} label={t(`amenities.weekdays.${day}`)} value={day} />
+                  ))}
+                </div>
+              </Checkbox.Group>
+              <NumberInput
+                allowDecimal={false}
+                allowNegative={false}
+                description={t('amenities.form.capacityHint')}
+                label={t('amenities.form.capacity')}
+                min={1}
+                placeholder={t('amenities.form.capacityPlaceholder')}
+                value={form.daily_capacity ?? ''}
+                onChange={(value) => set('daily_capacity', typeof value === 'number' && value > 0 ? value : null)}
               />
               <Switch
                 checked={form.requires_approval}
@@ -285,7 +276,7 @@ function AmenityForm({
         <Button variant="default" onClick={onClose}>
           {t('actions.cancel')}
         </Button>
-        <Button color="accent" disabled={conflicts || nameMissing} loading={mutation.isPending} type="submit">
+        <Button color="accent" disabled={nameMissing || noOpenDays} loading={mutation.isPending} type="submit">
           {editing ? t('locations.saveChanges') : t('amenities.create')}
         </Button>
       </AppDrawerFooter>

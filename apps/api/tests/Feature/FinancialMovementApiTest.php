@@ -73,7 +73,7 @@ function seedMovement(Location $location, User $actor, array $attributes = []): 
 
 /**
  * A pending approval-mode reservation with fee and deposit snapshots on a
- * Monday slot inside the amenity's window.
+ * Monday the amenity opens.
  *
  * @return array{Amenity, Reservation}
  */
@@ -83,9 +83,7 @@ function pendingReservationWithCharges(Account $account, Location $location, Uni
         'account_id' => $account->id,
         'name' => 'Salón de eventos',
         'booking_mode' => BookingMode::from($mode),
-        // The 10:00–12:00 booking below must be one slot on the grid for approve to re-validate.
-        'availability' => ['monday' => [['start' => '10:00', 'end' => '22:00']]],
-        'slot_minutes' => 120,
+        'open_days' => ['monday'],
         'fee_amount_minor' => 150,
         'deposit_amount_minor' => 300,
     ]);
@@ -95,8 +93,7 @@ function pendingReservationWithCharges(Account $account, Location $location, Uni
         'location_id' => $location->id,
         'amenity_id' => $amenity->id,
         'unit_id' => $unit->id,
-        'starts_at' => $monday->setTime(10, 0)->utc(),
-        'ends_at' => $monday->setTime(12, 0)->utc(),
+        'reserved_on' => $monday->toDateString(),
         'fee_snapshot_minor' => 150,
         'deposit_snapshot_minor' => 300,
         'created_by' => $creator->id,
@@ -511,7 +508,7 @@ test('an instant booking opens its rows at creation and a rejection opens none',
     $amenity = Amenity::factory()->for($location)->create([
         'account_id' => $account->id,
         'booking_mode' => BookingMode::Instant,
-        'availability' => ['monday' => [['start' => '09:00', 'end' => '22:00']]],
+        'open_days' => ['monday'],
         'fee_amount_minor' => 50,
         'deposit_amount_minor' => null,
     ]);
@@ -519,7 +516,7 @@ test('an instant booking opens its rows at creation and a rejection opens none',
 
     $id = $this->actingAs($admin)
         ->postJson("/api/accounts/{$account->id}/locations/{$location->id}/reservations", [
-            'amenity_id' => $amenity->id, 'unit_id' => $unit->id, 'date' => $monday, 'start' => '10:00', 'end' => '11:00',
+            'amenity_id' => $amenity->id, 'unit_id' => $unit->id, 'date' => $monday,
         ])
         ->assertCreated()
         ->json('data.id');

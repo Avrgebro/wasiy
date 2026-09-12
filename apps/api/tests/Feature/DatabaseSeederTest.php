@@ -455,7 +455,8 @@ test('it seeds the m6 locations settings amenity matrix and photos', function ()
         ->and($amenities['salon-de-eventos']->deposit_amount_minor)->toBe(30000)
         ->and($amenities['gimnasio']->fee_amount_minor)->toBeNull()
         ->and($amenities['parrilla-terraza']->fee_amount_minor)->toBe(5000)
-        ->and($amenities['parrilla-terraza']->availabilitySchedule->isOpenOn('monday'))->toBeFalse()
+        ->and($amenities['parrilla-terraza']->openDays())->toBe(['friday', 'saturday', 'sunday'])
+        ->and($amenities['salon-de-eventos']->daily_capacity)->toBe(1)
         ->and($amenities['lobby-recepcion']->is_reservable)->toBeFalse()
         ->and($amenities['cancha-de-squash']->isDeactivated())->toBeTrue();
 
@@ -470,15 +471,12 @@ test('it seeds the m6 locations settings amenity matrix and photos', function ()
         ->and($central->photos()->count())->toBe(2);
 });
 
-test('demo reservations respect availability on different seed days', function (string $date) {
+test('demo reservations fall on open days whatever the seed day', function (string $date) {
     $this->travelTo(CarbonImmutable::parse($date, 'America/Lima')->utc());
     $this->seed();
-    $reservations = Reservation::with('amenity.location')->get();
+    $reservations = Reservation::with('amenity')->get();
     expect($reservations)->not->toBeEmpty();
     foreach ($reservations as $reservation) {
-        $start = $reservation->starts_at->setTimezone($reservation->amenity->location->timezone);
-        $end = $reservation->ends_at->setTimezone($reservation->amenity->location->timezone);
-        $windows = $reservation->amenity->availability_schedule->windowsFor(strtolower($start->englishDayOfWeek));
-        $this->assertTrue(collect($windows)->contains(fn ($window) => $start->format('H:i') >= $window['start'] && $end->format('H:i') <= $window['end']), $reservation->amenity->name.' '.$start->toIso8601String().' '.$end->toIso8601String());
+        $this->assertTrue($reservation->amenity->isOpenOn($reservation->reserved_on), $reservation->amenity->name.' '.$reservation->reserved_on->toDateString());
     }
 })->with(['2026-09-04 12:00', '2026-09-06 12:00']);

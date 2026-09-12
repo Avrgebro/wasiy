@@ -238,8 +238,8 @@ Defaults:
 - Forms use `react-hook-form` with a `zod` resolver (ADR 0009). Schema messages are i18n keys; server `422` errors land under their field through `submitHandlingServerErrors`, and anything unmatched goes to a root `Alert`.
 - Plain `rows` on `Textarea`, never `autosize` (it needs layout APIs jsdom lacks). Note fields use three rows everywhere.
 - Money inputs: `MoneyInput` (`components/ui/money-input.tsx`) — a `NumberInput` with "S/" as a dimmed `leftSection`, two decimals, `thousandSeparator=" "`; the field shows soles but form state and the API hold integer cents (`*_minor`).
-- Dates: `DateField` from `components/ui/date-field.tsx` (Mantine `DatePickerInput` from `@mantine/dates`, Spanish, Monday-first, calendar icon, long value like "5 de octubre de 2026"). Values are `YYYY-MM-DD` strings or `''`, never `Date` objects. Bounds and closed days go through `minDate` / `maxDate` / `excludeDate`. Day buttons are labelled by ISO date, so tests pick a day with `pickDate` from `lib/test-dates.ts`. No native `type="date"` inputs. Times that are typed (availability windows, quiet hours, announcement hour) stay native `type="time"`.
-- Slots: both surfaces pick one slot on `SlotGrid` from `components/ui/slot-grid.tsx` (Mantine `TimeGrid`, single value: taken and past slots disabled, each button named by its `start–end` range). The portal shows it under a Mantine `MiniCalendar` day strip; the staff drawer under a `DateField`. A booking is exactly one slot (ADR 0041), so there is no end field anywhere.
+- Dates: `DateField` from `components/ui/date-field.tsx` (Mantine `DatePickerInput` from `@mantine/dates`, Spanish, Monday-first, calendar icon, long value like "5 de octubre de 2026"). Values are `YYYY-MM-DD` strings or `''`, never `Date` objects. Bounds and closed days go through `minDate` / `maxDate` / `excludeDate`. Day buttons are labelled by ISO date, so tests pick a day with `pickDate` from `lib/test-dates.ts`. No native `type="date"` inputs. Times that are typed (quiet hours, announcement hour) stay native `type="time"`.
+- Booking days (ADR 0043): a reservation is a whole day, so there is no time picker anywhere. The staff drawer books on a `DateField` with the amenity's closed weekdays excluded and a one-line `approved / capacity` hint under it; the portal books on a Mantine `MiniCalendar` seven-day strip where closed, past and full days are disabled through `getDayProps` and a full day says "Cupo lleno" under the strip. Open weekdays are seven `Checkbox`es in the amenity form (Monday first); weekday keys, `isOpenOn` and `openDaysLabel` ("Todos", "L–V", "L, Mi, V") live in `lib/open-days.ts` so both surfaces share them.
 
 ## Tables
 
@@ -431,7 +431,7 @@ What exists today, and where:
 | Toasts (`notifySuccess`, `notifyError`, `notifyWarning`) | `lib/notify.tsx` + `.wa-toast` in `index.css` | card chrome, tinted icon chip |
 | `PagePlaceholder` | `components/ui/page-placeholder.tsx` | route stubs |
 
-Not built, and not currently planned: breadcrumbs, a date range picker, a calendar or schedule grid (the day view was removed from M7; the week agenda list is the reservations view).
+Not built, and not currently planned: breadcrumbs, a date range picker, a time-based schedule grid (`@mantine/schedule` was removed twice; the reservations view is the week board, a plain table of amenity rows by day).
 
 ## Token Implementation Strategy
 
@@ -575,9 +575,9 @@ Rules:
 - Keep forms compact and easy to scan.
 - Resident invitation and claim-account flows should feel guided and reassuring.
 
-## Reservation Schedule UI
+## Reservation Week List
 
-Agenda-first. The manager view is a week list grouped by day (custom component, not `DataTable`), with a Por aprobar rail beside it; rows and queue cards open the reservation detail drawer. The day grid built on `@mantine/schedule` shipped and was removed in M7: at condominium volumes it was mostly empty space and its conflict value was covered by the queue's advisory line and the server's revalidation on approval. A calendar grid is not planned.
+The manager view is the day-grouped week list (`features/reservations/reservation-week-list.tsx`) on the shared `DataTable`: day bands through `groupBy` on `reserved_on` ("Hoy · viernes 12 de septiembre"), columns amenity (with the per-amenity accent bar in the cell), unit, resident (`hideBelow: md`), status pill and the trailing chevron, plus a toolbar with search, status chips (Todas · Pendientes n · Confirmadas · Completadas) and an amenity filter. Bookings carry no time (ADR 0043), so there is no time column; two rows for one amenity under a day band are a conflict at a glance. Rows open the reservation drawer and the open row shows the selected bar. The week pager sits above the list and anchors on the URL `date` param.
 
 ## Loading and Async States
 

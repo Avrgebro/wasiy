@@ -252,7 +252,7 @@ Route::middleware(['auth:sanctum', EnsureUserIsActive::class])->group(function (
             ->can('view', 'location');
         Route::get('/locations/{location}/search', LocationSearchController::class);
 
-        // Amenity slots for the Nueva reserva drawer (ADR 0041)
+        // Amenity open days for the Nueva reserva drawer and week board (ADR 0043)
         Route::get('/amenities/{amenity}/availability', AmenityAvailabilityController::class);
 
         // Buildings

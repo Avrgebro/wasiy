@@ -18,27 +18,33 @@ use Illuminate\Support\Facades\DB;
 class CreateReservation
 {
     public function __construct(
-        private readonly ValidateReservationSlot $validator,
+        private readonly ValidateReservationDay $validator,
         private readonly ActivityLogger $activityLogger,
         private readonly SyncReservationMovements $movements,
     ) {}
 
     /**
-     * Staff create on behalf of a unit. Instant amenities are approved on
-     * the spot; approval-mode ones enter the queue as pending. Slots are not
-     * exclusive, so nothing is locked: the transaction only keeps the row,
-     * its activity entry and its movements together.
+     * Book one day. Instant amenities are approved on the spot; approval-mode
+     * ones enter the queue as pending. A resident's request ($asResident)
+     * also respects the daily capacity; staff are never blocked by it (ADR
+     * 0043). The transaction keeps the row, its activity entry and its
+     * movements together, and serialises the capacity check against
+     * concurrent approvals.
      */
     public function handle(
         Amenity $amenity,
         Unit $unit,
         ?Resident $resident,
         User $actor,
-        CarbonImmutable $startsAt,
-        CarbonImmutable $endsAt,
+        CarbonImmutable $reservedOn,
+        bool $asResident = false,
     ): Reservation {
-        return DB::transaction(function () use ($amenity, $unit, $resident, $actor, $startsAt, $endsAt): Reservation {
-            $this->validator->validate($amenity, $unit, $startsAt, $endsAt);
+        return DB::transaction(function () use ($amenity, $unit, $resident, $actor, $reservedOn, $asResident): Reservation {
+            $this->validator->validate($amenity, $unit, $reservedOn);
+
+            if ($asResident) {
+                $this->validator->assertNotFull($amenity, $reservedOn);
+            }
 
             $instant = $amenity->booking_mode === BookingMode::Instant;
 
@@ -48,8 +54,7 @@ class CreateReservation
                 'amenity_id' => $amenity->id,
                 'unit_id' => $unit->id,
                 'resident_id' => $resident?->id,
-                'starts_at' => $startsAt,
-                'ends_at' => $endsAt,
+                'reserved_on' => $reservedOn->toDateString(),
             ]);
             $reservation->forceFill([
                 'status' => $instant ? ReservationStatus::Approved : ReservationStatus::Pending,

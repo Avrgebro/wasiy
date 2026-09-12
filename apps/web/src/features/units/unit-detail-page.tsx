@@ -22,7 +22,7 @@ import { packageStatusColor } from '../packages/presentation'
 import { reservationStatusColor, reservationStatusKey } from '../reservations/reservation-presentation'
 import { amountClassName, statusColor, statusLabel } from '../finances/movement-presentation'
 import type { ReservationSummary } from '../reservations/api'
-import { formatTimeRange, localDateString, shortDayLabel } from '../reservations/week'
+import { shortDayLabel } from '../reservations/week'
 import type { VehicleSummary } from '../vehicles/api'
 import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
 import { addUnitNote, deactivateUnit, getUnit, reactivateUnit, type UnitMember, type UnitNote } from './api'
@@ -255,7 +255,7 @@ function UnitDetailContent({
             {reservations.length === 0 ? (
               <Empty body={t('units.detail.noReservations')} />
             ) : (
-              reservations.map((reservation) => <ReservationRow key={reservation.id} reservation={reservation} timezone={timezone} />)
+              reservations.map((reservation) => <ReservationRow key={reservation.id} reservation={reservation} />)
             )}
           </Section>
 
@@ -467,7 +467,7 @@ function MemberRow({ member, onOpen }: { member: UnitMember; onOpen?: () => void
   )
 }
 
-function ReservationRow({ reservation, timezone }: { reservation: ReservationSummary; timezone: string }) {
+function ReservationRow({ reservation }: { reservation: ReservationSummary }) {
   const { t } = useTranslation('common')
   const charges = [
     reservation.fee_snapshot_minor ? t('reservations.queue.fee', { amount: formatMoney(reservation.fee_snapshot_minor) }) : null,
@@ -477,7 +477,7 @@ function ReservationRow({ reservation, timezone }: { reservation: ReservationSum
   return (
     <div className="flex items-center gap-3.5 px-5 py-3">
       <span className="w-24 shrink-0 font-mono text-xs text-[var(--mantine-color-dimmed)]">
-        {shortDayLabel(localDateString(new Date(reservation.starts_at), timezone))} · {formatTimeRange(reservation, timezone).split('–')[0]}
+        {shortDayLabel(reservation.reserved_on)}
       </span>
       <div className="min-w-0 flex-1">
         <Text fw={600} size="sm">

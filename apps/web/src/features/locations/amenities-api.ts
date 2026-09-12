@@ -3,10 +3,6 @@ import type { LocationPhoto } from './api'
 
 export type BookingModeValue = 'instant' | 'approval'
 
-export type AvailabilityWindow = { start: string; end: string }
-
-export type Availability = Partial<Record<string, AvailabilityWindow[]>>
-
 export type AmenitySummary = {
   id: string
   account_id: string
@@ -16,9 +12,10 @@ export type AmenitySummary = {
   description: string | null
   is_reservable: boolean
   booking_mode: BookingModeValue
-  availability: Availability
-  /** Length of one bookable slot (ADR 0041); a booking covers consecutive slots. */
-  slot_minutes: number
+  /** Weekday keys (`monday`…`sunday`) the amenity can be booked on (ADR 0043). */
+  open_days: string[]
+  /** Approved bookings allowed per day; null means no limit. */
+  daily_capacity: number | null
   fee_amount_minor: number | null
   deposit_amount_minor: number | null
   status: 'active' | 'deactivated'
@@ -32,8 +29,8 @@ export type AmenityPayload = {
   description?: string | null
   is_reservable?: boolean
   booking_mode?: BookingModeValue
-  availability?: Availability | null
-  slot_minutes?: number
+  open_days?: string[]
+  daily_capacity?: number | null
   fee_amount_minor?: number | null
   deposit_amount_minor?: number | null
 }
@@ -118,22 +115,25 @@ export function setAmenityCoverPhoto(
   )
 }
 
-/** One bookable slot as the server offers it; `reason` explains an unavailable one. */
-export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | null }
+/** One day as the server reports it; `reason` explains an unavailable one. */
+export type AvailabilityDay = {
+  date: string
+  available: boolean
+  reason: 'closed' | 'past' | 'full' | null
+  approved_count: number
+}
 
 export type AvailabilityResponse = {
-  date: string
-  slot_minutes: number
+  days: AvailabilityDay[]
+  daily_capacity: number | null
   booking_mode: BookingModeValue
   fee_amount_minor: number | null
   deposit_amount_minor: number | null
-  slots: AvailabilitySlot[]
 }
 
-/** The staff surface reads slots from the server like the portal does (ADR 0041). */
-export function getAmenityAvailability(amenityId: string, date: string, unitId?: string) {
-  const params = new URLSearchParams({ date })
-  if (unitId) params.set('unit_id', unitId)
+/** Day availability over a range (capped at 90 days by the API); staff reads it like the portal does (ADR 0043). */
+export function getAmenityAvailability(amenityId: string, from: string, to: string) {
+  const params = new URLSearchParams({ from, to })
 
   return apiRequest<AvailabilityResponse>(`/api/amenities/${amenityId}/availability?${params.toString()}`)
 }

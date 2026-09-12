@@ -14,7 +14,7 @@ import {
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { notifyError, notifySuccess } from '../../lib/notify'
-import { localDateString } from '../reservations/week'
+import { shortDayLabel } from '../reservations/week'
 import { getMovement, transitionMovement, type MovementHistoryEntry, type MovementStatus, type MovementSummary } from './api'
 import { longDate, shortDateTime } from './month'
 import {
@@ -133,13 +133,13 @@ export function MovementDrawer({
                     <Link
                       className="text-[var(--wa-info)] no-underline hover:underline"
                       search={{
-                        date: localDateString(new Date(movement.reservation.starts_at), timezone),
+                        date: movement.reservation.reserved_on,
                         reservation: movement.reservation.id,
                       }}
                       to="/admin/reservations"
                     >
                       {movement.reservation.amenity_name} ·{' '}
-                      {shortDateTime(movement.reservation.starts_at, timezone)} →
+                      {shortDayLabel(movement.reservation.reserved_on)} →
                     </Link>
                   }
                 />

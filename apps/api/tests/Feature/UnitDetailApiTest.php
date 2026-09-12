@@ -138,7 +138,7 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
     $amenity = Amenity::factory()->for($location)->create(['account_id' => $account->id, 'booking_mode' => BookingMode::Instant]);
     Reservation::factory()->create([
         'account_id' => $account->id, 'location_id' => $location->id, 'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
-        'starts_at' => now()->addDays(2), 'ends_at' => now()->addDays(2)->addHour(), 'created_by' => $admin->id,
+        'reserved_on' => now()->addDays(2)->toDateString(), 'created_by' => $admin->id,
     ]);
 
     $month = CarbonImmutable::now('America/Lima')->format('Y-m');
@@ -193,15 +193,15 @@ test('deactivating a unit ends memberships, parks vehicles and cancels future bo
     liveIn($unit);
     $vehicle = Vehicle::factory()->create(['account_id' => $account->id, 'location_id' => $location->id, 'unit_id' => $unit->id]);
 
-    $amenity = Amenity::factory()->for($location)->create(['account_id' => $account->id, 'availability' => ['monday' => [['start' => '09:00', 'end' => '22:00']]], 'fee_amount_minor' => 50]);
+    $amenity = Amenity::factory()->for($location)->create(['account_id' => $account->id, 'open_days' => ['monday'], 'fee_amount_minor' => 50]);
     $monday = CarbonImmutable::now('America/Lima')->addWeek()->next('Monday');
     $future = Reservation::factory()->create([
         'account_id' => $account->id, 'location_id' => $location->id, 'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
-        'starts_at' => $monday->setTime(10, 0)->utc(), 'ends_at' => $monday->setTime(12, 0)->utc(), 'fee_snapshot_minor' => 50, 'created_by' => $admin->id,
+        'reserved_on' => $monday->toDateString(), 'fee_snapshot_minor' => 50, 'created_by' => $admin->id,
     ]);
     $past = Reservation::factory()->create([
         'account_id' => $account->id, 'location_id' => $location->id, 'amenity_id' => $amenity->id, 'unit_id' => $unit->id,
-        'starts_at' => now()->subDays(3), 'ends_at' => now()->subDays(3)->addHour(), 'created_by' => $admin->id,
+        'reserved_on' => now()->subDays(3)->toDateString(), 'created_by' => $admin->id,
     ]);
     // A pending charge on the future booking should be voided by the cascade.
     $fee = FinancialMovement::factory()->income()->for($location)->create([

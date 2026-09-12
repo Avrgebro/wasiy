@@ -154,7 +154,10 @@ export type PortalAmenity = {
   name: string
   description: string | null
   booking_mode: 'instant' | 'approval'
-  slot_minutes: number
+  /** Weekday keys (`monday`…`sunday`) the amenity can be booked on (ADR 0043). */
+  open_days: string[]
+  /** Approved bookings allowed per day; null means no limit. */
+  daily_capacity: number | null
   fee_amount_minor: number | null
   deposit_amount_minor: number | null
   photos: { id: string; url: string; is_cover: boolean }[]
@@ -165,19 +168,20 @@ export function getPortalAmenities(unitId: string) {
   return apiRequest<{ data: PortalAmenity[] }>(`/api/portal/amenities?${buildParams({ unit_id: unitId }).toString()}`)
 }
 
-export type AvailabilitySlot = { start: string; end: string; available: boolean; reason: 'past' | null }
+/** One day as the server reports it; `reason` explains an unavailable one. */
+export type AvailabilityDay = { date: string; available: boolean; reason: 'closed' | 'past' | 'full' | null; approved_count: number }
 
 export type AvailabilityResponse = {
-  date: string
-  slot_minutes: number
+  days: AvailabilityDay[]
+  daily_capacity: number | null
   booking_mode: 'instant' | 'approval'
   fee_amount_minor: number | null
   deposit_amount_minor: number | null
-  slots: AvailabilitySlot[]
 }
 
-export function getAvailability(amenityId: string, unitId: string, date: string) {
-  return apiRequest<AvailabilityResponse>(`/api/portal/amenities/${amenityId}/availability?${buildParams({ unit_id: unitId, date }).toString()}`)
+/** Day availability over a range (the API caps it at 90 days). */
+export function getAvailability(amenityId: string, unitId: string, from: string, to: string) {
+  return apiRequest<AvailabilityResponse>(`/api/portal/amenities/${amenityId}/availability?${buildParams({ unit_id: unitId, from, to }).toString()}`)
 }
 
 export type PortalReservationStatus = 'pending' | 'approved' | 'observed' | 'rejected' | 'cancelled'
@@ -189,8 +193,8 @@ export type PortalReservation = {
   unit_id: string
   unit_number?: string
   resident_name?: string | null
-  starts_at: string
-  ends_at: string
+  /** The booked day, `YYYY-MM-DD` in the location's calendar (ADR 0043). */
+  reserved_on: string
   status: PortalReservationStatus
   is_completed: boolean
   status_note: string | null
@@ -212,7 +216,7 @@ export function getPortalReservation(reservationId: string) {
   return apiRequest<{ data: PortalReservation; history: PortalReservationHistory[]; can_cancel: boolean }>(`/api/portal/reservations/${reservationId}`)
 }
 
-export function requestReservation(payload: { unit_id: string; amenity_id: string; date: string; start: string; end: string }) {
+export function requestReservation(payload: { unit_id: string; amenity_id: string; date: string }) {
   return apiRequest<{ data: PortalReservation }>('/api/portal/reservations', { method: 'POST', data: payload })
 }
 

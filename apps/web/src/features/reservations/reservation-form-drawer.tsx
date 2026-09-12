@@ -1,23 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Alert, Button, Select, Text } from '@mantine/core'
 import { DateField } from '../../components/ui/date-field'
-import { SlotGrid } from '../../components/ui/slot-grid'
-import { durationLabel, durationOptions } from '../../lib/slot-runs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../app/api-client'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
-import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
+import { MAX_ADVANCE_DAYS } from '../../lib/calendar'
+import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
 import { notifySuccess } from '../../lib/notify'
+import { isOpenOn } from '../../lib/open-days'
 import { getAmenityAvailability, type AmenitySummary } from '../locations/amenities-api'
 import { getResidents } from '../residents/api'
 import { getUnits } from '../units/api'
 import { formatUnitLabel } from '../units/unit-label'
 import { createReservation } from './api'
 import { reservationFormSchema, type ReservationFormValues } from './schemas'
-import { closedWeekday, MAX_ADVANCE_DAYS } from './reservation-slots'
 import { addDays, localDateString } from './week'
 
 const emptyValues: ReservationFormValues = {
@@ -25,26 +24,30 @@ const emptyValues: ReservationFormValues = {
   unit_id: '',
   resident_id: '',
   date: '',
-  start: '',
-  end: '',
 }
 
 /**
- * The API validator reports on starts_at/ends_at while the form's fields
- * are date/start/end; remap so server messages land under the inputs
- * instead of the root alert.
+ * The API validator may report on `reserved_on` while the form's field is
+ * `date`; remap so the message lands under the picker instead of the root
+ * alert.
  */
 function remapServerFields(error: unknown): never {
   if (error instanceof ApiError && error.errors) {
     const mapped: Record<string, string[]> = {}
     for (const [key, messages] of Object.entries(error.errors)) {
-      mapped[key === 'starts_at' ? 'start' : key === 'ends_at' ? 'end' : key] = messages
+      mapped[key === 'reserved_on' ? 'date' : key] = messages
     }
     throw new ApiError(error.message, error.status, mapped, error.body)
   }
   throw error
 }
 
+/**
+ * Nueva reserva (ADR 0043): amenity, unit, resident and a day. Closed
+ * weekdays are not selectable; the hint under the date shows the approved
+ * count against the capacity, because staff are never blocked by it and
+ * decide with the number in view.
+ */
 export function ReservationFormDrawer({
   accountId,
   amenities,
@@ -106,35 +109,24 @@ export function ReservationFormDrawer({
   const today = localDateString(new Date(), timezone)
   const maxDate = addDays(today, MAX_ADVANCE_DAYS)
   const selectedAmenity = reservable.find((amenity) => amenity.id === amenityId) ?? null
-  const dateValid = /^\d{4}-\d{2}-\d{2}$/.test(date) && date >= today && date <= maxDate
 
-  // The server is the only place slots are computed (ADR 0041); the drawer
-  // shows what it offers and posts one of those runs back.
+  // One range query per amenity covers the whole horizon the picker offers.
   const availabilityQuery = useQuery({
-    enabled: opened && amenityId !== '' && dateValid,
-    queryKey: ['reservations', 'availability', amenityId, date, unitId],
-    queryFn: () => getAmenityAvailability(amenityId, date, unitId || undefined),
+    enabled: opened && amenityId !== '',
+    queryKey: ['reservations', 'availability', amenityId, today, maxDate],
+    queryFn: () => getAmenityAvailability(amenityId, today, maxDate),
   })
-  const slots = availabilityQuery.data?.slots ?? []
-  const slotMinutes = availabilityQuery.data?.slot_minutes ?? 60
-  const freeSlots = slots.filter((slot) => slot.available)
-  const start = useWatch({ control: form.control, name: 'start' })
-  const durations = start ? durationOptions(slots, start) : []
-  const slotsHint =
-    amenityId && date
-      ? !dateValid
-        ? t('reservations.form.dateOutOfRange', { days: MAX_ADVANCE_DAYS })
-        : availabilityQuery.isLoading
-          ? null
-          : availabilityQuery.isError
-            ? getErrorMessage(availabilityQuery.error)
-            : slots.length === 0
-              ? t('reservations.form.closedThatDay')
-              : freeSlots.length === 0
-                ? t('reservations.form.fullyBooked')
-                : null
+  const capacity = availabilityQuery.data?.daily_capacity ?? null
+  const day = availabilityQuery.data?.days.find((candidate) => candidate.date === date) ?? null
+  const capacityHint =
+    day && capacity !== null
+      ? [
+          t('reservations.form.capacityHint', { count: day.approved_count, capacity }),
+          day.reason === 'full' ? t('reservations.availability.full') : null,
+        ]
+          .filter(Boolean)
+          .join(' · ')
       : null
-
 
   const mutation = useMutation({
     mutationFn: (values: ReservationFormValues) =>
@@ -143,8 +135,6 @@ export function ReservationFormDrawer({
         unit_id: values.unit_id,
         resident_id: values.resident_id || null,
         date: values.date,
-        start: values.start,
-        end: values.end,
       }).catch(remapServerFields),
     onSuccess: async (response) => {
       await queryClient.invalidateQueries({ queryKey: ['reservations'] })
@@ -180,6 +170,11 @@ export function ReservationFormDrawer({
                 error={fieldErrorMessage(fieldState.error)}
                 label={t('reservations.form.amenity')}
                 searchable
+                onChange={(value) => {
+                  field.onChange(value ?? '')
+                  // The open weekdays change with the amenity.
+                  form.setValue('date', '')
+                }}
               />
             )}
           />
@@ -221,75 +216,25 @@ export function ReservationFormDrawer({
               name="date"
               render={({ field, fieldState }) => (
                 <DateField
+                  disabled={selectedAmenity === null}
                   error={fieldErrorMessage(fieldState.error)}
-                  // Closed weekdays are not selectable, so the "cerrado" hint
-                  // only ever shows for a date typed by the API's own rules.
-                  excludeDate={(candidate) => (selectedAmenity ? closedWeekday(selectedAmenity.availability, candidate) : false)}
+                  excludeDate={(candidate) => (selectedAmenity ? !isOpenOn(selectedAmenity.open_days, candidate) : false)}
                   label={t('reservations.form.date')}
                   maxDate={maxDate}
                   minDate={today}
                   placeholder={t('reservations.form.datePlaceholder')}
                   value={field.value}
                   onBlur={field.onBlur}
-                  onChange={(value) => {
-                    field.onChange(value)
-                    // The weekday's windows change with the date.
-                    form.setValue('start', '')
-                    form.setValue('end', '')
-                  }}
+                  onChange={field.onChange}
                 />
               )}
             />
-            {slotsHint ? (
+            {capacityHint ? (
               <Text c="dimmed" mt={4} size="xs">
-                {slotsHint}
+                {capacityHint}
               </Text>
             ) : null}
           </div>
-          {/* One slot per booking (ADR 0041): the same grid the portal uses;
-              picking a slot fixes the end. */}
-          {slots.length > 0 ? (
-            <Controller
-              control={form.control}
-              name="start"
-              render={({ field, fieldState }) => (
-                <SlotGrid
-                  error={fieldErrorMessage(fieldState.error) ?? fieldErrorMessage(form.formState.errors.end)}
-                  label={t('reservations.form.startSlot')}
-                  slots={slots}
-                  value={field.value}
-                  onChange={(start) => {
-                    field.onChange(start)
-                    form.setValue('end', slots.find((slot) => slot.start === start)?.end ?? '')
-                  }}
-                />
-              )}
-            />
-          ) : null}
-          {/* A booking is a run of whole slots (ADR 0041): the duration select
-              lists one slot up to the window's closing time; one slot is the
-              default, so the common case stays one tap. */}
-          {start && durations.length > 1 ? (
-            <Controller
-              control={form.control}
-              name="end"
-              render={({ field, fieldState }) => (
-                <Select
-                  allowDeselect={false}
-                  data={durations.map((option) => ({ value: option.end, label: `${durationLabel(option.slots * slotMinutes)} · ${start}–${option.end}` }))}
-                  error={fieldErrorMessage(fieldState.error)}
-                  label={t('reservations.form.duration')}
-                  value={field.value}
-                  onChange={(value) => field.onChange(value ?? '')}
-                />
-              )}
-            />
-          ) : null}
-          {slots.length === 0 && (amenityId === '' || date === '') ? (
-            <Text c="dimmed" size="sm">
-              {t('reservations.form.pickAmenityAndDay')}
-            </Text>
-          ) : null}
         </AppDrawerBody>
         <AppDrawerFooter>
           <Button variant="default" onClick={onClose}>

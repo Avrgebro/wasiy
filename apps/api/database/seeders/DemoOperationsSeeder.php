@@ -344,50 +344,43 @@ class DemoOperationsSeeder extends Seeder
         $today = $this->now->startOfDay();
 
         $rows = [
-            // [amenity, unit key, day offset, start h, end h, status, fee, deposit]
-            [$eventRoom, 'Torre A-402', 0, 9, 11, ReservationStatus::Approved, 15000, 30000],
-            [$rooftop, 'Torre B-1601', 0, 12, 14, ReservationStatus::Pending, 5000, null],
-            [$gym, 'Torre A-202', 0, 16, 18, ReservationStatus::Approved, null, null],
-            [$eventRoom, 'Torre B-1401', 0, 19, 21, ReservationStatus::Approved, 15000, 30000],
-            [$squash, 'Torre B-1001', 1, 7, 8, ReservationStatus::Approved, null, null],
-            [$eventRoom, 'Torre A-501', 2, 18, 22, ReservationStatus::Pending, 15000, 30000],
-            [$rooftop, 'Torre B-1202', 3, 13, 15, ReservationStatus::Observed, 5000, null],
-            [$eventRoom, 'Torre B-1501', -3, 17, 22, ReservationStatus::Approved, 15000, 30000],
-            [$rooftop, 'Torre A-302', -6, 12, 15, ReservationStatus::Approved, 5000, null],
-            [$eventRoom, 'Torre A-601', -9, 17, 22, ReservationStatus::Cancelled, 15000, 30000],
-            [$gym, 'Torre B-201', -1, 6, 7, ReservationStatus::Rejected, null, null],
+            // [amenity, unit key, day offset, status, fee, deposit]
+            // Two approved parties in the salón today: the conflict the week board shows.
+            [$eventRoom, 'Torre A-402', 0, ReservationStatus::Approved, 15000, 30000],
+            [$rooftop, 'Torre B-1601', 0, ReservationStatus::Pending, 5000, null],
+            [$gym, 'Torre A-202', 0, ReservationStatus::Approved, null, null],
+            [$eventRoom, 'Torre B-1401', 0, ReservationStatus::Approved, 15000, 30000],
+            [$squash, 'Torre B-1001', 1, ReservationStatus::Approved, null, null],
+            [$eventRoom, 'Torre A-501', 2, ReservationStatus::Pending, 15000, 30000],
+            [$rooftop, 'Torre B-1202', 3, ReservationStatus::Observed, 5000, null],
+            [$eventRoom, 'Torre B-1501', -3, ReservationStatus::Approved, 15000, 30000],
+            [$rooftop, 'Torre A-302', -6, ReservationStatus::Approved, 5000, null],
+            [$eventRoom, 'Torre A-601', -9, ReservationStatus::Cancelled, 15000, 30000],
+            [$gym, 'Torre B-201', -1, ReservationStatus::Rejected, null, null],
         ];
 
-        foreach ($rows as [$amenity, $unitKey, $offset, $startHour, $endHour, $status, $fee, $deposit]) {
+        foreach ($rows as [$amenity, $unitKey, $offset, $status, $fee, $deposit]) {
             $unit = $this->units->get($unitKey);
             if (! $amenity || ! $unit) {
                 continue;
             }
             $resident = $primaries->get($unitKey);
-            $startsAt = $today->addDays($offset)->setTime($startHour, 0);
-            $duration = ($endHour - $startHour) * 60;
+            $day = $today->addDays($offset);
             // Preserve historical/future intent while finding an open day.
-            for ($attempt = 0; $attempt < 7; $attempt++) {
-                $windows = $amenity->availability_schedule->windowsFor(strtolower($startsAt->englishDayOfWeek));
-                $fits = collect($windows)->contains(fn (array $window): bool => $startsAt->format('H:i') >= $window['start']
-                    && $startsAt->addMinutes($duration)->format('H:i') <= $window['end']);
-                if ($fits) {
-                    break;
-                }
-                $startsAt = $startsAt->addDays($offset < 0 ? -1 : 1);
+            for ($attempt = 0; $attempt < 7 && ! $amenity->isOpenOn($day); $attempt++) {
+                $day = $day->addDays($offset < 0 ? -1 : 1);
             }
-            if (! $fits) {
-                throw new \LogicException("No demo reservation window fits {$amenity->name}.");
+            if (! $amenity->isOpenOn($day)) {
+                throw new \LogicException("No open day fits the demo reservation of {$amenity->name}.");
             }
             $decided = $status !== ReservationStatus::Pending;
 
             $reservation = Reservation::query()->updateOrCreate(
-                ['amenity_id' => $amenity->id, 'unit_id' => $unit->id, 'starts_at' => $startsAt->utc()],
+                ['amenity_id' => $amenity->id, 'unit_id' => $unit->id, 'reserved_on' => $day->toDateString()],
                 [
                     'account_id' => $this->account->id,
                     'location_id' => $this->central->id,
                     'resident_id' => $resident?->id,
-                    'ends_at' => $startsAt->addMinutes($duration)->utc(),
                     'status' => $status,
                     'status_note' => match ($status) {
                         ReservationStatus::Observed => 'Confirmar el número de invitados antes de aprobar.',
@@ -398,12 +391,12 @@ class DemoOperationsSeeder extends Seeder
                     'deposit_snapshot_minor' => $deposit,
                     'created_by' => $resident?->user_id ?? $this->manager->id,
                     'decided_by' => $decided ? $this->manager->id : null,
-                    'decided_at' => $decided ? $startsAt->subDays(2)->setTime(10, 15)->utc() : null,
+                    'decided_at' => $decided ? $day->subDays(2)->setTime(10, 15)->utc() : null,
                 ],
             );
 
-            $createdAt = $startsAt->subDays(4)->setTime(9, 5);
-            $this->activity(ActivityEventType::ReservationCreated, "Se solicitó {$amenity->name} para el ".$startsAt->locale('es')->isoFormat('ddd D, HH:mm').' · '.$unit->label().'.', $this->manager, $createdAt, 'reservation', $reservation->id, ['unit_id' => $unit->id]);
+            $createdAt = $day->subDays(4)->setTime(9, 5);
+            $this->activity(ActivityEventType::ReservationCreated, "Se solicitó {$amenity->name} para el ".$day->locale('es')->isoFormat('ddd D MMM').' · '.$unit->label().'.', $this->manager, $createdAt, 'reservation', $reservation->id, ['unit_id' => $unit->id]);
             if ($decided) {
                 $eventType = match ($status) {
                     ReservationStatus::Approved => ActivityEventType::ReservationApproved,
@@ -569,10 +562,10 @@ class DemoOperationsSeeder extends Seeder
     {
         $rows = [
             // [unit key, kind, title, body, hours ago, read?]
-            ['Torre A-202', ResidentAlertKind::ReservationApproved, 'Tu reserva fue aprobada', 'Salón de eventos · sáb · 19:00–21:00', 2, false],
+            ['Torre A-202', ResidentAlertKind::ReservationApproved, 'Tu reserva fue aprobada', 'Salón de eventos · sáb 12 sep', 2, false],
             ['Torre A-202', ResidentAlertKind::PackageReceived, 'Paquete recibido', 'Recepción tiene un paquete para tu unidad · Urbano · caja mediana.', 5, false],
             ['Torre A-202', ResidentAlertKind::VisitArrived, 'Visitante llegó', 'Jorge Peña ingresó a tu unidad.', 26, false],
-            ['Torre A-202', ResidentAlertKind::ReservationObserved, 'Tu reserva fue observada', 'Parrilla · dom · 13:00–16:00 · Confirmar el número de invitados antes de aprobar.', 30, true],
+            ['Torre A-202', ResidentAlertKind::ReservationObserved, 'Tu reserva fue observada', 'Parrilla · dom 13 sep · Confirmar el número de invitados antes de aprobar.', 30, true],
             ['Torre A-202', ResidentAlertKind::PackageDelivered, 'Paquete entregado', 'Tu paquete fue retirado de recepción.', 24 * 4, true],
             ['Torre B-1001', ResidentAlertKind::PackageDelivered, 'Paquete entregado', 'Tu paquete fue retirado de recepción. · Amazon · sobre', 24 * 3, false],
             ['Torre B-1001', ResidentAlertKind::VisitArrived, 'Visitante llegó', 'Delivery Rappi ingresó a tu unidad.', 24 * 6, true],

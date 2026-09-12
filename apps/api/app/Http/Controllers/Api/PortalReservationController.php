@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Gate;
 /**
  * Resident-facing bookings (portal P2), scoped to one unit. Requests reuse the
  * staff action, so instant amenities confirm on the spot and approval ones
- * enter the same queue. Residents may cancel until the booking starts.
+ * enter the same queue; the portal alone respects the daily capacity.
+ * Residents may cancel until the start of the booked day (ADR 0043).
  */
 class PortalReservationController extends Controller
 {
@@ -44,16 +45,17 @@ class PortalReservationController extends Controller
         Gate::authorize('viewAsResident', [Reservation::class, $unit]);
 
         $scope = $validated['scope'] ?? 'upcoming';
+        $today = CarbonImmutable::now($unit->location->timezone)->toDateString();
         $reservations = Reservation::query()
             ->where('unit_id', $unit->id)
             ->with(self::RELATIONS)
             ->when($scope === 'upcoming', fn (Builder $query) => $query
-                ->whereIn('status', ['pending', 'observed', 'approved'])
-                ->where('ends_at', '>', now())
-                ->orderBy('starts_at'))
+                ->whereIn('status', Reservation::OPEN_STATUSES)
+                ->where('reserved_on', '>=', $today)
+                ->orderBy('reserved_on')->orderBy('created_at'))
             ->when($scope === 'past', fn (Builder $query) => $query
-                ->where(fn (Builder $done) => $done->whereIn('status', ['rejected', 'cancelled'])->orWhere('ends_at', '<=', now()))
-                ->orderByDesc('starts_at'));
+                ->where(fn (Builder $done) => $done->whereIn('status', ['rejected', 'cancelled'])->orWhere('reserved_on', '<', $today))
+                ->orderByDesc('reserved_on')->orderByDesc('created_at'));
 
         return ReservationResource::collection($reservations->paginate($this->perPage($validated))->withQueryString());
     }
@@ -80,9 +82,9 @@ class PortalReservationController extends Controller
 
         return (new ReservationResource($reservation))->additional([
             'history' => $history,
-            // Whether the resident can still cancel: undecided or approved, and not started (ADR 0041).
-            'can_cancel' => in_array($reservation->status->value, ['pending', 'observed', 'approved'], true)
-                && $reservation->starts_at->gt(now()),
+            // Whether the resident can still cancel: undecided or approved, and the day has not arrived (ADR 0043).
+            'can_cancel' => in_array($reservation->status->value, Reservation::OPEN_STATUSES, true)
+                && $reservation->isTodayOrLater(),
         ]);
     }
 
@@ -97,18 +99,14 @@ class PortalReservationController extends Controller
             'unit_id' => ['required', 'string', 'ulid'],
             'amenity_id' => ['required', 'string', 'ulid'],
             'date' => ['required', 'date_format:Y-m-d'],
-            'start' => ['required', 'date_format:H:i'],
-            'end' => ['required', 'date_format:H:i'],
         ]);
         $unit = Unit::query()->findOrFail($validated['unit_id']);
         Gate::authorize('createAsResident', [Reservation::class, $unit]);
         $amenity = Amenity::query()->where('location_id', $unit->location_id)->findOrFail($validated['amenity_id']);
 
-        $timezone = $unit->location->timezone;
-        $startsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', "{$validated['date']} {$validated['start']}", $timezone);
-        $endsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', "{$validated['date']} {$validated['end']}", $timezone);
+        $reservedOn = CarbonImmutable::createFromFormat('Y-m-d', $validated['date'], $unit->location->timezone)->startOfDay();
 
-        $reservation = $create->handle($amenity, $unit, $resident, $user, $startsAt->utc(), $endsAt->utc());
+        $reservation = $create->handle($amenity, $unit, $resident, $user, $reservedOn, asResident: true);
 
         return (new ReservationResource($reservation->load(self::RELATIONS)))->response()->setStatusCode(201);
     }

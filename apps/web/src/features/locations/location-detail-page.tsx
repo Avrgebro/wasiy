@@ -263,7 +263,6 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
             accountId={accountId}
             locationId={location.id}
             readOnly={deactivated}
-            timezone={location.timezone}
           />
         </Tabs.Panel>
         <Tabs.Panel pt="lg" value="staff">

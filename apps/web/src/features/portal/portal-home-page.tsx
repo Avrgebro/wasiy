@@ -7,7 +7,7 @@ import { useMe } from '../auth/hooks'
 import { useActiveUnit } from './active-unit-context'
 import { getPortalPackages, getPortalReservations, getPortalVisits } from './api'
 import { PortalCard, PortalRow, StatusPill } from './portal-cards'
-import { ageLabel, arrivedAt, expectedLabel, reservationRange, reservationTone, statusTone } from './presentation'
+import { ageLabel, arrivedAt, expectedLabel, longDate, reservationTone, statusTone } from './presentation'
 
 /** Inicio (Portal 01): today's board for the active unit. */
 export function PortalHomePage() {
@@ -63,7 +63,7 @@ export function PortalHomePage() {
           <PortalRow
             pill={<StatusPill color={reservationTone(reservations.data.data[0].status)}>{t(`portal.reservations.status.${reservations.data.data[0].status}`)}</StatusPill>}
             primary={reservations.data.data[0].amenity_name ?? ''}
-            secondary={reservationRange(reservations.data.data[0].starts_at, reservations.data.data[0].ends_at, timezone)}
+            secondary={longDate(reservations.data.data[0].reserved_on)}
           />
         </PortalCard>
       ) : null}

@@ -157,10 +157,10 @@ class UnitController extends Controller
 
         $reservations = Reservation::query()
             ->where('unit_id', $unit->id)
-            ->whereIn('status', ['pending', 'observed', 'approved'])
-            ->where('ends_at', '>', now())
+            ->whereIn('status', Reservation::OPEN_STATUSES)
+            ->where('reserved_on', '>=', CarbonImmutable::now($timezone)->toDateString())
             ->with(['amenity', 'resident'])
-            ->orderBy('starts_at')
+            ->orderBy('reserved_on')->orderBy('created_at')
             ->limit(5)
             ->get();
 

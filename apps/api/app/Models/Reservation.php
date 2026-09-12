@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ReservationStatus;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,12 +18,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'amenity_id',
     'unit_id',
     'resident_id',
-    'starts_at',
-    'ends_at',
+    'reserved_on',
 ])]
 class Reservation extends Model
 {
     use HasFactory, HasUlids, SoftDeletes;
+
+    /** The statuses a booking can still move out of: undecided or holding the day. */
+    public const OPEN_STATUSES = ['pending', 'observed', 'approved'];
 
     /**
      * Status, snapshots, and audit columns move only through the domain
@@ -34,10 +37,29 @@ class Reservation extends Model
     {
         return [
             'status' => ReservationStatus::class,
-            'starts_at' => 'immutable_datetime',
-            'ends_at' => 'immutable_datetime',
+            'reserved_on' => 'immutable_date',
             'decided_at' => 'datetime',
         ];
+    }
+
+    /** Today's date in the Location's calendar, the reference every day rule uses (ADR 0043). */
+    public function todayLocal(): CarbonImmutable
+    {
+        $this->loadMissing('location');
+
+        return CarbonImmutable::now($this->location->timezone)->startOfDay();
+    }
+
+    /** The booked day has not yet passed in the Location's timezone. */
+    public function isTodayOrLater(): bool
+    {
+        return $this->reserved_on->toDateString() >= $this->todayLocal()->toDateString();
+    }
+
+    /** "Completada" is presentation, not state: approved and the day is over. */
+    public function isCompleted(): bool
+    {
+        return $this->status === ReservationStatus::Approved && ! $this->isTodayOrLater();
     }
 
     /**

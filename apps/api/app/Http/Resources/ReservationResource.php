@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Enums\ReservationStatus;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -29,12 +28,10 @@ class ReservationResource extends JsonResource
             'resident_name' => $this->whenLoaded('resident', fn () => $this->resident?->name),
             'resident_phone' => $this->whenLoaded('resident', fn () => $this->resident?->phone),
             'resident_email' => $this->whenLoaded('resident', fn () => $this->resident?->email),
-            'starts_at' => $this->starts_at->toJSON(),
-            'ends_at' => $this->ends_at->toJSON(),
+            'reserved_on' => $this->reserved_on->toDateString(),
             'status' => $this->status->value,
-            // "Completada" is presentation, not state: approved and over.
-            'is_completed' => $this->status === ReservationStatus::Approved
-                && $this->ends_at->isPast(),
+            // "Completada" is presentation, not state: approved and the day is over (local).
+            'is_completed' => $this->isCompleted(),
             'status_note' => $this->status_note,
             'fee_snapshot_minor' => $this->fee_snapshot_minor,
             'deposit_snapshot_minor' => $this->deposit_snapshot_minor,

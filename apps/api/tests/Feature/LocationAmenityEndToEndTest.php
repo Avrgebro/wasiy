@@ -71,28 +71,23 @@ test('the full m6 location and amenity path works end to end', function () {
         ->assertJsonPath('data.explanation.announcements_email_residents.source', 'account')
         ->assertJsonPath('data.explanation.visitor_auto_checkout_hours.source', 'location');
 
-    // 4. An Amenity with a two-window day, a closed sunday and half-day slots.
+    // 4. An Amenity open two days a week with room for one party a day.
     $amenityId = $this->actingAs($admin)
         ->postJson("{$base}/locations/{$locationId}/amenities", [
             'name' => 'Salón de eventos',
             'is_reservable' => true,
             'booking_mode' => BookingMode::Approval->value,
-            'slot_minutes' => 240,
-            'availability' => [
-                'wednesday' => [
-                    ['start' => '09:00', 'end' => '13:00'],
-                    ['start' => '16:00', 'end' => '22:00'],
-                ],
-                'sunday' => [],
-            ],
+            'open_days' => ['wednesday', 'saturday'],
+            'daily_capacity' => 1,
             'fee_amount_minor' => 150,
             'deposit_amount_minor' => 300,
         ])
         ->assertCreated()
-        ->assertJsonPath('data.slot_minutes', 240)
+        ->assertJsonPath('data.open_days', ['wednesday', 'saturday'])
+        ->assertJsonPath('data.daily_capacity', 1)
         ->json('data.id');
 
-    expect(Amenity::query()->findOrFail($amenityId)->availabilitySchedule->isOpenOn('sunday'))->toBeFalse();
+    expect(Amenity::query()->findOrFail($amenityId)->openDays())->toBe(['wednesday', 'saturday']);
 
     // 5. The location detail now counts the amenity and carries the cover.
     $this->actingAs($admin)

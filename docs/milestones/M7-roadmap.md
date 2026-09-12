@@ -127,3 +127,7 @@ The exclusive-slot rule went too. Nothing enforces overlap: any number of units 
 ## Revision (2026-09-11, night) — variable length
 
 A booking is a run of whole slots inside one window (`end - start` a multiple of `slot_minutes`, `end` before the window closes). With no exclusivity the run has nothing to bridge, so this is a Duración select after the start slot on both surfaces, defaulting to one slot. `lib/slot-runs.ts` lists the options from the server's slot list.
+
+## Revision (2026-09-12) — reservations are days (ADR 0043)
+
+Residents of the target buildings book a day, not a time: "reserve the salón for Saturday and go when you like; the only rule is a maximum number of reservations at once". Time left the model end to end: amenities have `open_days` and an optional `daily_capacity`; a reservation has `reserved_on`. The staff page is the mockup-08 week list again (day bands, rows of amenity · unit · resident · status, search, chips, amenity filter; a one-row-per-amenity week board was tried and dropped the same day); the drawer is amenity, unit, resident, date; the portal is the day strip and a button, with full days disabled. Capacity is enforced only on the portal — staff are the override. Deleted: availability windows editor, slot builder and grids, duration select, run helpers, DST handling, `@mantine/schedule`.

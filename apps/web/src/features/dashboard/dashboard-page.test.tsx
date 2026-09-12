@@ -64,7 +64,7 @@ function dashboard(withManagement: boolean): LocationDashboardResponse {
       reservations_today_count: 1,
       reservations_with_deposit_count: 1,
       reservations_today: [
-        { id: 'rv_1', account_id: 'acc_1', location_id: 'loc_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_2', unit_number: '402', resident_id: 'rs_2', resident_name: 'Lucía Ramírez', resident_phone: null, resident_email: null, starts_at: '2026-09-04T14:00:00Z', ends_at: '2026-09-04T16:00:00Z', status: 'approved', is_completed: false, status_note: null, fee_snapshot_minor: 20000, deposit_snapshot_minor: 30000, created_by: 'usr_1', created_by_name: null, decided_by: null, decided_by_name: null, decided_at: null, created_at: null } as LocationDashboardResponse['today']['reservations_today'][number],
+        { id: 'rv_1', account_id: 'acc_1', location_id: 'loc_1', amenity_id: 'am_1', amenity_name: 'Salón de eventos', unit_id: 'un_2', unit_number: '402', resident_id: 'rs_2', resident_name: 'Lucía Ramírez', resident_phone: null, resident_email: null, reserved_on: '2026-09-04', status: 'approved', is_completed: false, status_note: null, fee_snapshot_minor: 20000, deposit_snapshot_minor: 30000, created_by: 'usr_1', created_by_name: null, decided_by: null, decided_by_name: null, decided_at: null, created_at: null } as LocationDashboardResponse['today']['reservations_today'][number],
       ],
       pending_movements_count: 3,
     },

@@ -74,8 +74,7 @@ class SyncReservationMovements
 
     private function detailFor(Reservation $reservation): string
     {
-        $start = $reservation->starts_at->setTimezone($reservation->location->timezone)->locale('es');
-        $slot = 'Reserva del '.$start->isoFormat('ddd D, HH:mm');
+        $slot = 'Reserva del '.$reservation->reserved_on->locale('es')->isoFormat('ddd D MMM');
 
         return $reservation->resident !== null
             ? "{$slot} · {$reservation->resident->name}"

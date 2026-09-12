@@ -96,8 +96,8 @@ class LocationDashboardController extends Controller
 
         $reservations = Reservation::query()
             ->where('location_id', $location->id)
-            ->whereIn('status', ['pending', 'observed', 'approved'])
-            ->whereBetween('starts_at', [$dayStart, $dayEnd]);
+            ->whereIn('status', Reservation::OPEN_STATUSES)
+            ->whereDate('reserved_on', $now->toDateString());
 
         // min() hands back the driver's raw string; the client needs ISO.
         $oldestPackage = $pendingPackages->clone()->min('received_at');
@@ -133,7 +133,7 @@ class LocationDashboardController extends Controller
             'reservations_today' => ReservationResource::collection(
                 $reservations->clone()
                     ->with(['amenity', 'unit', 'resident'])
-                    ->orderBy('starts_at')
+                    ->orderBy('created_at')
                     ->get(),
             )->resolve(),
             'pending_movements_count' => FinancialMovement::query()

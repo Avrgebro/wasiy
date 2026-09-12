@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import type { AxiosAdapter, AxiosResponse } from 'axios'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { apiClient } from '../../app/api-client'
+import { addDays } from '../../lib/calendar'
 import { pickDate } from '../../lib/test-dates'
 import { ADMIN_CAPABILITIES } from '../auth/access'
 import '../../i18n'
@@ -59,7 +60,6 @@ function meResponse() {
   }
 }
 
-/** Tomorrow at the given Lima wall-clock hour, as a UTC ISO instant. */
 /**
  * Y-m-d of a Monday at least a week ahead in the location calendar, inside
  * the 90-day horizon: the fixture amenity opens on Mondays only and the
@@ -74,21 +74,12 @@ function nextWeekDate(): string {
   throw new Error('unreachable')
 }
 
-/** Y-m-d of tomorrow in Lima: the board shows one day and the fixtures book tomorrow. */
+/** Y-m-d of tomorrow in Lima: the fixtures book tomorrow, inside the current week's list. */
 function tomorrowDate(): string {
   const lima = new Date(Date.now() - 5 * 3_600_000)
   lima.setUTCDate(lima.getUTCDate() + 1)
 
   return lima.toISOString().slice(0, 10)
-}
-
-function tomorrowAt(hour: number): string {
-  const now = new Date()
-  const lima = new Date(now.getTime() - 5 * 3_600_000)
-  lima.setUTCDate(lima.getUTCDate() + 1)
-  const date = lima.toISOString().slice(0, 10)
-
-  return new Date(`${date}T${String(hour).padStart(2, '0')}:00:00-05:00`).toISOString()
 }
 
 function reservation(overrides: Partial<ReservationSummary> = {}): ReservationSummary {
@@ -102,8 +93,7 @@ function reservation(overrides: Partial<ReservationSummary> = {}): ReservationSu
     unit_number: 'Depto. 704',
     resident_id: null,
     resident_name: 'A. Torres',
-    starts_at: tomorrowAt(19),
-    ends_at: tomorrowAt(21),
+    reserved_on: tomorrowDate(),
     status: 'approved',
     is_completed: false,
     status_note: null,
@@ -130,20 +120,18 @@ function installAdapter(
     }
 
     if (url.includes('/availability?')) {
+      // The whole horizon at once (ADR 0043): Mondays open with one of two
+      // places taken, everything else closed.
+      const from = url.match(/from=([\d-]+)/)![1]
+      const to = url.match(/to=([\d-]+)/)![1]
+      const days = []
+      for (let day = from; day <= to; day = addDays(day, 1)) {
+        const monday = new Date(`${day}T12:00:00Z`).getUTCDay() === 1
+        days.push(monday ? { date: day, available: true, reason: null, approved_count: 1 } : { date: day, available: false, reason: 'closed', approved_count: 0 })
+      }
+
       return Promise.resolve(
-        axiosResponse(config, {
-          date: url.match(/date=([\d-]+)/)?.[1],
-          slot_minutes: 60,
-          booking_mode: 'approval',
-          fee_amount_minor: null,
-          deposit_amount_minor: null,
-          slots: [
-            { start: '10:00', end: '11:00', available: true, reason: null },
-            { start: '11:00', end: '12:00', available: true, reason: null },
-            { start: '12:00', end: '13:00', available: false, reason: 'past' },
-            { start: '13:00', end: '14:00', available: true, reason: null },
-          ],
-        }),
+        axiosResponse(config, { days, daily_capacity: 2, booking_mode: 'approval', fee_amount_minor: null, deposit_amount_minor: null }),
       )
     }
 
@@ -156,7 +144,8 @@ function installAdapter(
               name: 'Parrilla / terraza',
               is_reservable: true,
               status: 'active',
-              availability: { monday: [{ start: '09:00', end: '22:00' }] },
+              open_days: ['monday'],
+              daily_capacity: 2,
             },
           ],
         }),
@@ -243,7 +232,7 @@ afterEach(() => {
 })
 
 describe('ReservationsPage', () => {
-  it('renders the day board blocks and the approval queue with pending requests', async () => {
+  it('renders the week list rows and the approval queue with pending requests', async () => {
     currentSearch.date = tomorrowDate()
     installAdapter([
       reservation(),
@@ -256,8 +245,6 @@ describe('ReservationsPage', () => {
         status: 'pending',
         fee_snapshot_minor: 15000,
         deposit_snapshot_minor: 30000,
-        starts_at: tomorrowAt(18),
-        ends_at: tomorrowAt(23),
       }),
     ])
 
@@ -271,20 +258,20 @@ describe('ReservationsPage', () => {
     expect(screen.getAllByText('Parrilla / terraza').length).toBeGreaterThan(0)
     expect(screen.getByText('Aprobar')).toBeInTheDocument()
     expect(screen.queryByText(/conflicto:/)).not.toBeInTheDocument()
-    // Both bookings sit on the board as blocks in their amenity's row.
-    expect(screen.getByRole('button', { name: 'Depto. 704 · A. Torres' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Depto. 501 · M. Paredes' })).toBeInTheDocument()
+    // Both bookings sit in the list under their day band; the
+    expect(screen.getByText('Depto. 704').closest('tr')).toHaveTextContent('Parrilla / terraza')
+    expect(screen.getByText('Depto. 501').closest('tr')).toHaveTextContent('Salón de eventos')
+    // Chips show the pending count.
+    expect(screen.getByRole('button', { name: 'Pendientes 1' })).toBeInTheDocument()
   })
 
-  it('keeps overlapping requests actionable without a speculative conflict label', async () => {
+  it('keeps same-day requests actionable without a speculative conflict label', async () => {
     installAdapter([
-      reservation({ starts_at: tomorrowAt(18), ends_at: tomorrowAt(20) }),
+      reservation(),
       reservation({
         id: 'res_2',
         status: 'pending',
         unit_number: 'Depto. 501',
-        starts_at: tomorrowAt(19),
-        ends_at: tomorrowAt(21),
       }),
     ])
 
@@ -335,7 +322,7 @@ describe('ReservationsPage', () => {
     })
   })
 
-  it('creates a reservation from the Nueva reserva drawer', async () => {
+  it('creates a reservation from the Nueva reserva drawer with the date only', async () => {
     const created: unknown[] = []
     installAdapter([], undefined, (body) => {
       created.push(body)
@@ -349,6 +336,8 @@ describe('ReservationsPage', () => {
     await user.click(await screen.findByText('Nueva reserva'))
     const drawer = await screen.findByRole('dialog')
 
+    // No amenity yet: the picker waits for one, since open days depend on it.
+    expect(within(drawer).getByRole('button', { name: /Fecha/ })).toBeDisabled()
     await user.click(within(drawer).getByRole('combobox', { name: 'Amenidad' }))
     await user.click(await screen.findByRole('option', { name: 'Parrilla / terraza' }))
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
@@ -356,16 +345,8 @@ describe('ReservationsPage', () => {
 
     const date = nextWeekDate()
     await pickDate(user, within(drawer).getByRole('button', { name: /Fecha/ }), date)
-    // Start = a free slot the server offered, on the grid; end = that slot's
-    // end or the end of a consecutive free run (12:00 is past, so 14:00 is
-    // unreachable).
-    // One slot per booking on the grid: picking a slot fixes the end; the
-    // past 12:00 slot renders disabled (slots are never taken by others).
-    expect(await within(drawer).findByRole('option', { name: '12:00–13:00' })).toBeDisabled()
-    await user.click(within(drawer).getByRole('option', { name: '10:00–11:00' }))
-    // Duración lists whole slots up to the window end; pick two hours.
-    await user.click(within(drawer).getByRole('combobox', { name: 'Duración' }))
-    await user.click(await screen.findByRole('option', { name: '2 h · 10:00–12:00' }))
+    // The capacity line reads from the range query for that day.
+    expect(await within(drawer).findByText('1 de 2 reservas aprobadas ese día')).toBeInTheDocument()
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))
 
     await waitFor(() => {
@@ -375,19 +356,37 @@ describe('ReservationsPage', () => {
           unit_id: 'un_1',
           resident_id: null,
           date,
-          start: '10:00',
-          end: '12:00',
         },
       ])
     })
   })
 
-  it('maps a starts_at server error onto the start field', async () => {
+  it('disables closed weekdays in the date picker', async () => {
+    installAdapter([])
+    renderPage()
+
+    const user = userEvent.setup()
+    await user.click(await screen.findByText('Nueva reserva'))
+    const drawer = await screen.findByRole('dialog')
+    await user.click(within(drawer).getByRole('combobox', { name: 'Amenidad' }))
+    await user.click(await screen.findByRole('option', { name: 'Parrilla / terraza' }))
+
+    const monday = nextWeekDate()
+    await pickDate(user, within(drawer).getByRole('button', { name: /Fecha/ }), monday)
+    // Reopen on the picked month: the Monday is enabled, the Tuesday after it
+    // (or the Sunday before, at a month edge) is not — the amenity opens on Mondays only.
+    await user.click(within(drawer).getByRole('button', { name: /Fecha/ }))
+    const closed = addDays(monday, 1).slice(0, 7) === monday.slice(0, 7) ? addDays(monday, 1) : addDays(monday, -1)
+    expect((await screen.findAllByRole('button', { name: monday })).at(-1)).toBeEnabled()
+    expect(screen.getAllByRole('button', { name: closed }).at(-1)).toBeDisabled()
+  })
+
+  it('maps a date server error onto the date field', async () => {
     installAdapter([], undefined, () => ({
       status: 422,
       data: {
-        message: 'Fuera de horario.',
-        errors: { starts_at: ['El horario solicitado está fuera de la disponibilidad.'] },
+        message: 'Día cerrado.',
+        errors: { date: ['La amenidad no abre ese día.'] },
       },
     }))
 
@@ -402,21 +401,17 @@ describe('ReservationsPage', () => {
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
     await user.click(await screen.findByRole('option', { name: 'Depto. 704' }))
     await pickDate(user, within(drawer).getByRole('button', { name: /Fecha/ }), nextWeekDate())
-    await user.click(await within(drawer).findByRole('option', { name: '10:00–11:00' }))
     await user.click(within(drawer).getByRole('button', { name: 'Registrar reserva' }))
 
-    expect(
-      await screen.findByText('El horario solicitado está fuera de la disponibilidad.'),
-    ).toBeInTheDocument()
+    expect(await screen.findByText('La amenidad no abre ese día.')).toBeInTheDocument()
   })
 
   it('caps the approval queue at three cards with an expand link', async () => {
-    const pendings = [19, 17, 15, 13, 11].map((hour, index) =>
+    const pendings = [0, 1, 2, 3, 4].map((index) =>
       reservation({
         id: `res_p${index}`,
         status: 'pending',
-        starts_at: tomorrowAt(hour),
-        ends_at: tomorrowAt(hour + 1),
+        unit_number: `Depto. ${index + 1}01`,
       }),
     )
     installAdapter(pendings)
@@ -432,19 +427,21 @@ describe('ReservationsPage', () => {
     expect(screen.getByText('Ver menos')).toBeInTheDocument()
   })
 
-  it('opens the detail drawer from a board block with facts, history and the cancel action', async () => {
+  it('opens the detail drawer from a list row with facts, history and the cancel action', async () => {
     currentSearch.date = tomorrowDate()
-    installAdapter([reservation({ starts_at: tomorrowAt(19), ends_at: tomorrowAt(21), created_by_name: 'A. Quispe' })])
+    installAdapter([reservation({ created_by_name: 'A. Quispe' })])
 
     renderPage()
 
     const user = userEvent.setup()
-    await user.click(await screen.findByRole('button', { name: 'Depto. 704 · A. Torres' }))
+    await user.click((await screen.findByText('Depto. 704')).closest('tr')!)
 
     const drawer = await screen.findByRole('dialog')
     expect(await within(drawer).findByText('Reserva · Depto. 704 · A. Torres')).toBeInTheDocument()
     expect(within(drawer).getByText('Confirmada')).toBeInTheDocument()
-    expect(within(drawer).getByText(/19:00–21:00/)).toBeInTheDocument()
+    // The band names the day, never a time.
+    expect(within(drawer).getByText(/\d+ de [a-z]+$/)).toBeInTheDocument()
+    expect(within(drawer).queryByText(/\d{2}:\d{2}–\d{2}:\d{2}/)).not.toBeInTheDocument()
     expect(within(drawer).getByText('Reserva aprobada')).toBeInTheDocument()
     expect(within(drawer).getByText('Reserva registrada')).toBeInTheDocument()
     // Approved bookings only offer cancel, behind a confirm step.
@@ -457,8 +454,6 @@ describe('ReservationsPage', () => {
     currentSearch.date = tomorrowDate()
     installAdapter([
       reservation({
-        starts_at: tomorrowAt(19),
-        ends_at: tomorrowAt(21),
         fee_snapshot_minor: 5000,
         deposit_snapshot_minor: 30000,
         movements: [
@@ -512,7 +507,7 @@ describe('ReservationsPage', () => {
 
     renderPage()
     const user = userEvent.setup()
-    await user.click(await screen.findByRole('button', { name: 'Depto. 704 · A. Torres' }))
+    await user.click((await screen.findByText('Depto. 704')).closest('tr')!)
 
     const drawer = await screen.findByRole('dialog')
     expect(await within(drawer).findByText('Cobros')).toBeInTheDocument()

@@ -28,10 +28,8 @@ class AmenityFactory extends Factory
             'slug' => Str::slug($name).'-'.fake()->unique()->bothify('####'),
             'is_reservable' => true,
             'booking_mode' => BookingMode::Instant,
-            'availability' => [
-                'monday' => [['start' => '09:00', 'end' => '22:00']],
-            ],
-            'slot_minutes' => 60,
+            'open_days' => ['monday'],
+            'daily_capacity' => null,
         ];
     }
 

@@ -107,11 +107,11 @@ test('the today strip counts visitors, flags overdue ones, and lists packages an
     Package::factory()->create([...$base, 'status' => PackageStatus::Delivered, 'delivered_at' => now()]);
 
     $amenity = Amenity::factory()->create(['account_id' => $location->account_id, 'location_id' => $location->id]);
-    $todayAt = fn (int $hour) => now($location->timezone)->setTime($hour, 0);
-    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(9), 'ends_at' => $todayAt(11), 'deposit_snapshot_minor' => 300]);
-    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(16), 'ends_at' => $todayAt(18)]);
-    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(12), 'ends_at' => $todayAt(13), 'status' => ReservationStatus::Cancelled]);
-    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'starts_at' => $todayAt(9)->addDay(), 'ends_at' => $todayAt(10)->addDay()]);
+    $today = now($location->timezone)->toDateString();
+    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'reserved_on' => $today, 'deposit_snapshot_minor' => 300]);
+    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'reserved_on' => $today]);
+    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'reserved_on' => $today, 'status' => ReservationStatus::Cancelled]);
+    Reservation::factory()->create([...$base, 'amenity_id' => $amenity->id, 'reserved_on' => now($location->timezone)->addDay()->toDateString()]);
 
     FinancialMovement::factory()->create(['location_id' => $location->id]); // pending expense
 

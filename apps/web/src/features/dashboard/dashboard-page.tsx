@@ -13,7 +13,6 @@ import { useMe } from '../auth/hooks'
 import type { MeResponse } from '../auth/types'
 import { RegisterPackageDrawer } from '../packages/register-package-drawer'
 import { reservationStatusColor, reservationStatusKey } from '../reservations/reservation-presentation'
-import { formatTimeRange } from '../reservations/week'
 import { RegisterVisitDrawer } from '../visits/register-visit-drawer'
 import { durationLabel } from '../visits/visit-presentation'
 import { getLocationDashboard, type DashboardManagement, type DashboardToday } from './api'
@@ -275,7 +274,6 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
             <Table verticalSpacing="sm">
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>{t('dashboard.columns.schedule')}</Table.Th>
                   <Table.Th>{t('dashboard.columns.amenity')}</Table.Th>
                   <Table.Th>{t('dashboard.columns.unit')}</Table.Th>
                   <Table.Th className="hidden md:table-cell">{t('dashboard.columns.resident')}</Table.Th>
@@ -288,7 +286,6 @@ function TodayStrip({ canManage, now, timezone, today }: { canManage: boolean; n
 
                   return (
                     <Table.Tr key={reservation.id}>
-                      <Table.Td className="whitespace-nowrap font-mono text-[12.5px] text-[var(--mantine-color-dimmed)]">{formatTimeRange(reservation, timezone)}</Table.Td>
                       <Table.Td>{reservation.amenity_name}</Table.Td>
                       <Table.Td className="font-mono text-[12.5px]">{reservation.unit_number}</Table.Td>
                       <Table.Td className="hidden md:table-cell">{reservation.resident_name ?? '—'}</Table.Td>

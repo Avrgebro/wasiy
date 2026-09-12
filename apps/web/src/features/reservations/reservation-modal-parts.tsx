@@ -1,23 +1,15 @@
 import { Text } from '@mantine/core'
 import { ReservationStatusBadge } from './reservation-status-badge'
 import type { ReservationSummary } from './api'
-import { formatTimeRange, localDateString, shortDayLabel } from './week'
+import { dayHeading } from './week'
 
-/** The "mié 2 · 18:00–23:00 [status]" band the reservation modals open with. */
-export function ReservationSlotBand({
-  reservation,
-  timezone,
-}: {
-  reservation: ReservationSummary
-  timezone: string
-}) {
-
+/** The "miércoles 2 de septiembre [status]" band the reservation modals open with. */
+export function ReservationDayBand({ reservation }: { reservation: ReservationSummary }) {
   return (
     // Surface-2 band; the pill uses the `surface` variant so it stays visible.
     <div className="flex flex-wrap items-center justify-between gap-2 rounded-inner bg-[var(--wa-surface-2)] px-3.5 py-2.5">
-      <Text fw={600} size="sm">
-        {shortDayLabel(localDateString(new Date(reservation.starts_at), timezone))} ·{' '}
-        {formatTimeRange(reservation, timezone)}
+      <Text className="capitalize" fw={600} size="sm">
+        {dayHeading(reservation.reserved_on)}
       </Text>
       <ReservationStatusBadge reservation={reservation} />
     </div>

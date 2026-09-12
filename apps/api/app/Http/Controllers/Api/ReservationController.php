@@ -31,9 +31,9 @@ class ReservationController extends Controller
     ) {}
 
     /**
-     * One list serves the agenda, the day viewer, and the approval queue:
-     * `from`/`to` are local dates in the Location's timezone, `status`
-     * accepts a comma-separated set.
+     * One list serves the week board, the unit detail and the approval
+     * queue: `from`/`to` are inclusive local dates on `reserved_on`,
+     * `status` accepts a comma-separated set.
      */
     public function index(Request $request, Account $account, Location $location): AnonymousResourceCollection
     {
@@ -51,23 +51,18 @@ class ReservationController extends Controller
         $statuses = collect(explode(',', $validated['status'] ?? ''))
             ->filter(fn (string $status): bool => ReservationStatus::tryFrom($status) !== null);
 
-        $timezone = $location->timezone;
-
         $reservations = Reservation::query()
             ->where('location_id', $location->id)
             ->with(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements'])
-            ->when($validated['from'] ?? null, fn ($query, string $from) => $query->where(
-                'ends_at', '>', CarbonImmutable::parse($from, $timezone)->startOfDay()->utc(),
-            ))
-            ->when($validated['to'] ?? null, fn ($query, string $to) => $query->where(
-                'starts_at', '<', CarbonImmutable::parse($to, $timezone)->addDay()->startOfDay()->utc(),
-            ))
+            ->when($validated['from'] ?? null, fn ($query, string $from) => $query->where('reserved_on', '>=', $from))
+            ->when($validated['to'] ?? null, fn ($query, string $to) => $query->where('reserved_on', '<=', $to))
             ->when($statuses->isNotEmpty(), fn ($query) => $query->whereIn('status', $statuses))
             ->when($validated['amenity_id'] ?? null, fn ($query, string $amenityId) => $query
                 ->where('amenity_id', $amenityId))
             ->when($validated['unit_id'] ?? null, fn ($query, string $unitId) => $query
                 ->where('unit_id', $unitId))
-            ->orderBy('starts_at')
+            ->orderBy('reserved_on')
+            ->orderBy('created_at')
             ->get();
 
         return ReservationResource::collection($reservations);
@@ -97,11 +92,9 @@ class ReservationController extends Controller
         /** @var User $actor */
         $actor = $request->user();
 
-        $timezone = $location->timezone;
-        $startsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', "{$validated['date']} {$validated['start']}", $timezone)->utc();
-        $endsAt = CarbonImmutable::createFromFormat('Y-m-d H:i', "{$validated['date']} {$validated['end']}", $timezone)->utc();
+        $reservedOn = CarbonImmutable::createFromFormat('Y-m-d', $validated['date'], $location->timezone)->startOfDay();
 
-        $reservation = $createReservation->handle($amenity, $unit, $resident, $actor, $startsAt, $endsAt);
+        $reservation = $createReservation->handle($amenity, $unit, $resident, $actor, $reservedOn);
 
         return (new ReservationResource($reservation->load(['amenity', 'unit', 'resident', 'createdBy', 'decidedBy', 'movements'])))
             ->response()->setStatusCode(201);

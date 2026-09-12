@@ -21,8 +21,8 @@ export type ReservationSummary = {
   resident_name?: string | null
   resident_phone?: string | null
   resident_email?: string | null
-  starts_at: string
-  ends_at: string
+  /** The booked day, `YYYY-MM-DD` in the Location's calendar (ADR 0043). */
+  reserved_on: string
   status: ReservationStatusValue
   is_completed: boolean
   status_note: string | null
@@ -78,9 +78,8 @@ export type ReservationPayload = {
   amenity_id: string
   unit_id: string
   resident_id?: string | null
+  /** `YYYY-MM-DD`; a booking is a whole day. */
   date: string
-  start: string
-  end: string
 }
 
 export function createReservation(accountId: string, locationId: string, payload: ReservationPayload) {

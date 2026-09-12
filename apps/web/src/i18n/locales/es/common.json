@@ -134,7 +134,6 @@
       "activity": "Aún no hay actividad en esta ubicación."
     },
     "columns": {
-      "schedule": "Horario",
       "amenity": "Amenidad",
       "unit": "Unidad",
       "resident": "Residente",
@@ -277,22 +276,18 @@
       },
       "free": "Sin costo",
       "depositOf": "depósito {{amount}}",
-      "hours_one": "{{count}} hora",
-      "hours_other": "{{count}} horas",
-      "minutes": "{{count}} min",
       "fee": "Costo",
       "deposit": "Depósito",
       "cancellation": "Cancelación",
       "amenityMissing": "Esta amenidad ya no está disponible.",
       "pickDay": "Elegir día",
-      "pickSlot": "Elegir horario",
       "closedThatDay": "La amenidad no abre ese día.",
       "requestedBy": "Solicitada por",
       "staffNote": "Nota de administración",
       "cancel": "Cancelar reserva",
       "cancelClosed": "El plazo de cancelación venció.",
       "cancelTitle": "¿Cancelar la reserva de {{amenity}}?",
-      "cancelBody": "El horario quedará libre para otras unidades. Si ya había un cobro, administración lo anulará.",
+      "cancelBody": "El día quedará libre para otras unidades. Si ya había un cobro, administración lo anulará.",
       "timeline": {
         "created": "Solicitada",
         "approved": "Aprobada",
@@ -302,9 +297,12 @@
         "updated": "Actualizada",
         "staff": "administración"
       },
-      "slotLength": "Duración por turno",
-      "cancelUntilStart": "Puedes cancelar hasta la hora de inicio.",
-      "duration": "Duración"
+      "cancelUntilStart": "Puedes cancelar hasta el mismo día de la reserva.",
+      "openDays": "Días",
+      "capacity": "Cupo por día",
+      "noLimit": "Sin límite",
+      "perDay": "{{count}} reservas",
+      "dayFull": "Cupo lleno"
     },
     "alerts": {
       "title": "Alertas",
@@ -573,9 +571,6 @@
     "cityRequired": "Ingresa la ciudad.",
     "amenityRequired": "Selecciona una amenidad.",
     "dateRequired": "Selecciona una fecha.",
-    "startRequired": "Indica la hora de inicio.",
-    "endRequired": "Indica la hora de fin.",
-    "endAfterStart": "La hora de fin debe ser posterior al inicio.",
     "categoryRequired": "Selecciona una categoría.",
     "amountRequired": "Ingresa un monto mayor a cero.",
     "conceptRequired": "Ingresa el concepto.",
@@ -841,16 +836,16 @@
       "observed": "Requiere aclaraciones.",
       "rejected": "Solicitud rechazada.",
       "cancelled": "Reserva cancelada.",
-      "completed": "El horario de la reserva ya terminó."
+      "completed": "El día de la reserva ya pasó."
     },
     "title": "Reservas",
     "subtitle": "Amenidades de {{location}}",
     "noLocation": "Selecciona una ubicación para ver sus reservas.",
-    "today": "Hoy",
     "columns": {
       "amenity": "Amenidad",
       "unit": "Unidad",
-      "resident": "Residente"
+      "resident": "Residente",
+      "status": "Estado"
     },
     "statuses": {
       "pending": "Pendiente",
@@ -900,13 +895,8 @@
       "resident": "Residente (opcional)",
       "date": "Fecha",
       "datePlaceholder": "Elegir fecha",
-      "pickAmenityAndDay": "Elige una amenidad y un día para ver los turnos disponibles.",
-      "closedThatDay": "La amenidad está cerrada ese día.",
       "submit": "Registrar reserva",
-      "startSlot": "Horario",
-      "dateOutOfRange": "Elige una fecha entre hoy y {{days}} días adelante.",
-      "fullyBooked": "No quedan turnos disponibles hoy: todos ya pasaron.",
-      "duration": "Duración"
+      "capacityHint": "{{count}} de {{capacity}} reservas aprobadas ese día"
     },
     "detail": {
       "fee": "Cuota",
@@ -940,12 +930,28 @@
       "updated": "Reserva modificada",
       "chargeGenerated": "Cobro generado: {{charge}}",
       "completed": "Reserva completada",
-      "derived": "derivado del horario"
+      "derived": "derivado de la fecha"
     },
-    "previousDay": "Día anterior",
-    "nextDay": "Día siguiente",
     "board": {
       "noAmenities": "Esta ubicación no tiene amenidades reservables."
+    },
+    "availability": {
+      "closed": "Cerrado",
+      "past": "Ya pasó",
+      "full": "Cupo lleno"
+    },
+    "previousWeek": "Semana anterior",
+    "nextWeek": "Semana siguiente",
+    "thisWeek": "Esta semana",
+    "searchPlaceholder": "Buscar por unidad o residente…",
+    "allAmenities": "Todas las amenidades",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "chips": {
+      "all": "Todas",
+      "pending": "Pendientes",
+      "approved": "Confirmadas",
+      "completed": "Completadas"
     }
   },
   "settings": {
@@ -1004,7 +1010,6 @@
     "feeWithDeposit": "{{fee}} + depósito {{deposit}}",
     "instant": "Instantánea",
     "approval": "Requiere aprobación",
-    "variableSchedule": "Horario variable",
     "pausedFootnote": "Las amenidades inactivas no aparecen en el portal del residente. Los cambios quedan en el registro de actividad.",
     "deactivateConfirmTitle": "¿Desactivar {{name}}?",
     "deactivateHint": "La amenidad se oculta del portal y no acepta reservas nuevas. Su historial y sus cuotas registradas se conservan.",
@@ -1016,10 +1021,11 @@
     },
     "columns": {
       "amenity": "Amenidad",
-      "schedule": "Horario",
       "fee": "Cuota / depósito",
       "approval": "Aprobación",
-      "actions": "Acciones"
+      "actions": "Acciones",
+      "openDays": "Días",
+      "capacity": "Cupo"
     },
     "empty": {
       "title": "Sin amenidades registradas",
@@ -1027,7 +1033,6 @@
     },
     "sections": {
       "basics": "Básicos",
-      "availability": "Disponibilidad",
       "fees": "Cuotas",
       "booking": "Reserva"
     },
@@ -1043,26 +1048,11 @@
       "deposit": "Depósito reembolsable",
       "feesHint": "Montos en soles. El depósito se registra manualmente al confirmar la reserva.",
       "photosAfterCreate": "Podrás agregar fotos al editar la amenidad una vez creada.",
-      "slotLength": "Duración de cada turno",
-      "slotLengthHint": "Los residentes reservan uno o más turnos seguidos dentro del horario.",
-      "slotMinutes": "{{count}} min",
-      "slotHours_one": "{{count}} hora",
-      "slotHours_other": "{{count}} horas",
-      "slotHoursDecimal": "{{hours}} horas"
-    },
-    "availability": {
-      "columns": "Día · abierto · horarios",
-      "timezoneNote": "Hora local de la ubicación ({{timezone}})",
-      "closed": "Cerrado",
-      "openDay": "Abrir y agregar horario",
-      "addWindow": "Agregar horario",
-      "copyToAll": "Copiar a todos los días",
-      "removeWindow": "Quitar horario de {{day}}",
-      "startFor": "Inicio {{n}} de {{day}}",
-      "endFor": "Fin {{n}} de {{day}}",
-      "to": "a",
-      "overlap": "Los horarios se superponen entre {{start}} y {{end}}. Ajusta uno de los dos para guardar.",
-      "inverted": "El horario cierra antes de abrir."
+      "openDays": "Días abiertos",
+      "openDaysRequired": "Elige al menos un día.",
+      "capacity": "Cupo por día",
+      "capacityHint": "Reservas aprobadas por día. Vacío = sin límite.",
+      "capacityPlaceholder": "Sin límite"
     },
     "weekdays": {
       "monday": "Lunes",
@@ -1072,6 +1062,16 @@
       "friday": "Viernes",
       "saturday": "Sábado",
       "sunday": "Domingo"
+    },
+    "allDays": "Todos",
+    "weekdaysShort": {
+      "monday": "L",
+      "tuesday": "Ma",
+      "wednesday": "Mi",
+      "thursday": "J",
+      "friday": "V",
+      "saturday": "S",
+      "sunday": "D"
     }
   },
   "finances": {

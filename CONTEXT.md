@@ -84,7 +84,7 @@ A shared facility inside a Location that may be reserved or managed, such as a p
 
 ### Reservation
 
-A scheduled use of an Amenity owned by a Unit and usually created by a Resident associated with that Unit. Reservations may be instant-booked when the Amenity allows it or require Location Manager approval when the Amenity has an approval policy.
+A Unit's booking of an Amenity for one calendar day, usually created by a Resident associated with that Unit. There is no time of day: the Amenity is open on certain weekdays and may carry a daily capacity that the Resident Portal respects and staff may override. Reservations may be instant-booked when the Amenity allows it or require Location Manager approval when the Amenity has an approval policy (ADR 0043).
 
 ### Payment
 

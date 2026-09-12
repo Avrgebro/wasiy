@@ -5,6 +5,7 @@ import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { DrawerFact, DrawerFacts } from '../../components/ui/detail-drawer-parts'
 import { formatMoney } from '../../lib/money'
+import { openDaysLabel } from '../../lib/open-days'
 import { useActiveUnit } from './active-unit-context'
 import { getPortalAmenities } from './api'
 import { StatusPill } from './portal-cards'
@@ -35,8 +36,6 @@ export function PortalAmenityPage() {
     )
   }
 
-  const hours = (minutes: number) => (minutes % 60 === 0 ? t('portal.reservations.hours', { count: minutes / 60 }) : t('portal.reservations.minutes', { count: minutes }))
-
   return (
     <div className="flex min-h-[calc(100dvh-8rem)] flex-col gap-4">
       <div className="flex items-center gap-2">
@@ -56,7 +55,8 @@ export function PortalAmenityPage() {
       {amenity.description ? <Text size="sm">{amenity.description}</Text> : null}
 
       <DrawerFacts>
-        <DrawerFact label={t('portal.reservations.slotLength')} value={hours(amenity.slot_minutes)} />
+        <DrawerFact label={t('portal.reservations.openDays')} value={openDaysLabel(amenity.open_days, t)} />
+        <DrawerFact label={t('portal.reservations.capacity')} value={amenity.daily_capacity === null ? t('portal.reservations.noLimit') : t('portal.reservations.perDay', { count: amenity.daily_capacity })} />
         <DrawerFact label={t('portal.reservations.fee')} value={amenity.fee_amount_minor ? formatMoney(amenity.fee_amount_minor) : t('portal.reservations.free')} />
         <DrawerFact label={t('portal.reservations.deposit')} value={amenity.deposit_amount_minor ? formatMoney(amenity.deposit_amount_minor) : '—'} />
         <DrawerFact label={t('portal.reservations.cancellation')} value={t('portal.reservations.cancelUntilStart')} />

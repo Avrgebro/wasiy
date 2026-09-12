@@ -27,12 +27,13 @@ import {
   transitionLabel,
 } from '../finances/movement-presentation'
 import { getReservation, type ReservationHistoryEntry, type ReservationSummary } from './api'
-import { ReservationSlotBand } from './reservation-modal-parts'
+import { ReservationDayBand } from './reservation-modal-parts'
+import { shortDayLabel } from './week'
 import { StatusPill } from '../../components/ui/chips'
 import { useReservationDecisions, type Decision } from './use-reservation-decisions'
 
 /**
- * The booking's home (mockup 08 drawer): slot and status, facts, Cobros
+ * The booking's home (mockup 08 drawer): day and status, facts, Cobros
  * with the same forward action as Finanzas, a Historial that merges the
  * reservation's events with its movements', and the decisions with one
  * note field. Front desk sees everything and decides nothing.
@@ -108,7 +109,7 @@ export function ReservationDrawer({
           <Skeleton height={240} radius="md" />
         ) : (
           <>
-            <ReservationSlotBand reservation={reservation} timezone={timezone} />
+            <ReservationDayBand reservation={reservation} />
 
             <DrawerFacts>
               <DrawerFact
@@ -320,7 +321,7 @@ function timelineItems(
     items.unshift({
       id: 'derived-completed',
       derived: true,
-      when: shortDateTime(reservation.ends_at, timezone),
+      when: shortDayLabel(reservation.reserved_on),
       label: t('reservations.history.completed'),
       actor: t('reservations.history.derived'),
     })

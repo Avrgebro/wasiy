@@ -1,37 +1,23 @@
 import { addDays, localDateString } from '../../lib/calendar'
 
 export { addDays, localDateString }
-import type { ReservationSummary } from './api'
-
-/** Indexed by Date#getUTCDay() — the API's availability keys. */
-export const WEEKDAY_KEYS = [
-  'sunday',
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-] as const
 
 /**
- * Calendar math for the reservations board. Everything works on plain
- * YYYY-MM-DD strings interpreted in the Location's timezone: the API takes
- * local dates, and reservations carry UTC instants that must be regrouped into
- * local days for display.
+ * Calendar math for the reservations week board. Everything works on plain
+ * YYYY-MM-DD strings in the Location's calendar: a reservation is a day
+ * (ADR 0043), so there are no instants to regroup.
  */
 
+/** The Monday of the week that holds `date`. */
+export function startOfWeek(date: string): string {
+  const weekday = new Date(`${date}T12:00:00Z`).getUTCDay()
 
+  return addDays(date, -((weekday + 6) % 7))
+}
 
-export function formatTimeRange(reservation: ReservationSummary, timezone: string): string {
-  const format = new Intl.DateTimeFormat('es-PE', {
-    timeZone: timezone,
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-
-  return `${format.format(new Date(reservation.starts_at))}–${format.format(new Date(reservation.ends_at))}`
+/** The seven days from a Monday. */
+export function weekDays(start: string): string[] {
+  return Array.from({ length: 7 }, (_, index) => addDays(start, index))
 }
 
 /** "sáb 16" style short label for a local date. */
@@ -40,10 +26,12 @@ export function shortDayLabel(date: string): string {
     timeZone: 'UTC',
     weekday: 'short',
     day: 'numeric',
-  }).format(new Date(`${date}T12:00:00Z`))
+  })
+    .format(new Date(`${date}T12:00:00Z`))
+    .replace(/\./g, '')
 }
 
-/** "viernes 11 de septiembre": the board's day heading. */
+/** "viernes 11 de septiembre": the day a booking holds, spelled out. */
 export function dayHeading(date: string): string {
   return new Intl.DateTimeFormat('es-PE', {
     timeZone: 'UTC',
@@ -51,4 +39,16 @@ export function dayHeading(date: string): string {
     day: 'numeric',
     month: 'long',
   }).format(new Date(`${date}T12:00:00Z`))
+}
+
+/** "14 – 20 de septiembre" or "28 de septiembre – 4 de octubre": the pager's label. */
+export function weekRangeLabel(start: string): string {
+  const end = addDays(start, 6)
+  const dayMonth = new Intl.DateTimeFormat('es-PE', { timeZone: 'UTC', day: 'numeric', month: 'long' })
+  const day = new Intl.DateTimeFormat('es-PE', { timeZone: 'UTC', day: 'numeric' })
+  const sameMonth = start.slice(0, 7) === end.slice(0, 7)
+
+  return sameMonth
+    ? `${day.format(new Date(`${start}T12:00:00Z`))} – ${dayMonth.format(new Date(`${end}T12:00:00Z`))}`
+    : `${dayMonth.format(new Date(`${start}T12:00:00Z`))} – ${dayMonth.format(new Date(`${end}T12:00:00Z`))}`
 }

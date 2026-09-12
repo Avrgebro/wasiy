@@ -10,6 +10,7 @@ use App\Models\Reservation;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\ActivityLogger;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -45,7 +46,7 @@ class DeactivateUnit
             $reservations = Reservation::query()
                 ->where('unit_id', $unit->id)
                 ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Observed->value, ReservationStatus::Approved->value])
-                ->where('starts_at', '>', now())
+                ->where('reserved_on', '>=', CarbonImmutable::now($unit->location->timezone)->toDateString())
                 ->get();
             foreach ($reservations as $reservation) {
                 $this->decide->cancel($reservation, $actor, __('Unidad desactivada.'));

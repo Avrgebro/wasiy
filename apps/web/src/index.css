@@ -8,7 +8,6 @@
 @import '@mantine/spotlight/styles.layer.css';
 @import '@mantine/tiptap/styles.layer.css';
 @import '@mantine/dates/styles.layer.css';
-@import '@mantine/schedule/styles.layer.css';
 
 /* Brand typography (marketing site + auth surfaces only): Sora for display,
    Instrument Sans for body. Product UI stays on Inter per DESIGN-SYSTEM.md —
@@ -310,16 +309,6 @@
 :root:not([data-mantine-color-scheme='dark']) .mantine-Modal-content {
   --wa-surface-2: var(--wa-surface);
   --wa-pill-inverse: var(--wa-surface-2-base);
-}
-
-/* Reservations board: the grid cells have no handler, so they must not
-   invite a click; blocks do open the drawer. */
-.wa-day-board .mantine-ResourcesDayView-resourcesDayViewRowSlot {
-  cursor: default;
-}
-
-.wa-day-board .mantine-ScheduleEvent-event {
-  cursor: pointer;
 }
 
 /* Jerarquía por elevación en oscuro: no shadows, borders delimit. */
