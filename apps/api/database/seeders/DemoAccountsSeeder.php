@@ -110,12 +110,33 @@ class DemoAccountsSeeder extends Seeder
             'city' => 'Lima',
         ]);
 
+        // A lapsed customer: one location, one admin, so the lock screen and
+        // the expired subscription state have demo data without locking any
+        // other demo user out.
+        $lapsedAccount = Account::query()->updateOrCreate(
+            ['slug' => 'wasiy-andes'],
+            [
+                'name' => 'Wasiy Andes',
+                'timezone' => 'America/Lima',
+            ],
+        );
+        $this->location($lapsedAccount, 'residencial-andes', [
+            'name' => 'Residencial Andes',
+            'timezone' => 'America/Lima',
+            'type' => LocationType::ResidentialCommunity,
+            'address_line1' => 'Av. Los Incas 1450',
+            'district' => 'Santiago de Surco',
+            'city' => 'Lima',
+        ]);
+
         $admin = $this->user('admin@wasiy.test', 'Alejandra', 'Admin');
         $manager = $this->user('manager@wasiy.test', 'Mariana', 'Rojas');
         $frontDesk = $this->user('frontdesk@wasiy.test', 'Felipe', 'Porteria');
         $multiAccountUser = $this->user('multi@wasiy.test', 'Mateo', 'Multi');
         $deactivated = $this->user('deactivated@wasiy.test', 'Diego', 'Salazar');
         $this->user('resident@wasiy.test', 'Rosa', 'Portal');
+        $lapsedAdmin = $this->user('expired@wasiy.test', 'Elena', 'Quiroga');
+        $this->membership($lapsedAccount, $lapsedAdmin, AccountRole::AccountAdmin);
 
         $this->membership($account, $admin, AccountRole::AccountAdmin);
         $this->locationRole($this->membership($account, $manager), $location, LocationRole::LocationManager);

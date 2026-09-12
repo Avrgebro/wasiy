@@ -84,9 +84,9 @@ test('it seeds m2 demo users and role assignments idempotently', function () {
         ->toBe(LocationRole::LocationManager)
         ->and(seededLocationRole($playaAccount, $beachLocation, $multiAccountUser))
         ->toBe(LocationRole::FrontDesk)
-        ->and(StaffMembership::query()->whereNotNull('account_role')->count())->toBe(1)
+        ->and(StaffMembership::query()->whereNotNull('account_role')->count())->toBe(2)
         ->and(StaffLocationRole::query()->count())->toBe(5)
-        ->and(StaffMembership::query()->count())->toBe(6);
+        ->and(StaffMembership::query()->count())->toBe(7);
 
     // The deactivated demo user is suspended in wasiy-demo only: the
     // membership is deactivated, the User can still log in, and the role
@@ -519,6 +519,19 @@ test('it seeds the subscription model behind the demo accounts idempotently', fu
         ->and($trial->daysLeft())->toBeLessThanOrEqual(7)
         ->and($trial->isLapsed())->toBeFalse()
         ->and($trial->invoices()->count())->toBe(0);
+
+    // A lapsed customer: expired, access twelve days gone, renewal invoice open and overdue.
+    $andes = Account::query()->where('slug', 'wasiy-andes')->sole();
+    $lapsed = $andes->subscription()->sole();
+    expect($lapsed->status)->toBe(SubscriptionStatus::Expired)
+        ->and($lapsed->isLapsed())->toBeTrue()
+        ->and($lapsed->invoices()->count())->toBe(3)
+        ->and($lapsed->openInvoice()?->status)->toBe(InvoiceStatus::Pending)
+        ->and($lapsed->openInvoice()?->due_on->lt(now()))->toBeTrue();
+    $lapsedAdmin = User::query()->where('email', 'expired@wasiy.test')->sole();
+    $this->actingAs($lapsedAdmin)->getJson('/api/me')->assertOk()
+        ->assertJsonPath('active_account.subscription.is_lapsed', true);
+    $this->actingAs($lapsedAdmin)->getJson("/api/accounts/{$andes->id}/locations")->assertStatus(402);
 
     // The admin's /me carries the paid state the SPA gates on.
     $admin = User::query()->where('email', 'admin@wasiy.test')->sole();

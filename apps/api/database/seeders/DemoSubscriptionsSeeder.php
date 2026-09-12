@@ -23,7 +23,9 @@ use Illuminate\Support\Facades\Storage;
  * invoices, and the next period's invoice under review with a proof
  * attached, so the subscription page shows a full history and the review
  * queue has a row. wasiy-playa is a trial in its last week, so the banner
- * shows and the lock is a few days away. Rows are written directly, not
+ * shows and the lock is a few days away. wasiy-andes lapsed twelve days
+ * ago with its renewal unpaid, so the lock screen and the expired state are
+ * reachable. Rows are written directly, not
  * through the billing actions, so seeding sends no emails. Idempotent by
  * account and period.
  */
@@ -76,6 +78,38 @@ class DemoSubscriptionsSeeder extends Seeder
             'issued_at' => $now->subDays(2)->setTime(8, 0),
         ]);
         $this->proof($underReview, $admin, $now->subDay());
+
+        // Lapsed: two paid periods, then the renewal was never paid. Access ran
+        // out twelve days ago and the open invoice is overdue by as much.
+        $andes = Account::query()->where('slug', 'wasiy-andes')->firstOrFail();
+        $andesAccessUntil = $now->subDays(12)->endOfDay();
+        $andesTrialEnd = $andesAccessUntil->startOfDay()->subMonths(2)->addDay();
+        $lapsed = $this->subscription($andes, [
+            'plan_id' => $esencial->id,
+            'status' => SubscriptionStatus::Expired,
+            'unit_price_minor' => $esencial->unit_price_minor,
+            'billable_units' => 24,
+            'currency' => 'PEN',
+            'trial_starts_at' => $andesTrialEnd->subDays(14),
+            'trial_ends_at' => $andesTrialEnd,
+            'access_until' => $andesAccessUntil,
+            'terms_accepted_at' => $andesTrialEnd->subDays(14),
+        ]);
+        $start = $andesTrialEnd->startOfDay();
+        foreach ([3, 5] as $index => $paidAfterDays) {
+            $end = $index === 1 ? $andesAccessUntil->startOfDay() : $start->addMonth()->subDay();
+            $this->invoice($lapsed, $start, $end, [
+                'status' => InvoiceStatus::Paid,
+                'issued_at' => $start->subDays(7)->setTime(8, 0),
+                'paid_at' => $start->subDays(7)->addDays($paidAfterDays)->setTime(10, 15),
+                'payment_method' => PaymentMethod::Transfer,
+            ]);
+            $start = $end->addDay();
+        }
+        $this->invoice($lapsed, $start, $start->addMonth()->subDay(), [
+            'status' => InvoiceStatus::Pending,
+            'issued_at' => $start->subDays(7)->setTime(8, 0),
+        ]);
 
         // Trial in its last week: banner on, lock four days away, no invoices yet.
         $playa = Account::query()->where('slug', 'wasiy-playa')->firstOrFail();
