@@ -38,6 +38,23 @@ function myUnitWorld(): array
     return [$location, $unit, $carlos, $lucia, $carlosUser, $lauraUser];
 }
 
+test('a deactivated location drops out of the portal: no membership at login, 403 on its features', function () {
+    [$location, $unit, , , $carlosUser] = myUnitWorld();
+    $admin = User::factory()->create();
+
+    $this->actingAs($carlosUser)->getJson('/api/me')->assertOk()->assertJsonCount(1, 'resident_memberships');
+    $this->actingAs($carlosUser)->getJson("/api/portal/household?unit_id={$unit->id}")->assertOk();
+
+    $location->deactivate($admin);
+
+    $this->actingAs($carlosUser)->getJson('/api/me')->assertOk()->assertJsonCount(0, 'resident_memberships');
+    $this->actingAs($carlosUser)->getJson("/api/portal/household?unit_id={$unit->id}")->assertForbidden();
+
+    $location->reactivate();
+
+    $this->actingAs($carlosUser)->getJson('/api/me')->assertOk()->assertJsonCount(1, 'resident_memberships');
+});
+
 test('every member lists the household; only the primary contact can manage', function () {
     [, $unit, , , $carlosUser, $luciaUser] = myUnitWorld();
 

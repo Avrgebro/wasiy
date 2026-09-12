@@ -242,7 +242,9 @@ class AccessAuthorizationService
             ->where('resident_id', $resident->id)
             ->where('account_id', $resident->account_id)
             ->where('status', RegistryStatus::Active)
-            ->whereHas('location')
+            // A deactivated Location drops out of the portal entirely, so the
+            // unit list at login agrees with the per-feature liveness guards.
+            ->whereHas('location', fn (Builder $query) => $query->whereNull('deactivated_at'))
             ->whereHas('unit', fn (Builder $query) => $query->where('status', RegistryStatus::Active));
     }
 
