@@ -148,7 +148,7 @@ test('show returns members, vehicles, upcoming reservations, this month charges,
     ]);
     FinancialMovement::factory()->income()->for($location)->create([
         'account_id' => $account->id, 'created_by' => $admin->id, 'unit_id' => $unit->id,
-        'category' => 'fine', 'status' => 'pending', 'amount_minor' => 80, 'occurred_on' => "{$month}-11",
+        'category' => 'other_income', 'status' => 'pending', 'amount_minor' => 80, 'occurred_on' => "{$month}-11",
     ]);
 
     $this->actingAs($admin)

@@ -8,32 +8,25 @@ enum MovementCategory: string
     case ReservationFee = 'reservation_fee';
     case ReservationDeposit = 'reservation_deposit';
     case MaintenanceDues = 'maintenance_dues';
-    case Fine = 'fine';
     case OtherIncome = 'other_income';
 
     // Expense
-    case Water = 'water';
-    case Electricity = 'electricity';
-    case Gas = 'gas';
-    case Telecom = 'telecom';
-    case Cleaning = 'cleaning';
-    case Maintenance = 'maintenance';
-    case Security = 'security';
+    case Services = 'services';
     case Staff = 'staff';
-    case Supplies = 'supplies';
-    case Gardening = 'gardening';
-    case InsuranceTaxes = 'insurance_taxes';
+    case Maintenance = 'maintenance';
     case Administration = 'administration';
     case OtherExpense = 'other_expense';
 
     /**
-     * Categories are closed and direction-scoped (mockup 10, "Categorías v2"):
-     * a fine is always income, water is always an expense.
+     * Categories are closed and direction-scoped: nine buckets the way a
+     * condominio budget is presented (ADR 0034, revised 2026-09-11). The
+     * line item (Luz, Sedapal, multa por ruido) lives in concept and
+     * counterparty, not in the category.
      */
     public function direction(): MovementDirection
     {
         return match ($this) {
-            self::ReservationFee, self::ReservationDeposit, self::MaintenanceDues, self::Fine, self::OtherIncome => MovementDirection::Income,
+            self::ReservationFee, self::ReservationDeposit, self::MaintenanceDues, self::OtherIncome => MovementDirection::Income,
             default => MovementDirection::Expense,
         };
     }

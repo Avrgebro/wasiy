@@ -30,4 +30,8 @@ The first cut had thirteen transitions, a `to_refund` state between `held` and `
 | held | refunded, retained, voided | pending |
 | retained | | held |
 
-Cancelling a reservation voids its pending rows and leaves a held deposit held; the held tile is the queue of money to return or keep. The migration moved existing `to_refund` rows back to `held`; the activity log keeps the flag. The drawer shows one primary button, the confirmed moves (Anular, No devolver), and a single Deshacer link naming the state it returns to, each with its own loading state.
+Cancelling a reservation voids its pending rows and leaves a held deposit held; the held tile is the queue of money to return or keep. No data migration: the change landed before production data. The drawer shows one primary button, the confirmed moves (Anular, No devolver), and a single Deshacer link naming the state it returns to, each with its own loading state.
+
+## Revision 2026-09-11: nine categories
+
+The direction-scoped list of eighteen categories (mockup 10, "Categorías v2") was cut to nine, the way a condominio budget is presented to residents. Income: `reservation_fee`, `reservation_deposit`, `maintenance_dues`, `other_income`. Expense: `services` (water, electricity, gas, telecom), `staff` (payroll, security, cleaning, gardening), `maintenance` (repairs and supplies), `administration` (fees, insurance, taxes), `other_expense`. Fines fold into other income. The line item lives in `concept` and `counterparty`, so a per-utility total is a search, not a filter. Fee and deposit stay apart because a deposit is not income: it is excluded from the income total and runs its own machine. No data migration: the change landed before production data and the local database is re-migrated.

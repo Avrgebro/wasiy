@@ -43,29 +43,9 @@ export function chipParams(chip: FinanceChip | undefined): Pick<MovementsSearch,
   }
 }
 
-/** Closed, direction-scoped list (mockup 10, "Categorías v2"). */
-export const INCOME_CATEGORIES = [
-  'reservation_fee',
-  'reservation_deposit',
-  'maintenance_dues',
-  'fine',
-  'other_income',
-] as const
-export const EXPENSE_CATEGORIES = [
-  'water',
-  'electricity',
-  'gas',
-  'telecom',
-  'cleaning',
-  'maintenance',
-  'security',
-  'staff',
-  'supplies',
-  'gardening',
-  'insurance_taxes',
-  'administration',
-  'other_expense',
-] as const
+/** Closed, direction-scoped list: nine buckets (ADR 0034 revision, 2026-09-11). */
+export const INCOME_CATEGORIES = ['reservation_fee', 'reservation_deposit', 'maintenance_dues', 'other_income'] as const
+export const EXPENSE_CATEGORIES = ['services', 'staff', 'maintenance', 'administration', 'other_expense'] as const
 
 /**
  * The Registrar movimiento drawer. Shape only — the API validates the

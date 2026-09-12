@@ -1,5 +1,5 @@
 import { FILTER_COMBOBOX_PROPS } from '../../components/table/filter-combobox-props'
-import { MultiSelect, Select } from '@mantine/core'
+import { MultiSelect } from '@mantine/core'
 import { useTranslation } from 'react-i18next'
 import { FilterButton } from '../../components/table/filter-button'
 import { TableToolbar } from '../../components/table/table-toolbar'
@@ -9,9 +9,13 @@ import { EXPENSE_CATEGORIES, FINANCE_CHIPS, INCOME_CATEGORIES, type FinancesSear
 
 /**
  * Toolbar: the quick views (Todo, Ingresos, Egresos, Pendientes · N), text
- * search over concept, detail and vendor, and Estado plus the category
- * multi-select behind Filtros; applied filters echoed as chips.
+ * search over concept, detail and vendor, and two multi-selects behind
+ * Filtros, Estado and Categoría, both sent to the API as comma lists;
+ * applied filters echoed as chips. "Por pagar" is a table label for a pending
+ * expense, not a status, so it is not offered here.
  */
+const STATUSES = ['pending', 'paid', 'held', 'refunded', 'retained', 'voided'] as const
+
 export function FinancesFilters({
   onChange,
   pendingCount,
@@ -26,7 +30,8 @@ export function FinancesFilters({
     { key: 'all' as const, label: t('finances.chips.all') },
     ...FINANCE_CHIPS.map((key) => ({ key, label: t(`finances.chips.${key}`), count: key === 'pending' && pendingCount > 0 ? pendingCount : undefined })),
   ]
-  const statusOptions = (['pending', 'payable', 'paid', 'held', 'refunded', 'retained', 'voided'] as const).map((value) => ({ value, label: t(`finances.statuses.${value}`) }))
+  const statusOptions = STATUSES.map((value) => ({ value, label: t(`finances.statuses.${value}`) }))
+  const selectedStatuses = search.status ? search.status.split(',').filter(Boolean) : []
   const selected = search.category ? search.category.split(',').filter(Boolean) : []
   const label = (value: string) => t(`finances.categories.${value}`)
 
@@ -36,9 +41,11 @@ export function FinancesFilters({
   ]
 
   const chips = [
-    ...(search.status
-      ? [{ key: 'status', label: `${t('finances.columns.status')}: ${t(`finances.statuses.${search.status}`)}`, onRemove: () => onChange({ status: '' }) }]
-      : []),
+    ...selectedStatuses.map((value) => ({
+      key: `status:${value}`,
+      label: `${t('finances.columns.status')}: ${t(`finances.statuses.${value}`)}`,
+      onRemove: () => onChange({ status: selectedStatuses.filter((other) => other !== value).join(',') }),
+    })),
     ...selected.map((value) => ({
       key: `category:${value}`,
       label: `${t('finances.columns.category')}: ${label(value)}`,
@@ -51,14 +58,14 @@ export function FinancesFilters({
       appliedChips={chips}
       filters={
         <FilterButton activeCount={chips.length} onClearAll={() => onChange({ category: '', status: '' })}>
-            <Select
+            <MultiSelect
               clearable
               comboboxProps={FILTER_COMBOBOX_PROPS}
               data={statusOptions}
               label={t('finances.columns.status')}
-              placeholder={t('finances.allStatuses')}
-              value={search.status || null}
-              onChange={(value) => onChange({ status: value ?? '' })}
+              placeholder={selectedStatuses.length === 0 ? t('finances.allStatuses') : undefined}
+              value={selectedStatuses}
+              onChange={(values) => onChange({ status: values.join(',') })}
             />
             <MultiSelect
               clearable

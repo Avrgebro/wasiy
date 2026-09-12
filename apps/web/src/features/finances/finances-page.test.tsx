@@ -61,15 +61,15 @@ function summary(overrides: Partial<FinanceSummary> = {}): FinanceSummary {
     income_count: 17,
     income_by_category: [
       { category: 'reservation_fee', total_minor: 100000, count: 14 },
-      { category: 'fine', total_minor: 16000, count: 2 },
+      { category: 'maintenance_dues', total_minor: 16000, count: 2 },
       { category: 'other_income', total_minor: 8000, count: 1 },
     ],
     expense_total_minor: 318000,
     expense_count: 3,
     expense_by_category: [
-      { category: 'cleaning', total_minor: 140000, count: 1 },
-      { category: 'electricity', total_minor: 118000, count: 1 },
-      { category: 'water', total_minor: 60000, count: 1 },
+      { category: 'staff', total_minor: 140000, count: 1 },
+      { category: 'services', total_minor: 118000, count: 1 },
+      { category: 'maintenance', total_minor: 60000, count: 1 },
     ],
     balance_minor: -194000,
     previous_month: '2026-07',
@@ -89,7 +89,7 @@ function movement(overrides: Partial<MovementSummary> = {}): MovementSummary {
     account_id: 'acc_1',
     location_id: 'loc_1',
     direction: 'expense',
-    category: 'water',
+    category: 'services',
     status: 'pending',
     allowed_transitions: ['paid', 'voided'],
     amount_minor: 60000,
@@ -279,11 +279,11 @@ describe('FinancesPage', () => {
     // No action column: the row itself is the way in.
     expect(screen.queryByRole('button', { name: 'Marcar devuelto' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Detalle' })).not.toBeInTheDocument()
-    expect(screen.getAllByText('Depósito de reserva').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Depósito en garantía').length).toBeGreaterThan(0)
     expect(screen.getByRole('button', { name: 'agosto 2026' })).toBeInTheDocument()
     // Tile sublines are statistics, never claims.
-    expect(screen.getByText('14 cuotas de reserva · 2 multas · 1 otro ingreso')).toBeInTheDocument()
-    expect(screen.getByText(`Limpieza ${money(140000)} · Luz ${money(118000)} · Agua ${money(60000)}`)).toBeInTheDocument()
+    expect(screen.getByText('14 reservas · 2 cuotas de mantenimiento · 1 otro ingreso')).toBeInTheDocument()
+    expect(screen.getByText(`Personal ${money(140000)} · Servicios ${money(118000)} · Mantenimiento ${money(60000)}`)).toBeInTheDocument()
     expect(screen.getByText(`vs. julio: ${money(-42000)}`)).toBeInTheDocument()
     expect(screen.queryByText(/Se cubre con/)).not.toBeInTheDocument()
   })
@@ -339,7 +339,7 @@ describe('FinancesPage', () => {
     await user.click(await screen.findByText('Depósito · Salón de eventos'))
 
     const drawer = await screen.findByRole('dialog')
-    expect(within(drawer).getByText('Ingreso · Depósito de reserva')).toBeInTheDocument()
+    expect(within(drawer).getByText('Ingreso · Depósito en garantía')).toBeInTheDocument()
     expect(within(drawer).getByText('12 ago 2026')).toBeInTheDocument()
     expect(within(drawer).getByText('Sistema · al aprobar la reserva')).toBeInTheDocument()
     expect(within(drawer).getByRole('link', { name: /Salón de eventos/ })).toHaveAttribute(
@@ -380,7 +380,7 @@ describe('FinancesPage', () => {
     const drawer = await screen.findByRole('dialog')
 
     await user.click(within(drawer).getByRole('combobox', { name: 'Categoría' }))
-    await user.click(await screen.findByRole('option', { name: 'Agua' }))
+    await user.click(await screen.findByRole('option', { name: 'Servicios' }))
     await user.type(within(drawer).getByLabelText('Monto'), '600')
     await user.type(within(drawer).getByLabelText('Concepto'), 'Agua · áreas comunes')
     await user.type(within(drawer).getByLabelText('Detalle'), 'Recibo Sedapal')
@@ -393,7 +393,7 @@ describe('FinancesPage', () => {
       expect(recorded).toEqual([
         {
           direction: 'expense',
-          category: 'water',
+          category: 'services',
           status: 'pending',
           amount_minor: 60000,
           concept: 'Agua · áreas comunes',
@@ -425,7 +425,7 @@ describe('FinancesPage', () => {
     await user.click(within(drawer).getByRole('radio', { name: 'Ingreso' }))
     expect(within(drawer).queryByLabelText('Proveedor')).not.toBeInTheDocument()
     await user.click(within(drawer).getByRole('combobox', { name: 'Categoría' }))
-    await user.click(await screen.findByRole('option', { name: 'Depósito de reserva' }))
+    await user.click(await screen.findByRole('option', { name: 'Depósito en garantía' }))
     await user.click(within(drawer).getByRole('combobox', { name: 'Unidad' }))
     await user.click(await screen.findByRole('option', { name: 'Depto. 704' }))
     // A deposit's settled option is "held", never "paid".
@@ -440,7 +440,8 @@ describe('FinancesPage', () => {
 
   it('puts search, category filter and header sorting on the URL and the request', async () => {
     currentSearch.month = '2026-08'
-    currentSearch.category = 'water,fine'
+    currentSearch.category = 'services,other_income'
+    currentSearch.status = 'paid,voided'
     currentSearch.sort = '-amount_minor'
     const requests = installAdapter([movement()])
 
@@ -449,9 +450,11 @@ describe('FinancesPage', () => {
     const user = userEvent.setup()
 
     // Applied categories echo as chips; the request carries them.
-    expect(screen.getByText('Categoría: Agua')).toBeInTheDocument()
-    expect(screen.getByText('Categoría: Multa')).toBeInTheDocument()
-    expect(requests.some((url) => url.includes('category=water%2Cfine') && url.includes('sort=-amount_minor'))).toBe(true)
+    expect(screen.getByText('Categoría: Servicios')).toBeInTheDocument()
+    expect(screen.getByText('Categoría: Otro ingreso')).toBeInTheDocument()
+    expect(screen.getByText('Estado: Pagado')).toBeInTheDocument()
+    expect(screen.getByText('Estado: Anulado')).toBeInTheDocument()
+    expect(requests.some((url) => url.includes('category=services%2Cother_income') && url.includes('status=paid%2Cvoided') && url.includes('sort=-amount_minor'))).toBe(true)
 
     await user.type(screen.getByPlaceholderText('Buscar concepto, detalle o proveedor…'), 'sedapal{Enter}')
     expect(navigateSpy.mock.calls.at(-1)![0].search({ month: '2026-08', page: 2 })).toMatchObject({ search: 'sedapal', page: 1 })
@@ -464,8 +467,10 @@ describe('FinancesPage', () => {
     expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ sort: 'occurred_on' })
 
     // Removing a chip drops only that category.
-    await user.click(screen.getByRole('button', { name: 'Quitar filtro Categoría: Agua' }))
-    expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ category: 'fine' })
+    await user.click(screen.getByRole('button', { name: 'Quitar filtro Categoría: Servicios' }))
+    expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ category: 'other_income' })
+    await user.click(screen.getByRole('button', { name: 'Quitar filtro Estado: Anulado' }))
+    expect(navigateSpy.mock.calls.at(-1)![0].search({})).toMatchObject({ status: 'paid' })
   })
 
   it('offers every allowed move for a held deposit: refund, retain, void, and one undo', async () => {

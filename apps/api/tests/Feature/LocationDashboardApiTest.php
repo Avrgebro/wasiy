@@ -175,7 +175,7 @@ test('managers receive the management strip with dues, balances, deposits, occup
     $dues($unit, MovementStatus::Paid, 450);
     $dues($noPrimary, MovementStatus::Pending, 450);
     $dues($vacant, MovementStatus::Voided, 450);
-    FinancialMovement::factory()->income()->create(['location_id' => $location->id, 'unit_id' => $noPrimary->id, 'category' => MovementCategory::Fine, 'amount_minor' => 100]);
+    FinancialMovement::factory()->income()->create(['location_id' => $location->id, 'unit_id' => $noPrimary->id, 'category' => MovementCategory::OtherIncome, 'amount_minor' => 100]);
     FinancialMovement::factory()->create(['location_id' => $location->id, 'direction' => MovementDirection::Income, 'category' => MovementCategory::ReservationDeposit, 'status' => MovementStatus::Held, 'amount_minor' => 300]);
 
     // Seven entries in this location plus one elsewhere: the feed shows six.

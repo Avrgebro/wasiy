@@ -25,7 +25,7 @@ class FinancialMovementFactory extends Factory
         return [
             'location_id' => Location::factory(),
             'direction' => MovementDirection::Expense,
-            'category' => MovementCategory::Water,
+            'category' => MovementCategory::Services,
             'status' => MovementStatus::Pending,
             'amount_minor' => fake()->numberBetween(5000, 200000),
             'concept' => 'Agua · áreas comunes',

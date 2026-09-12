@@ -39,11 +39,11 @@ class DemoFinancesSeeder extends Seeder
 
         $rows = [
             // [direction, category, status, amount_minor, concept, detail, counterparty, unit, occurred, due]
-            [MovementDirection::Expense, MovementCategory::Water, MovementStatus::Pending, 60000,
+            [MovementDirection::Expense, MovementCategory::Services, MovementStatus::Pending, 60000,
                 'Agua · áreas comunes', 'Recibo Sedapal', 'Sedapal', null, $day(16), $day(20)],
-            [MovementDirection::Expense, MovementCategory::Electricity, MovementStatus::Paid, 118000,
+            [MovementDirection::Expense, MovementCategory::Services, MovementStatus::Paid, 118000,
                 'Luz · áreas comunes', 'Recibo Luz del Sur', 'Luz del Sur', null, $day(14), null],
-            [MovementDirection::Expense, MovementCategory::Cleaning, MovementStatus::Paid, 140000,
+            [MovementDirection::Expense, MovementCategory::Staff, MovementStatus::Paid, 140000,
                 'Limpieza · quincena 1', 'Factura F001-2210', 'Limpieza Total SAC', null, $day(13), null],
             [MovementDirection::Expense, MovementCategory::Maintenance, MovementStatus::Paid, 60000,
                 'Mantenimiento · ascensor', 'Visita mensual', 'Ascensores Andinos', null, $day(6), null],
@@ -51,7 +51,7 @@ class DemoFinancesSeeder extends Seeder
                 'Cuota · Parrilla / terraza', 'Reserva del vie, 19:00', null, '101', $day(14), null],
             [MovementDirection::Income, MovementCategory::ReservationFee, MovementStatus::Paid, 5000,
                 'Cuota · Parrilla / terraza', 'Reserva del lun, 13:00', null, '201', $day(11), null],
-            [MovementDirection::Income, MovementCategory::Fine, MovementStatus::Pending, 8000,
+            [MovementDirection::Income, MovementCategory::OtherIncome, MovementStatus::Pending, 8000,
                 'Multa · ruido fuera de horario', 'Reporte del lun, 23:40', null, '301', $day(11), null],
             [MovementDirection::Income, MovementCategory::MaintenanceDues, MovementStatus::Paid, 42000,
                 'Cuota de mantenimiento · agosto', 'Pago en efectivo', null, '101', $day(5), null],

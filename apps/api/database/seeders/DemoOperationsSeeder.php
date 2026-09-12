@@ -304,12 +304,12 @@ class DemoOperationsSeeder extends Seeder
     {
         $day = fn (int $day): string => $this->now->startOfMonth()->day(min($day, $this->now->daysInMonth))->toDateString();
         $rows = [
-            [MovementCategory::Security, MovementStatus::Paid, 480000, 'Vigilancia · turno completo', 'Factura F002-0918', 'Seguridad Andina SAC', $day(2)],
+            [MovementCategory::Staff, MovementStatus::Paid, 480000, 'Vigilancia · turno completo', 'Factura F002-0918', 'Seguridad Andina SAC', $day(2)],
             [MovementCategory::Staff, MovementStatus::Paid, 320000, 'Planilla · conserjería', 'Quincena 1', null, $day(15)],
-            [MovementCategory::Gardening, MovementStatus::Pending, 45000, 'Jardinería · áreas verdes', 'Poda mensual', 'Verde Urbano', $day(18)],
-            [MovementCategory::Telecom, MovementStatus::Paid, 18900, 'Internet · recepción', 'Recibo Movistar', 'Movistar', $day(9)],
-            [MovementCategory::Supplies, MovementStatus::Paid, 26000, 'Insumos de limpieza', 'Boleta B001-4410', 'Makro', $day(7)],
-            [MovementCategory::InsuranceTaxes, MovementStatus::Pending, 135000, 'Seguro · áreas comunes', 'Cuota trimestral', 'Rímac Seguros', $day(25)],
+            [MovementCategory::Staff, MovementStatus::Pending, 45000, 'Jardinería · áreas verdes', 'Poda mensual', 'Verde Urbano', $day(18)],
+            [MovementCategory::Services, MovementStatus::Paid, 18900, 'Internet · recepción', 'Recibo Movistar', 'Movistar', $day(9)],
+            [MovementCategory::Maintenance, MovementStatus::Paid, 26000, 'Insumos de limpieza', 'Boleta B001-4410', 'Makro', $day(7)],
+            [MovementCategory::Administration, MovementStatus::Pending, 135000, 'Seguro · áreas comunes', 'Cuota trimestral', 'Rímac Seguros', $day(25)],
         ];
 
         foreach ($rows as [$category, $status, $amount, $concept, $detail, $counterparty, $occurredOn]) {

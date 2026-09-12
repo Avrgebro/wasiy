@@ -168,7 +168,7 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
           <div className="flex min-w-0 items-start gap-4">
             {/* Brand tile stands in for the location avatar for now (mockup 03). */}
             <div className="grid size-12 shrink-0 place-items-center rounded-inner border border-[#2A3F40] bg-[#124E52] text-[#F7F5F0] sm:size-16 sm:rounded-surface">
-              <WasiyLogo size={28} />
+              <WasiyLogo size={40} />
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">

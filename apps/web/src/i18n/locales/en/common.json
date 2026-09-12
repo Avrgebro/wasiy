@@ -1133,24 +1133,13 @@
       "voided": "Void"
     },
     "categories": {
-      "reservation_fee": "Reservation fee",
-      "reservation_deposit": "Reservation deposit",
-      "utility": "Utilities",
-      "cleaning": "Cleaning",
-      "maintenance": "Maintenance and repairs",
-      "other": "Other",
+      "reservation_fee": "Reservation",
+      "reservation_deposit": "Deposit held",
       "maintenance_dues": "Maintenance dues",
-      "fine": "Fine",
       "other_income": "Other income",
-      "water": "Water",
-      "electricity": "Electricity",
-      "gas": "Gas",
-      "telecom": "Internet and phone",
-      "security": "Security",
+      "services": "Utilities",
       "staff": "Staff",
-      "supplies": "Supplies",
-      "gardening": "Gardening",
-      "insurance_taxes": "Insurance and taxes",
+      "maintenance": "Maintenance",
       "administration": "Administration",
       "other_expense": "Other expense"
     },
@@ -1198,15 +1187,13 @@
       "recorded": "Movement recorded"
     },
     "categoriesPlural": {
-      "reservation_fee_one": "reservation fee",
+      "reservation_fee_one": "reservation",
       "reservation_deposit_one": "deposit",
       "maintenance_dues_one": "dues payment",
-      "fine_one": "fine",
       "other_income_one": "other income",
-      "reservation_fee_other": "reservation fees",
+      "reservation_fee_other": "reservations",
       "reservation_deposit_other": "deposits",
       "maintenance_dues_other": "dues payments",
-      "fine_other": "fines",
       "other_income_other": "other income"
     },
     "history": {

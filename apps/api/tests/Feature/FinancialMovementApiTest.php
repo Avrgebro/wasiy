@@ -51,7 +51,7 @@ function expensePayload(array $overrides = []): array
 {
     return [
         'direction' => 'expense',
-        'category' => 'water',
+        'category' => 'services',
         'amount_minor' => 600,
         'concept' => 'Agua · áreas comunes',
         'detail' => 'Recibo Sedapal · vence 20 ago',
@@ -167,17 +167,17 @@ test('the category must belong to the direction', function () {
     [$account, $location, $unit, $admin] = financeWorld();
 
     $this->actingAs($admin)
-        ->postJson(movementsBase($account, $location), expensePayload(['category' => 'fine']))
+        ->postJson(movementsBase($account, $location), expensePayload(['category' => 'other_income']))
         ->assertUnprocessable()
         ->assertJsonValidationErrors('category');
 
     $this->actingAs($admin)
         ->postJson(movementsBase($account, $location), expensePayload([
-            'direction' => 'income', 'category' => 'fine', 'counterparty' => null, 'unit_id' => $unit->id,
+            'direction' => 'income', 'category' => 'other_income', 'counterparty' => null, 'unit_id' => $unit->id,
             'concept' => 'Multa · ruido fuera de horario', 'amount_minor' => 80,
         ]))
         ->assertCreated()
-        ->assertJsonPath('data.category', 'fine');
+        ->assertJsonPath('data.category', 'other_income');
 });
 
 test('a unit from another location is rejected', function () {
@@ -324,7 +324,7 @@ test('the month list filters by month, direction, status, category and search', 
 
     seedMovement($location, $admin, ['occurred_on' => '2026-08-16', 'concept' => 'Agua · áreas comunes']);
     seedMovement($location, $admin, ['occurred_on' => '2026-08-14', 'concept' => 'Luz · áreas comunes', 'status' => 'paid']);
-    seedMovement($location, $admin, ['occurred_on' => '2026-07-30', 'concept' => 'Limpieza · julio', 'category' => 'cleaning']);
+    seedMovement($location, $admin, ['occurred_on' => '2026-07-30', 'concept' => 'Limpieza · julio', 'category' => 'staff']);
     FinancialMovement::factory()->income()->for($location)->create([
         'account_id' => $location->account_id, 'created_by' => $admin->id,
         'occurred_on' => '2026-08-15', 'concept' => 'Cuota · Parrilla', 'category' => 'reservation_fee', 'unit_id' => $unit->id,
@@ -405,7 +405,7 @@ test('the summary totals the month and the outstanding balances', function () {
                 ['category' => 'reservation_fee', 'total_minor' => 100, 'count' => 2],
             ],
             'expense_by_category' => [
-                ['category' => 'water', 'total_minor' => 2580, 'count' => 2],
+                ['category' => 'services', 'total_minor' => 2580, 'count' => 2],
             ],
         ]]);
 });

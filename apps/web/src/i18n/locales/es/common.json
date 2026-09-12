@@ -1133,24 +1133,13 @@
       "voided": "Anular"
     },
     "categories": {
-      "reservation_fee": "Cuota de reserva",
-      "reservation_deposit": "Depósito de reserva",
-      "utility": "Servicios",
-      "cleaning": "Limpieza",
-      "maintenance": "Mantenimiento y reparaciones",
-      "other": "Otro",
+      "reservation_fee": "Reserva",
+      "reservation_deposit": "Depósito en garantía",
       "maintenance_dues": "Cuota de mantenimiento",
-      "fine": "Multa",
       "other_income": "Otro ingreso",
-      "water": "Agua",
-      "electricity": "Luz",
-      "gas": "Gas",
-      "telecom": "Internet y telefonía",
-      "security": "Vigilancia",
+      "services": "Servicios",
       "staff": "Personal",
-      "supplies": "Insumos",
-      "gardening": "Jardinería",
-      "insurance_taxes": "Seguros e impuestos",
+      "maintenance": "Mantenimiento",
       "administration": "Administración",
       "other_expense": "Otro egreso"
     },
@@ -1198,15 +1187,13 @@
       "recorded": "Movimiento registrado"
     },
     "categoriesPlural": {
-      "reservation_fee_one": "cuota de reserva",
+      "reservation_fee_one": "reserva",
       "reservation_deposit_one": "depósito",
       "maintenance_dues_one": "cuota de mantenimiento",
-      "fine_one": "multa",
       "other_income_one": "otro ingreso",
-      "reservation_fee_other": "cuotas de reserva",
+      "reservation_fee_other": "reservas",
       "reservation_deposit_other": "depósitos",
       "maintenance_dues_other": "cuotas de mantenimiento",
-      "fine_other": "multas",
       "other_income_other": "otros ingresos"
     },
     "history": {

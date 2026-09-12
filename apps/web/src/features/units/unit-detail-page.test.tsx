@@ -61,7 +61,7 @@ function detail(): UnitDetailResponse {
     reservations: [],
     movements: [
       { id: 'mv_1', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'maintenance_dues', status: 'paid', allowed_transitions: ['pending'], amount_minor: 42000, concept: 'Cuota de mantenimiento · agosto 2026', detail: 'Emitida el 01 ago · Torre A / 402', counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-01', due_on: null, note: null, created_by: 'usr_1', settled_by: 'usr_1', settled_at: null, created_at: null },
-      { id: 'mv_2', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'fine', status: 'pending', allowed_transitions: ['paid', 'voided'], amount_minor: 8000, concept: 'Multa · ruido fuera de horario', detail: null, counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-11', due_on: null, note: null, created_by: 'usr_1', settled_by: null, settled_at: null, created_at: null },
+      { id: 'mv_2', account_id: 'acc_1', location_id: 'loc_1', direction: 'income', category: 'other_income', status: 'pending', allowed_transitions: ['paid', 'voided'], amount_minor: 8000, concept: 'Multa · ruido fuera de horario', detail: null, counterparty: null, unit_id: 'un_402', reservation_id: null, occurred_on: '2026-08-11', due_on: null, note: null, created_by: 'usr_1', settled_by: null, settled_at: null, created_at: null },
     ],
     movements_month: '2026-08',
     pending_balance_minor: 8000,
