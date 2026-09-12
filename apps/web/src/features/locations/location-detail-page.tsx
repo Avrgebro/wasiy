@@ -269,10 +269,9 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
           <LocationStaffTab accountId={accountId} locationId={location.id} />
         </Tabs.Panel>
         <Tabs.Panel pt="lg" value="settings">
-          <section className="mb-6 rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)] p-5">
-            <h3 className="m-0 mb-3 font-display text-base font-semibold text-[var(--mantine-color-text)]">{t('buildings.title')}</h3>
+          <div className="mb-6">
             <BuildingsList locationId={location.id} readOnly={deactivated} />
-          </section>
+          </div>
           <OperationalSettingsPanel
             fetchSettings={() => getLocationSettings(accountId, location.id)}
             level="location"

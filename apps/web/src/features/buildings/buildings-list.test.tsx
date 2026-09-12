@@ -47,33 +47,34 @@ afterEach(() => {
 describe('BuildingsList', () => {
   it('renames in place, blocks deleting towers in use or the last one, and adds towers', async () => {
     const writes = install([
-      { id: 'bd_a', location_id: 'loc_1', name: 'Torre A', code: 'TA', sort_order: 1, units_count: 3 },
-      { id: 'bd_b', location_id: 'loc_1', name: 'Torre B', code: null, sort_order: 2, units_count: 0 },
+      { id: 'bd_a', location_id: 'loc_1', name: 'Torre A', sort_order: 1, units_count: 3 },
+      { id: 'bd_b', location_id: 'loc_1', name: 'Torre B', sort_order: 2, units_count: 0 },
     ])
     renderList()
     const user = userEvent.setup()
 
-    const nameInputs = await screen.findAllByLabelText(/Nombre/)
-    expect(nameInputs).toHaveLength(2)
-    expect(screen.getByText('3 unidades')).toBeInTheDocument()
-
     // Torre A has units: its delete is disabled. Torre B is empty: enabled.
-    expect(screen.getByRole('button', { name: 'Eliminar Torre A' })).toBeDisabled()
+    expect(await screen.findByRole('button', { name: 'Eliminar Torre A' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Eliminar Torre B' })).toBeEnabled()
+    expect(screen.getByText('3 unidades')).toBeInTheDocument()
+    expect(screen.getByText('Sin unidades')).toBeInTheDocument()
 
-    await user.clear(nameInputs[0])
-    await user.type(nameInputs[0], 'Torre Norte')
-    await user.click(screen.getAllByRole('button', { name: 'Guardar' })[0])
-    await waitFor(() => expect(writes[0]).toEqual({ method: 'patch', url: '/api/buildings/bd_a', body: { name: 'Torre Norte', code: 'TA' } }))
+    // Click the name to rename in place; Enter saves.
+    await user.click(screen.getByRole('button', { name: 'Torre A' }))
+    const nameInput = screen.getByLabelText('Nombre')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Torre Norte{Enter}')
+    await waitFor(() => expect(writes[0]).toEqual({ method: 'patch', url: '/api/buildings/bd_a', body: { name: 'Torre Norte' } }))
 
+    // Add opens a tile in the grid; submitting posts the name.
     await user.click(screen.getByRole('button', { name: 'Agregar torre' }))
     await user.type(screen.getByPlaceholderText('Torre B'), 'Torre C')
-    await user.click(screen.getByRole('button', { name: 'Agregar torre' }))
+    await user.click(screen.getByRole('button', { name: 'Agregar' }))
     await waitFor(() => expect(writes[1]).toEqual({ method: 'post', url: '/api/locations/loc_1/buildings', body: { name: 'Torre C' } }))
   })
 
   it('hides the default tower behind a switch and splits into two towers on save', async () => {
-    const writes = install([{ id: 'bd_a', location_id: 'loc_1', name: null, code: null, sort_order: 0, units_count: 12 }])
+    const writes = install([{ id: 'bd_a', location_id: 'loc_1', name: null, sort_order: 0, units_count: 12 }])
     renderList()
     const user = userEvent.setup()
 
@@ -81,16 +82,16 @@ describe('BuildingsList', () => {
     expect(toggle).not.toBeChecked()
     expect(screen.getByText(/Una sola torre/)).toBeInTheDocument()
     // No row, no delete affordance for the internal default tower.
-    expect(screen.queryByLabelText(/^Nombre$/)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Nombre')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Eliminar/ })).not.toBeInTheDocument()
 
     await user.click(toggle)
-    expect(screen.getByText(/12 unidades registradas quedarán en la primera torre/)).toBeInTheDocument()
+    expect(screen.getByText(/12 unidades existentes quedan en la primera torre/)).toBeInTheDocument()
     const save = screen.getByRole('button', { name: 'Guardar' })
     expect(save).toBeDisabled()
 
-    await user.type(screen.getByLabelText(/primera torre/), 'Torre A')
-    await user.type(screen.getByLabelText(/segunda torre/), 'Torre B')
+    await user.type(screen.getByLabelText(/torre actual/), 'Torre A')
+    await user.type(screen.getByLabelText(/nueva torre/), 'Torre B')
     await user.click(save)
 
     await waitFor(() => expect(writes).toHaveLength(2))
@@ -100,8 +101,8 @@ describe('BuildingsList', () => {
 
   it('blocks going back to one tower while other towers hold units', async () => {
     install([
-      { id: 'bd_a', location_id: 'loc_1', name: 'Torre A', code: null, sort_order: 1, units_count: 3 },
-      { id: 'bd_b', location_id: 'loc_1', name: 'Torre B', code: null, sort_order: 2, units_count: 2 },
+      { id: 'bd_a', location_id: 'loc_1', name: 'Torre A', sort_order: 1, units_count: 3 },
+      { id: 'bd_b', location_id: 'loc_1', name: 'Torre B', sort_order: 2, units_count: 2 },
     ])
     renderList()
 

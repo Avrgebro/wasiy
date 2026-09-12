@@ -1,7 +1,7 @@
-import { ActionIcon, Alert, Button, Loader, Switch, Text, TextInput, Tooltip } from '@mantine/core'
-import { AddIcon, TrashBinTrashIcon } from '@solar-icons/react/linear'
+import { ActionIcon, Alert, Button, Skeleton, Switch, Text, TextInput, Tooltip } from '@mantine/core'
+import { AddIcon, BuildingsIcon, CheckCircleIcon, CloseCircleIcon, PenIcon, TrashBinTrashIcon } from '@solar-icons/react/linear'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
 import { getErrorMessage } from '../../lib/errors'
@@ -9,15 +9,15 @@ import { notifyError, notifySuccess } from '../../lib/notify'
 import { buildingsQueryKey, createBuilding, deleteBuilding, getBuildings, updateBuilding, type BuildingSummary } from './api'
 
 /**
- * The location's towers (ADR 0037). Every location owns one building row
- * from birth, but a single-tower location must not look like a half-filled
- * form, so the default row stays hidden behind a switch: off = one tower,
- * units show no tower. Turning it on names the existing tower and creates
- * the second in one save (existing units stay in the first). With two or
- * more towers the switch stays on and the editable list appears: rename in
- * place, a short code for chips, unit counts, add, delete when empty.
- * Turning it back off deletes the empty extra towers and clears the first
- * tower's name — only possible while those towers hold no units.
+ * The location's towers card (ADR 0037, mockup 06). Every location owns one
+ * building row from birth, but a single-tower location must not look like a
+ * half-filled form, so the default row stays hidden behind a switch: off = one
+ * tower, units show no tower. Turning it on names the existing tower and
+ * creates the second in one save (existing units stay in the first). With two
+ * or more towers the switch stays on and a grid of tiles appears: rename in
+ * place, unit counts, add, delete when empty. Turning it back off deletes the
+ * empty extra towers and clears the first tower's name — only possible while
+ * those towers hold no units.
  */
 export function BuildingsList({ locationId, readOnly = false }: { locationId: string; readOnly?: boolean }) {
   const { t } = useTranslation('common')
@@ -25,7 +25,6 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
   const [enabling, setEnabling] = useState(false)
   const [disabling, setDisabling] = useState(false)
   const [adding, setAdding] = useState(false)
-  const [newName, setNewName] = useState('')
   const [deleting, setDeleting] = useState<BuildingSummary | null>(null)
 
   const query = useQuery({ queryKey: buildingsQueryKey(locationId), queryFn: () => getBuildings(locationId) })
@@ -38,16 +37,6 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
     ])
   }
 
-  const create = useMutation({
-    mutationFn: (name: string) => createBuilding(locationId, { name }),
-    onSuccess: async () => {
-      await refresh()
-      setAdding(false)
-      setNewName('')
-      notifySuccess(t('buildings.added'))
-    },
-    onError: (error) => notifyError(getErrorMessage(error)),
-  })
   const remove = useMutation({
     mutationFn: (building: BuildingSummary) => deleteBuilding(building.id),
     onSuccess: async () => {
@@ -74,9 +63,27 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
 
   if (query.isLoading) {
     return (
-      <div className="grid min-h-24 place-items-center">
-        <Loader aria-label={t('common.loading')} />
-      </div>
+      <Card subtitle={t('buildings.multiHint')}>
+        <Skeleton height={44} radius="sm" width="60%" />
+        <Rule />
+        <TileGrid>
+          <Skeleton height={42} radius="sm" />
+          <Skeleton height={42} radius="sm" />
+        </TileGrid>
+      </Card>
+    )
+  }
+
+  if (query.isError) {
+    return (
+      <Card subtitle={t('buildings.multiHint')}>
+        <Alert color="error" title={t('buildings.loadFailed')}>
+          <p>{getErrorMessage(query.error)}</p>
+          <Button className="mt-3" variant="default" onClick={() => void query.refetch()}>
+            {t('router.retry')}
+          </Button>
+        </Alert>
+      </Card>
     )
   }
 
@@ -84,41 +91,77 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
   const unitsInOthers = buildings.slice(1).reduce((sum, building) => sum + building.units_count, 0)
   const canCollapse = !single && unitsInOthers === 0
   const multi = !single || enabling
+  const subtitle = readOnly ? t('buildings.readOnlyHint') : single ? t('buildings.singleHint') : t('buildings.multiHint')
 
   return (
-    <div className="flex flex-col gap-4">
-      <Tooltip disabled={single || canCollapse} label={t('buildings.collapseBlocked', { count: unitsInOthers })}>
-        <div className="self-start">
-          <Switch
-            checked={multi}
-            description={t(multi ? 'buildings.multiHint' : 'buildings.singleHint')}
-            disabled={readOnly || (!single && !canCollapse)}
-            label={t('buildings.toggle')}
-            onChange={(event) => {
-              if (event.currentTarget.checked) setEnabling(true)
-              else if (single) setEnabling(false)
-              else setDisabling(true)
-            }}
-          />
+    <Card
+      footer={
+        !single ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {!readOnly && !adding ? (
+              <Button leftSection={<AddIcon size={18} />} variant="default" onClick={() => setAdding(true)}>
+                {t('buildings.add')}
+              </Button>
+            ) : (
+              <span />
+            )}
+            <Hint>{canCollapse || readOnly ? t('buildings.renameHint') : t('buildings.collapseHint')}</Hint>
+          </div>
+        ) : undefined
+      }
+      subtitle={subtitle}
+    >
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <Text fw={600} size="sm">
+            {t('buildings.toggle')}
+          </Text>
+          <Text c="dimmed" size="xs">
+            {t('buildings.toggleHint')}
+          </Text>
         </div>
-      </Tooltip>
+        {readOnly ? (
+          <Text c="dimmed" size="sm">
+            {multi ? t('buildings.on') : t('buildings.off')}
+          </Text>
+        ) : (
+          <Tooltip disabled={single || canCollapse} label={t('buildings.collapseBlocked', { count: unitsInOthers })}>
+            <span className="inline-flex shrink-0">
+              <Switch
+                aria-label={t('buildings.toggle')}
+                checked={multi}
+                disabled={!single && !canCollapse}
+                onChange={(event) => {
+                  if (event.currentTarget.checked) setEnabling(true)
+                  else if (single) setEnabling(false)
+                  else setDisabling(true)
+                }}
+              />
+            </span>
+          </Tooltip>
+        )}
+      </div>
 
       {single && enabling ? (
-        <EnableTowersForm
-          first={buildings[0]}
-          onCancel={() => setEnabling(false)}
-          onSaved={async () => {
-            await refresh()
-            setEnabling(false)
-          }}
-        />
+        <>
+          <Rule />
+          <EnableTowersForm
+            first={buildings[0]}
+            onCancel={() => setEnabling(false)}
+            onSaved={async () => {
+              await refresh()
+              setEnabling(false)
+            }}
+          />
+        </>
       ) : null}
 
       {!single ? (
         <>
-          <ul className="m-0 flex list-none flex-col gap-2 p-0">
+          <Rule />
+          <TileGrid>
             {buildings.map((building) => (
-              <BuildingRow
+              <BuildingTile
                 key={building.id}
                 building={building}
                 canDelete={!readOnly && building.units_count === 0}
@@ -128,38 +171,17 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
                 onSaved={refresh}
               />
             ))}
-          </ul>
-
-          {!readOnly ? (
-            adding ? (
-              <form
-                className="flex flex-wrap items-end gap-2 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] p-3"
-                onSubmit={(event) => {
-                  event.preventDefault()
-                  if (newName.trim()) create.mutate(newName.trim())
+            {adding ? (
+              <AddTowerTile
+                locationId={locationId}
+                onCancel={() => setAdding(false)}
+                onSaved={async () => {
+                  await refresh()
+                  setAdding(false)
                 }}
-              >
-                <TextInput
-                  autoFocus
-                  className="min-w-48 flex-1"
-                  label={t('buildings.name')}
-                  placeholder={t('buildings.namePlaceholder')}
-                  value={newName}
-                  onChange={(event) => setNewName(event.currentTarget.value)}
-                />
-                <Button variant="default" onClick={() => setAdding(false)}>
-                  {t('actions.cancel')}
-                </Button>
-                <Button color="accent" disabled={!newName.trim()} loading={create.isPending} type="submit">
-                  {t('buildings.add')}
-                </Button>
-              </form>
-            ) : (
-              <Button className="self-start" leftSection={<AddIcon size={18} />} variant="default" onClick={() => setAdding(true)}>
-                {t('buildings.add')}
-              </Button>
-            )
-          ) : null}
+              />
+            ) : null}
+          </TileGrid>
         </>
       ) : null}
 
@@ -177,14 +199,62 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
         onCancel={() => setDisabling(false)}
         onConfirm={() => collapse.mutate()}
       />
-    </div>
+    </Card>
+  )
+}
+
+/** The section card: header band with title and state subtitle, body, optional footer row. */
+function Card({ children, footer, subtitle }: { children: ReactNode; footer?: ReactNode; subtitle: string }) {
+  const { t } = useTranslation('common')
+  return (
+    <section className="overflow-hidden rounded-surface border border-[var(--mantine-color-default-border)] bg-[var(--mantine-color-default)]">
+      <div className="border-b border-[var(--mantine-color-default-border)] px-5 py-4">
+        <h3 className="m-0 font-display text-base font-semibold text-[var(--mantine-color-text)]">{t('buildings.title')}</h3>
+        <Text c="dimmed" size="xs">
+          {subtitle}
+        </Text>
+      </div>
+      <div className="flex flex-col gap-4 p-5">
+        {children}
+        {footer}
+      </div>
+    </section>
+  )
+}
+
+function Rule() {
+  return <div aria-hidden className="h-px bg-[var(--mantine-color-default-border)]" />
+}
+
+function Hint({ children }: { children: ReactNode }) {
+  return (
+    <Text c="dimmed" className="inline-flex items-center gap-2" size="xs">
+      <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-[var(--wa-interactive)]" />
+      {children}
+    </Text>
+  )
+}
+
+/** Tiles fill the card in as many 320px columns as fit, one per row on phones. */
+function TileGrid({ children }: { children: ReactNode }) {
+  return <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-2.5 p-0">{children}</ul>
+}
+
+const tileClass =
+  'flex min-h-[42px] items-center gap-2.5 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] py-1.5 pl-2.5 pr-1.5'
+
+function TileIcon() {
+  return (
+    <span aria-hidden className="grid size-[26px] shrink-0 place-items-center rounded-[7px] bg-[var(--wa-tint)] text-[var(--wa-interactive)]">
+      <BuildingsIcon size={15} />
+    </span>
   )
 }
 
 /**
  * First-time split: name the existing tower and the new one, then one save
  * renames the first (its units come along by reference) and creates the
- * second. Codes are left for the list afterwards so this asks for names only.
+ * second. The footer bar bleeds to the card edges like the mockup.
  */
 function EnableTowersForm({ first, onCancel, onSaved }: { first: BuildingSummary; onCancel: () => void; onSaved: () => Promise<unknown> }) {
   const { t } = useTranslation('common')
@@ -206,43 +276,51 @@ function EnableTowersForm({ first, onCancel, onSaved }: { first: BuildingSummary
 
   return (
     <form
-      className="flex flex-col gap-3 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] p-4"
+      className="-mx-5 -mb-5 flex flex-col"
       onSubmit={(event) => {
         event.preventDefault()
         if (ready) save.mutate()
       }}
     >
-      <Alert color="warning" variant="light">
-        {t('buildings.enableNotice', { count: first.units_count })}
-      </Alert>
-      <TextInput
-        autoFocus
-        label={t('buildings.firstTower')}
-        placeholder={t('buildings.firstTowerPlaceholder')}
-        required
-        value={firstName}
-        onChange={(event) => setFirstName(event.currentTarget.value)}
-      />
-      <TextInput
-        label={t('buildings.secondTower')}
-        placeholder={t('buildings.namePlaceholder')}
-        required
-        value={secondName}
-        onChange={(event) => setSecondName(event.currentTarget.value)}
-      />
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button variant="default" onClick={onCancel}>
-          {t('actions.cancel')}
-        </Button>
-        <Button color="accent" disabled={!ready} loading={save.isPending} type="submit">
-          {t('actions.save')}
-        </Button>
+      <div className="flex flex-col gap-3 px-5 pb-5">
+        <div className="grid gap-3.5 sm:grid-cols-2">
+          <TextInput
+            autoFocus
+            label={t('buildings.firstTower')}
+            placeholder={t('buildings.firstTowerPlaceholder')}
+            required
+            value={firstName}
+            onChange={(event) => setFirstName(event.currentTarget.value)}
+          />
+          <TextInput
+            label={t('buildings.secondTower')}
+            placeholder={t('buildings.secondTowerPlaceholder')}
+            required
+            value={secondName}
+            onChange={(event) => setSecondName(event.currentTarget.value)}
+          />
+        </div>
+        <Hint>{t('buildings.enableNotice', { count: first.units_count })}</Hint>
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] px-5 py-3">
+        <Text c="dimmed" size="xs">
+          {t('buildings.willCreateSecond')}
+        </Text>
+        <div className="flex items-center gap-2">
+          <Button size="xs" variant="subtle" onClick={onCancel}>
+            {t('actions.cancel')}
+          </Button>
+          <Button color="accent" disabled={!ready} loading={save.isPending} size="xs" type="submit">
+            {t('actions.save')}
+          </Button>
+        </div>
       </div>
     </form>
   )
 }
 
-function BuildingRow({
+/** One tower: icon, name (click or pencil to rename in place), unit count, rename and delete. */
+function BuildingTile({
   building,
   canDelete,
   deleteHint,
@@ -258,59 +336,145 @@ function BuildingRow({
   readOnly: boolean
 }) {
   const { t } = useTranslation('common')
+  const [editing, setEditing] = useState(false)
   const [name, setName] = useState(building.name ?? '')
-  const [code, setCode] = useState(building.code ?? '')
   const [error, setError] = useState<string | null>(null)
-  const dirty = name !== (building.name ?? '') || code !== (building.code ?? '')
+  const label = building.name ?? t('buildings.unnamed')
 
   const save = useMutation({
-    mutationFn: () => updateBuilding(building.id, { name: name.trim(), code: code.trim() || null }),
+    mutationFn: () => updateBuilding(building.id, { name: name.trim() }),
     onSuccess: async () => {
       setError(null)
       await onSaved()
+      setEditing(false)
       notifySuccess(t('buildings.saved'))
     },
     onError: (err) => setError(getErrorMessage(err)),
   })
 
+  function startEditing() {
+    setName(building.name ?? '')
+    setError(null)
+    setEditing(true)
+  }
+
+  function stopEditing() {
+    setEditing(false)
+    setError(null)
+  }
+
+  if (editing) {
+    return (
+      <li className={`${tileClass} border-[var(--wa-interactive)]`}>
+        <TileIcon />
+        <TextInput
+          aria-label={t('buildings.name')}
+          autoFocus
+          className="min-w-0 flex-1"
+          error={error}
+          placeholder={t('buildings.namePlaceholder')}
+          size="xs"
+          value={name}
+          onChange={(event) => setName(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && name.trim()) {
+              event.preventDefault()
+              save.mutate()
+            }
+            if (event.key === 'Escape') stopEditing()
+          }}
+        />
+        <ActionIcon aria-label={t('actions.cancel')} size={28} variant="subtle" onClick={stopEditing}>
+          <CloseCircleIcon size={16} />
+        </ActionIcon>
+        <ActionIcon aria-label={t('actions.save')} color="accent" disabled={!name.trim()} loading={save.isPending} size={28} variant="subtle" onClick={() => save.mutate()}>
+          <CheckCircleIcon size={16} />
+        </ActionIcon>
+      </li>
+    )
+  }
+
   return (
-    <li className="flex flex-wrap items-end gap-2 rounded-inner border border-[var(--mantine-color-default-border)] bg-[var(--wa-surface-2)] p-3">
-      <TextInput
-        className="min-w-40 flex-1"
-        error={error}
-        label={t('buildings.name')}
-        placeholder={t('buildings.unnamed')}
-        readOnly={readOnly}
-        required
-        value={name}
-        onChange={(event) => setName(event.currentTarget.value)}
-      />
-      <TextInput
-        className="w-24"
-        label={t('buildings.code')}
-        maxLength={8}
-        placeholder="T1"
-        readOnly={readOnly}
-        value={code}
-        onChange={(event) => setCode(event.currentTarget.value.toUpperCase())}
-      />
-      <Text c="dimmed" className="min-w-24 pb-2" size="sm">
-        {t('buildings.unitsCount', { count: building.units_count })}
+    <li className={`${tileClass}${readOnly ? ' pr-3' : ''}`}>
+      <TileIcon />
+      {readOnly ? (
+        <Text className="min-w-0 flex-1 truncate" fw={600} size="sm">
+          {label}
+        </Text>
+      ) : (
+        <button
+          className="m-0 min-w-0 flex-1 cursor-text truncate border-0 border-b border-dashed border-[var(--mantine-color-default-border)] bg-transparent p-0 py-0.5 text-left text-sm font-semibold text-[var(--mantine-color-text)]"
+          type="button"
+          onClick={startEditing}
+        >
+          {label}
+        </button>
+      )}
+      <Text c="dimmed" className="whitespace-nowrap" size="sm">
+        {building.units_count === 0 ? t('buildings.noUnits') : t('buildings.unitsCount', { count: building.units_count })}
       </Text>
       {!readOnly ? (
         <>
-          <Button disabled={!dirty || !name.trim()} loading={save.isPending} variant="default" onClick={() => save.mutate()}>
-            {t('actions.save')}
-          </Button>
+          <span aria-hidden className="h-5 w-px shrink-0 bg-[var(--mantine-color-default-border)]" />
+          <ActionIcon aria-label={t('buildings.rename', { name: label })} size={28} variant="subtle" onClick={startEditing}>
+            <PenIcon size={15} />
+          </ActionIcon>
           <Tooltip disabled={canDelete} label={deleteHint ?? ''}>
-            <span>
-              <ActionIcon aria-label={t('buildings.delete', { name: building.name ?? t('buildings.unnamed') })} color="error" disabled={!canDelete} size={36} variant="subtle" onClick={onDelete}>
-                <TrashBinTrashIcon size={18} />
+            <span className="inline-flex">
+              <ActionIcon aria-label={t('buildings.delete', { name: label })} color="error" disabled={!canDelete} size={28} variant="subtle" onClick={onDelete}>
+                <TrashBinTrashIcon size={15} />
               </ActionIcon>
             </span>
           </Tooltip>
         </>
       ) : null}
+    </li>
+  )
+}
+
+/** The add row lives in the grid as one more tile: input, cancel, confirm. */
+function AddTowerTile({ locationId, onCancel, onSaved }: { locationId: string; onCancel: () => void; onSaved: () => Promise<unknown> }) {
+  const { t } = useTranslation('common')
+  const [name, setName] = useState('')
+
+  const create = useMutation({
+    mutationFn: () => createBuilding(locationId, { name: name.trim() }),
+    onSuccess: async () => {
+      await onSaved()
+      notifySuccess(t('buildings.added'))
+    },
+    onError: (error) => notifyError(getErrorMessage(error)),
+  })
+
+  return (
+    <li className={`${tileClass} border-[var(--wa-interactive)]`}>
+      <form
+        className="flex min-w-0 flex-1 items-center gap-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          if (name.trim()) create.mutate()
+        }}
+      >
+        <TileIcon />
+        <TextInput
+          aria-label={t('buildings.name')}
+          autoFocus
+          className="min-w-0 flex-1"
+          placeholder={t('buildings.namePlaceholder')}
+          size="xs"
+          value={name}
+          onChange={(event) => setName(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') onCancel()
+          }}
+        />
+        <Button size="xs" variant="subtle" onClick={onCancel}>
+          {t('actions.cancel')}
+        </Button>
+        <Button color="accent" disabled={!name.trim()} loading={create.isPending} size="xs" type="submit">
+          {t('buildings.addShort')}
+        </Button>
+      </form>
     </li>
   )
 }
