@@ -3,8 +3,10 @@
 use App\Enums\AccountRole;
 use App\Enums\ActivityEventType;
 use App\Enums\BookingMode;
+use App\Enums\InvoiceStatus;
 use App\Enums\LocationRole;
 use App\Enums\RegistryStatus;
+use App\Enums\SubscriptionStatus;
 use App\Enums\UserInvitationPurpose;
 use App\Enums\UserInvitationStatus;
 use App\Enums\VehicleType;
@@ -22,6 +24,7 @@ use App\Models\User;
 use App\Models\UserInvitation;
 use App\Models\Vehicle;
 use App\Notifications\StaffInvitationNotification;
+use App\Services\UnitCapacity;
 use App\Services\UserInvitationTokenResolver;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -480,3 +483,46 @@ test('demo reservations fall on open days whatever the seed day', function (stri
         $this->assertTrue($reservation->amenity->isOpenOn($reservation->reserved_on), $reservation->amenity->name.' '.$reservation->reserved_on->toDateString());
     }
 })->with(['2026-09-04 12:00', '2026-09-06 12:00']);
+
+test('it seeds the subscription model behind the demo accounts idempotently', function () {
+    Storage::fake('local');
+    $this->seed();
+    $this->seed();
+
+    $demo = Account::query()->where('slug', 'wasiy-demo')->sole();
+    $playa = Account::query()->where('slug', 'wasiy-playa')->sole();
+
+    // A paying customer: active, over the contracted units it actually uses,
+    // three paid periods and the next one under review with a proof on disk.
+    $subscription = $demo->subscription()->sole();
+    expect($subscription->status)->toBe(SubscriptionStatus::Active)
+        ->and($subscription->plan->code)->toBe('operativo')
+        ->and($subscription->isLapsed())->toBeFalse()
+        ->and($subscription->billable_units)->toBeGreaterThanOrEqual(app(UnitCapacity::class)->activeUnits($demo));
+
+    $invoices = $subscription->invoices()->orderBy('period_starts_on')->get();
+    expect($invoices)->toHaveCount(4)
+        ->and($invoices->take(3)->pluck('status')->unique()->all())->toBe([InvoiceStatus::Paid])
+        ->and($invoices->last()->status)->toBe(InvoiceStatus::UnderReview)
+        ->and($invoices->last()->period_starts_on->toDateString())->toBe($subscription->access_until->addDay()->toDateString())
+        ->and($invoices->pluck('number')->unique())->toHaveCount(4)
+        ->and($subscription->openInvoice()?->is($invoices->last()))->toBeTrue();
+
+    $proof = $invoices->last()->latestProof;
+    expect($proof)->not->toBeNull()
+        ->and($proof->amount_minor)->toBe($invoices->last()->amount_minor);
+    Storage::disk($proof->disk)->assertExists($proof->path);
+
+    // A trial in its last week: the banner shows, nothing is billed yet.
+    $trial = $playa->subscription()->sole();
+    expect($trial->status)->toBe(SubscriptionStatus::Trialing)
+        ->and($trial->daysLeft())->toBeLessThanOrEqual(7)
+        ->and($trial->isLapsed())->toBeFalse()
+        ->and($trial->invoices()->count())->toBe(0);
+
+    // The admin's /me carries the paid state the SPA gates on.
+    $admin = User::query()->where('email', 'admin@wasiy.test')->sole();
+    $this->actingAs($admin)->getJson('/api/me')->assertOk()
+        ->assertJsonPath('active_account.subscription.status', 'active')
+        ->assertJsonPath('active_account.subscription.is_lapsed', false);
+});
