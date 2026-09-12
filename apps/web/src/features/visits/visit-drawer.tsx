@@ -7,8 +7,7 @@ import { usePhoneFormat } from '../auth/hooks'
 import { telHref } from '../../lib/phone'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DrawerFact, DrawerFacts, DrawerSection, DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
-import { getErrorMessage } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { shortDateTime } from '../finances/month'
 import { checkOutVisit, type VisitSummary } from './api'
 import { checkInLabel, durationLabel, visitStatusColor } from './visit-presentation'
@@ -44,7 +43,6 @@ export function VisitDrawer({ onClose, timezone, visit }: { onClose: () => void;
       close()
       notifySuccess(t('visits.checkedOut'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const inside = visit?.status === 'inside'

@@ -6,8 +6,8 @@ import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { BottomSheet, ConfirmSheet, SheetAction } from '../../components/ui/bottom-sheet'
 import { FormTextInput } from '../../components/ui/form-fields'
-import { getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { submitHandlingServerErrors } from '../../lib/errors'
+import { notifySuccess } from '../../lib/notify'
 import { createPortalVehicle, deletePortalVehicle, updatePortalVehicle, type PortalVehicle } from './api'
 import { portalVehicleSchema, type PortalVehicleFormValues } from './schemas'
 
@@ -52,7 +52,6 @@ export function VehicleSheet({ onClose, opened, unitId, vehicle }: { onClose: ()
       onClose()
       notifySuccess(t('portal.vehicles.deleted'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const rootError = form.formState.errors.root?.message

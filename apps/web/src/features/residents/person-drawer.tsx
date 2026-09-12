@@ -9,7 +9,7 @@ import { ConfirmDialog, DangerZone, DrawerFact, DrawerFacts, DrawerField, Drawer
 import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
 import { telHref } from '../../lib/phone'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { shortDateTime } from '../finances/month'
 import { portalColor } from '../units/unit-presentation'
 import { deactivatePerson, getResident, invitePerson, reactivatePerson, type ResidentSummary } from './api'
@@ -70,7 +70,6 @@ export function PersonDrawer({
       setEmail('')
       notifySuccess(t('units.member.invited'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
   const deactivate = useMutation({
     mutationFn: () => deactivatePerson(residentId!),
@@ -79,7 +78,6 @@ export function PersonDrawer({
       setConfirmingDeactivate(false)
       notifySuccess(t('residents.deactivated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
   const reactivate = useMutation({
     mutationFn: () => reactivatePerson(residentId!),
@@ -87,7 +85,6 @@ export function PersonDrawer({
       await invalidate()
       notifySuccess(t('residents.reactivated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   function sendInvite() {

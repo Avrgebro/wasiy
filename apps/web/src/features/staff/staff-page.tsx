@@ -7,7 +7,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
-import { notifySuccess, notifyError } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
 import type { MeResponse } from '../auth/types'
 import { DataTable } from '../../components/table/data-table'
@@ -93,9 +93,6 @@ function StaffPageContent({ accountId, me }: { accountId: string; me: MeResponse
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
       notifySuccess(t('staff.reactivated'))
-    },
-    onError: (error) => {
-      notifyError(getErrorMessage(error))
     },
   })
 

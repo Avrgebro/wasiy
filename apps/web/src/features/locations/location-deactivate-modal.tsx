@@ -1,8 +1,7 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { notifySuccess, notifyError } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { getErrorMessage } from '../../lib/errors'
 import { deactivateLocation, type LocationSummary } from './api'
 
 function AffectedCount({ label, value }: { label: string; value: number }) {
@@ -41,9 +40,6 @@ export function LocationDeactivateModal({
       // Deactivation also drops the location from accessible_locations.
       await queryClient.invalidateQueries({ queryKey: ['auth'] })
       notifySuccess(t('locations.deactivated'))
-    },
-    onError: (error) => {
-      notifyError(getErrorMessage(error))
     },
   })
 

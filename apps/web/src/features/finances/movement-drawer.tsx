@@ -13,7 +13,7 @@ import {
 } from '../../components/ui/detail-drawer-parts'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { shortDayLabel } from '../reservations/week'
 import { getMovement, transitionMovement, type MovementHistoryEntry, type MovementStatus, type MovementSummary } from './api'
 import { longDate, shortDateTime } from './month'
@@ -75,7 +75,6 @@ export function MovementDrawer({
       setNote('')
       notifySuccess(t('finances.updated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const movement = detailQuery.data?.data

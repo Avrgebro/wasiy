@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { ConfirmDialog, DangerZone, DrawerRow } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
-import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
+import { notifySuccess } from '../../lib/notify'
 import { createVehicle, updateVehicle, type VehicleSummary } from '../vehicles/api'
 import { vehicleFormSchema, VEHICLE_TYPES, type VehicleFormValues } from './schemas'
 
@@ -83,7 +83,6 @@ export function VehicleDrawer({
       onClose()
       notifySuccess(t(editing?.status === 'active' ? 'units.vehicle.deactivated' : 'units.vehicle.reactivated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   return (

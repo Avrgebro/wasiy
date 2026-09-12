@@ -5,8 +5,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { SectionCard, SectionCardFooter } from '../../components/ui/section-card'
 import { formatDate } from '../../lib/dates'
-import { getErrorMessage } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
 import { getSubscriptionPage, paymentProofUrl, requestPlanChange, subscriptionPageQueryKey, type Invoice, type SubscriptionPageData } from './api'
 import { ChangeUnitsDrawer } from './change-units-drawer'
@@ -324,7 +323,6 @@ function ChangePlanCard({ data }: { data: SubscriptionPageData }) {
       queryClient.setQueryData(subscriptionPageQueryKey, { data: next })
       notifySuccess(t(plan ? 'subscription.changePlan.requested' : 'subscription.changePlan.withdrawn'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
     meta: { suppressErrorNotification: true },
   })
 

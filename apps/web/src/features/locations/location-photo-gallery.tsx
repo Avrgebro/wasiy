@@ -5,7 +5,6 @@ import { notifyError } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getErrorMessage } from '../../lib/errors'
 import {
   deleteLocationPhoto,
   reorderLocationPhotos,
@@ -41,33 +40,25 @@ export function LocationPhotoGallery({
     await queryClient.invalidateQueries({ queryKey: ['locations'] })
   }
 
-  const notifyMutationError = (error: unknown) => {
-    notifyError(getErrorMessage(error))
-  }
-
   const uploadMutation = useMutation({
     mutationFn: (files: File[]) =>
       Promise.all(files.map((file) => uploadLocationPhoto(accountId, locationId, file))),
     onSuccess: invalidate,
-    onError: notifyMutationError,
   })
 
   const deleteMutation = useMutation({
     mutationFn: (photoId: string) => deleteLocationPhoto(accountId, locationId, photoId),
     onSuccess: invalidate,
-    onError: notifyMutationError,
   })
 
   const coverMutation = useMutation({
     mutationFn: (photoId: string) => setLocationCoverPhoto(accountId, locationId, photoId),
     onSuccess: invalidate,
-    onError: notifyMutationError,
   })
 
   const reorderMutation = useMutation({
     mutationFn: (photoIds: string[]) => reorderLocationPhotos(accountId, locationId, photoIds),
     onSuccess: invalidate,
-    onError: notifyMutationError,
   })
 
   function handleDrop(targetIndex: number) {

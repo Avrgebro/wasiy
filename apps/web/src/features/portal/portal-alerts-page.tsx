@@ -4,8 +4,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getErrorMessage } from '../../lib/errors'
-import { notifyError } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
 import { useActiveUnit } from './active-unit-context'
 import { getPortalAlerts, markAllPortalAlertsRead, markPortalAlertRead, type PortalAlert } from './api'
@@ -40,7 +38,6 @@ export function PortalAlertsPage() {
   const markAll = useMutation({
     mutationFn: () => markAllPortalAlertsRead(active!.unit_id),
     onSuccess: refresh,
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const open = useMutation({
@@ -52,7 +49,6 @@ export function PortalAlertsPage() {
       else if (alert.subject_type === 'package') void navigate({ to: '/portal' })
       else if (alert.subject_type === 'visit') void navigate({ to: '/portal/visitas' })
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   if (!active) {

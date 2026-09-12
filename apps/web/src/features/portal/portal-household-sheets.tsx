@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { BottomSheet, ConfirmSheet, SheetAction, SheetRow, SheetRows } from '../../components/ui/bottom-sheet'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { FormPhoneInput } from '../../components/ui/phone-input'
-import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
+import { notifySuccess } from '../../lib/notify'
 import { formatPhone, telHref } from '../../lib/phone'
 import { addHouseholdMember, PORTAL_RESIDENT_TYPES, removeHouseholdMember, resendHouseholdInvitation, type HouseholdMember } from './api'
 import { StatusPill } from './portal-cards'
@@ -49,7 +49,6 @@ export function MemberSheet({
   const resend = useMutation({
     mutationFn: (membershipId: string) => resendHouseholdInvitation(membershipId),
     onSuccess: () => notifySuccess(t('portal.household.invitationResent')),
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
   const remove = useMutation({
     mutationFn: (membershipId: string) => removeHouseholdMember(membershipId),
@@ -59,7 +58,6 @@ export function MemberSheet({
       onClose()
       notifySuccess(t('portal.household.removed'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const removable = canManage && member !== null && !member.is_primary_contact && !member.is_me

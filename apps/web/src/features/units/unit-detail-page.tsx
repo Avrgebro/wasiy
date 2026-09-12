@@ -10,7 +10,7 @@ import { ApiError } from '../../app/api-client'
 import { formatDate } from '../../lib/dates'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { can } from '../auth/access'
 import { useMe, usePhoneFormat } from '../auth/hooks'
 import type { MovementSummary } from '../finances/api'
@@ -94,7 +94,6 @@ function UnitDetailContent({
       setEditing(false)
       notifySuccess(t('units.detail.deactivated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
   const reactivate = useMutation({
     mutationFn: () => reactivateUnit(unitId),
@@ -102,7 +101,6 @@ function UnitDetailContent({
       await invalidate()
       notifySuccess(t('units.detail.reactivated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const detailQuery = useQuery({
@@ -605,7 +603,6 @@ function NotesSection({ canManage, notes, unitId }: { canManage: boolean; notes:
       setWriting(false)
       notifySuccess(t('units.detail.noteAdded'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   return (

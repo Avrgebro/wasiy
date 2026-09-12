@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
 import { useActiveUnit } from './active-unit-context'
 import { getAvailability, getPortalAmenities, requestReservation } from './api'
@@ -50,8 +50,8 @@ export function PortalBookingPage() {
       notifySuccess(t(data.status === 'approved' ? 'portal.reservations.booked' : 'portal.reservations.requested'))
       void navigate({ to: '/portal/reservas', search: { chip: 'mine' } })
     },
-    onError: async (error) => {
-      notifyError(getErrorMessage(error))
+    // The global handler toasts the failure.
+    onError: async () => {
       // A day that filled up meanwhile shows as full once the range reloads.
       await queryClient.invalidateQueries({ queryKey: ['portal', 'availability', amenityId] })
     },

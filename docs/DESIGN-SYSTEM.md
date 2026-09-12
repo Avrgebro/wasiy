@@ -631,8 +631,9 @@ Use toasts for short-lived feedback after actions. Do not use toasts as the only
 
 Patterns:
 
-- Success and info toasts may auto-dismiss.
-- Important errors should stay longer or require dismissal.
+- Success and info toasts may auto-dismiss (Mantine default, 4 s).
+- Errors stay 8 s (`ERROR_TOAST_AUTO_CLOSE` in `app/query-client.ts`).
+- **One error toaster.** A failed mutation is toasted by the query client's mutation cache, titled "No se pudo completar la acción". Feature code never calls `notifyError` from a mutation's `onError`: the cache handler runs as well and the failure shows twice. A form that renders the error inline opts out with `meta: { suppressErrorNotification: true }`. Success toasts stay local, since only the caller knows what happened.
 - Long-running jobs should show on-page status, not only a toast.
 - Desktop placement: top-right.
 - Mobile placement: top or bottom safe area depending readability and Mantine behavior.

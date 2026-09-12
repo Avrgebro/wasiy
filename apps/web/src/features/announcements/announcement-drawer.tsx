@@ -4,8 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { ConfirmDialog, DrawerSection } from '../../components/ui/detail-drawer-parts'
-import { getErrorMessage } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { shortDateTime } from '../finances/month'
 import { archiveAnnouncement, type AnnouncementSummary } from './api'
 import { publishedLabel, validityLabel } from './presentation'
@@ -36,7 +35,6 @@ export function AnnouncementDrawer({
       onClose()
       notifySuccess(t('announcements.archived'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const open = announcement !== null && announcement.status !== 'archived'

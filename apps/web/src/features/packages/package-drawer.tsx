@@ -5,8 +5,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/app-drawer'
 import { DrawerFact, DrawerFacts, DrawerSection, DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
-import { getErrorMessage } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { shortDate, shortDateTime } from '../finances/month'
 import { deliverPackage, type PackageSummary } from './api'
 import { packageStatusColor } from './presentation'
@@ -41,7 +40,6 @@ export function PackageDrawer({
       close()
       notifySuccess(t('packages.delivered'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const pending = pkg?.status === 'pending'

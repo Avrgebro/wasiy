@@ -17,7 +17,7 @@ import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
 import { useMe } from '../auth/hooks'
 import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { generateDues, getFinanceSummary, getMovements, type CategoryTotal, type FinanceSummary, type MovementSummary } from './api'
 import { currentMonth, monthLabel, shortDate } from './month'
 import { FinancesFilters } from './finances-filters'
@@ -121,7 +121,6 @@ function FinancesContent({
       setConfirmingDues(false)
       notifySuccess(t('finances.dues.done', { created: data.created, skipped: data.skipped }))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   function updateSearch(next: Partial<FinancesSearchValues>) {

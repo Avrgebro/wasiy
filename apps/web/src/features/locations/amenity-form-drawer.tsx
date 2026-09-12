@@ -140,6 +140,7 @@ function AmenityForm({
       await queryClient.invalidateQueries({ queryKey: ['locations'] })
       notifySuccess(editing ? t('amenities.updated') : t('amenities.created'))
     },
+    meta: { suppressErrorNotification: true },
     onError: (error) => {
       setServerError(
         error instanceof ApiError && error.errors

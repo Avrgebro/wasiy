@@ -19,7 +19,7 @@ it('reports a failed approval only once through the app mutation handler', async
   </QueryClientProvider></MantineProvider>)
   await userEvent.click(screen.getByRole('button', { name: 'Aprobar' }))
   await waitFor(() => expect(notifyError).toHaveBeenCalledTimes(1))
-  expect(notifyError).toHaveBeenCalledWith('Unavailable day', 'No se pudo completar la acción')
+  expect(notifyError).toHaveBeenCalledWith('Unavailable day', 'No se pudo completar la acción', { autoClose: 8000 })
 })
 
 it.each([

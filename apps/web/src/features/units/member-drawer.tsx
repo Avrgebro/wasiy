@@ -9,8 +9,8 @@ import { AppDrawer, AppDrawerBody, AppDrawerFooter } from '../../components/ui/a
 import { ConfirmDialog, DangerZone, DrawerField, DrawerRow, DrawerSection } from '../../components/ui/detail-drawer-parts'
 import { FormTextInput } from '../../components/ui/form-fields'
 import { FormPhoneInput } from '../../components/ui/phone-input'
-import { fieldErrorMessage, getErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
-import { notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
+import { fieldErrorMessage, submitHandlingServerErrors } from '../../lib/errors'
+import { notifySuccess, notifyWarning } from '../../lib/notify'
 import { getResidents } from '../residents/api'
 import {
   createMembership,
@@ -159,7 +159,6 @@ export function MemberDrawer({
       await invalidate()
       notifySuccess(t('units.member.invited'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const remove = useMutation({
@@ -170,7 +169,6 @@ export function MemberDrawer({
       onClose()
       notifySuccess(t('units.member.removed'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const pending = add.isPending || save.isPending

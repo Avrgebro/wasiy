@@ -6,9 +6,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BottomSheet, ConfirmSheet, SheetAction, SheetNote, SheetTile, SheetTiles } from '../../components/ui/bottom-sheet'
 import { DrawerTimeline, type TimelineItem } from '../../components/ui/detail-drawer-parts'
-import { getErrorMessage } from '../../lib/errors'
 import { formatMoney } from '../../lib/money'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMe } from '../auth/hooks'
 import { useActiveUnit } from './active-unit-context'
 import { cancelPortalReservation, getPortalAmenities, getPortalReservation, getPortalReservations, type PortalAmenity, type PortalReservation } from './api'
@@ -49,7 +48,6 @@ export function PortalReservationsPage() {
       setSelectedId(null)
       notifySuccess(t('portal.reservations.cancelled'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   if (!active) {

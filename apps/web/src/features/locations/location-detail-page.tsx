@@ -1,7 +1,7 @@
 import { PageAction } from '../../components/ui/page-action'
 import { Alert, Button, Skeleton, Tabs, Text } from '@mantine/core'
 import { Buildings2Icon, CameraMinimalisticIcon, DangerTriangleIcon } from '@solar-icons/react/linear'
-import { notifySuccess, notifyError } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMediaQuery } from '@mantine/hooks'
 import { getRouteApi, Link } from '@tanstack/react-router'
@@ -70,9 +70,6 @@ function LocationDetailContent({ accountId }: { accountId: string }) {
       await queryClient.invalidateQueries({ queryKey: ['locations'] })
       await queryClient.invalidateQueries({ queryKey: ['auth'] })
       notifySuccess(t('locations.reactivated'))
-    },
-    onError: (error) => {
-      notifyError(getErrorMessage(error))
     },
   })
 

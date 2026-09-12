@@ -1,8 +1,7 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { notifySuccess, notifyError } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { getErrorMessage } from '../../lib/errors'
 import { deactivateStaff, type StaffSummary } from './api'
 
 /**
@@ -27,9 +26,6 @@ export function StaffDeactivateModal({
       onClose()
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
       notifySuccess(t('staff.deactivated'))
-    },
-    onError: (error) => {
-      notifyError(getErrorMessage(error))
     },
   })
 

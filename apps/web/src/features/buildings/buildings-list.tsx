@@ -5,7 +5,7 @@ import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ConfirmDialog } from '../../components/ui/detail-drawer-parts'
 import { getErrorMessage } from '../../lib/errors'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { buildingsQueryKey, createBuilding, deleteBuilding, getBuildings, updateBuilding, type BuildingSummary } from './api'
 
 /**
@@ -44,7 +44,6 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
       setDeleting(null)
       notifySuccess(t('buildings.removed'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
   // Back to one tower: drop the empty extras, then unname the first.
   const collapse = useMutation({
@@ -58,7 +57,6 @@ export function BuildingsList({ locationId, readOnly = false }: { locationId: st
       setDisabling(false)
       notifySuccess(t('buildings.collapsed'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   if (query.isLoading) {
@@ -271,7 +269,6 @@ function EnableTowersForm({ first, onCancel, onSaved }: { first: BuildingSummary
       await onSaved()
       notifySuccess(t('buildings.enabled'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   return (
@@ -349,6 +346,7 @@ function BuildingTile({
       setEditing(false)
       notifySuccess(t('buildings.saved'))
     },
+    meta: { suppressErrorNotification: true },
     onError: (err) => setError(getErrorMessage(err)),
   })
 
@@ -443,7 +441,6 @@ function AddTowerTile({ locationId, onCancel, onSaved }: { locationId: string; o
       await onSaved()
       notifySuccess(t('buildings.added'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   return (

@@ -1,9 +1,8 @@
 import { Button, Group, Modal, Stack, Text } from '@mantine/core'
-import { notifySuccess, notifyError } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getErrorMessage } from '../../lib/errors'
 import { getRoleLabelKey } from '../auth/access'
 import {
   resendStaffInvitation,
@@ -58,9 +57,6 @@ export function PendingInvitations({
       await queryClient.invalidateQueries({ queryKey: ['staff', 'invitations'] })
       notifySuccess(t('staff.pending.resent'))
     },
-    onError: (error) => {
-      notifyError(getErrorMessage(error))
-    },
   })
 
   const revokeMutation = useMutation({
@@ -69,9 +65,6 @@ export function PendingInvitations({
       setRevoking(null)
       await queryClient.invalidateQueries({ queryKey: ['staff'] })
       notifySuccess(t('staff.pending.revoked'))
-    },
-    onError: (error) => {
-      notifyError(getErrorMessage(error))
     },
   })
 

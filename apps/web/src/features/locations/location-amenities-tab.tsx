@@ -1,6 +1,6 @@
 import { Alert, Button, Group, Modal, Stack, Text } from '@mantine/core'
 import { AddIcon } from '@solar-icons/react/linear'
-import { notifySuccess, notifyError } from '../../lib/notify'
+import { notifySuccess } from '../../lib/notify'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
@@ -73,7 +73,6 @@ export function LocationAmenitiesTab({
       await invalidate()
       notifySuccess(t('amenities.reactivated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const deactivateMutation = useMutation({
@@ -84,7 +83,6 @@ export function LocationAmenitiesTab({
       await invalidate()
       notifySuccess(t('amenities.deactivated'))
     },
-    onError: (error) => notifyError(getErrorMessage(error)),
   })
 
   const amenities = listQuery.data?.data ?? []
